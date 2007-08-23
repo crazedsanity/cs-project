@@ -1,0 +1,160 @@
+
+
+<form name="hiddenAddTagForm" method="POST" action="/content/tags">
+	<input type="HIDDEN" name="new_tag" value="">
+	<input type="HIDDEN" name="" value="Create Tag">
+	<input type="HIDDEN" name="goBack" value="{PHP_SELF}?ID={public_id}">
+</form>
+
+<form method="POST" action="{PHP_SELF}" name="main">
+<input name="id" value="{public_id}" type="HIDDEN">
+<input name="module" value="rts" type="HIDDEN">
+<table border="0" cellpadding="4" cellspacing="0">
+<tbody>
+<!-- BEGIN info_block -->
+<tr>
+	<td colspan="4">
+		<table cellpadding="3" cellspacing="0">
+			<tr>
+				<th align="right">Issue Number:</th>
+				<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/extern/helpdesk/view?ID={public_id}">External Link</a></b>]</td>
+				
+				<td rowspan="4" align="left">
+<!-- BEGIN access_block -->
+						<table border="1" cellpadding="2" cellspacing="0" align="left">
+							<tr>
+								<td style="border-left:solid #000 1px;border-top:solid #000 1px;">Assigned: </td>
+								<td style="border-right:solid #000 1px;border-top:solid #000 1px;"> 
+									<select name="updates[leader_contact_id]">
+										{user_assign_list}
+									</select>
+									[<b>{assigned}</b>]
+								</td>
+							</tr>
+							<tr>
+								<td style="border-left:solid #000 1px;">Priority: </td>
+								
+								<td style="border-right:solid #000 1px"> 
+									<select name="updates[priority]">
+										{select_priority_list}
+									</select>
+								</td>
+							</tr>
+	<!-- BEGIN link_to_parent_project -->
+							<tr>
+								<td colspan="2" align="center" style="border-left:solid #000 1px;border-right:solid #000 1px">
+									Link to project: [<a href="/content/project/view?ID={parent_record_public_id}"><b>{parent_record_name}</b></a>]
+								</td>
+							</tr>
+	<!-- END link_to_parent_project -->
+							<tr>
+								<td colspan="2" style="border-left:solid #000 1px;border-right:solid #000 1px;border-bottom:solid #000 1px;">
+									<img src="/images/clear.gif" border="0" height="1"></td>
+							</tr>
+						</table>
+<!-- END access_block -->
+					</td>
+				</tr>
+				<tr>
+					<th align="right">Customer: </th>
+					<td>{email}&nbsp;</td>
+				</tr>
+				<tr>
+				
+					<th align="right">Submission Date: </th>
+					<td>&nbsp;{start_date}</td>
+				</tr>
+				<tr>
+					<th align="right">Status: </th>
+					
+					<td><b>{status_text}</b></td>
+				</tr>
+				<tr>
+					<th align="right">Title: </th>
+					
+					<td>{name}</td>
+				
+				</tr>
+				<tr>
+					<th align="right">Tags: </th>
+					
+					<td>
+				<!-- BEGIN removeable_tag --><a href="/content/tags/remove/%%tag_name_id%%/{record_id}">%%name%%</a>%%separator%%
+				<!-- END removeable_tag -->
+				
+				<BR>
+					
+								<select>
+				<!-- BEGIN addTag_option -->	<option value='%%value%%'%%selectedString%% onClick="location.href='/content/tags/add/%%value%%/{record_id}'">%%display%%</option>
+				<!-- END addTag_option -->
+									{add_tag_list}
+								</select> <i><font color="red">(NOTE: this will *immediately* add a tag -- don't do it if you've changed something!)</font></i><BR>
+								
+				<input type="text" name="newTag" value=""><input type="button" value="Add New Tag" 
+					onClick="this.value='Creating Tag...';document.main.newTag.readonly=true;document.hiddenAddTagForm.new_tag.value=document.main.newTag.value;document.hiddenAddTagForm.submit()"></td>
+				
+				</tr>
+				<tr>
+					<th style="border-bottom:solid #000 1px;" align="right">Due date: </th>
+					<td style="border-bottom:solid #000 1px;" colspan="2">&nbsp;{deadline}</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+
+	<th style="border-bottom:solid #000 1px;" align="right">Issue Text:</th>
+	
+	<td style="border-bottom:solid #000 1px;" width="400" colspan="2" nowrap><pre>{subject}</pre></td>
+</tr>
+<tr>
+	<th style="border-bottom:solid #000 1px;" align="right">Notes:<BR><font size="-3"><i>(Includes previous/current<BR>solution(s), if available)</i></font></th>
+	<td style="border-bottom:solid #000 1px;" colspan="2">&nbsp;
+<!-- BEGIN issueNotes --><div style="border-top:dotted #000 1px;">%%solutionIndicator%% <u> [#%%note_id%%] <b>%%subject%%</b> (%%fname%%@%%created%%)</u></div>
+	<pre>%%body%%</pre>
+<!-- END issueNotes -->
+	</td>
+</tr>
+<!-- END info_block -->
+<!-- BEGIN remark_row -->
+<tr>
+
+	<td colspan="3">Remark:  <br>
+		<textarea name="remark" rows="8" cols="80"></textarea>
+	</td>
+</tr>
+<!-- END remark_row -->
+<!-- BEGIN solution_row -->
+<tr>
+	<td colspan="3">Solution: <br>
+		<textarea name="solution" rows="10" cols="80" {solution_readonly}></textarea>
+	</td>
+</tr>
+<!-- END solution_row -->
+<!-- BEGIN reopen_button -->
+	<tr>
+		<td>&nbsp;</td>
+		<td><input type="submit" name="action" value='Re-Open'></td>
+	</tr>
+<!-- END reopen_button -->
+<!-- BEGIN buttons_row -->
+<tr>
+	<td colspan="3"><i>(Changes only take effect when clicking "modify", while "solve" only cares about the solution field, and "remark" only cares about the remarks field.)</i></td>
+</tr>
+<tr>
+	<td colspan="3">&nbsp;&nbsp;
+	<input name="action" value="Remark" type="submit">&nbsp;
+<!-- BEGIN update_button -->
+		<input name="action" value="Modify" type="submit">&nbsp;
+<!-- END update_button -->
+<!-- BEGIN owner_options -->
+		<input name="action" value="solve" type="submit">&nbsp;
+		<input name="action" value="stall" type="submit">&nbsp;
+<!-- END owner_options -->
+		<!-- input name="delete" value="Delete" onclick="return confirm('Are you sure?')" type="submit">&nbsp; -->
+	</td>
+</tr>
+<!-- END buttons_row -->
+</tbody>
+</table>
+</form>

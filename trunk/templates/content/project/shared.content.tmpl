@@ -1,0 +1,121 @@
+
+<table border="0" cellpadding=2 cellspacing=2>
+<form action="{PHP_SELF}" method="POST" name=frm>
+<input name="module" value="project" type="HIDDEN">
+<tr>
+	<td>
+	<table border="0" cellpadding="2" cellspacing="2">
+	<tr>
+		<td>Name of Project: </td>
+		<td colspan=2><input type='text' name='data[name]' size='45' maxlength='80' value="{project_name}"></td>
+	</tr>
+	<tr>
+		<td>Category:</td>
+		<td>
+			<select name="data[status_id]">
+				<option value="0" {select_status_id_0}>New/Offered</option>
+				<option value="1" {select_status_id_1}>Pending</option>
+				<option value="2" {select_status_id_2}>Running/Accepted</option>
+				<option value="3" {select_status_id_3}>Stalled</option>
+				<option value="4" {select_status_id_4}>Ended/Solved</option>
+				<option value="5" {select_status_id_5}>Rejected</option>
+				<option value="6" {select_status_id_6}>Re-opened</option>
+			</select>
+		</td>
+		<td rowspan="6" align="center"><b>Participants:</b><BR>
+			<select name='data[linked_users][]' multiple size='10'>
+				{select_linked_users}
+		</select></td>
+	</tr>
+	<tr>
+		<td>Priority:</td>
+		<td colspan="2">
+			<select name='data[priority]'>
+				{select_priority}
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>Progress: <b><input type="text" name="data[progress]" value="{progress}" size="3" maxlength="3">%</b> </td>
+		<td colspan=2>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>Begin:</td>
+		<td colspan=2>
+			<input type='text' name='data[start_date]' size='10' maxlength='10' value="{start_date}"> [yyyy-mm-dd]
+		</td>
+	</tr>
+	<tr>
+		<td>End:</td>
+		<td colspan=2>
+		<input type='text' name='data[deadline]' size='10' maxlength='10' value="{deadline}"> [yyyy-mm-dd]</u>
+		</td>
+	</tr>
+	<tr>
+		<td>Leader:</td>
+		<td colspan="3">
+			<select name='data[leader_contact_id]'>
+				{select_leader_uid}
+			</select>
+		</td>
+	</tr>
+<!-- BEGIN show_ancestry_data -->
+	<tr>
+		<td colspan="3">
+			<b>List of Parents Projects:</b><BR>
+			{ancestry_string}
+		</td>
+		<td rowspan="2">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="3">
+			<b>List of Child Projects:</b><BR>
+			<div style=" width:100%; height:{children_string_height}px; overflow:auto;">{children_string}</div>
+		</td>
+	</tr>
+<!-- END show_ancestry_data -->
+	</table>
+	</td>
+	
+	
+	<td>
+	<table border="0">
+		<tr>
+			<td colspan="4"><h3><u>Remark:</u></h3>
+				<div style=" width:100%; height:240px; overflow:auto;">{subject}</div>
+				<input type="hidden" name="ID" value="{public_id}">
+			</td>
+		</tr>
+	</table>
+	</td>
+</tr>
+<tr>
+	<td colspan="2" align="center">
+		<table border="0" width="100%">
+		
+		<tr>
+			<td colspan=6><img src='/images/pixel_black.gif' width="100%" height=10 width=10></td>
+		</tr>
+	
+<!-- BEGIN modify_button -->
+		<tr>
+			<td align="center"><input type="submit" value="{submit_name}"></td>
+		</tr>
+<!-- END modify_button -->
+		<tr>
+			<td align="center">
+				<a href='/content/project/'>Back</a> || 
+				<a href='/content/project/create?parent={public_id}'>New subproject</a>
+			</td>
+		</tr>
+		
+		<tr>
+			<td><img src='/images/pixel_black.gif' width="100%" height=1></td>
+		</tr>
+		
+		</form>
+		</table>
+	</td>
+</tr>
+</table>

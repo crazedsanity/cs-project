@@ -1,0 +1,64 @@
+
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<td>
+			<table border=1 cellpadding=3 cellspacing=0>
+				<tr>
+					<td>
+						<b>Available Tags:</b><BR>
+						<ul>
+					<!-- BEGIN availableTagsList -->
+							<li><a href="{PHP_SELF}?showTag=%%tagNameId%%">(%%tagNameId%%) %%tagName%%</a></li>
+					<!-- END availableTagsList -->
+					<!-- BEGIN availableTagsList_noLink -->
+							<li>(%%tagNameId%%) %%tagName%%</li>
+					<!-- END availableTagsList_noLink -->
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<b>Add a New Tag:</b><br>
+						<form method="POST">
+							<input type="text" name="new_tag"><BR>
+							<input type="submit" value="Create Tag">
+						</form>
+					</td>
+			</table>
+		</td>
+		
+		<td>
+			<table border=1 cellpadding=3 cellspacing=0>
+				<tr>
+					<th colspan=5>
+						{tagName} &nbsp;&nbsp;[{tagRecordCount}]
+					</th>
+				</tr>
+				<tr>
+					<th>Name</th>
+					<th>Move Record</th>
+				</tr>
+				
+				<!-- BEGIN tag_row -->
+					<tr style="background-color: %%rowColor%%;" onmouseover="this.style.backgroundColor = '#ffffff'" 
+					onmouseout="this.style.backgroundColor ='%%rowColor2%%'" 
+					onclick="location.href = '/content/%%module%%/view?ID=%%public_id%%'">
+					
+						<td><a href="/content/%%module%%/view/?ID=%%public_id%%">%%name%%</a>&nbsp;</td>
+						
+						<td>
+							<a href="{PHP_SELF}?showTag={showTagNameId}&tagId=%%tag_id%%&move=up">up</a> / 
+							<a href="{PHP_SELF}?showTag={showTagNameId}&tagId=%%tag_id%%&move=down">down</a>
+						</td>
+					</tr>
+				<!-- END tag_row -->
+				<!-- BEGIN tag_row__noRecords -->
+					<tr>
+						<td colspan="5"><font color="red"><b>NO RECORDS</b></font></td>
+					</tr>
+				<!-- END tag_row__noRecords -->
+			</table>
+		</td>
+		
+	</tr>
+</table>
