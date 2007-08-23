@@ -45,13 +45,6 @@ $page->add_template_var('project_row', $projectRows);
 			if(is_numeric($dataArr['record_id'])) {
 				//setup the "module".
 				$myModule = strtolower($dataArr['category_name']);
-				$translateCatName = array(
-					'helpdesk'	=> 'rts'
-				);
-				if(isset($translateCatName[$myModule])) {
-					$dataArr['myModule'] = $translateCatName[$dataArr['myModule']];
-					$myModule = $translateCatName[$myModule];
-				} 
 				$dataArr['myModule'] = $myModule;
 			}
 			else {
@@ -74,11 +67,11 @@ $page->add_template_var('project_row', $projectRows);
 // +++ HELPDESK ISSUES +++ 
 //pull the recordset.
 $helpdeskCriteria = array('leader_contact_id' => $_SESSION['contact_id'], 'status_id' => array(0,1,2,6));
-$rtsArr = $proj->rtsObj->get_records($helpdeskCriteria, array('priority'=>'ASC'));
+$helpdeskArr = $proj->helpdeskObj->get_records($helpdeskCriteria, array('priority'=>'ASC'));
 
-if(is_array($rtsArr)) {
+if(is_array($helpdeskArr)) {
 	//got some data.
-	$page->add_template_var('helpdeskIssueCount', count($rtsArr));
+	$page->add_template_var('helpdeskIssueCount', count($helpdeskArr));
 }
 else {
 	//no data.
@@ -86,10 +79,10 @@ else {
 }
 
 //if there's an array, show it...
-if(is_array($rtsArr) && count($rtsArr) > 0) {
+if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 	//got good data.
-	$baseRow = $page->templateRows['rts_row'];
-	foreach($rtsArr as $rtsId=>$subData) {
+	$baseRow = $page->templateRows['helpdesk_row'];
+	foreach($helpdeskArr as $helpdeskId=>$subData) {
 		unset($deleteLink);
 		if($subData['von'] == $_SESSION['uid'])
 		{
@@ -123,7 +116,7 @@ if(is_array($rtsArr) && count($rtsArr) > 0) {
 		//truncate the email address...
 		$subData['email'] = truncate_string($subData['email'], 20, "...", TRUE);
 		
-		$subData['rts_id'] = $rtsId;
+		$subData['helpdesk_id'] = $helpdeskId;
 		unset($subData['id']);
 		
 		//show the "created" and "updated" strings properly...
@@ -131,7 +124,7 @@ if(is_array($rtsArr) && count($rtsArr) > 0) {
 		$subData['updated'] = parse_date_string($subData['div2'],TRUE);
 		$finalRow .= mini_parser($baseRow, $subData, "%%", "%%");
 	}
-	$page->add_template_var("rts_row", $finalRow);
+	$page->add_template_var("helpdesk_row", $finalRow);
 }
 
 

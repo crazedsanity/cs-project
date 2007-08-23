@@ -8,9 +8,9 @@
  * keep track of things in multiple locations.
  * 
  * SVN INFORMATION:::
- * SVN Signature: $Id$
- * Last Committted Date: $Date$
- * Last Committed Path: $HeadURL$
+ * SVN Signature: $Id:tagClass.php 8 2007-08-23 23:22:35Z crazedsanity $
+ * Last Committted Date: $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
+ * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/tagClass.php $
  * 
  */
 
@@ -119,7 +119,7 @@ class tagClass
 				$isHelpdeskIssue = cleanString($array['is_helpdesk_issue'], 'bool_strict');
 				$retval[$recId]['module'] = 'project';
 				if($isHelpdeskIssue == 'true') {
-					$retval[$recId]['module'] = 'rts';
+					$retval[$recId]['module'] = 'helpdesk';
 				}
 			}
 		}

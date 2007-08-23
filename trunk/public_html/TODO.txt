@@ -50,7 +50,7 @@ GENERAL:::
  	c.) ensure sub-records have their ancestry & ancestry_level updated properly--use PostgreSQL "overlay()" function
  2.) (DONE)
  3.) Search Tab
- 	a.) remove the "search-like" abilities in helpdesk/rts & from mainRecord{}
+ 	a.) remove the "search-like" abilities in helpdesk & from mainRecord{}
  	b.) allow searching of projects, issues, or both
  	c.) ability to limit to only those with certain tags
  	d.) cache search criteria for returning to the page
@@ -101,13 +101,8 @@ GENERAL:::
 10.) Automatic Logging Options
  	* use CONSTANTS in classes for declaring the recordTypeId and logCategoryId.
  	* add items to config.xml to list each of the afore-mentioned constants.
- 	* upgrades that add new items can 
- 
-SETTINGS:::
- 1.) listing available (but not yet set) preferences
- 2.) adding preferences
- 3.) deleting preferences
- 4.) updating preferences
+ 	* upgrades that add new items can add stuff to the config.xml, and the classes can just reference constants 
+ 	by the given config name.
 
 HELPDESK:
  1.) change stuff to reference "helpdesk" instead of "rts"
@@ -211,6 +206,10 @@ REQUIREMENTS FOR 1.0 (NON-BETA) RELEASE (includes previously-listed items):
  	* newly-registered users without access privileges can still view unmodifiable records
  		- ability to leave comments/notes
  		- add/remove themselves from involvement/notifications for a record
+ 6.) Contact Modification
+ 	* users can modify their own contact information (must update appropriate items in session)
+ 	* admins can update all contacts
+ 	* admins can set contacts as active/inactive
  	
  	
  

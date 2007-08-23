@@ -1,17 +1,17 @@
 <?php
 /*
- * Last Author:         $Author$ 
- * Current Revision:    $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:        $Date$
+ * Last Author:         $Author:danf $ 
+ * Current Revision:    $Revision:859 $ 
+ * Repository Location: $HeadURL:svn://charybdis.crazedsanity.com/main/projects/cs-project/trunk/includes/auto/content/helpdesk.inc $ 
+ * Last Updated:        $Date:2007-07-01 23:15:12 -0500 (Sun, 01 Jul 2007) $
  */
 if($_POST) {
 	$action = strtolower($_POST['action']);
-	$rtsId = $_POST['id'];
-	$baseUrl = "/content/rts";
+	$helpdeskId = $_POST['id'];
+	$baseUrl = "/content/helpdesk";
 	$urlSection = "view";
 	$urlExtrasArr = array(
-		"ID"	=> $rtsId
+		"ID"	=> $helpdeskId
 	);
 	$byPassUrlExtras = FALSE;
 	if($action) {
@@ -26,7 +26,7 @@ if($_POST) {
 			foreach($doNotAcceptFields as $unsetThis) {
 				unset($_POST['updates'][$unsetThis]);
 			}
-			$result = $proj->rtsObj->update_record($rtsId, $_POST['updates']);
+			$result = $proj->helpdeskObj->update_record($helpdeskId, $_POST['updates']);
 			
 			//tell them what happened.
 			if($result == 1) {
@@ -38,7 +38,7 @@ if($_POST) {
 			} else {
 				set_message_wrapper(array(
 					"title"		=> "Update FAILURE",
-					"message"	=> "Update returned [$result].  Last error was [". $proj->rtsObj->lastError ."]",
+					"message"	=> "Update returned [$result].  Last error was [". $proj->helpdeskObj->lastError ."]",
 					"type"		=> "error"
 				));
 			}
@@ -46,13 +46,13 @@ if($_POST) {
 		}
 		elseif($action == "remark")
 		{
-			$rtsData = $proj->rtsObj->get_record($rtsId);
+			$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 			//only care about the remark data... if they changed something, well... they're stupid.
 			$useRespondLink = FALSE;
-			if($rtsData['email'] != $_SESSION['email']) {
-				$useRespondLink = $proj->rtsObj->create_md5($rtsId);
+			if($helpdeskData['email'] != $_SESSION['email']) {
+				$useRespondLink = $proj->helpdeskObj->create_md5($helpdeskId);
 			}
-			$result = $proj->rtsObj->remark($rtsId, $_POST['remark'], FALSE, $useRespondLink);
+			$result = $proj->helpdeskObj->remark($helpdeskId, $_POST['remark'], FALSE, $useRespondLink);
 			
 			if($result > 0) {
 				set_message_wrapper(array(
@@ -71,7 +71,7 @@ if($_POST) {
 		elseif($action == "solve")
 		{
 			//solve it & make sure they know if it was good or not.
-			$result = $proj->rtsObj->solve($rtsId, $_POST['solution']);
+			$result = $proj->helpdeskObj->solve($helpdeskId, $_POST['solution']);
 			$extra = NULL;
 			
 			if($result == 1) {
@@ -92,11 +92,11 @@ if($_POST) {
 		elseif($action == "filter")
 		{
 			if($_POST['reset_filter']) {
-				$page->ui->unset_cache("rts/filter");
+				$page->ui->unset_cache("helpdesk/filter");
 				$result = "unset";
 			} else {
 				//store the filter.
-				$page->ui->set_cache("rts/filter", $_POST['filter']);
+				$page->ui->set_cache("helpdesk/filter", $_POST['filter']);
 				$result = "set";
 			}
 			$byPassUrlExtras = TRUE;
@@ -105,17 +105,17 @@ if($_POST) {
 		elseif($action == "re-open")
 		{
 			//we'll update some fields, then remark the old solution.
-			$oldData = $proj->rtsObj->get_record($rtsId);
+			$oldData = $proj->helpdeskObj->get_record($helpdeskId);
 			$oldSolution = $oldData['solution'];
 			$updatesArr = array(
 				"status_id"	=> 6
 			);
 			
-			$updateRes = $proj->rtsObj->update_record($rtsId, $updatesArr);
+			$updateRes = $proj->helpdeskObj->update_record($helpdeskId, $updatesArr);
 			
 			//make the old solution... better.
 			$oldSolution = "Re-opened.";
-			$remarkRes = $proj->rtsObj->remark($rtsId, $oldSolution);
+			$remarkRes = $proj->helpdeskObj->remark($helpdeskId, $oldSolution);
 			
 		}
 		else
@@ -125,7 +125,7 @@ if($_POST) {
 	} elseif($_POST['submit'] == "go" && count($_POST['data']) > 1) {
 		//CREATING NEW RECORD!!!
 		$dataArr = $_POST['data'];
-		$result = $proj->rtsObj->create_record($dataArr);
+		$result = $proj->helpdeskObj->create_record($dataArr);
 		
 		if($result > 0) {
 			//TODO: implement email portion.
@@ -140,7 +140,7 @@ if($_POST) {
 				$byPassUrlExtras = TRUE;
 				$baseUrl = $_SESSION['goBackLink'];
 			} else {
-				$rtsId = $result;
+				$helpdeskId = $result;
 				$urlExtrasArr['ID'] = $result;
 			}
 		} else {
@@ -182,7 +182,7 @@ if($_POST) {
 	conditional_header($url);
 	exit;
 } else {
-	$rtsId = $_GET['ID'];
+	$helpdeskId = $_GET['ID'];
 	$action = $page->ftsSections[2];
 	
 	
@@ -196,55 +196,55 @@ if($_POST) {
 		$page->set_all_block_rows("content");
 		
 		//show the "category" selection.
-		$categoryList = $proj->rtsObj->get_category_list();
+		$categoryList = $proj->helpdeskObj->get_category_list();
 		$page->add_template_var("select_tags", $categoryList);
 		
 		//
 		$page->add_template_var("email", $_SESSION['email']);
 		$page->add_template_var("linked_proj", cleanString($_GET['proj']),"numeric");
 		
-	} elseif($action == "view" && !is_numeric($rtsId)) {
+	} elseif($action == "view" && !is_numeric($helpdeskId)) {
 		//missing ID: throw a message & send 'em packin'.
 		set_message_wrapper(array(
 			"title"		=> "Invalid ID Specified",
 			"message"	=> "Unable to retrieve the requested record, due to an invalid ID:<BR>" .
 							" you were automatically redirected.<BR>" .
-							"Requested ID: [$rtsId]",
+							"Requested ID: [$helpdeskId]",
 			"type"		=> "error"
 		));
 		conditional_header("/". $page->ftsSections[0] ."/". $page->ftsSections[1]);
 		exit;
-	} elseif($action == "view" && is_numeric($rtsId)) {
-		$titleSub = "Edit Issue #$rtsId";
+	} elseif($action == "view" && is_numeric($helpdeskId)) {
+		$titleSub = "Edit Issue #$helpdeskId";
 		$doNotRipRows = array("edit_form", "info_block", "access_block");
-		$rtsData = $proj->rtsObj->get_record($rtsId);
+		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 		
 		//TODO: handle this better, somehow... AJAX comes to mind. ;) 
-		if($_GET['newTag'] && !$_SESSION['addTag_cache'][$rtsData['record_id']][$_GET['newTag']]) {
-			$tempObj = new tagClass($proj->rtsObj->db);
-			$addRes = $tempObj->add_tag($rtsData['record_id'], $_GET['newTag']);
+		if($_GET['newTag'] && !$_SESSION['addTag_cache'][$helpdeskData['record_id']][$_GET['newTag']]) {
+			$tempObj = new tagClass($proj->helpdeskObj->db);
+			$addRes = $tempObj->add_tag($helpdeskData['record_id'], $_GET['newTag']);
 			if($addRes) {
-				$_SESSION['addTag_cache'][$rtsData['record_id']][$_GET['newTag']] = $addRes;
+				$_SESSION['addTag_cache'][$helpdeskData['record_id']][$_GET['newTag']] = $addRes;
 			}
 		}
 		
 		//show it's "access" properly..
-		$page->add_template_var("select_acc_". $rtsData['acc'], "selected");
+		$page->add_template_var("select_acc_". $helpdeskData['acc'], "selected");
 		
 		//show the "category" properly.
-		$categoryList = $proj->rtsObj->get_category_list($rtsData['rts_cat_id']);
+		$categoryList = $proj->helpdeskObj->get_category_list($helpdeskData['helpdesk_cat_id']);
 		$page->add_template_var("select_category_list", $categoryList);
 		
 		//convert the returned data into htmlentities so brackets show properly.
-		$rtsData['subject'] = cleanString($rtsData['subject'], "htmlentity_plus_brackets");
-		$rtsData['name'] = cleanString($rtsData['name'], "htmlentity_plus_brackets");
-		$rtsData['remark'] = cleanString($rtsData['remark'], "htmlentity_plus_brackets");
-		$rtsData['solution'] = cleanString($rtsData['solution'], "htmlentity_plus_brackets");
+		$helpdeskData['subject'] = cleanString($helpdeskData['subject'], "htmlentity_plus_brackets");
+		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlentity_plus_brackets");
+		$helpdeskData['remark'] = cleanString($helpdeskData['remark'], "htmlentity_plus_brackets");
+		$helpdeskData['solution'] = cleanString($helpdeskData['solution'], "htmlentity_plus_brackets");
 		
 		//make the wrapping SANE.
-		$rtsData['remark'] = wordwrap($rtsData['remark'], FORMAT_WORDWRAP);
-		$rtsData['subject'] = wordwrap($rtsData['subject'], FORMAT_WORDWRAP);	
-		$rowsToUse = count(explode("\n", $rtsData['subject']));
+		$helpdeskData['remark'] = wordwrap($helpdeskData['remark'], FORMAT_WORDWRAP);
+		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
+		$rowsToUse = count(explode("\n", $helpdeskData['subject']));
 		if($rowsToUse < 5) {
 			$rowsToUse = 5;
 		}
@@ -252,8 +252,8 @@ if($_POST) {
 		
 		//show the buttons appropriate to their membership level & ownership.
 		//if they're the owner, show the "solution" section.
-		$assignedStr = $rtsData['leader_contact_id'];
-		if($rtsData['status_id'] == 4) {
+		$assignedStr = $helpdeskData['leader_contact_id'];
+		if($helpdeskData['status_id'] == 4) {
 			//allow the current user to re-open this issue.
 			$doNotRipRows[] = "reopen_button";
 		} else {
@@ -273,40 +273,40 @@ if($_POST) {
 			$doNotRipRows[] = "remark_row";
 			$doNotRipRows[] = "buttons_row";
 			
-			if($rtsData['status_id'] == 6) {
+			if($helpdeskData['status_id'] == 6) {
 				//yeah, it's dirty... but it highlights the fact that it's been re-opened.
-				$rtsData['status_text'] = '<font color="red">'. $rtsData['status_text'] .'</font>';
+				$helpdeskData['status_text'] = '<font color="red">'. $helpdeskData['status_text'] .'</font>';
 			}
 			
 			//keep the set of data allows it to be linked to a project.
 			$doNotRipRows[] = "edit_project_selection";
 			
 			//TODO: implement a link for updating project associations.
-			#$page->add_template_var("select_project_list", $proj->create_project_option_list($rtsData['ancestry'], NULL));
+			#$page->add_template_var("select_project_list", $proj->create_project_option_list($helpdeskData['ancestry'], NULL));
 		}
 		$doNotRipRows[] = 'update_button';
 		
 		//TODO: get ancestry data for this!
-		if($rtsData['ancestry_level'] > 1) {
+		if($helpdeskData['ancestry_level'] > 1) {
 			$doNotRipRows[] = "link_to_parent_project";
 			
 			//get the parent.
-			$parentData = $proj->rtsObj->get_parent_record($rtsData['ancestry']);
+			$parentData = $proj->helpdeskObj->get_parent_record($helpdeskData['ancestry']);
 			$page->add_template_var('parent_record_name', $parentData['name']);
 			$page->add_template_var('parent_record_public_id', $parentData['public_id']);
 		}
 		
 		//create the priority list.
-		$page->add_template_var("select_priority_list", create_priority_option_list($rtsData['priority'],9,0));
+		$page->add_template_var("select_priority_list", create_priority_option_list($helpdeskData['priority'],9,0));
 		
 		//create the list of users.
 		//TODO: retrieve list of attached contacts. 
-		$page->add_template_var("user_assign_list", $proj->create_user_option_list($rtsData['leader_contact_id'],NULL,NULL,"n/a"));
+		$page->add_template_var("user_assign_list", $proj->create_user_option_list($helpdeskData['leader_contact_id'],NULL,NULL,"n/a"));
 		
 		//add everything to the page as a template var...
-		$myNotes = $rtsData['notes'];
-		unset($rtsData['notes']);
-		foreach($rtsData as $field=>$value) {
+		$myNotes = $helpdeskData['notes'];
+		unset($helpdeskData['notes']);
+		foreach($helpdeskData as $field=>$value) {
 			$page->add_template_var($field, $value);
 		}
 		
@@ -315,7 +315,7 @@ if($_POST) {
 		
 		
 		
-		$myTagList = $proj->tagObj->get_tags_for_record($rtsData['record_id']);
+		$myTagList = $proj->tagObj->get_tags_for_record($helpdeskData['record_id']);
 		if(is_array($myTagList)) {
 			$baseRow = $page->templateRows['removeable_tag'];
 			$myTagRow = "";
@@ -343,7 +343,7 @@ if($_POST) {
 		$page->add_template_var('removeable_tag', $myTagRow);
 		
 		//Display tags that can be added.
-		$availableTagsList = $proj->tagObj->get_available_tags_for_record($rtsData['record_id'], 3);
+		$availableTagsList = $proj->tagObj->get_available_tags_for_record($helpdeskData['record_id'], 3);
 		if(is_array($availableTagsList) && count($availableTagsList) > 0)
 		{
 			$myTagsList = array_as_option_list($availableTagsList,NULL,'select',$page->templateRows['addTag_option']);
@@ -369,16 +369,16 @@ if($_POST) {
 		
 	} else {
 		//change the content of the page properly.
-		$page->set_all_block_rows("content", array("rts_search"));
+		$page->set_all_block_rows("content", array("helpdesk_search"));
 		
-		$filterData = $page->ui->get_cache("rts/filter");
+		$filterData = $page->ui->get_cache("helpdesk/filter");
 		if(is_array($filterData)) {
 			$page->add_template_var("filter_keyword", $filterData['keyword']);
 			$page->add_template_var("filter_field_". $filterData['field'] ."_selected", "selected");
 		} else {
 			//no filter array... set one.
 			$filterData = array();
-			$page->ui->set_cache("rts/filter", $filterData);
+			$page->ui->set_cache("helpdesk/filter", $filterData);
 		}
 		$page->add_template_var("filter_status_id_". $filterData['status_id'] ."_selected", "selected");
 		
@@ -399,14 +399,14 @@ if($_POST) {
 		unset($filter['status_id'], $filter['status']);
 	
 		//pull the recordset.
-		$rtsArr = $proj->rtsObj->get_records($primaryFilterArr, $currentSortArr, $filter);
+		$helpdeskArr = $proj->helpdeskObj->get_records($primaryFilterArr, $currentSortArr, $filter);
 		
-		$page->add_template_var("numRows", count($rtsArr));
+		$page->add_template_var("numRows", count($helpdeskArr));
 		//if there's an array, show it...
-		if(is_array($rtsArr) && count($rtsArr) > 0) {
+		if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 			//got good data.
-			$baseRow = $page->templateRows['rts_row'];
-			foreach($rtsArr as $rtsId=>$subData) {
+			$baseRow = $page->templateRows['helpdesk_row'];
+			foreach($helpdeskArr as $helpdeskId=>$subData) {
 				unset($deleteLink);
 				if($subData['von'] == $_SESSION['uid']) {
 					$deleteLink = mini_parser($baseDeleteLink, $subData, "%%", "%%");
@@ -439,7 +439,7 @@ if($_POST) {
 				//truncate the email address...
 				$subData['email'] = truncate_string($subData['email'], 20, "...", TRUE);
 				
-				$subData['rts_id'] = $rtsId;
+				$subData['helpdesk_id'] = $helpdeskId;
 				unset($subData['id']);
 				
 				//show the "created" and "updated" strings properly...
@@ -447,7 +447,7 @@ if($_POST) {
 				$subData['updated'] = parse_date_string($subData['div2'],TRUE);
 				$finalRow .= mini_parser($baseRow, $subData, "%%", "%%");
 			}
-			$page->add_template_var("rts_row", $finalRow);
+			$page->add_template_var("helpdesk_row", $finalRow);
 		}
 	}
 }

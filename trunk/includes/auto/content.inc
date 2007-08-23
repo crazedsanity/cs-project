@@ -65,7 +65,8 @@ $page->add_template_var("module", $module);
 $tabNames = array();
 $tabNames['summary']	= new Tab("", "Summary");
 $tabNames['project']	= new Tab("", "Projects");
-$tabNames['helpdesk']	= new Tab("", "Helpdesk");
+$tabNames['helpdesk']		= new Tab("", "Helpdesk");
+#$tabNames['tags']		= new Tab("", "Tags");
 $tabNames['settings']	= new Tab("", "Settings");
 
 foreach($tabNames as $moduleName=>$tab) {

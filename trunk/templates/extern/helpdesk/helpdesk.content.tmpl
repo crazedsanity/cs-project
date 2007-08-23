@@ -1,4 +1,4 @@
-<!-- BEGIN rts_search -->
+<!-- BEGIN helpdesk_search -->
 <form action="{PHP_SELF}" method="post">
 <table bgcolor="#d5d5d5" border="0">
 <tbody>
@@ -32,7 +32,7 @@
 	</td>
 </tr>
 <tr>
-	<td><a href="/content/rts/create">New request</a></td>
+	<td><a href="/content/helpdesk/create">New request</a></td>
 	<td colspan="3">&nbsp;</td>
 	<td><input type="submit" name="reset_filter" value="Reset"></td>
 </tr>
@@ -40,7 +40,7 @@
 </table>
 </form>
 <br>
-<!-- END rts_search -->
+<!-- END helpdesk_search -->
 
 <table border="0" cellpadding="2" cellspacing="0">
 <tbody>
@@ -57,10 +57,10 @@
 </td>
 </tr>
 
-<!-- BEGIN rts_row -->
+<!-- BEGIN helpdesk_row -->
 <tr style="background-color: %%bgColor%%;" onmouseover="this.style.backgroundColor = '#ffffff'" 
 onmouseout="this.style.backgroundColor = '%%bgColor2%%'" 
-onclick="location.href = '/extern/helpdesk/view?ID=%%rts_id%%'">
+onclick="location.href = '/extern/helpdesk/view?ID=%%helpdesk_id%%'">
 
 	<td><a href="/extern/helpdesk/view?ID=%%public_id%%"><b>%%public_id%%</b></a></td>
 	
@@ -81,5 +81,5 @@ onclick="location.href = '/extern/helpdesk/view?ID=%%rts_id%%'">
 	<td>%%assigned%%&nbsp;</td>
 	
 </tr>
-<!-- END rts_row -->
+<!-- END helpdesk_row -->
 </table>

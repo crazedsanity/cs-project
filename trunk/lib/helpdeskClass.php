@@ -1,17 +1,17 @@
 <?php
 /*
- * Last Author:         $Author$ 
- * Current Revision:    $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:        $Date$
+ * Last Author:         $Author:danf $ 
+ * Current Revision:    $Revision:860 $ 
+ * Repository Location: $HeadURL:svn://charybdis.crazedsanity.com/main/projects/cs-project/trunk/lib/helpdeskClass.php $ 
+ * Last Updated:        $Date:2007-07-01 23:38:48 -0500 (Sun, 01 Jul 2007) $
  */
 
-//TODO: convert all methods to use $this->rtsId...?
+//TODO: convert all methods to use $this->helpdeskId...?
 
-class rtsClass extends mainRecord {
+class helpdeskClass extends mainRecord {
 	
 	var $db;				//database handle.
-	var $rtsId	= NULL;		//bug/helpdesk
+	var $helpdeskId	= NULL;		//bug/helpdesk
 	public $recordTypeId = 3; 
 	private $logCategoryId = 6;
 	private $allowedFields;
@@ -22,7 +22,7 @@ class rtsClass extends mainRecord {
 	/**
 	 * CONSTRUCTOR.
 	 */
-	function rtsClass(phpDB $db) {
+	function helpdeskClass(phpDB $db) {
 		//check to see if the database object is valid.
 		if(is_object($db) && is_resource($db->connectionID)) {
 			$this->db = $db;
@@ -47,14 +47,14 @@ class rtsClass extends mainRecord {
 			"progress"			=> "numeric"
 		);
 		parent::__construct();
-	}//end rtsClass()
+	}//end helpdeskClass()
 	//================================================================================================
 	
 	
 	
 	//================================================================================================
 	/**
-	 * The generic, (hopefully) extensible method to retrieve helpdesk/rts records.  Couldn't think of
+	 * The generic, (hopefully) extensible method to retrieve helpdesk records.  Couldn't think of
 	 * a better name to use.
 	 * 
 	 * @param $critArr			<array> Main criteria to use... 
@@ -75,14 +75,14 @@ class rtsClass extends mainRecord {
 	
 	
 	//================================================================================================
-	function get_record($rtsId) {
+	function get_record($helpdeskId) {
 		$criteria = array(
-			'public_id'			=> $rtsId,
+			'public_id'			=> $helpdeskId,
 			'is_helpdesk_issue'	=> 't',
 			'status_id'			=> 'all'
 		);
 		$tmp = $this->get_records($criteria);
-		$retval = $tmp[$rtsId];
+		$retval = $tmp[$helpdeskId];
 		
 		//before continuing, get notes for this issue.
 		$noteObj = new noteClass($this->db);
@@ -97,15 +97,15 @@ class rtsClass extends mainRecord {
 	/**
 	 * Method to update a helpdesk issue.
 	 * 
-	 * @param $rtsId		<int> ID to update.
+	 * @param $helpdeskId		<int> ID to update.
 	 * @param $updatesArr	<array> field=>value list to update from.
 	 * 
 	 * @return 0			FAIL: unable to update.
 	 * @return <n>			PASS: <n> indicates # of records updated...
 	 */
-	function update_record($rtsId, $updatesArr=NULL, $appendRemark=TRUE) {
+	function update_record($helpdeskId, $updatesArr=NULL, $appendRemark=TRUE) {
 		
-		$retval = parent::update_record(array('public_id' => $rtsId, 'is_helpdesk_issue' => 't', 'status_id' => 'all'), $updatesArr);
+		$retval = parent::update_record(array('public_id' => $helpdeskId, 'is_helpdesk_issue' => 't', 'status_id' => 'all'), $updatesArr);
 		
 		return($retval);
 	}//end update_record()
@@ -117,7 +117,7 @@ class rtsClass extends mainRecord {
 	 * A simple wrapper for update_record()... this is where the appendage to the remark should
 	 * occur...
 	 * 
-	 * @param $rtsId			(int) ID to remark on.
+	 * @param $helpdeskId			(int) ID to remark on.
 	 * @param $remark			(str) Remark to add...
 	 * @param $isSolution		(bool,optional) mark the item as a solution.
 	 * @param $useRespondLink	(bool,optional) instead of saying "view" in the email sent, it will 
@@ -125,15 +125,15 @@ class rtsClass extends mainRecord {
 	 * 
 	 * @return <SPECIAL: see returns for update_record()>
 	 */
-	function remark($rtsId, $remark, $isSolution=FALSE, $useRespondLink=FALSE) {
+	function remark($helpdeskId, $remark, $isSolution=FALSE, $useRespondLink=FALSE) {
 		//PRE-CHECK!!!
 		if(strlen($remark) < 10) {
-			$this->logsObj->log_by_class("remark(): not enough content::: $remark", 'error', NULL, $this->recordTypeId, $rtsId);
+			$this->logsObj->log_by_class("remark(): not enough content::: $remark", 'error', NULL, $this->recordTypeId, $helpdeskId);
 			return(-1);
 		}
 		
-		#$retval = $this->update_record($rtsId, $updateArr, $appendRemark);
-		$tmp = $this->get_record($rtsId);
+		#$retval = $this->update_record($helpdeskId, $updateArr, $appendRemark);
+		$tmp = $this->get_record($helpdeskId);
 		$noteObj = new noteClass($this->db);
 		$noteData = array(
 			'record_id'	=> $tmp['record_id'],
@@ -149,7 +149,7 @@ class rtsClass extends mainRecord {
 		{
 			//send the submitter an email		
 			$newRemarks = $remark;
-			$emailTemplate = html_file_to_string("email/rts-remark.tmpl");
+			$emailTemplate = html_file_to_string("email/helpdesk-remark.tmpl");
 			$linkAction = "view";
 			if(!$isSolution) {
 				if($useRespondLink) {
@@ -158,7 +158,7 @@ class rtsClass extends mainRecord {
 				$parseArr = array(
 					"newRemark"		=> $newRemarks,
 					"linkAction"	=> $linkAction,
-					"linkExtra"		=> "&check=". $this->create_md5($rtsId)
+					"linkExtra"		=> "&check=". $this->create_md5($helpdeskId)
 				);
 				$parseArr = array_merge($tmp, $parseArr);
 				
@@ -174,17 +174,17 @@ class rtsClass extends mainRecord {
 			
 				//okay, now send the email.  The function "send_email()" should be ensuring that all values in
 				//	the recipients array are valid, and there's no dups.
-				$sendEmailRes = send_email($recipientsArr, "Update to Helpdesk Issue #$rtsId", $emailTemplate, $parseArr);
+				$sendEmailRes = send_email($recipientsArr, "Update to Helpdesk Issue #$helpdeskId", $emailTemplate, $parseArr);
 				
 				//log who we sent the emails to.
 				$details = 'Sent notification(s) of remark to: '. $sendEmailRes;
-				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $rtsId);
+				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			}
 		}
 		else
 		{
 			//something went wrong.
-			$this->logsObj->log_by_class("remark(): failed to update record ($retval)", 'error', NULL, $this->recordTypeId, $rtsId);
+			$this->logsObj->log_by_class("remark(): failed to update record ($retval)", 'error', NULL, $this->recordTypeId, $helpdeskId);
 		}
 		
 		return($retval);
@@ -197,18 +197,18 @@ class rtsClass extends mainRecord {
 	/**
 	 * Updates the given record with the "solved" status, and updates the "solution" field.
 	 * 
-	 * @param <$rtsId>		<int> helpdesk issue to update.
+	 * @param <$helpdeskId>		<int> helpdesk issue to update.
 	 * @param <$solution>	<str> solution for the problem.
 	 * 
 	 * @return 0			FAIL: unable to solve... not sure why.
 	 * @return 1			PASS: solved successfully.
 	 */
-	function solve($rtsId, $solution) {
+	function solve($helpdeskId, $solution) {
 		//PRE-CHECK!!!
-		if(!is_numeric($rtsId) || !is_string($solution) || strlen($solution) < 10) {
+		if(!is_numeric($helpdeskId) || !is_string($solution) || strlen($solution) < 10) {
 			$retval = 0;
 			if(strlen($solution) < 10) {
-				$this->logsObj->log_by_class("solve(): not enough information to solve::: $solution", 'error', NULL, $this->recordTypeId, $rtsId);
+				$this->logsObj->log_by_class("solve(): not enough information to solve::: $solution", 'error', NULL, $this->recordTypeId, $helpdeskId);
 				$retval = -1;
 			}
 		} else {
@@ -222,16 +222,16 @@ class rtsClass extends mainRecord {
 			);
 			
 			//now, let's run the update method & tell 'em what happened.
-			$createSolution = $this->remark($rtsId, $solution, TRUE);
+			$createSolution = $this->remark($helpdeskId, $solution, TRUE);
 			if($createSolution > 0) {
-				$retval = $this->update_record($rtsId, $updatesArr);
+				$retval = $this->update_record($helpdeskId, $updatesArr);
 				
 				//only send an email if the update succeeded.
 				if($retval == 1)
 				{
 					//send the submitter an email		
-					$parseArr = $this->get_record($rtsId);
-					$emailTemplate = html_file_to_string("email/rts-solve.tmpl");
+					$parseArr = $this->get_record($helpdeskId);
+					$emailTemplate = html_file_to_string("email/helpdesk-solve.tmpl");
 					
 					//Parse-in the previous comments....
 					//TODO: make this part of a different system, or something...
@@ -261,18 +261,18 @@ class rtsClass extends mainRecord {
 					$recipientsArr[] = $parseArr['email'];
 					
 					//send the submitter a notification.
-					$sendEmailRes = send_email($recipientsArr, "Helpdesk Issue #$rtsId was Solved", $emailTemplate, $parseArr);
+					$sendEmailRes = send_email($recipientsArr, "Helpdesk Issue #$helpdeskId was Solved", $emailTemplate, $parseArr);
 					
-					$notifySubject = "[ALERT] Helpdesk Issue #$rtsId was Solved by ". $_SESSION['login_loginname'];
+					$notifySubject = "[ALERT] Helpdesk Issue #$helpdeskId was Solved by ". $_SESSION['login_loginname'];
 					$sendEmailRes .= ", ". send_email(HELPDESK-ISSUE-ANNOUNCE-EMAIL, $notifySubject, $emailTemplate, $parseArr);
 					
-					$this->logsObj->log_by_class("Solve notice sent to: ". $sendEmailRes, 'information', NULL, $this->recordTypeId, $rtsId);
-					$this->logsObj->log_by_class("Solved issue #". $rtsId .": ". $parseArr['name'], 'report', NULL, $this->recordTypeId, $rtsId);
+					$this->logsObj->log_by_class("Solve notice sent to: ". $sendEmailRes, 'information', NULL, $this->recordTypeId, $helpdeskId);
+					$this->logsObj->log_by_class("Solved issue #". $helpdeskId .": ". $parseArr['name'], 'report', NULL, $this->recordTypeId, $helpdeskId);
 				}
 				else
 				{
 					//log the problem.
-					$this->logsObj->log_by_class("solve(): failed to update record ($retval)", 'report', NULL, $this->recordTypeId, $rtsId);
+					$this->logsObj->log_by_class("solve(): failed to update record ($retval)", 'report', NULL, $this->recordTypeId, $helpdeskId);
 				}
 				}
 			else {
@@ -318,7 +318,7 @@ class rtsClass extends mainRecord {
 			//got good data... get the note_id.
 			
 			//now send 'em an email about it.
-			$emailTemplate = html_file_to_string("email/rts-new.tmpl");
+			$emailTemplate = html_file_to_string("email/helpdesk-new.tmpl");
 			$parseArr = $this->get_record($retval);
 			
 			$normalEmailExtra = NULL;
@@ -329,8 +329,8 @@ class rtsClass extends mainRecord {
 			send_email($parseArr['email'], "Helpdesk Issue #$retval Created". $normalEmailExtra, $emailTemplate, $parseArr);
 			
 			//now send the alert...
-			$alertSubject = "[ALERT] Helpdesk Issue #$retval Created";
-			send_email(HELPDESK-ISSUE-ANNOUNCE-EMAIL, $alertSubject, $emailTemplate, $parseArr);
+			$alehelpdeskubject = "[ALERT] Helpdesk Issue #$retval Created";
+			send_email(HELPDESK-ISSUE-ANNOUNCE-EMAIL, $alehelpdeskubject, $emailTemplate, $parseArr);
 			
 			//log that it was created.
 			$details = "Helpdesk Issue #$retval Created by (". $dataArr['email'] ."): ". $dataArr['name'];
@@ -355,15 +355,15 @@ class rtsClass extends mainRecord {
 	 * remark on the issue.  Not completely secure... but the only other way to allow them to remark on
 	 * issues is to give the sales people logins to the project site.
 	 * 
-	 * @param $rtsId		<int> ID to lookup, so as to create the md5 from.
+	 * @param $helpdeskId		<int> ID to lookup, so as to create the md5 from.
 	 * 
 	 * @return <string>		PASS: string is 32 characters & is the md5 sum requested.
 	 * @return 0			FAIL: unable to create md5.
 	 */
-	function create_md5($rtsId) {
+	function create_md5($helpdeskId) {
 		$retval = 0;
-		if(is_numeric($rtsId)) {
-			$dataArr = $this->get_record($rtsId);
+		if(is_numeric($helpdeskId)) {
+			$dataArr = $this->get_record($helpdeskId);
 			if(is_array($dataArr) && strlen($dataArr['div2']) > 8) {
 				//still okay.
 				//TODO: make it more secure: it's md5'd to avoid them figuring out the date string...
@@ -378,7 +378,7 @@ class rtsClass extends mainRecord {
 	
 	//================================================================================================
 	/**
-	 * This returns a list of available TAGS (the "rts_cat" table is deprecated)
+	 * This returns a list of available TAGS (the "helpdesk_cat" table is deprecated)
 	 */
 	function get_category_list($selectThis=NULL) {
 		//create a list of tags.
@@ -392,5 +392,5 @@ class rtsClass extends mainRecord {
 	//================================================================================================
 	
 	
-}//end rtsClass{}
+}//end helpdeskClass{}
 ?>

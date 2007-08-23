@@ -8,7 +8,7 @@
 
 <form method="POST" action="{PHP_SELF}" name="main">
 <input name="id" value="{public_id}" type="HIDDEN">
-<input name="module" value="rts" type="HIDDEN">
+<input name="module" value="helpdesk" type="HIDDEN">
 <table border="0" cellpadding="4" cellspacing="0">
 <tbody>
 <!-- BEGIN info_block -->
@@ -91,7 +91,7 @@
 								</select> <i><font color="red">(NOTE: this will *immediately* add a tag -- don't do it if you've changed something!)</font></i><BR>
 								
 				<input type="text" name="newTag" value=""><input type="button" value="Add New Tag" 
-					onClick="this.value='Creating Tag...';document.main.newTag.readonly=true;document.hiddenAddTagForm.new_tag.value=document.main.newTag.value;document.hiddenAddTagForm.submit()"></td>
+					onClick="this.value='Creating Tag...';document.main.newTag.readonly=true;document.hiddenAddTagForm.new_tag.value=document.main.newTag.value;document.hiddenAddTagForm.submit()></td>
 				
 				</tr>
 				<tr>

@@ -1,9 +1,9 @@
 <?
 /*
  * SVN INFORMATION:::
- * SVN Signature: $Id$
- * Last Committted Date: $Date$
- * Last Committed Path: $HeadURL$
+ * SVN Signature: $Id:includes.php 8 2007-08-23 23:22:35Z crazedsanity $
+ * Last Committted Date: $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
+ * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/includes.php $
  */
 
 require_once(dirname(__FILE__) ."/site_config.php");
@@ -56,7 +56,7 @@ require_once(dirname(__FILE__) ."/mainRecordClass.php");
 require_once(dirname(__FILE__) ."/projectClass.php");
 require_once(dirname(__FILE__) ."/noteClass.php");
 require_once(dirname(__FILE__) ."/todoClass.php");
-require_once(dirname(__FILE__) ."/rtsClass.php");
+require_once(dirname(__FILE__) ."/helpdeskClass.php");
 require_once(dirname(__FILE__) ."/emailFaxClass.php");
 require_once(dirname(__FILE__) ."/userClass.php");
 require_once(dirname(__FILE__) ."/fileSystemClass.php");

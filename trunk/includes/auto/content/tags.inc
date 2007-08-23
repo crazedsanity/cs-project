@@ -12,8 +12,8 @@ $sessionCache = new sessionCache("settings");
 
 if($page->ftsSections[2] == 'add') {
 	//okay, they're adding a tag: the URL should look 
-	//	something like: /content/tags/add/rts/2/555
-	//	where rts is the source section, and 2 is that tag_name_id to attach record_id #555 to.
+	//	something like: /content/tags/add/helpdesk/2/555
+	//	where helpdesk is the source section, and 2 is that tag_name_id to attach record_id #555 to.
 	
 	//okay... let's do some pre-checking.
 	$tagNameId = $page->ftsSections[3];

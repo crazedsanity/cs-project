@@ -25,15 +25,13 @@ class emailFax {
 	var $smtp;		// The SMTP connection to MA
 	var $smtp_params;	// The SMTP parameters used for the email Header
 	var $params;		// The SMTP parameters used for connecting to the mail server
-	var $stamp_file;	// The location of the file containing the stamp
 	var $mailType;		// The type of mail object (FAX || Reg. Email)
 	var $subject;		// The subject of the email -- Reg Email Only
 	
 	// The fabulous constructor
 	function emailFax($attachment = NULL,$html_file = NULL,$text_file = NULL,$type = NULL,$plain = NULL,$gold = NULL){
-		$this->stamp_file = '/home/bladow/partslogistics2002/templates/stamp.tmpl';
 		$rfc_date = date("r");
-     	$this->mail = new html_mime_mail(array('X-Mailer: Bladow\'s Crazy Mailer',"Date: $rfc_date"));
+     	$this->mail = new html_mime_mail(array('X-Mailer:Project Mailer',"Date: $rfc_date"));
 
 		if($attachment){
 			// Try to fetch the attachment
@@ -150,45 +148,6 @@ class emailFax {
 	}//end add_manual_attachment()
 
 
-	function sendFax($faxnum,$poc,$fname,$lname,$uid){
-		if((!$this->mail->built_message) AND (!$this->mail->build_message()))
-			die('Failed to build email -- sendFax()');
-		$this->to = $faxnum;
-		$this->fname = $fname;
-		$this->lname = $lname;
-		$this->from = $this->fname . "_" . $this->lname;
-		$this->poc = $poc;
-		$this->poc = str_replace(" ","_",$this->poc);
-		$this->to .= '~TO=' . $this->poc . '~FR=' . $this->from . '~AC=' . $uid . '@Faxmail.com';
-		print_r($this->to);
-		//$this->to = 'bbladow@sendit.nodak.edu';
-		//$this->to = 'garrett@avsupport.com';
-		$this->header_address = 'To: ' . $this->to;
-
-
-		// Set up the SMTP parameters
-		$this->params = array(
-				'host' => '216.239.10.100',		// Mail server address
-				'port' => 25,				// Mail server port
-				'helo' => 'avsupport.com',		// Use your domain here.
-				'auth' => FALSE,			// Whether to use authentication or not.
-				'user' => '',				// Authentication username
-				'pass' => ''				// Authentication password
-			   );
-        $this->smtp =& smtp::connect($this->params);
-		$this->send_params = array(
-		  		     'from'       => 'autorfq@avsupport.com',			
-				     'recipients' => $this->to,
-				     'headers'    => array(
-							'From: autorfq@avsupport.com',
-							$this->header_address,
-							'Subject: RFQ via PartsLogistics.com'
-						     )
-				     );
-        if(!$this->mail->smtp_send($this->smtp,$this->send_params))
-			die($this->smtp->errors);
-	}
-
 	function sendMail($to,$from,$subject,$use_reply_to=0) {
 		
 		if((!$this->mail->built_message) AND (!$this->mail->build_message()))
@@ -196,9 +155,9 @@ class emailFax {
 
 		// Set up the SMTP parameters
 		$this->params = array(
-			'host' => '216.239.10.100',      // Mail server address
+			'host' => CONFIG_EMAIL_SERVER_IP,      // Mail server address
 			'port' => 25,           // Mail server port
-			'helo' => 'avsupport.com',    // Use your domain here.
+			'helo' => CONFIG_EMAIL_DOMAIN,    // Use your domain here.
 			'auth' => FALSE,        // Whether to use authentication or not.
 			'user' => '',           // Authentication username
 			'pass' => ''            // Authentication password
@@ -224,9 +183,9 @@ class emailFax {
 		}
 		else
 		{
-			//We're sending rfqs or something from us between two parties. Set the from as us... Allow for specifying the From field (currently autorfq)
+			//We're sending rfqs or something from us between two parties. Set the from as us... 
 			$this->from=$from;
-			$this->sender_header_address = "Sender: autorfq@partslogistics.com";
+			$this->sender_header_address = "Sender: ". CONFIG_EMAIL_SENDER_ADDRESS;
 			$this->reply_to=$from;
 			$this->fr_header_address = 'From: '. $from;
 			$this->reply_to_header_address = 'Reply-To: ' . $this->reply_to;

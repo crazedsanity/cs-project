@@ -1,9 +1,9 @@
 <?
 /*
  * SVN INFORMATION:::
- * SVN Signature: $Id$
- * Last Committted Date: $Date$
- * Last Committed Path: $HeadURL$
+ * SVN Signature: $Id:projectClass.php 8 2007-08-23 23:22:35Z crazedsanity $
+ * Last Committted Date: $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
+ * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/projectClass.php $
  */
 require_once("site_config.php");
 
@@ -41,7 +41,7 @@ class projectClass extends mainRecord {
 		//now create all those internal objects.
 		$this->noteObj = new noteClass($this->db);
 		$this->todoObj = new todoClass($this->db);
-		$this->rtsObj  = new rtsClass($this->db);
+		$this->helpdeskObj  = new helpdeskClass($this->db);
 		$this->tagObj  = new tagClass($this->db);
 		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
 		$this->prefObj = new pref($this->db, $_SESSION['uid']);
@@ -422,7 +422,7 @@ class projectClass extends mainRecord {
 			}
 			
 			//retrieve the record, so we can get the public_id.
-			//TODO: add error-checking, or something (same for rtsClass::create_record()).
+			//TODO: add error-checking, or something (same for helpdeskClass::create_record()).
 			$myNewRecordArr = parent::get_records(array('record_id' => $newRecord), NULL, FALSE);
 			$tempKeysArray = array_keys($myNewRecordArr);
 			$retval = $tempKeysArray[0];
