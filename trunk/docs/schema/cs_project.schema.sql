@@ -658,6 +658,96 @@ CREATE FUNCTION encrypt_iv(bytea, bytea, bytea, text) RETURNS bytea
 ALTER FUNCTION public.encrypt_iv(bytea, bytea, bytea, text) OWNER TO postgres;
 
 --
+-- Name: fix_projekte_dates(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION fix_projekte_dates() RETURNS integer
+    AS $$
+DECLARE
+	my_projectRecord projekte%ROWTYPE;
+	my_updateString TEXT;
+	my_performUpdate INTEGER;
+	my_newDate TEXT;
+	my_retval INTEGER DEFAULT 0;
+	
+	my_checkValid BOOL;
+BEGIN
+	FOR my_projectRecord IN SELECT id, anfang, ende, statuseintrag FROM projekte ORDER BY id LOOP
+		
+		my_performUpdate := 0;
+		--my_updateString := '';
+		
+		--
+		IF (my_projectRecord.ende IS NOT NULL) THEN
+			SELECT INTO my_checkValid isValidDate(my_projectRecord.ende)::boolean;
+			
+			IF (my_checkValid IS FALSE) THEN
+				my_performUpdate := my_performUpdate +1;
+				SELECT INTO my_newDate fix_off_by_one_date(my_projectRecord.anfang);
+				UPDATE projekte SET ende=my_newDate WHERE id=my_projectRecord.id;
+			END IF;
+		END IF;
+		
+		
+		
+		IF (my_projectRecord.statuseintrag IS NOT NULL) THEN
+			SELECT INTO my_checkValid isValidDate(my_projectRecord.statuseintrag)::boolean;
+			
+			IF (my_checkValid IS FALSE) THEN
+				my_performUpdate := my_performUpdate +1;
+				SELECT INTO my_newDate fix_off_by_one_date(my_projectRecord.statuseintrag);
+				UPDATE projekte SET statuseintrag=my_newDate WHERE id=my_projectRecord.id;
+			END IF;
+		END IF;
+		
+		
+		
+		IF (my_projectRecord.anfang IS NOT NULL AND length(my_projectRecord.anfang) >= 5) THEN
+			SELECT INTO my_checkValid isValidDate(my_projectRecord.anfang)::boolean;
+			
+			IF (my_checkValid IS FALSE) THEN
+				my_performUpdate := my_performUpdate +1;
+				SELECT INTO my_newDate fix_off_by_one_date(my_projectRecord.anfang);
+				UPDATE projekte SET anfang=my_newDate WHERE id=my_projectRecord.id;
+			END IF;
+--		ELSEIF (my_projectRecord.anfang IS NULL OR length(my_projectRecord.anfang) < 5) THEN
+--			-- check that the last update is valid.
+--			SELECT INTO my_checkValid isValidDate(my_projectRecord.statuseintrag);
+--			
+--			IF (my_checkValid IS TRUE) THEN
+--				--goodie.
+--				my_performUpdate := my_performUpdate +1;
+--				RAISE NOTICE '%', my_projectRecord.anfang;
+--				UPDATE projekte SET anfang=statuseintrag WHERE id=my_projectRecord.id;
+--			ELSE
+--				--oh, boy.
+--				my_performUpdate := my_performUpdate +1;
+--				UPDATE projekte SET anfang=CURRENT_DATE WHERE id=my_projectRecord.id;
+--			--	RAISE NOTICE '%', my_projectRecord.id;
+--				my_updateString := my_updateString || 'id=' || my_projectRecord.id || ',anfang=' || my_projectRecord.anfang;
+--			END IF;
+		END IF;
+		
+		IF (my_performUpdate > 0) THEN
+			my_retval := my_retval +1;
+		END IF;
+		
+	END LOOP;
+	
+	--last-ditch effort to fix anfang.
+	UPDATE projekte SET anfang=statuseintrag WHERE anfang IS NULL OR length(anfang) <= 5;
+	
+	RAISE NOTICE '%', my_updateString;
+	
+	RETURN my_retval;
+END
+$$
+    LANGUAGE plpgsql;
+
+
+ALTER FUNCTION public.fix_projekte_dates() OWNER TO postgres;
+
+--
 -- Name: gen_salt(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -1052,22 +1142,6 @@ CREATE TABLE contact_table (
 ALTER TABLE public.contact_table OWNER TO postgres;
 
 --
--- Name: estimate_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE estimate_table (
-    estimate_id serial NOT NULL,
-    record_type_id integer NOT NULL,
-    record_id integer NOT NULL,
-    original numeric(10,2) DEFAULT 1 NOT NULL,
-    current numeric(10,2) DEFAULT 1 NOT NULL,
-    elapsed numeric(10,2) DEFAULT 0 NOT NULL
-);
-
-
-ALTER TABLE public.estimate_table OWNER TO postgres;
-
---
 -- Name: group_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -1126,9 +1200,9 @@ CREATE TABLE log_estimate_table (
     log_estimate_id serial NOT NULL,
     creation timestamp with time zone DEFAULT now() NOT NULL,
     uid integer NOT NULL,
-    record_type_id integer NOT NULL,
-    record_id integer NOT NULL,
-    elapsed numeric(10,2) NOT NULL
+    todo_id integer NOT NULL,
+    add_elapsed numeric(10,2) NOT NULL,
+    system_note text
 );
 
 
@@ -1381,8 +1455,11 @@ CREATE TABLE todo_table (
     started date,
     status_id integer DEFAULT 0 NOT NULL,
     priority smallint DEFAULT 50 NOT NULL,
-    progress smallint DEFAULT 0 NOT NULL,
-    record_id integer NOT NULL
+    progress numeric DEFAULT 0 NOT NULL,
+    record_id integer NOT NULL,
+    estimate_original numeric(10,2) DEFAULT 1 NOT NULL,
+    estimate_current numeric(10,2) DEFAULT 1 NOT NULL,
+    estimate_elapsed numeric(10,2) DEFAULT 0 NOT NULL
 );
 
 
@@ -1462,16 +1539,6 @@ ALTER TABLE ONLY contact_table
 
 
 ALTER INDEX public.contact_table_pkey OWNER TO postgres;
-
---
--- Name: estimate_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY estimate_table
-    ADD CONSTRAINT estimate_table_pkey PRIMARY KEY (estimate_id);
-
-
-ALTER INDEX public.estimate_table_pkey OWNER TO postgres;
 
 --
 -- Name: group_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1703,15 +1770,6 @@ CREATE UNIQUE INDEX contact_attrbute_link_table_uidx ON contact_attribute_link_t
 ALTER INDEX public.contact_attrbute_link_table_uidx OWNER TO postgres;
 
 --
--- Name: estimates_table_unique_recid_rectypeid_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE UNIQUE INDEX estimates_table_unique_recid_rectypeid_idx ON estimate_table USING btree (record_type_id, record_id);
-
-
-ALTER INDEX public.estimates_table_unique_recid_rectypeid_idx OWNER TO postgres;
-
---
 -- Name: internal_data_table_internal_name_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
@@ -1773,14 +1831,6 @@ ALTER TABLE ONLY contact_attribute_link_table
 
 
 --
--- Name: estimate_table_record_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY estimate_table
-    ADD CONSTRAINT estimate_table_record_type_id_fkey FOREIGN KEY (record_type_id) REFERENCES record_type_table(record_type_id);
-
-
---
 -- Name: group_table_leader_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1789,11 +1839,11 @@ ALTER TABLE ONLY group_table
 
 
 --
--- Name: log_estimate_table_record_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: log_estiate_table_todo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY log_estimate_table
-    ADD CONSTRAINT log_estimate_table_record_type_id_fkey FOREIGN KEY (record_type_id) REFERENCES record_type_table(record_type_id);
+    ADD CONSTRAINT log_estiate_table_todo_id_fkey FOREIGN KEY (todo_id) REFERENCES todo_table(todo_id);
 
 
 --
