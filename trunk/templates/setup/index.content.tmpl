@@ -49,7 +49,7 @@ Welcome to the setup program for CS-Project, version {VERSION_STRING}
 <!-- END step_data_row -->
 </table>
 
-
+<form method="POST">
 <table border=1 cellpadding=3 cellspacing=0>
 	<tr>
 		<th colspan="3">{currentStepName}</th>
@@ -63,5 +63,9 @@ Welcome to the setup program for CS-Project, version {VERSION_STRING}
 		<td>%%fieldDescription%%</td>
 	</tr>
 <!-- END step_form_row -->
+	<tr>
+		<td colspan="3" align="center"><input type="submit" value="Go to next step"></td>
+	</tr>
 </table>
+</form>
 

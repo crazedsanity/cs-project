@@ -104,9 +104,27 @@ class phpDB {
     
 	// connection function
 	function connect($DataBaseReference="site_config"){
-
-		if (isset($DataBaseReference)) {
-		$this->set_db_info($DataBaseReference);
+		if(isset($DataBaseReference)) {
+		if(is_array($DataBaseReference)) {
+			$required = array(
+				'hostName'		=> "host",
+				'port'			=> "port",
+				'databaseName'	=> "dbname",
+				'userName'		=> "user",
+				'password'		=> "password"
+			);
+			foreach($required as $propertyName => $arrayIndex) {
+				if(isset($DataBaseReference[$arrayIndex])) {
+					$this->$propertyName = $DataBaseReference[$arrayIndex];
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to set ". $propertyName);
+				}
+			}
+		}
+		else {
+			$this->set_db_info($DataBaseReference);
+		}
 
 		// build connection string based on internal settings.
 		$connStr = '';

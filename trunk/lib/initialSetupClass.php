@@ -11,18 +11,19 @@
 
 class initialSetup {
 	
-	private $gfObj;
-	private $fsObj;
-	private $versionFileVersion=NULL;
-	private $stepData = NULL;
+	protected $gfObj;
+	protected $fsObj;
+	protected $versionFileVersion=NULL;
+	protected $stepData = NULL;
 	
 	
 	//=========================================================================
-	public function __construct() {
+	protected function __construct() {
 		
 		$this->gfObj = new cs_globalFunctions;
 		$this->fsObj = new cs_fileSystemClass();
 		$this->read_version_file();
+		$this->get_step_data();
 	}//end __construct()
 	//=========================================================================
 	
@@ -72,6 +73,34 @@ class initialSetup {
 						"will be used later for creating the database, setting up users, " .
 						"and setting some default values.",
 					'isComplete'	=> FALSE,
+					'requiredFields'=> array(
+						'Database Name (cs_project)'	=> array(
+							'name'		=> "db_name",
+							'desc'		=> "Name of the database within PostgreSQL (i.e. \"cs_project\")",
+							'default'	=> "cs_project"
+						),
+						'Hostname (localhost)'			=> array(
+							'name'		=> "db_host",
+							'desc'		=> "Fully qualified host name (like \"taz.google.com\" or \"localhost\").",
+							'default'	=> "localhost"
+						),
+						'Port (5432)'					=> array(
+							'name'		=> "db_port",
+							'desc'		=> "Port to connect to PostgreSQL on (default is 5432).",
+							'default'	=> "5432"
+						),
+						'Database Username (postgres)'	=> array(
+							'name'		=> "db_user",
+							'desc'		=> "Username for connecting to PostgreSQL (if you don't know, it's probably \"postgres\", " .
+								"though connecting as a SUPERUSER is generally accepted as a BAD THING).",
+							'default'	=> "postgres"
+						),
+						'Database Password'				=> array(
+							'name'		=> "db_pass",
+							'desc'		=> "Password for connecting to PostgreSQL (for a trusted connection, this can be blank).",
+							'default'	=> ""
+						)
+					),
 					'result'		=> NULL
 				), 
 				"createDb"		=> array(
@@ -95,6 +124,22 @@ class initialSetup {
 						"issues, name of the project, password for the administrator, " .
 						"and one user.",
 					'isComplete'	=> FALSE,
+					'requiredFields'=> array(
+						'New Issue Announcement Address'	=> "helpdesk-issue-announce-email",
+						'Project Name'						=> "proj__name",
+						'Project URL (project.domain.com)'	=> "project_url",
+						'Cookie Name (CS_PROJECT_SESSID)'	=> "config_session_name",
+						'First Username'					=> "first_username",
+						'Password For User'					=> "first_username__password",
+						'Session: Max Idle Time (2 hours)'	=> "max_idle",
+						'Session: Max Length (18 hours)'	=> "max_time"
+					),
+					'internalFields'=> array(
+						'isdevsite'						=> 0,
+						'debugprintopt'					=> 0,
+						'debugremovehr'					=> 0,
+						'stop_logins_on_global_alert'	=> 1
+					),
 					'result'		=> NULL
 				),
 				"writeConfig"	=> array(
@@ -136,7 +181,52 @@ class initialSetup {
 	
 	
 	//=========================================================================
-	private function setup__dbInfo() {
+	public function process_step($stepName, array $data) {
+		$this->gfObj->debug_print($data);
+		$methodName = "setup__". $stepName;
+		
+		if(method_exists($this, $methodName)) {
+			$retval = $this->$methodName($data['fields']);
+		}
+		else {
+			throw new exception(__METHOD__ .": method (". $methodName .") does not exist");
+		}
+		exit;
+	}//end process_step()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function setup__dbInfo(array $data) {
+		
+		//format: ourName => indexForPhpDBConnect
+		$requiredFields = array(
+			'db_host'	=> "host",
+			'db_name'	=> "dbname",
+			'db_port'	=> "port",
+			'db_user'	=> "user",
+			'db_pass'	=> "password"
+		);
+		$connectionParams = array();
+		foreach($requiredFields as $ourName => $phpDbName) {
+			if(isset($data[$ourName])) {
+				#define($field, $data[$field]);
+				$connectionParams[$phpDbName] = $data[$ourName];
+			}
+			else {
+				throw new exception(__METHOD__ .": required data (". $ourName .") missing");
+			}
+		}
+		
+		$this->gfObj->debug_print($connectionParams);
+		$phpDb = new phpDB;
+		$phpDb->connect($connectionParams);
+		$this->gfObj->debug_print($phpDb);
+		$this->gfObj->debug_print($phpDb->errorMsg());
+		exit;
+		
+		//attempt a connection to the database.
 	}//end setup_dbInfo()
 	//=========================================================================
 	

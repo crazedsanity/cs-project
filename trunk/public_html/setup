@@ -16,21 +16,15 @@ EXAMPLE: public_html/content  ->  ./index.php
 
 //set a constant, so no upgrades are attempted (within lib/site_config.php)... 
 define("PROJECT__INITIALSETUP", TRUE);
+
+//now set a SPECIAL name for the session cookie.
+ini_set('session.name', "CSPROJECT_SETUP_SESSID");
+
 require_once(dirname(__FILE__) ."/../lib/includes.php");
-
-
-
-//done with redirection.  Here's where we define if they have to be logged-in, and then run the fast_templating engine.
-$mustBeLoggedIn = 0;
 require_once(dirname(__FILE__) ."/../lib/externals/cs-content/contentSystemClass.php");
-//conditionally include files pointing to it...
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();
 $contentObj->finish();
-exit;
-
-
-
 
 ?>
