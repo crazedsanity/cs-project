@@ -7,10 +7,10 @@
  * Last Committed Path: $HeadURL$
  */
 
-require_once(dirname(__FILE__) .'/externals/cs-content/cs_fileSystemClass.php');
-require_once(dirname(__FILE__) .'/externals/cs-phpxml/xmlCreatorClass.php');
-require_once(dirname(__FILE__) .'/externals/cs-phpxml/xmlParserClass.php');
-require_once(dirname(__FILE__) .'/externals/cs-content/cs_globalFunctions.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
+require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
+require_once(dirname(__FILE__) .'/cs-phpxml/xmlParserClass.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
 require_once(dirname(__FILE__) .'/upgradeClass.php');
 
 define(CONFIG_FILENAME, 'config.xml');
