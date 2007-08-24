@@ -337,7 +337,7 @@ class upgrade {
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .": transitioning from (or to) non-production versions is not supported");
+				throw new exception(__METHOD__ .": transitioning from (or to) non-production versions is not supported (". $dbVersion['version_string'] ." to ". $versionFileData['version_string'] .")");
 			}
 		}
 		
@@ -367,7 +367,7 @@ class upgrade {
 		
 		if(strlen($dberror) || $numrows != 1) {
 			//fail.
-			$retval = 0;
+			throw new exception(__METHOD__ .": failed to retrieve version... numrows=(". $numrows ."), DBERROR::: ". $dberror);
 		}
 		else {
 			$retval = $this->db->farray_fieldnames();
