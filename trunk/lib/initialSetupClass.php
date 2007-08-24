@@ -15,6 +15,7 @@ class initialSetup {
 	protected $fsObj;
 	protected $versionFileVersion=NULL;
 	protected $stepData = NULL;
+	protected $userData=array();
 	
 	
 	//=========================================================================
@@ -64,6 +65,9 @@ class initialSetup {
 	
 	//=========================================================================
 	public function get_step_data($stepName=NULL) {
+		if(isset($_SESSION['storedStepData']) && is_array($_SESSION['storedStepData'])) {
+			$this->stepData = $_SESSION['storedStepData'];
+		}
 		if(is_null($this->stepData) || !count($this->stepData)) {
 			$this->stepData = array(
 				"dbInfo"		=> array(
@@ -185,19 +189,28 @@ class initialSetup {
 		$this->gfObj->debug_print($data);
 		$methodName = "setup__". $stepName;
 		
-		if(method_exists($this, $methodName)) {
+		if(method_exists($this, $methodName) && $this->stepData[$stepName]) {
+			$x = array_keys($this->stepData);
+			$stepNum = array_search($stepName, $x);
 			$retval = $this->$methodName($data['fields']);
+			$_SESSION['step_results'][$stepName] = array(
+				
+			);
 		}
 		else {
 			throw new exception(__METHOD__ .": method (". $methodName .") does not exist");
 		}
-		exit;
 	}//end process_step()
 	//=========================================================================
 	
 	
 	
 	//=========================================================================
+	/**
+	 * Set database connection information, and attempt a connection to the db.
+	 * 
+	 * TODO: should a pre-existing database be allowed (non-existent eliminates lots of problems).
+	 */
 	private function setup__dbInfo(array $data) {
 		
 		//format: ourName => indexForPhpDBConnect
@@ -219,14 +232,37 @@ class initialSetup {
 			}
 		}
 		
-		$this->gfObj->debug_print($connectionParams);
 		$phpDb = new phpDB;
 		$phpDb->connect($connectionParams);
-		$this->gfObj->debug_print($phpDb);
-		$this->gfObj->debug_print($phpDb->errorMsg());
-		exit;
+		if(!strlen($phpDb->errorMsg())) {
+			//store our data.
+			$this->userData['dbInfo'] = $connectionParams;
+			$this->userData['dbInfo']['dbExists'] = TRUE;
+			$retval = "Connection can be established, database already exists.";
+		}
+		else {
+			//attempt to connect to "template1": if we can, then we'll set a flag so we know to create the database later.
+			$myConParms = $connectionParams;
+			$myConParms['dbname'] = "template1";
+			$phpDb = new phpDB;
+			$phpDb->connect($myConParms);
+			
+			if(!strlen($phpDb->errorMsg())) {
+				$this->userData['dbInfo'] = $connectionParams;
+				$this->userData['dbInfo']['dbExists'] = FALSE;
+				$retval = "Connection can be established, database doesn't exist.";
+			}
+			else {
+				$this->gfObj->debug_print($phpDb);
+				#throw new exception(__METHOD__ .": failed to connect to the database");
+				$retval = "Failed to connect to server: ". $phpDb->errorMsg();
+			}
+		}
 		
-		//attempt a connection to the database.
+		//store the setup information in the session.
+		$_SESSION['stepData'] = $this->userData;
+		
+		return($retval);
 	}//end setup_dbInfo()
 	//=========================================================================
 	

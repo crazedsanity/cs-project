@@ -31,6 +31,7 @@ else {
 		$setupObj->display_step();
 	}
 	else {
+		throw new exception(__FILE__ .", line #". __LINE__ .": failed to get appropriate step.");
 	}
 }
 

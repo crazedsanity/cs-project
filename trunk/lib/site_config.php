@@ -32,7 +32,9 @@ function exception_handler($exception)
 function read_config_file() {
 	$GLOBALS['DEBUGPRINTOPT'] = 1;
 	if(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
-		write_config_file();
+		$gf = new cs_globalFunctions;
+		$gf->conditional_header("/setup?from=". urlencode($_SERVER['REQUEST_URI']));
+		exit;
 	}
 	
 	$fs = new cs_fileSystemClass(dirname(__FILE__));
@@ -53,52 +55,6 @@ function read_config_file() {
 	}
 	
 }//end read_config_file()
-//-------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------
-function write_config_file() {
-	$fs = new cs_filesystemClass(dirname(__FILE__));
-	$xmlCreator = new xmlCreator('config');
-	
-	$defaults = array(
-		'isdevsite'							=> 1,
-		'db_host'							=> 'localhost',
-		'db_name'							=> 'cs_project',
-		'db_port'							=> '5432',
-		'db_user'							=> 'postgres',
-		'db_pass'							=> '',
-		'helpdesk-issue-announce-email'		=> 'project_helpdesk_notifications@avsupport.com',
-		'workingonit'						=> 0,
-		'max_idle'							=> '2 hours',
-		'max_time'							=> '18 hours',
-		'stop_logins_on_global_alert'		=> 1,
-		'debugprintopt'						=> 1,
-		'debugremovehr'						=> 0,
-		'project_url'						=> 'project.cs',
-		'config_session_name'				=> 'CS_PROJECT_SESSID',
-		'version_string'					=> 'BETA-3.3.1',
-		'proj_name'							=> 'CS-Project'
-		
-		//TODO: run an "initial setup" script to populate certain values, like log_category_id's for things... 
-	);
-	
-	foreach($defaults as $index=>$value) {
-		$xmlCreator->add_tag($index, $value);
-	}
-	
-	$xmlCreator->add_attribute('/config', array('generated' => date('Y-m-d H:m:s')));
-	
-	$gf = new cs_globalFunctions;
-	$xmlString = $xmlCreator->create_xml_string();
-	
-	$gf->debug_print($gf->cleanString($xmlString, 'htmlentity_plus_brackets'),1);
-	
-	$fs->create_file(CONFIG_FILENAME);
-	$fs->write($xmlString, CONFIG_FILENAME);
-	
-}//end write_config_file()
 //-------------------------------------------------------------------
 
 	
