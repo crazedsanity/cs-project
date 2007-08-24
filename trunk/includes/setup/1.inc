@@ -4,7 +4,7 @@
  * 
  */
 
-$requiredFields = array('db_name', 'db_host', 'db_port', 'db_user', 'db_pass');
+$requiredFields = array('dbname', 'host', 'port', 'user', 'password');
 
 if($_POST) {
 	$page->gfObj->debug_print($_POST);
@@ -19,11 +19,11 @@ else {
 	if(!is_array($setupData) || !count($setupData)) {
 		//provide some defaults.
 		$setupData = array(
-			'db_name'	=> "cs_project",
-			'db_host'	=> "localhost",
-			'db_port'	=> "5432",
-			'db_user'	=> "postgres",
-			'db_pass'	=> ""
+			'dbname'	=> "cs_project",
+			'host'		=> "localhost",
+			'port'		=> "5432",
+			'user'		=> "postgres",
+			'password'	=> ""
 		);
 	}
 	

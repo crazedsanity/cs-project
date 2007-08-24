@@ -9,6 +9,7 @@
 //create the setup object.
 require_once(dirname(__FILE__) ."/../lib/initialSetupClass.php");
 require_once(dirname(__FILE__) ."/../lib/displaySetupClass.php");
+require_once(dirname(__FILE__) ."/../lib/cs-content/cs_phpDB.php");
 
 
 $setupObj = new displaySetup($page);
