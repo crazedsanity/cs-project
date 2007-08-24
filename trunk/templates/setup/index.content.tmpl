@@ -8,8 +8,12 @@ Welcome to the setup program for CS-Project, version {VERSION_STRING}
 		- username (i.e. "postgres")
 		- password
 	2.) Build the initial database schema
+		- test to ensure the database can be connected to (use "template1")
 		- be sure to report ALL errors: may require creating individual SQL scripts for each statement...
 	3.) Create default values (unless they're in the schema...)
+		- record_type_id's
+		- log_category_id's
+		- anonymous user (with contact_id & default email address)
 	4.) Get extra final values:
 		- "isdevsite" (setting to non-false/zero value will display debugging information where appropriate)
 		- project name (i.e. "CS-Project")
@@ -17,6 +21,47 @@ Welcome to the setup program for CS-Project, version {VERSION_STRING}
 		- max session idle time
 		- max session time
 		- cookie name (i.e. "CS_PROJECT_SESSID") -- NOTE: changing this might result in loss of session information... set a special name during setup?
+		- password for "administrator"
+		- add user(s)
 	5.) Attempt to write the config file:
 		- if it fails, tell user to "touch" lib/config.xml"
+		- should probably run some tests:
+			* attempt login
+			* create new user
+			* create new project
+			* create sub-project
+			* create helpdesk issue
+			* create helpdesk issue attached to sub-project
+			* create note attached to sub-project
+			* create todo attached to sub-project
+			* test modifications of project, todo, note, and helpdesk issues.
 </pre>
+
+<table border=1 cellpadding=3 cellspacing=0>
+<!-- BEGIN step_data_row -->
+	<tr>
+		<th>#%%stepNum%%</th>
+		
+		<td>%%stepName%%</td>
+		
+		<td bgcolor="%%stepBGColor%%">%%passFail%%</td>
+	</tr>
+<!-- END step_data_row -->
+</table>
+
+
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<th colspan="3">{currentStepName}</th>
+	</tr>
+<!-- BEGIN step_form_row -->
+	<tr>
+		<th>%%properFieldName%%</th>
+		
+		<td><input type="text" name="fields[%%fieldName%%]" value="%%fieldValue%%"></td>
+		
+		<td>%%fieldDescription%%</td>
+	</tr>
+<!-- END step_form_row -->
+</table>
+
