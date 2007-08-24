@@ -1,0 +1,60 @@
+Welcome to the setup program for CS-Project, version <b>{VERSION_STRING}</b>!
+
+<p>
+	In this step, we need to determine some basic information about the database.
+	The database should NOT exist yet: it will be created later.  
+</p>
+
+
+<form method="POST">
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<th colspan="3"></th>
+
+	</tr>
+	<tr>
+		<th>Database Name (cs_project)</th>
+		
+		<td><input type="text" name="fields[db_name]" value="cs_project"></td>
+		
+		<td>Name of the database within PostgreSQL (i.e. "cs_project")</td>
+	</tr>
+	<tr>
+
+		<th>Hostname (localhost)</th>
+		
+		<td><input type="text" name="fields[db_host]" value="localhost"></td>
+		
+		<td>Fully qualified host name (like "taz.google.com" or "localhost").</td>
+	</tr>
+	<tr>
+		<th>Port (5432)</th>
+		
+		<td><input type="text" name="fields[db_port]" value="5432"></td>
+
+		
+		<td>Port to connect to PostgreSQL on (default is 5432).</td>
+	</tr>
+	<tr>
+		<th>Database Username (postgres)</th>
+		
+		<td><input type="text" name="fields[db_user]" value="postgres"></td>
+		
+		<td>Username for connecting to PostgreSQL (if you don't know, it's probably "postgres", though connecting as a SUPERUSER is generally accepted as a BAD THING).</td>
+	</tr>
+
+	<tr>
+		<th>Database Password</th>
+		
+		<td><input type="text" name="fields[db_pass]" value=""></td>
+		
+		<td>Password for connecting to PostgreSQL (for a trusted connection, this can be blank).</td>
+	</tr>
+	<tr>
+		<td colspan="3" align="center"><input type="submit" value="Go to next step"></td>
+
+	</tr>
+</table>
+</form>
+
+
