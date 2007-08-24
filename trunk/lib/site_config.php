@@ -101,7 +101,9 @@ function write_config_file() {
 }//end write_config_file()
 //-------------------------------------------------------------------
 
-read_config_file();
+	
+if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
+	read_config_file();
 	
 	//don't panic: we're going to check for upgrades, but this doesn't
 	//	necessarily mean anything will ACTUALLY be upgraded.
@@ -113,6 +115,7 @@ read_config_file();
 		$upgrade->check_versions();
 		read_config_file();
 	}
+}
 
 if($_SERVER['DOCUMENT_ROOT']) {
 	//it was called from the web...
