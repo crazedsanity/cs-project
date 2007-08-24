@@ -21,7 +21,6 @@ define("PROJECT__INITIALSETUP", TRUE);
 ini_set('session.name', "CSPROJECT_SETUP_SESSID");
 
 require_once(dirname(__FILE__) ."/../lib/includes.php");
-require_once(dirname(__FILE__) ."/../lib/externals/cs-content/contentSystemClass.php");
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();

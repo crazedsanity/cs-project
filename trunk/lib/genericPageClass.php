@@ -6,7 +6,6 @@
  * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/genericPageClass.php $
  */
 require_once("includes.php");
-require_once(dirname(__FILE__) ."/cs-content/contentSystemClass.php");//includes all the files for cs-content...
 
 class GenericPage extends cs_genericPage
 	{
