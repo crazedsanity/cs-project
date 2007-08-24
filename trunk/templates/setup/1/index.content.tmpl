@@ -15,7 +15,7 @@ Welcome to the setup program for CS-Project, version <b>{VERSION_STRING}</b>!
 	<tr>
 		<th>Database Name (cs_project)</th>
 		
-		<td><input type="text" name="fields[db_name]" value="cs_project"></td>
+		<td><input type="text" name="fields[db_name]" value="{db_name}"></td>
 		
 		<td>Name of the database within PostgreSQL (i.e. "cs_project")</td>
 	</tr>
@@ -23,14 +23,14 @@ Welcome to the setup program for CS-Project, version <b>{VERSION_STRING}</b>!
 
 		<th>Hostname (localhost)</th>
 		
-		<td><input type="text" name="fields[db_host]" value="localhost"></td>
+		<td><input type="text" name="fields[db_host]" value="{db_host}"></td>
 		
 		<td>Fully qualified host name (like "taz.google.com" or "localhost").</td>
 	</tr>
 	<tr>
 		<th>Port (5432)</th>
 		
-		<td><input type="text" name="fields[db_port]" value="5432"></td>
+		<td><input type="text" name="fields[db_port]" value="{db_port}"></td>
 
 		
 		<td>Port to connect to PostgreSQL on (default is 5432).</td>
@@ -38,7 +38,7 @@ Welcome to the setup program for CS-Project, version <b>{VERSION_STRING}</b>!
 	<tr>
 		<th>Database Username (postgres)</th>
 		
-		<td><input type="text" name="fields[db_user]" value="postgres"></td>
+		<td><input type="text" name="fields[db_user]" value="{db_user}"></td>
 		
 		<td>Username for connecting to PostgreSQL (if you don't know, it's probably "postgres", though connecting as a SUPERUSER is generally accepted as a BAD THING).</td>
 	</tr>
@@ -46,7 +46,7 @@ Welcome to the setup program for CS-Project, version <b>{VERSION_STRING}</b>!
 	<tr>
 		<th>Database Password</th>
 		
-		<td><input type="text" name="fields[db_pass]" value=""></td>
+		<td><input type="text" name="fields[db_pass]" value="{db_pass}"></td>
 		
 		<td>Password for connecting to PostgreSQL (for a trusted connection, this can be blank).</td>
 	</tr>

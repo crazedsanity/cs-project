@@ -15,28 +15,18 @@ $setupObj = new displaySetup($page);
 $page->add_template_var("VERSION_STRING", $setupObj->get_version());
 
 
-//now, let's determine what step we're on.
-$gfObj = new cs_globalFunctions;
-
-$currentStep = $setupObj->get_current_step();
-if($_POST) {
-	$result = $setupObj->process_step($currentStep, $_POST);
-	
-	$page->conditional_header("/setup/step/". $currentStep ."?result=". $result);
-	exit;
-}
-else {
-	if(!is_null($currentStep)) {
-		
-		$setupObj->display_step();
-	}
-	else {
-		throw new exception(__FILE__ .", line #". __LINE__ .": failed to get appropriate step.");
-	}
-}
+//=============================================================================
+function store_setup_data($step, $data, $type='data') {
+	$_SESSION['setup'][$type][$step] = $data;
+}//end store_setup_data()
+//=============================================================================
 
 
 
-
+//=============================================================================
+function get_setup_data($step, $type='data') {
+	return($_SESSION['setup'][$type][$step]);
+}//end get_setup_data()
+//=============================================================================
 
 ?>
