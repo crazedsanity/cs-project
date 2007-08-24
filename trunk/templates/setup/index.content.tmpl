@@ -1,0 +1,22 @@
+Welcome to the setup program for CS-Project, version {VERSION_STRING}
+
+<pre>
+	Things needed to be performed:
+	1.) Get information about the database
+		- hostname (i.e. "localhost" or "server.name.com")
+		- port (i.e. 5432)
+		- username (i.e. "postgres")
+		- password
+	2.) Build the initial database schema
+		- be sure to report ALL errors: may require creating individual SQL scripts for each statement...
+	3.) Create default values (unless they're in the schema...)
+	4.) Get extra final values:
+		- "isdevsite" (setting to non-false/zero value will display debugging information where appropriate)
+		- project name (i.e. "CS-Project")
+		- announcements email address (i.e. "project-announce@yourdomain.com")
+		- max session idle time
+		- max session time
+		- cookie name (i.e. "CS_PROJECT_SESSID") -- NOTE: changing this might result in loss of session information... set a special name during setup?
+	5.) Attempt to write the config file:
+		- if it fails, tell user to "touch" lib/config.xml"
+</pre>
