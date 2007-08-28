@@ -62,8 +62,9 @@ function test_db_stuff(cs_phpDB &$db) {
 		$db->connect($params);
 		try {
 			$db2 = new cs_phpDB;
-			$db2->connect(get_setup_data(1));
 			$retval = FALSE;
+			store_setup_data(2, 0, 'result');
+			$db2->connect(get_setup_data(1));
 		}
 		catch(exception $e) {
 			//no database!
@@ -96,6 +97,9 @@ class __tmpSetupClass {
 		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../../docs/sql/setup');
 		$this->gfObj = new cs_globalFunctions;
 		$this->page = $page;
+		
+		store_setup_data(2, 0, 'result');
+		store_setup_data(2, 'Initializing...', 'data');
 	}//end __construct()
 	//=========================================================================
 	
@@ -118,6 +122,8 @@ class __tmpSetupClass {
 			}
 		}
 		else {
+			store_setup_data(2, 0, 'result');
+			store_setup_data(2, 'Failed to create database', 'data');
 			$setupData = get_setup_data(1, 'data');
 			$retval = "Unable to create database... check that ". $setupData['host'] .
 				" does not already have a database named '". $setupData['dbname'] ."'.  " .

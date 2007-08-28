@@ -1,4 +1,17 @@
-Welcome to the setup program for CS-Project, version {VERSION_STRING}
+Welcome to the setup program for CS-Project, version {VERSION_STRING}<BR><BR>
+
+
+<table border=1 cellpadding=3 cellspacing=0>
+<!-- BEGIN step_data_row -->
+	<tr>
+		<th>#%%stepNum%%</th>
+		
+		<td><a href="/setup/%%stepNum%%">%%stepName%%</a></td>
+		
+		<td bgcolor="%%stepBGColor%%">%%passFail%%</td>
+	</tr>
+<!-- END step_data_row -->
+</table>
 
 <pre>
 	Things needed to be performed:
@@ -36,36 +49,3 @@ Welcome to the setup program for CS-Project, version {VERSION_STRING}
 			* create todo attached to sub-project
 			* test modifications of project, todo, note, and helpdesk issues.
 </pre>
-
-<table border=1 cellpadding=3 cellspacing=0>
-<!-- BEGIN step_data_row -->
-	<tr>
-		<th>#%%stepNum%%</th>
-		
-		<td>%%stepName%%</td>
-		
-		<td bgcolor="%%stepBGColor%%">%%passFail%%</td>
-	</tr>
-<!-- END step_data_row -->
-</table>
-
-<form method="POST">
-<table border=1 cellpadding=3 cellspacing=0>
-	<tr>
-		<th colspan="3">{currentStepName}</th>
-	</tr>
-<!-- BEGIN step_form_row -->
-	<tr>
-		<th>%%properFieldName%%</th>
-		
-		<td><input type="text" name="fields[%%fieldName%%]" value="%%fieldValue%%"></td>
-		
-		<td>%%fieldDescription%%</td>
-	</tr>
-<!-- END step_form_row -->
-	<tr>
-		<td colspan="3" align="center"><input type="submit" value="Go to next step"></td>
-	</tr>
-</table>
-</form>
-

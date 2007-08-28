@@ -9,7 +9,7 @@ $requiredFields = array('dbname', 'host', 'port', 'user', 'password');
 if($_POST) {
 	$page->gfObj->debug_print($_POST);
 	store_setup_data(1, $_POST['fields']);
-	store_setup_data(1, TRUE, 'result');
+	store_setup_data(1, 1, 'result');
 	
 	$page->gfObj->conditional_header("/setup/2", TRUE);
 }
