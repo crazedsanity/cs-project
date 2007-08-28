@@ -16,6 +16,34 @@ COMMENT ON SCHEMA public IS 'Standard public schema';
 SET search_path = public, pg_catalog;
 
 --
+-- Name: plpgsql_call_handler(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
+    AS '$libdir/plpgsql', 'plpgsql_call_handler'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.plpgsql_call_handler() OWNER TO postgres;
+
+--
+-- Name: plpgsql_validator(oid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_validator(oid) RETURNS void
+    AS '$libdir/plpgsql', 'plpgsql_validator'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.plpgsql_validator(oid) OWNER TO postgres;
+
+--
+-- Name: plpgsql; Type: PROCEDURAL LANGUAGE; Schema: public; Owner: 
+--
+
+CREATE TRUSTED PROCEDURAL LANGUAGE plpgsql HANDLER plpgsql_call_handler VALIDATOR plpgsql_validator;
+
+--
 -- Name: attribute_get_create(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -269,6 +297,7 @@ $_$
 
 ALTER FUNCTION public.contact_update_attribute(integer, text, text) OWNER TO postgres;
 
+
 --
 -- Name: internal_data_get_value(text); Type: FUNCTION; Schema: public; Owner: postgres
 --
@@ -414,46 +443,6 @@ $_$
 
 ALTER FUNCTION public.record_id_from_public_id(integer, boolean) OWNER TO postgres;
 
---
--- Name: replace(character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION "replace"(character varying, character varying, character varying) RETURNS character varying
-    AS $_$ 
-DECLARE 
-subject ALIAS for $1; 
-match ALIAS for $2; 
-replace ALIAS for $3; 
-r varchar; 
-matchpos int; 
-remain varchar; 
-rempos int; 
-BEGIN 
-
-if (char_length(match) = 0) then 
-raise exception 'replace function was called with null match string. This is not permitted.'; 
-end if; 
-
-remain := subject; 
-r := ''; 
-matchpos := strpos(subject,match); 
-WHILE (matchpos > 0 ) LOOP 
-r := r || substring(remain, 0,matchpos) || replace; 
-rempos := matchpos + char_length(match); 
-remain := substring(remain,rempos); 
-matchpos := strpos(remain,match); 
-END LOOP; 
-
-r := r || remain; 
-return r; 
-
-END; 
-
-$_$
-    LANGUAGE plpgsql;
-
-
-ALTER FUNCTION public."replace"(character varying, character varying, character varying) OWNER TO postgres;
 
 --
 -- Name: tag_add(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
