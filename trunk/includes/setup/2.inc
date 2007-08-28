@@ -93,7 +93,8 @@ class __tmpSetupClass {
 	//=========================================================================
 	public function __construct(cs_phpDB &$db, cs_genericPage &$page) {
 		$this->db = $db;
-		$this->fs = new cs_fileSystemClass();
+		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../../docs/sql/setup');
+		$this->gfObj = new cs_globalFunctions;
 		$this->page = $page;
 	}//end __construct()
 	//=========================================================================
@@ -103,8 +104,18 @@ class __tmpSetupClass {
 	public function go() {
 		$retval = "Nothing done... something went horribly wrong.";
 		if($this->create_database()) {
-			//okay, keep going.
-			$this->load_schema();
+			$retval = $this->load_schema();
+			
+			if($retval === TRUE) {
+				$this->page->set_message_wrapper(
+					array(
+						'title'		=> "Step Successful",
+						'message'	=> "Finished step two with result:::<BR>\n". get_setup_data(2,'data'),
+						'type'		=> "status"
+					)
+				);
+				$this->page->conditional_header('/setup/3', TRUE);
+			}
 		}
 		else {
 			$setupData = get_setup_data(1, 'data');
@@ -131,6 +142,11 @@ class __tmpSetupClass {
 		}
 		else {
 			$retval = TRUE;
+			
+			//okay.  Now destroy our database handle & create a new one, connected to the proper database.
+			unset($this->db);
+			$this->db = new cs_phpDb;
+			$this->db->connect($stepOneData);
 		}
 		
 		return($retval);
@@ -140,6 +156,59 @@ class __tmpSetupClass {
 	
 	//=========================================================================
 	private function load_schema() {
+		
+		store_setup_data(2, "Schema not loaded... ", 'data');
+		store_setup_data(2, 0, 'result');
+		
+		$fileData = $this->fsObj->read("01__storedprocs.sql");
+		
+		//now we'll try to push that into the database.
+		$this->db->beginTrans();
+		
+		$this->gfObj->debug_print("Loading stored procedures... ");
+		
+		$this->db->exec($fileData);
+		$dberror = $this->db->errorMsg();
+		
+		if(strlen($dberror)) {
+			$retval = $dberror;
+		}
+		else {
+			//keep going
+			$retval = "Successfully loaded stored procedures!  Loading tables....";
+			$this->gfObj->debug_print($retval);
+			
+			$fileData = $this->fsObj->read("02__tables.sql");
+			$this->db->exec($fileData);
+			$dberror = $this->db->errorMsg();
+			
+			if(strlen($dberror)) {
+				$retval = $dberror;
+			}
+			else {
+				$retval = "Done loading tables!!! Creating indexes and miscellaneous other things...";
+				$this->gfObj->debug_print($retval);
+				
+				$fileData = $this->fsObj->read("03__indexes_etc.sql");
+				$this->db->exec($fileData);
+				$dberror = $this->db->errorMsg();
+				
+				if(strlen($dberror)) {
+					$retval = $dberror;
+				}
+				else {
+					$retval = "All stored procedures, tables, and indexes have been created!";
+					$this->gfObj->debug_print($retval);
+					
+					store_setup_data(2, $retval, 'data');
+					store_setup_data(2, 1, 'result');
+					
+					$retval = TRUE;
+				}
+			}
+		}
+		
+		return($retval);
 	}//end load_schema()
 	//=========================================================================
 }
