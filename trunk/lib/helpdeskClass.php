@@ -264,7 +264,7 @@ class helpdeskClass extends mainRecord {
 					$sendEmailRes = send_email($recipientsArr, "Helpdesk Issue #$helpdeskId was Solved", $emailTemplate, $parseArr);
 					
 					$notifySubject = "[ALERT] Helpdesk Issue #$helpdeskId was Solved by ". $_SESSION['login_loginname'];
-					$sendEmailRes .= ", ". send_email(HELPDESK-ISSUE-ANNOUNCE-EMAIL, $notifySubject, $emailTemplate, $parseArr);
+					$sendEmailRes .= ", ". send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $notifySubject, $emailTemplate, $parseArr);
 					
 					$this->logsObj->log_by_class("Solve notice sent to: ". $sendEmailRes, 'information', NULL, $this->recordTypeId, $helpdeskId);
 					$this->logsObj->log_by_class("Solved issue #". $helpdeskId .": ". $parseArr['name'], 'report', NULL, $this->recordTypeId, $helpdeskId);
@@ -330,7 +330,7 @@ class helpdeskClass extends mainRecord {
 			
 			//now send the alert...
 			$alehelpdeskubject = "[ALERT] Helpdesk Issue #$retval Created";
-			send_email(HELPDESK-ISSUE-ANNOUNCE-EMAIL, $alehelpdeskubject, $emailTemplate, $parseArr);
+			send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $alehelpdeskubject, $emailTemplate, $parseArr);
 			
 			//log that it was created.
 			$details = "Helpdesk Issue #$retval Created by (". $dataArr['email'] ."): ". $dataArr['name'];
