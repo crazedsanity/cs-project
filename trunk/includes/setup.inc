@@ -10,8 +10,6 @@
 require_once(dirname(__FILE__) ."/../lib/cs-content/cs_phpDB.php");
 
 
-$page->add_template_var("VERSION_STRING", read_version_file());
-$page->rip_all_block_rows('stepData');
 
 $stepNames = array(
 	1	=> "Database Information",
@@ -20,6 +18,35 @@ $stepNames = array(
 	4	=> "Get Extra Information",
 	5	=> "Write Config File + Tests"
 );
+
+//do some checking to make sure they're not doing something we don't want them to.
+if(count($sectionArr) > 2 || ((count($sectionArr)) == 2 && !is_numeric($sectionArr[1]))) {
+	//too many things in the URL.
+	$page->set_message_wrapper(
+		array(
+			'title'		=> "Invalid URL",
+			'message'	=> "The page you were trying to go view was invalid.",
+			'type'		=> "error"
+		)
+	);
+	$page->conditional_header("/setup", TRUE);
+}
+elseif(count($sectionArr) == 2 && is_numeric($sectionArr[1]) && $sectionArr[1] != 1) {
+	if(!is_numeric(get_setup_data($sectionArr[1], 'result'))) {
+		$page->set_message_wrapper(
+			array(
+				'title'		=> "Incomplete Step",
+				'message'	=> "Tried to go to a step that wasn't complete... ",
+				'type'		=> "error"
+			)
+		);
+		$page->conditional_header("/setup", TRUE);
+	}
+}
+
+
+$page->add_template_var("VERSION_STRING", read_version_file());
+$page->rip_all_block_rows('stepData');
 
 
 foreach($stepNames as $num=>$name) {
