@@ -11,7 +11,7 @@ require_once(dirname(__FILE__) ."/../lib/cs-content/cs_phpDB.php");
 
 
 $page->add_template_var("VERSION_STRING", read_version_file());
-$page->rip_all_block_rows();
+$page->rip_all_block_rows('stepData');
 
 $stepNames = array(
 	1	=> "Database Information",

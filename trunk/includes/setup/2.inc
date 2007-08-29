@@ -34,6 +34,7 @@ if($_POST) {
 		}
 		else {
 			//not so good.  Go back to step 1, so they can make changes.
+			$params = get_setup_data(1, 'data');
 			$page->set_message_wrapper(
 				array(
 					'title'		=> "Connection to Host Failed",
@@ -57,12 +58,14 @@ function test_db_stuff(cs_phpDB &$db) {
 	
 	$params = get_setup_data(1);
 	$params['dbname'] = 'template1';
+			$gf = new cs_globalFunctions;
 	
 	try {
 		$db->connect($params);
 		try {
+			$newParams = get_setup_data(1);
 			$db2 = new cs_phpDB;
-			$retval = FALSE;
+			$retval = "Connected successfully to ". $newParams['host'] .":". $newParams['dbname'];
 			store_setup_data(2, 0, 'result');
 			$db2->connect(get_setup_data(1));
 		}
