@@ -19,6 +19,7 @@ class __setupDefaultValues {
 	
 	private $db;
 	private $gfObj;
+	private $totalRecords=0;
 	
 	//=========================================================================
 	public function __construct() {
@@ -104,6 +105,7 @@ class __setupDefaultValues {
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				$retval++;
+				$this->totalRecords++;
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to set (". $name .") as (". $value .")::: ". $dberror);
@@ -181,9 +183,9 @@ class __setupDefaultValues {
 		foreach($classes as $num=>$name) {
 			$insertArr = array(
 				'log_class_id'	=> $num,
-				'name'			=> "'". $name ."'"
+				'name'			=> $name
 			);
-			$sql = "INSERT INTO log_class_table ". $this->gfObj->string_from_array($insertArr, 'insert');
+			$sql = "INSERT INTO log_class_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 			
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
@@ -191,6 +193,7 @@ class __setupDefaultValues {
 			if(!strlen($dberror) && $numrows == 1) {
 				//good.
 				$counter++;
+				$this->totalRecords++;
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to create class record for (". $name .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -222,9 +225,9 @@ class __setupDefaultValues {
 			foreach($categories as $num=>$name) {
 				$insertArr = array(
 					'log_category_id'	=> $num,
-					'name'				=> "'". $name ."'"
+					'name'				=> $name
 				);
-				$sql = "INSERT INTO log_category_table ". $this->gfObj->string_from_array($insertArr, 'insert');
+				$sql = "INSERT INTO log_category_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 				
 				$numrows = $this->db->exec($sql);
 				$dberror = $this->db->errorMsg();
@@ -232,6 +235,7 @@ class __setupDefaultValues {
 				if(!strlen($dberror) && $numrows == 1) {
 					//good.
 					$counter++;
+					$this->totalRecords++;
 				}
 				else {
 					throw new exception(__METHOD__ .": failed to create category record for (". $name .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -285,14 +289,15 @@ class __setupDefaultValues {
 						'log_event_id'		=> $logEventId,
 						'log_class_id'		=> $subArr[0],
 						'log_category_id'	=> $subArr[1],
-						'description'		=> "'". $this->gfObj->cleanString($subArr[2], 'sql') ."'"
+						'description'		=> $subArr[2]
 					);
-					$sql = "INSERT INTO log_event_table ". $this->gfObj->string_from_array($insertArr, 'insert');
+					$sql = "INSERT INTO log_event_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 					$numrows = $this->db->exec($sql);
 					$dberror = $this->db->errorMsg();
 					
 					if(!strlen($dberror) && $numrows == 1) {
 						$counter++;
+						$this->totalRecords++;
 					}
 					else {
 						throw new exception(__METHOD__ .": failed to create log_event_id #". $insertArr['log_event_id'] 
@@ -325,9 +330,22 @@ class __setupDefaultValues {
 	
 	//=========================================================================
 	private function create_record_type_data() {
+		//format:
+		//	{record_type_id} => array({name}, {module})
 		$recordTypes = array(
-			
+			1	=> array('Project',		'project'),
+			2	=> array('Todo',		'todo'),
+			3	=> array('Helpdesk',	'helpdesk')
 		);
+		
+		foreach($recordTypes as $recTypeId => $subData) {
+			$insertArr = array(
+				'record_type_id'	=> $recTypeId,
+				'name'				=> $subData[0],
+				'module'			=> $subData[1]
+			);
+			$sql = "INSERT INTO record_type_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+		}
 	}//end create_record_type_data()
 	//=========================================================================
 	
