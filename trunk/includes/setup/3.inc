@@ -40,7 +40,7 @@ class __setupDefaultValues {
 			
 			//now that we've connected, start doing stuff.
 			$retval = $this->set_version();
-			$retval = $this->create_log_categories_and_classes();
+			$retval .= "<BR>\n". $this->create_log_categories_and_classes();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
@@ -244,47 +244,68 @@ class __setupDefaultValues {
 			$dberror = $this->db->errorMsg();
 			
 			if(!strlen($dberror) && $numrows == 1) {
-				//FINAL SANITY CHECKS!!!
-				if($counter == (count($classes) + count($categories))) {
-					#$retval = "Successfully created all category and class records.";
+				
+				//format (primary index is log_event_id): log_class_id, log_category_id, description
+				$logEvents = array(
+				// *  log_event_id | log_class_id | log_category_id |              description
+					1	=> array(3,	5,	'Project: created record'),
+					2	=> array(5,	5,	'Project: deleted record'),
+					3	=> array(4,	5,	'Project: updated record'),
+					4	=> array(1,	5,	'Project: ERROR'),
+					5	=> array(3,	6,	'Helpdesk: Created record'),
+					6	=> array(4,	6,	'Helpdesk: Updated record'),
+					7	=> array(2,	6,	'Helpdesk: Information'),
+					8	=> array(1,	6,	'Helpdesk: ERROR'),
+					9	=> array(6,	6,	'Helpdesk: Report'),
+					10	=> array(3,	7,	'Todo: created record'),
+					11	=> array(5,	7,	'Todo: deleted record'),
+					12	=> array(4,	7,	'Todo: updated record'),
+					13	=> array(1,	1,	'Database Error'),
+					14	=> array(6,	5,	'Project: Activity Report'),
+					15	=> array(6,	7,	'Todo: Activity Report'),
+					16	=> array(3,	2,	'User logged-in'),
+					17	=> array(5,	2,	'User logged-out'),
+					18	=> array(6,	2,	'Login/Logout Report'),
+					19	=> array(3,	8,	'Tags: created record'),
+					20	=> array(5,	8,	'Tags: deleted record'),
+					21	=> array(4,	8,	'Tags: updated record'),
+					22	=> array(6,	8,	'Tags: Activity Report'),
+					23	=> array(1,	2,	'Authentication: ERROR'),
+					24	=> array(2,	10,	'Navigation: Viewed page'),
+					25	=> array(4,	9,	'Update: Estimates'),
+					26	=> array(1,	9,	'Error: Estimates'),
+					27	=> array(2,	5,	'Information: Project'),
+					28	=> array(4,	3,	'Update: Users'),
+					29	=> array(1,	7,	'Error: Todo'),
+					30	=> array(3,	3,	'Create: Users')
+				);
+				
+				foreach($logEvents as $logEventId => $subArr) {
+				 	$insertArr = array(
+						'log_event_id'		=> $logEventId,
+						'log_class_id'		=> $subArr[0],
+						'log_category_id'	=> $subArr[1],
+						'description'		=> "'". $this->gfObj->cleanString($subArr[2], 'sql') ."'"
+					);
+					$sql = "INSERT INTO log_event_table ". $this->gfObj->string_from_array($insertArr, 'insert');
+					$numrows = $this->db->exec($sql);
+					$dberror = $this->db->errorMsg();
 					
-					//format (primary index is log_event_id): log_class_id, log_category_id, description
-					$logEvents = array(
-					// *  log_event_id | log_class_id | log_category_id |              description
-						1	=> array(3,	5,	'Project: created record'),
-						2	=> array(5,	5,	'Project: deleted record'),
-						3	=> array(4,	5,	'Project: updated record'),
-						4	=> array(1,	5,	'Project: ERROR'),
-						5	=> array(3,	6,	'Helpdesk: Created record'),
-						6	=> array(4,	6,	'Helpdesk: Updated record'),
-						7	=> array(2,	6,	'Helpdesk: Information'),
-						8	=> array(1,	6,	'Helpdesk: ERROR'),
-						9	=> array(6,	6,	'Helpdesk: Report'),
-						10	=> array(3,	7,	'Todo: created record'),
-						11	=> array(5,	7,	'Todo: deleted record'),
-						12	=> array(4,	7,	'Todo: updated record'),
-						13	=> array(1,	1,	'Database Error'),
-						14	=> array(6,	5,	'Project: Activity Report'),
-						15	=> array(6,	7,	'Todo: Activity Report'),
-						16	=> array(3,	2,	'User logged-in'),
-						17	=> array(5,	2,	'User logged-out'),
-						18	=> array(6,	2,	'Login/Logout Report'),
-						19	=> array(3,	8,	'Tags: created record'),
-						20	=> array(5,	8,	'Tags: deleted record'),
-						21	=> array(4,	8,	'Tags: updated record'),
-						22	=> array(6,	8,	'Tags: Activity Report'),
-						23	=> array(1,	2,	'Authentication: ERROR'),
-						24	=> array(2,	10,	'Navigation: Viewed page'),
-						25	=> array(4,	9,	'Update: Estimates (auto-generated)'),
-						26	=> array(1,	9,	'Error: Estimates (auto-generated)'),
-						27	=> array(2,	5,	'Information: Project (auto-generated)'),
-						28	=> array(4,	3,	'Update: Users (auto-generated)'),
-						29	=> array(1,	7,	'Error: Todo (auto-generated)'),
-						30	=> array(3,	3,	'Create: Users (auto-generated)')
-					 );
+					if(!strlen($dberror) && $numrows == 1) {
+						$counter++;
+					}
+					else {
+						throw new exception(__METHOD__ .": failed to create log_event_id #". $insertArr['log_event_id'] 
+						.", description: ". $insertArr['description'] ."<BR>\nERROR::: ". $dberror ."<BR>\nSQL::: ". $sql);
+					}
+				}
+				
+				//FINAL SANITY CHECKS!!!
+				if($counter == (count($classes) + count($categories) + count($logEvents))) {
+					$retval = "Successfully created all category, class, and log event records";
 				}
 				else {
-					$retval = "Internal error, failed to create all category and class records.";
+					throw new exception(__METHOD__ .": Internal error, failed to create all category and class records");
 				}
 			}
 			else {
