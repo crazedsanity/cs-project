@@ -53,7 +53,6 @@ else {
 
 //=============================================================================
 function test_db_stuff(cs_phpDB &$db) {
-	$retval = "Failed to connect to". $params['host'];
 	
 	$params = get_setup_data(1);
 	$params['dbname'] = 'template1';
@@ -182,6 +181,7 @@ class __tmpSetupClass {
 		$dberror = $this->db->errorMsg();
 		
 		if(strlen($dberror)) {
+			$this->db->rollbackTrans();
 			$retval = $dberror;
 		}
 		else {
@@ -194,6 +194,7 @@ class __tmpSetupClass {
 			$dberror = $this->db->errorMsg();
 			
 			if(strlen($dberror)) {
+				$this->db->rollbackTrans();
 				$retval = $dberror;
 			}
 			else {
@@ -205,14 +206,17 @@ class __tmpSetupClass {
 				$dberror = $this->db->errorMsg();
 				
 				if(strlen($dberror)) {
+					$this->db->rollbackTrans();
 					$retval = $dberror;
 				}
 				else {
 					$retval = "All stored procedures, tables, and indexes have been created!";
 					$this->gfObj->debug_print($retval);
 					
+					$this->db->commitTrans();
 					store_setup_data(2, $retval, 'data');
 					store_setup_data(2, 1, 'result');
+					store_setup_data(2, $retval, 'text');
 					store_setup_data(3, 1, 'accessible');
 					
 					$retval = TRUE;

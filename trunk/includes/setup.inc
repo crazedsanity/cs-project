@@ -31,7 +31,7 @@ if(count($sectionArr) > 2 || ((count($sectionArr)) == 2 && !is_numeric($sectionA
 			'type'		=> "error"
 		)
 	);
-	$page->conditional_header("/setup". $_SESSION['setup']['lastStep'], TRUE);
+	$page->conditional_header("/setup/". $_SESSION['setup']['lastStep'], TRUE);
 }
 elseif(count($sectionArr) == 2 && is_numeric($sectionArr[1]) && $sectionArr[1] != 1) {
 	if(!is_numeric(get_setup_data($sectionArr[1], 'accessible'))) {
@@ -51,25 +51,46 @@ $page->add_template_var("VERSION_STRING", read_version_file());
 $page->rip_all_block_rows('stepData');
 
 
+//determine the current step based on the URL ($sectionArr is provided by contentSystem).
+$currentStep = $sectionArr[1];
+
 foreach($stepNames as $num=>$name) {
 	$stepResult = get_setup_data($num, 'result');
 	if(!is_numeric($stepResult)) {
 		$passFail = "Incomplete";
 		$bgColor  = "yellow";
+		$stepText = "Step incomplete...";
 	}
 	else {
 		$passFail = interpret_bool($stepResult, array('FAIL', 'Pass'));
 		$bgColor = interpret_bool($stepResult, array('red', 'green'));
+		
+		if(strlen(get_setup_data($num, 'text'))) {
+			$stepText = get_setup_data($num, 'text');
+		}
+		else {
+			$stepText = "&nbsp;";
+		}
+		
 		store_setup_data($num, 1, 'accessible');
 		if($passFail == 'Pass') {
 			$_SESSION['setup']['lastStep'] = $num;
 		}
 	}
+	$curStepL = "&nbsp;";
+	$curStepR = "&nbsp;";
+	if($currentStep == $num) {
+		$curStepL = "&gt;";
+		$curStepR = "&lt;";
+	}
 	$repArr = array(
 		'stepNum'		=> $num,
 		'stepName'		=> $name,
 		'passFail'		=> $passFail,
-		'stepBGColor'	=> $bgColor
+		'stepBGColor'	=> $bgColor,
+		'stepText'		=> $stepText,
+		'isCurStepL'	=> $curStepL,
+		'isCurStepR'	=> $curStepR
 	);
 	$myRows .= $page->gfObj->mini_parser($page->templateRows['step_data_row'], $repArr, '%%', '%%');
 }
