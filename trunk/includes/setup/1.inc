@@ -10,6 +10,10 @@ if($_POST) {
 	$page->gfObj->debug_print($_POST);
 	store_setup_data(1, $_POST['fields']);
 	store_setup_data(1, 1, 'result');
+	store_setup_data(1, 'Values stored successfully', 'text');
+	
+	//set the next step as accessible.
+	store_setup_data(2, 1, 'accessible');
 	
 	$page->gfObj->conditional_header("/setup/2", TRUE);
 }

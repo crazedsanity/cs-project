@@ -17,7 +17,6 @@ if($_POST) {
 		
 		if($result === TRUE) {
 			//Good to go: load the schema!
-			$page->gfObj->debug_print($result);
 			
 			//now create a temporary local class that does the rest.
 			$obj = new __tmpSetupClass($db, $page);
@@ -37,8 +36,8 @@ if($_POST) {
 			$params = get_setup_data(1, 'data');
 			$page->set_message_wrapper(
 				array(
-					'title'		=> "Connection to Host Failed",
-					'message'	=> "Failed to connect to the 'template1' database of host ". $params['host'] .":<BR>\n" . $result,
+					'title'		=> "Test Failed",
+					'message'	=> "Result of testing host ". $params['host'] .":<BR>\n" . $result,
 					'type'		=> "error"
 				)
 			);
@@ -54,20 +53,23 @@ else {
 
 //=============================================================================
 function test_db_stuff(cs_phpDB &$db) {
-	$retval = FALSE;
+	$retval = "Failed to connect to". $params['host'];
 	
 	$params = get_setup_data(1);
 	$params['dbname'] = 'template1';
-			$gf = new cs_globalFunctions;
+	$retval = "Failed to connect to ". $params['host'] .":". $params['dbname'] ." (host connection failed)";
+	
+	$gf = new cs_globalFunctions;
 	
 	try {
 		$db->connect($params);
+		$result = "Connected successfully to ". $params['host'] .":". $params['dbname'] ." (host connection good)";
 		try {
 			$newParams = get_setup_data(1);
 			$db2 = new cs_phpDB;
-			$retval = "Connected successfully to ". $newParams['host'] .":". $newParams['dbname'];
 			store_setup_data(2, 0, 'result');
 			$db2->connect(get_setup_data(1));
+			$retval = "Connected successfully to ". $newParams['host'] .":". $newParams['dbname'] ." (host connection good, DATABASE EXISTS)";
 		}
 		catch(exception $e) {
 			//no database!
@@ -211,6 +213,7 @@ class __tmpSetupClass {
 					
 					store_setup_data(2, $retval, 'data');
 					store_setup_data(2, 1, 'result');
+					store_setup_data(3, 1, 'accessible');
 					
 					$retval = TRUE;
 				}

@@ -9,7 +9,9 @@
 //create the setup object.
 require_once(dirname(__FILE__) ."/../lib/cs-content/cs_phpDB.php");
 
-
+if(!is_numeric($_SESSION['setup']['lastStep'])) {
+	$_SESSION['setup']['lastStep'] = 1;
+}
 
 $stepNames = array(
 	1	=> "Database Information",
@@ -29,10 +31,10 @@ if(count($sectionArr) > 2 || ((count($sectionArr)) == 2 && !is_numeric($sectionA
 			'type'		=> "error"
 		)
 	);
-	$page->conditional_header("/setup", TRUE);
+	$page->conditional_header("/setup". $_SESSION['setup']['lastStep'], TRUE);
 }
 elseif(count($sectionArr) == 2 && is_numeric($sectionArr[1]) && $sectionArr[1] != 1) {
-	if(!is_numeric(get_setup_data($sectionArr[1], 'result'))) {
+	if(!is_numeric(get_setup_data($sectionArr[1], 'accessible'))) {
 		$page->set_message_wrapper(
 			array(
 				'title'		=> "Incomplete Step",
@@ -40,7 +42,7 @@ elseif(count($sectionArr) == 2 && is_numeric($sectionArr[1]) && $sectionArr[1] !
 				'type'		=> "error"
 			)
 		);
-		$page->conditional_header("/setup", TRUE);
+		$page->conditional_header("/setup/". $_SESSION['setup']['lastStep'], TRUE);
 	}
 }
 
@@ -58,6 +60,10 @@ foreach($stepNames as $num=>$name) {
 	else {
 		$passFail = interpret_bool($stepResult, array('FAIL', 'Pass'));
 		$bgColor = interpret_bool($stepResult, array('red', 'green'));
+		store_setup_data($num, 1, 'accessible');
+		if($passFail == 'Pass') {
+			$_SESSION['setup']['lastStep'] = $num;
+		}
 	}
 	$repArr = array(
 		'stepNum'		=> $num,
