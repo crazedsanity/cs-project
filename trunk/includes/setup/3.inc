@@ -40,12 +40,19 @@ class __setupDefaultValues {
 			
 			//now that we've connected, start doing stuff.
 			$retval = $this->set_version();
+			
+			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
+			//TODO: set results
+			//TODO: set data
+			//TODO: set next step as accessible
 		}
 		catch(exception $e) {
+			//TODO: rollback the transaction
 			$retval = "An error occurred: ". $e->getMessage();
 		}
 		
-		$this->gfObj->debug_print(__METHOD__ .": RETURNING: ". $retval);
+		$this->gfObj->debug_print(__METHOD__ .": RETURNING ($x) : ". $retval);
+		
 		return($retval);
 		
 	}//end go()

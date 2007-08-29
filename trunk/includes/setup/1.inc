@@ -6,6 +6,8 @@
 
 $requiredFields = array('dbname', 'host', 'port', 'user', 'password');
 
+//TODO: consider adding a check that the /lib directory is writable, to avoid errors later on.
+
 if($_POST) {
 	$page->gfObj->debug_print($_POST);
 	store_setup_data(1, $_POST['fields']);
@@ -15,7 +17,15 @@ if($_POST) {
 	//set the next step as accessible.
 	store_setup_data(2, 1, 'accessible');
 	
-	$page->gfObj->conditional_header("/setup/2", TRUE);
+	//TODO: consider moving the database connectivity tests into this step (and alter the status message below accordingly).
+	$page->set_message_wrapper(
+		array(
+			'title'		=> "Success",
+			'message'	=> "Your data was stored successfully.",
+			'type'		=> "status"
+		)
+	);
+	$page->conditional_header("/setup/2", TRUE);
 }
 else {
 	
