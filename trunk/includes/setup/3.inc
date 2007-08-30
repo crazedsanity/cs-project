@@ -46,6 +46,7 @@ class __setupDefaultValues {
 			$retval .= "<BR>\n". $this->create_anonymous_contact_data();
 			$retval .= "<BR>\n". $this->create_status_records();
 			$retval .= "<BR>\n". $this->create_tag_names();
+			$retval .= "<BR>\n". $this->build_preferences();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
@@ -649,6 +650,142 @@ class __setupDefaultValues {
 		
 		return($retval);
 	}//end create_tag_names()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function build_preferences() {
+		//format: {pref_type_id} => array({name}, {default_value}, {display_name}, {description})
+		$prefTypes = array(
+			1	=> array('startModule',	'helpdesk',	'Starting on Module',	'Defines which section will be loaded upon login if nothing was selected.'),
+			5	=> array('sorting_rts', 'public_id|DESC', 'Helpdesk Sorting', 'Define the type of sorting for the helpdesk page.'),
+			6	=> array('sorting_project', 'priority|ASC', 'Project Sorting', 'Define the type of sorting for the helpdesk page.'),
+			7	=> array('projectDetails_todoDisplayOnlyMine', 'all', 'Project Details: Todo display', 'Define what todos are displayed on a project\'s details page.'),
+			8	=> array('projectDetails_showCompletedIssues', '1', 'Project Details: Display completed issues', 'Should completed issues display in the details of a project?')
+		);
+		
+		$retval = 0;
+		foreach($prefTypes as $prefTypeId => $subData) {
+			$insertArr = array(
+				'pref_type_id'	=> $prefTypeId,
+				'name'			=> $subData[0],
+				'default_value'	=> $subData[1],
+				'display_name'	=> $subData[2],
+				'description'	=> $subData[3]
+			);
+			
+			$sql = "INSERT INTO pref_type_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$retval++;
+				$this->totalRecords++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to insert data for (". $insertArr['name'] .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		
+		if($retval == count($prefTypes)) {
+			//format: {pref_option_id}	=> array({pref_type_id}, {name}, {effective_value})
+			$prefOptions = array(
+				1	=>array(1,	'Helpdesk',							'helpdesk'),
+				2	=>array(1,	'Projects',							'project'),
+				3	=>array(1,	'Summary ',							'summary'),
+				8	=>array(5,	'ID - Descending',					'public_id|DESC'),
+				9	=>array(5,	'ID - Ascending',					'public_id|ASC'),
+				10	=>array(5,	'Priority - Descending',			'priority|DESC'),
+				11	=>array(5,	'Priority - Ascending',				'priority|ASC'),
+				12	=>array(5,	'Submit - Descending',				'start_date|DESC'),
+				13	=>array(5,	'Submit - Ascending',				'start_date|ASC'),
+				14	=>array(5,	'Title - Descending',				'name|DESC'),
+				15	=>array(5,	'Title - Ascending',				'name|DESC'),
+				16	=>array(5,	'Status ID - Descending',			'status_id|DESC'),
+				17	=>array(5,	'Status ID - Ascending',			'status_id|DESC'),
+				18	=>array(5,	'Assigned - Descending',			'assigned|DESC'),
+				19	=>array(5,	'Assigned - Ascending',				'assigned|DESC'),
+				20	=>array(6,	'Priority - Ascending',				'priority|ASC'),
+				21	=>array(6,	'Priority - Descending',			'priority|DESC'),
+				22	=>array(6,	'Name of Project - Ascending',		'name|ASC'),
+				23	=>array(6,	'Name of Project - Descending',		'name|DESC'),
+				24	=>array(6,	'Begin - Ascending',				'start_date|ASC'),
+				25	=>array(6,	'Begin - Descending',				'start_date|DESC'),
+				26	=>array(6,	'End - Ascending',					'end|ASC'),
+				27	=>array(6,	'End - Descending',					'end|DESC'),
+				28	=>array(6,	'Status ID - Ascending',			'status_id|ASC'),
+				29	=>array(6,	'Status ID - Descending',			'status_id|DESC'),
+				30	=>array(6,	'Progress - Ascending',				'progress|ASC'),
+				31	=>array(6,	'Progress - Descending',			'progress|DESC'),
+				32	=>array(6,	'Leader - Ascending',				'leader_contact_id|ASC'),
+				33	=>array(6,	'Leader - Descending',				'leader_contact_id|DESC'),
+				34	=>array(7,	'Show everything',					'all'),
+				35	=>array(7,	'All of mine (created & assigned)',	'mine'),
+				36	=>array(7,	'Only my assigned items',			'assigned'),
+				37	=>array(8,	'Yes',								'1'),
+				38	=>array(8,	'No',								'0'),
+			);
+			
+			foreach($prefOptions as $prefOptionId => $subData) {
+				$insertArr = array(
+					'pref_option_id'	=> $prefOptionId,
+					'pref_type_id'		=> $subData[0],
+					'name'				=> $subData[1],
+					'effective_value'	=> $subData[2]
+				);
+				$sql = "INSERT INTO pref_option_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+				$numrows = $this->db->exec($sql);
+				$dberror = $this->db->errorMsg();
+				
+				if(!strlen($dberror) && $numrows == 1) {
+					$retval++;
+					$this->totalRecords++;
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to insert data for pref option (". $insertArr['name'] .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
+				}
+			}
+			
+			if($retval == (count($prefTypes) + count($prefOptions))) {
+				//reset the pref_type_table.pref_type_id sequence.
+				$sql = "SELECT setval('pref_type_table_pref_type_id_seq'::text, (SELECT max(pref_type_id) FROM pref_type_table))";
+				$numrows = $this->db->exec($sql);
+				$dberror = $this->db->errorMsg();
+				
+				if(!strlen($dberror) && $numrows == 1) {
+					if($retval == (count($prefTypes) + count($prefOptions))) {
+						//reset the pref_option_table.pref_option_id sequence.
+						$sql = "SELECT setval('pref_option_table_pref_option_id_seq'::text, (SELECT max(pref_option_id) FROM pref_option_table))";
+						$numrows = $this->db->exec($sql);
+						$dberror = $this->db->errorMsg();
+						
+						if(!strlen($dberror) && $numrows == 1) {
+							$retval = "Successfully created all preferences and options!";
+						}
+						else {
+							throw new exception(__METHOD__ .": failed to reset the pref_option sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+						}
+					}
+					else {
+						throw new exception(__METHOD__ .": internal error (sanity check #2 failed)");
+					}
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to reset pref_type sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": internal error (sanity check #2 failed): (". $retval ." != ". (count($prefTypes) + count($prefOptions)) .")");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": internal error (sanity check #1 failed)");
+		}
+		
+		return($retval);
+		
+	}//end build_preferences()
 	//=========================================================================
 	
 	
