@@ -42,6 +42,7 @@ class __setupDefaultValues {
 			//now that we've connected, start doing stuff.
 			$retval = $this->set_version();
 			$retval .= "<BR>\n". $this->create_log_categories_and_classes();
+			$retval .= "<BR>\n". $this->create_attributes();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
@@ -360,7 +361,22 @@ class __setupDefaultValues {
 		}
 		
 		if(count($recordTypes) == $retval) {
-			$retval = "Created all record types";
+			
+			$sql = "SELECT setval('record_type_table_record_type_id_seq'::text, (SELECT max(record_type_id) FROM record_type_table)))";
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				if($retval == count($recordTypes)) {
+					$retval = "Created all record types";
+				}
+				else {
+					throw new exception(__METHOD__ .": internal error (sanity check failed)");
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to reset sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
 		}
 		else {
 			throw new exception(__METHOD__ .": internal error");
@@ -368,6 +384,67 @@ class __setupDefaultValues {
 		
 		return($retval);
 	}//end create_record_type_data()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function create_attributes() {
+		$attributes = array(
+			1	=> array('company',		'sql'),
+			2	=> array('email',		'email'),
+			3	=> array('phone',		'phone'),
+			4	=> array('fax',			'phone'),
+			5	=> array('cell',		'phone'),
+			6	=> array('im_yahoo',	'alphanumeric'),
+			7	=> array('im_skype',	'alphanumeric'),
+			8	=> array('im_aol',		'alphanumeric'),
+			9	=> array('im_msn',		'alphanumeric'),
+			10	=> array('im_icq',		'alphanumeric'),
+			11	=> array('address',		'sql'),
+			12	=> array('city',		'alphanumeric'),
+			13	=> array('state',		'alphanumeric'),
+			14	=> array('zip',			'alphanumeric')
+		);
+		
+		$retval = 0;
+		foreach($attributes as $attributeId => $subData) {
+			$insertArr = array(
+				'attribute_id'	=> $attributeId,
+				'name'			=> $subData[0],
+				'clean_as'		=> $subData[1]
+			);
+			$sql = "INSERT INTO attribute_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$retval++;
+				$this->totalRecords++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to insert data for attribute (". $insertArr['name'] .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		
+		if($retval == count($attributes)) {
+			$sql = "SELECT setval('attribute_table_attribute_id_seq'::text, (SELECT max(attribute_id) FROM attribute_table))";
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$retval = "Successfully created all attributes!";
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to reset sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": internal error (sanity check failed)");
+		}
+		
+		return($retval);
+	}//end create_attributes()
 	//=========================================================================
 	
 	
