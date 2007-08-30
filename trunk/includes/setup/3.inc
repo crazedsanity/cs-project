@@ -338,6 +338,7 @@ class __setupDefaultValues {
 			3	=> array('Helpdesk',	'helpdesk')
 		);
 		
+		$retval = 0;
 		foreach($recordTypes as $recTypeId => $subData) {
 			$insertArr = array(
 				'record_type_id'	=> $recTypeId,
@@ -345,7 +346,27 @@ class __setupDefaultValues {
 				'module'			=> $subData[1]
 			);
 			$sql = "INSERT INTO record_type_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$this->totalRecords++;
+				$retval++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to create record for ". $insertArr['name'] 
+					.", dberror::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
 		}
+		
+		if(count($recordTypes) == $retval) {
+			$retval = "Created all record types";
+		}
+		else {
+			throw new exception(__METHOD__ .": internal error");
+		}
+		
+		return($retval);
 	}//end create_record_type_data()
 	//=========================================================================
 	
