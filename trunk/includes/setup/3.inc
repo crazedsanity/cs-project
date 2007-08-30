@@ -44,6 +44,7 @@ class __setupDefaultValues {
 			$retval .= "<BR>\n". $this->create_log_categories_and_classes();
 			$retval .= "<BR>\n". $this->create_attributes();
 			$retval .= "<BR>\n". $this->create_anonymous_contact_data();
+			$retval .= "<BR>\n". $this->create_status_records();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
@@ -538,6 +539,63 @@ class __setupDefaultValues {
 		
 		return($retval);
 	}//end create_anonymous_contact_data()
+	//=========================================================================
+	
+	
+	//=========================================================================
+	private function create_status_records() {
+		//format: {status_id}	=> array({name}, {description})
+		$statuses = array(
+			0	=> array('New/Offered',			'New record'),
+			1	=> array('Pending',				'Not new: pending review, or nearly complete.'),
+			2	=> array('Running/Accepted',	'Work is underway'),
+			3	=> array('Stalled',				'Unable to complete, or dependent on other things.'),
+			4	=> array('Ended/Solved',		'Work is complete!'),
+			5	=> array('Rejected',			'Denied.'),
+			6	=> array('Re-opened',			'Was solved, but is once again open.'),
+		);
+		
+		$retval = 0;
+		foreach($statuses as $statusId => $subData) {
+			$insertArr = array(
+				'status_id'		=> $statusId,
+				'name'			=> $subData[0],
+				'description'	=> $subData[1]
+			);
+			$sql = "INSERT INTO status_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$retval++;
+				$this->totalRecords++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to create status (". $insertArr['name'] .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		
+		if($retval == count($statuses)) {
+			//reset the status_table.status_id sequence...
+			$sql = "SELECT setval('status_table_status_id_seq'::text, (SELECT max(status_id) FROM status_table))";
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				//good to go.
+				$retval = "Successfully created all status records!";
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to reset status sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": internal error (failed sanity check)");
+		}
+		
+		return($retval);
+		
+	}//end create_status_records()
 	//=========================================================================
 	
 	
