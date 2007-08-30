@@ -327,10 +327,16 @@ ALTER TABLE ONLY contact_attribute_link_table
 
 --
 -- Name: group_table_leader_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- NOTE: this MUST be initially deferred, so the leader can be created before the constraint takes effect
+--	(for a new group with a new user, both inserts must happen within the same transaction, or they will fail...
+--	for a new group with a new user + new contact data, the user must be created first, followed by the other 
+--	two, within the same transaction to avoid failure).
 --
 
 ALTER TABLE ONLY group_table
-    ADD CONSTRAINT group_table_leader_uid_fkey FOREIGN KEY (leader_uid) REFERENCES user_table(uid);
+    ADD CONSTRAINT group_table_leader_uid_fkey FOREIGN KEY (leader_uid) REFERENCES user_table(uid)
+    DEFERRABLE
+    INITIALLY DEFERRED;
 
 
 --
@@ -575,10 +581,16 @@ ALTER TABLE ONLY user_pref_table
 
 --
 -- Name: user_table_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- NOTE: this MUST be initially deferred, so the user can be created before other constraints takes effect
+--	(for a new group with a new user, both inserts must happen within the same transaction, or they will fail...
+--	for a new group with a new user + new contact data, the user must be created first, followed by the other 
+--	two, within the same transaction to avoid failure).
 --
 
 ALTER TABLE ONLY user_table
-    ADD CONSTRAINT user_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
+    ADD CONSTRAINT user_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id)
+    DEFERRABLE
+    INITIALLY DEFERRED;
 
 
 --

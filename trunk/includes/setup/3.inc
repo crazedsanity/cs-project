@@ -43,11 +43,14 @@ class __setupDefaultValues {
 			$retval = $this->set_version();
 			$retval .= "<BR>\n". $this->create_log_categories_and_classes();
 			$retval .= "<BR>\n". $this->create_attributes();
+			$retval .= "<BR>\n". $this->create_anonymous_contact_data();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
 			//TODO: set data
 			//TODO: set next step as accessible
+			
+			$retval .= "<BR>\n ----------- Created (". $this->totalRecords .") records so far...";
 		}
 		catch(exception $e) {
 			//TODO: rollback the transaction
@@ -445,6 +448,96 @@ class __setupDefaultValues {
 		
 		return($retval);
 	}//end create_attributes()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Create the anonymous user.  This includes their contact data and the 
+	 * default group.
+	 * 
+	 * TODO: change "short_name" into "display_name".
+	 */
+	private function create_anonymous_contact_data() {
+		$allRecords = array(
+			'disabled group'	=> array(
+				'name' => 'group_table',
+				'data' => array(
+					'group_id'		=> 0,
+					'name'			=> 'disabled',
+					'short_name'	=> 'DISABLED',
+					'leader_uid'	=> 0
+				),
+			),
+			'anonymous record in user table' => array(
+				'name' => 'user_table',
+				'data' => array(
+					'uid'			=> 0,
+					'username'		=> 'Anonymous',
+					'password'		=> 'disabled',		//this is PURPOSELY an invalid password (passwords should be 32-char md5's
+					'is_admin'		=> 'f',
+					'is_active'		=> 'f',
+					'group_id'		=> 0,
+					'contact_id'	=> 0
+				),
+			),
+			'default group' => array(
+				'name' => 'group_table',
+				'data' => array(
+					'group_id'		=> 1,
+					'name'			=> 'default',
+					'short_name'	=> '-DEFAULT-',
+					'leader_uid'	=> 0
+				),
+			),
+			'anonymous contact record' => array(
+				'name' => 'contact_table',
+				'data' => array(
+					'contact_id'	=> 0,
+					'fname'			=> 'Anonymous',
+					'lname'			=> ''
+				)
+			)
+		);
+		
+		$retval = 0;
+		foreach($allRecords as $operationName => $subData) {
+			$tableName = $subData['name'];
+			$insertArr = $subData['data'];
+			
+			$sql = "INSERT INTO ". $tableName ." ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$this->totalRecords++;
+				$retval++;
+			} else {
+				throw new exception(__METHOD__. ": failed perform operation (". $operationName .") for table (". $tableName .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		
+		if($retval == count($allRecords)) {
+			//reset the sequence for the group table...
+			$sql = "SELECT setval('group_table_group_id_seq'::text, (SELECT max(group_id) FROM group_table))";
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				//good to go.
+				$retval = "Successfully created anonymous user, anonymous contact record, and the two default groups!";
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to reset group sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": internal error (failed sanity check)");
+		}
+		
+		return($retval);
+	}//end create_anonymous_contact_data()
 	//=========================================================================
 	
 	

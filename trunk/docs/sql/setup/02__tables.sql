@@ -411,7 +411,7 @@ CREATE TABLE user_table (
     "password" character varying(32),
     is_admin boolean DEFAULT false NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
-    group_id integer NOT NULL,
+    group_id integer NOT NULL DEFAULT 1,
     contact_id integer NOT NULL
 );
 
