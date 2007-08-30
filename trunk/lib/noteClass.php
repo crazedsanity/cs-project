@@ -1,9 +1,9 @@
 <?php
 /*
- * Last Author:         $Author$ 
- * Current Revision:    $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:        $Date$
+ * Last Author:         $Author:crazedsanity $ 
+ * Current Revision:    $Revision:8 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/noteClass.php $ 
+ * Last Updated:        $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
  */
  
 
@@ -219,8 +219,14 @@ class noteClass {
 		}
 		
 		//data that needs to be appended.
+		if(is_numeric($_SESSION['contact_id'])) {
+			$creatorContactId = $_SESSION['contact_id'];
+		}
+		else {
+			$creatorContactId = "0";
+		}
 		$addFieldsArr = array(
-			"creator_contact_id"	=> $_SESSION['contact_id']
+			"creator_contact_id"	=> $creatorContactId
 		);
 		$addFieldsCleaning = array(
 			"creator_contact_id"	=> 'numeric' 
