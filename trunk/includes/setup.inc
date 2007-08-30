@@ -54,6 +54,8 @@ $page->rip_all_block_rows('stepData');
 //determine the current step based on the URL ($sectionArr is provided by contentSystem).
 $currentStep = $sectionArr[1];
 
+
+$tmplStepTitle = "Main Setup Screen";
 foreach($stepNames as $num=>$name) {
 	$stepResult = get_setup_data($num, 'result');
 	if(!is_numeric($stepResult)) {
@@ -82,6 +84,7 @@ foreach($stepNames as $num=>$name) {
 	if($currentStep == $num) {
 		$curStepL = "&gt;";
 		$curStepR = "&lt;";
+		$tmplStepTitle = "Step #". $num .": ". $name;
 	}
 	$repArr = array(
 		'stepNum'		=> $num,
@@ -94,6 +97,7 @@ foreach($stepNames as $num=>$name) {
 	);
 	$myRows .= $page->gfObj->mini_parser($page->templateRows['step_data_row'], $repArr, '%%', '%%');
 }
+$page->add_template_var('stepTitle', $tmplStepTitle);
 $page->add_template_var('step_data_row', $myRows);
 
 
