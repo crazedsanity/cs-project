@@ -45,6 +45,7 @@ class __setupDefaultValues {
 			$retval .= "<BR>\n". $this->create_attributes();
 			$retval .= "<BR>\n". $this->create_anonymous_contact_data();
 			$retval .= "<BR>\n". $this->create_status_records();
+			$retval .= "<BR>\n". $this->create_tag_names();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
@@ -596,6 +597,58 @@ class __setupDefaultValues {
 		return($retval);
 		
 	}//end create_status_records()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function create_tag_names() {
+		$tags = array(
+			1	=> 'bug',
+			2	=> 'feature request',
+			3	=> 'information',
+			4	=> 'network related'
+		);
+		
+		$retval = 0;
+		foreach($tags as $id=>$name) {
+			$insertArr = array(
+				'tag_name_id'	=> $id,
+				'name'			=> $name
+			);
+			$sql = "INSERT INTO tag_name_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$retval++;
+				$this->totalRecords++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to insert data for (". $name .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		
+		if($retval == count($tags)) {
+			//reset sequence for tag_name_table.tag_name_id
+			$sql = "SELECT setval('tag_name_table_tag_name_id_seq'::text, (SELECT max(tag_name_id) FROM tag_name_table))";
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				//good to go.
+				$retval = "Successfully created all tags!";
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to reset tag_name sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": internal error (sanity check failed)");
+		}
+		
+		return($retval);
+	}//end create_tag_names()
 	//=========================================================================
 	
 	
