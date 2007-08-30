@@ -20,6 +20,30 @@
 
 <form method="POST">
 
+<table border="1" cellpadding="3" cellspacing="0">
+	<tr>
+		<th>Username</th>
+		<th>Password</th>
+		<th>Confirm</th>
+		<th>Admin?</th>
+	</tr>
+	
+	<tr>
+		<td><input name="users[1][username]" value="{users__1__username}" size="20"></td>
+		<td><input name="users[1][password]" value="{users__1__password}" size="20" type="password"></td>
+		<td><input name="users[1][confirmPassword]" value="{users__1__password}" size="20" type="password"></td>
+		<td align="center"><input name="users[1][is_admin]" value="t" type="checkbox" checked readonly></td>
+	</tr>
+	
+	<tr>
+		<td><input name="users[2][username]" value="{users__2__username}" size="20"></td>
+		<td><input name="users[2][password]" value="{users__2__password}" size="20" type="password"></td>
+		<td><input name="users[2][confirmPassword]" value="{users__2__password}" size="20" type="password"></td>
+		<td align="center"><input name="users[2][is_admin]" value="t" type="checkbox" {users__2__is_admin__checked}></td>
+	</tr>
+	
+</table>
+
 <input type="submit" name="go" value="Create default values &amp; proceed to the next step">
 
 </form>

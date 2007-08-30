@@ -7,11 +7,120 @@
 
 if($_POST) {
 	
-	$obj = new __setupDefaultValues();
-	$obj->go();
+	$validSubmission = test_submitted_data($page, $_POST['users']);
+	store_setup_data(3, $_POST['users'], 'data');
+	if($validSubmission === TRUE) {
+		$obj = new __setupDefaultValues();
+		store_setup_data(3, $obj->go(), 'text');
+	}
+	else {
+		$page->set_message_wrapper(
+			array(
+				'title'		=> "Invalid User Data",
+				'message'	=> "The user data you submitted appears to be invalid: <BR>\n". $validSubmission,
+				'type'		=> "error"
+			)
+		);
+		$page->conditional_header("/setup/3", TRUE);
+	}
+	
+	$page->conditional_header("/setup/3", TRUE);
 }
 else {
+	$myData = get_setup_data(3, 'data');
+	if(is_array($myData)) {
+		foreach($myData as $num=>$userArr) {
+			foreach($userArr as $userField => $userValue) {
+				$varName = "users__". $num ."__". $userField;
+				if($userField == 'is_admin') {
+					$varName .= "__checked";
+					$userValue = "checked";
+				}
+				$page->add_template_var($varName, $userValue);
+			}
+		}
+	}
 }
+
+
+
+//-----------------------------------------------------------------------------------------------------
+function test_submitted_data(cs_genericPage &$page, array $users) {
+	$counter = 0;
+	$storeThis = array();
+	$retval = "something terrible happened";
+	foreach($users as $num=>$data) {
+		$output = is_valid_user($page, $data);
+		if(is_array($output)) {
+			$counter++;
+			$storeThis[$num] = $output;
+		}
+		else {
+			$retval = "Failure on user #". $num .": ". $output;
+			$counter = -1;
+			break;
+		}
+	}
+	
+	if(is_numeric($counter) && $counter == count($users)) {
+		$retval = TRUE;
+	}
+	
+	$page->gfObj->debug_print(__METHOD__ .": RETURNING::: ". $retval);
+	
+	return($retval);
+}//end test_submitted_data()
+//-----------------------------------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------------------------------
+function is_valid_user(cs_genericPage &$page, array $data) {
+	$requiredFields = array('username', 'password', 'confirmPassword');
+	
+	$good=0;
+	$retval = "failure";
+	foreach($requiredFields as $fieldname) {
+		if(isset($data[$fieldname]) && strlen($data[$fieldname]) > 3) {
+			$good++;
+		}
+		else {
+			$retval = "Invalid length of data in ". $fieldname ." (or it's missing).";
+			break;
+		}
+	}
+	
+	$goodToGo = FALSE;
+	if($data['password'] == $data['confirmPassword']) {
+		if(isset($data['is_admin'])) {
+			if($data['is_admin'] === 't') {
+				$goodToGo = TRUE;
+			}
+		}
+		else {
+			$goodToGo = TRUE;
+		}
+	}
+	else {
+		$retval = "Passwords don't match.";
+	}
+	
+	if($good == count($requiredFields) && $goodToGo == TRUE) {
+		$retval = $data;
+		unset($retval['confirmPassword']);
+	}
+	
+	$page->gfObj->debug_print(__METHOD__ .": RETURNING::: ". $retval);
+	
+	return($retval);
+}//end is_valid_user()
+//-----------------------------------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 class __setupDefaultValues {

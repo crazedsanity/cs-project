@@ -61,7 +61,12 @@ foreach($stepNames as $num=>$name) {
 	if(!is_numeric($stepResult)) {
 		$passFail = "Incomplete";
 		$bgColor  = "yellow";
-		$stepText = "Step incomplete...";
+		if(strlen(get_setup_data($num, 'text'))) {
+			$stepText = get_setup_data($num, 'text');
+		}
+		else {
+			$stepText = "Step incomplete...";
+		}
 	}
 	else {
 		$passFail = interpret_bool($stepResult, array('FAIL', 'Pass'));
