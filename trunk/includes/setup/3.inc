@@ -8,12 +8,12 @@
 if($_POST) {
 	
 	$validSubmission = test_submitted_data($page, $_POST['users']);
-	store_setup_data(3, $_POST['users'], 'data');
 	if($validSubmission === TRUE) {
 		$obj = new __setupDefaultValues();
 		store_setup_data(3, $obj->go(), 'text');
 	}
 	else {
+		store_setup_data(3, $_POST['users'], 'data');
 		$page->set_message_wrapper(
 			array(
 				'title'		=> "Invalid User Data",
@@ -63,10 +63,9 @@ function test_submitted_data(cs_genericPage &$page, array $users) {
 	}
 	
 	if(is_numeric($counter) && $counter == count($users)) {
+		store_setup_data(3, $storeThis, 'data');
 		$retval = TRUE;
 	}
-	
-	$page->gfObj->debug_print(__METHOD__ .": RETURNING::: ". $retval);
 	
 	return($retval);
 }//end test_submitted_data()
@@ -76,7 +75,7 @@ function test_submitted_data(cs_genericPage &$page, array $users) {
 
 //-----------------------------------------------------------------------------------------------------
 function is_valid_user(cs_genericPage &$page, array $data) {
-	$requiredFields = array('username', 'password', 'confirmPassword');
+	$requiredFields = array('username', 'password', 'confirmPassword', 'email');
 	
 	$good=0;
 	$retval = "failure";
@@ -156,6 +155,7 @@ class __setupDefaultValues {
 			$retval .= "<BR>\n". $this->create_status_records();
 			$retval .= "<BR>\n". $this->create_tag_names();
 			$retval .= "<BR>\n". $this->build_preferences();
+			$retval .= "<BR>\n". $this->create_users();
 			
 			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
 			//TODO: set results
@@ -895,6 +895,68 @@ class __setupDefaultValues {
 		return($retval);
 		
 	}//end build_preferences()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function create_users() {
+		
+		//retrieve the user information.
+		$userData = get_setup_data(3, 'data');
+		
+		$counter = 0;
+		$retval = "Successfully created records for::: ";
+		foreach($userData as $num => $subData) {
+			
+			//create their contact record.
+			$sql = "SELECT contact_create_from_email('". $subData['email'] ."');";
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$this->totalRecords++;
+				
+				$data = $this->db->farray();
+				$contactId = $data[0];
+				
+				//now create the user.
+				$subData['contact_id'] = $contactId;
+				unset($subData['email']);
+				
+				//now make their password hash.
+				$subData['password'] = md5($subData['password']);
+				
+				$xUser = $subData['username'];
+				$sql = "INSERT INTO user_table ". $this->gfObj->string_from_array($subData, 'insert', NULL, 'sql');
+				$numrows = $this->db->exec($sql);
+				$dberror = $this->db->errorMsg();
+				
+				if(!strlen($dberror) && $numrows == 1) {
+					$sql = "SELECT currval('user_table_uid_seq'::text)";
+					$numrows = $this->db->exec($sql);
+					$dberror = $this->db->errorMsg();
+					
+					if(!strlen($dberror) && $numrows == 1) {
+						$data = $this->db->farray();
+						$lastUid = $data[0];
+						$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
+					}
+					else {
+						throw new exception(__METHOD__ .": failed to retrieve uid for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+					}
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to create user record for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to create contact record for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		
+		return($retval);
+	}//end create_users()
 	//=========================================================================
 	
 	
