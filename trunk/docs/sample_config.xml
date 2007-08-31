@@ -1,0 +1,17 @@
+<config generated="2007-07-03 08:07:45">
+	<isdevsite>1</isdevsite>
+	<db_host>localhost</db_host>
+	<db_name>cs_project</db_name>
+	<db_port>5432</db_port>
+	<db_user>postgres</db_user>
+	<db_pass/>
+	<helpdesk_issue_announce_email>project_helpdesk_notifications@127.0.0.1</helpdesk_issue_announce_email>
+	<workingonit>0</workingonit>
+	<max_idle>2 hours</max_idle>
+	<max_time>18 hours</max_time>
+	<stop_logins_on_global_alert>1</stop_logins_on_global_alert>
+	<debugprintopt>1</debugprintopt>
+	<debugremovehr>0</debugremovehr>
+	<project_url>project.localhost</project_url>
+	<CONFIG_SESSION_NAME>CS_PROJECT_SESSID</CONFIG_SESSION_NAME>
+</config>
