@@ -11,6 +11,7 @@ if($_POST) {
 	if($validSubmission === TRUE) {
 		$obj = new __setupDefaultValues();
 		store_setup_data(3, $obj->go(), 'text');
+		$obj->finish($page);
 	}
 	else {
 		store_setup_data(3, $_POST['users'], 'data');
@@ -156,13 +157,18 @@ class __setupDefaultValues {
 			$retval .= "<BR>\n". $this->create_tag_names();
 			$retval .= "<BR>\n". $this->build_preferences();
 			$retval .= "<BR>\n". $this->create_users();
+						
+			$commitRes = $this->db->commitTrans();
+			if($commitRes == 1) {
+				$retval .= "<BR>\n ----------- Created (". $this->totalRecords ."), result of commit: (". $commitRes .").";
+				store_setup_data(3, 1, 'result');
+				store_setup_data(4, 1, 'accessible');
+			}
+			else {
+				store_setup_data(3, 0, 'result');
+				throw new exception(__METHOD__ .": failed to commit the transaction (". $commitRes .")");
+			}
 			
-			//TODO: commit the transaction (any exception WILL keep this from running: I tested to make sure).
-			//TODO: set results
-			//TODO: set data
-			//TODO: set next step as accessible
-			
-			$retval .= "<BR>\n ----------- Created (". $this->totalRecords .") records so far...";
 		}
 		catch(exception $e) {
 			//TODO: rollback the transaction
@@ -423,7 +429,7 @@ class __setupDefaultValues {
 				
 				//FINAL SANITY CHECKS!!!
 				if($counter == (count($classes) + count($categories) + count($logEvents))) {
-					$retval = "Successfully created all category, class, and log event records";
+					$retval = "Successfully created all category, class, and log event records (". $counter .")";
 				}
 				else {
 					throw new exception(__METHOD__ .": Internal error, failed to create all category and class records");
@@ -483,7 +489,7 @@ class __setupDefaultValues {
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				if($retval == count($recordTypes)) {
-					$retval = "Created all record types";
+					$retval = "Created all record types (". $retval .")";
 				}
 				else {
 					throw new exception(__METHOD__ .": internal error (sanity check failed)");
@@ -548,7 +554,7 @@ class __setupDefaultValues {
 			$dberror = $this->db->errorMsg();
 			
 			if(!strlen($dberror) && $numrows == 1) {
-				$retval = "Successfully created all attributes!";
+				$retval = "Successfully created all attributes (". $retval .")!";
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to reset sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -638,7 +644,7 @@ class __setupDefaultValues {
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				//good to go.
-				$retval = "Successfully created anonymous user, anonymous contact record, and the two default groups!";
+				$retval = "Successfully created anonymous user, anonymous contact record, and the two default groups (". $retval .")!";
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to reset group sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -694,7 +700,7 @@ class __setupDefaultValues {
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				//good to go.
-				$retval = "Successfully created all status records!";
+				$retval = "Successfully created all status records (". $retval .")!";
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to reset status sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -747,7 +753,7 @@ class __setupDefaultValues {
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				//good to go.
-				$retval = "Successfully created all tags!";
+				$retval = "Successfully created all tags (". $retval .")!";
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to reset tag_name sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -870,7 +876,7 @@ class __setupDefaultValues {
 						$dberror = $this->db->errorMsg();
 						
 						if(!strlen($dberror) && $numrows == 1) {
-							$retval = "Successfully created all preferences and options!";
+							$retval = "Successfully created all preferences and options (". $retval .")!";
 						}
 						else {
 							throw new exception(__METHOD__ .": failed to reset the pref_option sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -955,8 +961,36 @@ class __setupDefaultValues {
 			}
 		}
 		
+		$retval = $this->gfObj->create_list($retval, " --->>> done, created  (". $counter .") records", "<BR>\n");
+		
 		return($retval);
 	}//end create_users()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function finish(cs_genericPage &$page) {
+		
+		$stepRes = get_setup_data(3, 'result');
+		if($stepRes == 1) {
+			$page->set_message_wrapper(array(
+				'title'		=> "Successfully Setup Data",
+				'message'	=> "All default data was stored in the new database successfully!",
+				'type'		=> "status"
+			));
+			$page->conditional_header("/setup/4", TRUE);
+		}
+		else {
+			$page->set_message_wrapper(array(
+				'title'		=> "Step Failed",
+				'message'	=> "Please review the errors below and proceed accordingly.",
+				'type'		=> "error"
+			));
+			$page->conditional_header("/setup/3", TRUE);
+		}
+		
+	}//end finish()
 	//=========================================================================
 	
 	

@@ -2,8 +2,10 @@
 /*
  * Created on Jul 27, 2007
  * 
+ * TODO: check for the existence of the /lib/config.xml file
+ * TODO: if the config.xml exists, check if the database connection works, and if we can get ANY version data: if so, give fatal message saying it won't work.
+ * TODO: if step 2 is re-run, do something to reset the status/accessibility of the other steps.
  */
-
 
 
 //create the setup object.
