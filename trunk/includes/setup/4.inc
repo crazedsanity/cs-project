@@ -24,9 +24,28 @@ $defaultValues = array(
 if($_POST) {
 	//TODO: something to *CHECK* that they actually provided something...
 	store_setup_data(4, $_POST['fields'], 'data');
-	#store_setup_data(4, 1, 'result');
-	#store_setup_data(4, 'Values stored successfully', 'text');
-	#store_setup_data(5, 1, 'accessible');
+	$verifyDataRes = verify_submitted_data($page, $_POST['fields'], $defaultValues);
+	if($verifyDataRes === TRUE) {
+		store_setup_data(4, 1, 'result');
+		store_setup_data(4, 'Successfully stored values.', 'text');
+		store_setup_data(5, 1, 'accessible');
+		
+		//set a message!
+		$page->set_message_wrapper(array(
+			'title'		=> "Success",
+			'message'	=> "Step processed successfully.",
+			'type'		=> "status"
+		));
+	}
+	else {
+		store_setup_data(4, 0, 'result');
+		store_setup_data(4, $verifyDataRes, 'text');
+		$page->set_message_wrapper(array(
+			'title'		=> "Failure",
+			'message'	=> "Unable to process step data:<BR>\n". $verifyDataRes,
+			'type'		=> "error"
+		));
+	}
 	
 	$page->conditional_header("/setup/4", TRUE);
 }
@@ -53,6 +72,8 @@ else {
 }
 
 function verify_submitted_data(cs_genericPage &$page, array $checkThis, array $againstThis) {
+	$goodValues = 0;
+	$retval = NULL;
 	foreach($againstThis as $index=>$subData) {
 		if(!is_array($subData) || count($subData) !== 3 || !is_numeric($subData[0])) {
 			$retval = __FUNCTION__ .": failed to get valid data to check against";
@@ -65,6 +86,7 @@ function verify_submitted_data(cs_genericPage &$page, array $checkThis, array $a
 				//preliminary checks seem good.
 				$valueToCheck = $page->gfObj->cleanString($valueToCheck, $cleanAs);
 				if(strlen($valueToCheck) >= $minLength) {
+					$goodValues++;
 				}
 				else {
 					$retval = __FUNCTION__ .": ". $index ." failed minimum length check after cleaning";
@@ -74,6 +96,10 @@ function verify_submitted_data(cs_genericPage &$page, array $checkThis, array $a
 				$retval = __FUNCTION__ .": ". $index ." contains invalid data";
 			}
 		}
+	}
+	
+	if(($goodValues == count($againstThis)) && is_null($retval)) {
+		$retval = TRUE;
 	}
 	
 	return($retval);
