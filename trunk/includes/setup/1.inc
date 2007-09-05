@@ -33,11 +33,11 @@ else {
 	if(!is_array($setupData) || !count($setupData)) {
 		//provide some defaults.
 		$setupData = array(
-			'dbname'	=> "cs_project",
-			'host'		=> "localhost",
-			'port'		=> "5432",
-			'user'		=> "postgres",
-			'password'	=> ""
+			'database__dbname'	=> "cs_project",
+			'database__host'		=> "localhost",
+			'database__port'		=> "5432",
+			'database__user'		=> "postgres",
+			'database__password'	=> ""
 		);
 	}
 	
