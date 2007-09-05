@@ -54,7 +54,12 @@ else {
 //=============================================================================
 function test_db_stuff(cs_phpDB &$db) {
 	
-	$params = get_setup_data(1);
+	$stepOneData = get_setup_data(1);
+	$params = get_db_params();
+	$originalParams = $params;
+	
+	
+	
 	$params['dbname'] = 'template1';
 	$retval = "Failed to connect to ". $params['host'] .":". $params['dbname'] ." (host connection failed)";
 	
@@ -64,10 +69,10 @@ function test_db_stuff(cs_phpDB &$db) {
 		$db->connect($params);
 		$result = "Connected successfully to ". $params['host'] .":". $params['dbname'] ." (host connection good)";
 		try {
-			$newParams = get_setup_data(1);
+			$newParams = $originalParams;
 			$db2 = new cs_phpDB;
 			store_setup_data(2, 0, 'result');
-			$db2->connect(get_setup_data(1));
+			$db2->connect($originalParams );
 			$retval = "Connected successfully to ". $newParams['host'] .":". $newParams['dbname'] ." (host connection good, DATABASE EXISTS)";
 		}
 		catch(exception $e) {
@@ -103,7 +108,7 @@ class __tmpSetupClass {
 		$this->page = $page;
 		
 		store_setup_data(2, 0, 'result');
-		store_setup_data(2, 'Initializing...', 'data');
+		store_setup_data(2, 'Initializing...', 'text');
 	}//end __construct()
 	//=========================================================================
 	
@@ -118,7 +123,7 @@ class __tmpSetupClass {
 				$this->page->set_message_wrapper(
 					array(
 						'title'		=> "Step Successful",
-						'message'	=> "Finished step two with result:::<BR>\n". get_setup_data(2,'data'),
+						'message'	=> "Finished step two with result:::<BR>\n". get_setup_data(2,'text'),
 						'type'		=> "status"
 					)
 				);
@@ -127,7 +132,7 @@ class __tmpSetupClass {
 		}
 		else {
 			store_setup_data(2, 0, 'result');
-			store_setup_data(2, 'Failed to create database', 'data');
+			store_setup_data(2, 'Failed to create database', 'text');
 			$setupData = get_setup_data(1, 'data');
 			$retval = "Unable to create database... check that ". $setupData['host'] .
 				" does not already have a database named '". $setupData['dbname'] ."'.  " .
@@ -142,9 +147,10 @@ class __tmpSetupClass {
 	
 	//=========================================================================
 	private function create_database() {
-		$stepOneData = get_setup_data(1, 'data');	
+		$params = get_db_params();
+		
 		//okay, let's try to create the database.
-		$numrows = $this->db->exec("CREATE DATABASE ". $stepOneData['dbname']);
+		$numrows = $this->db->exec("CREATE DATABASE ". $params['dbname']);
 		$dberror = $this->db->errorMsg();
 		
 		if(strlen($dberror)) {
@@ -156,7 +162,7 @@ class __tmpSetupClass {
 			//okay.  Now destroy our database handle & create a new one, connected to the proper database.
 			unset($this->db);
 			$this->db = new cs_phpDb;
-			$this->db->connect($stepOneData);
+			$this->db->connect(get_db_params());
 		}
 		
 		return($retval);
@@ -167,7 +173,7 @@ class __tmpSetupClass {
 	//=========================================================================
 	private function load_schema() {
 		
-		store_setup_data(2, "Schema not loaded... ", 'data');
+		store_setup_data(2, "Schema not loaded... ", 'text');
 		store_setup_data(2, 0, 'result');
 		
 		$fileData = $this->fsObj->read("01__storedprocs.sql");
@@ -214,7 +220,7 @@ class __tmpSetupClass {
 					$this->gfObj->debug_print($retval);
 					
 					$this->db->commitTrans();
-					store_setup_data(2, $retval, 'data');
+					store_setup_data(2, array(), 'data');
 					store_setup_data(2, 1, 'result');
 					store_setup_data(2, $retval, 'text');
 					store_setup_data(3, 1, 'accessible');
