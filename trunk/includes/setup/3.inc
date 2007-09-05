@@ -14,7 +14,7 @@ if($_POST) {
 		$obj->finish($page);
 	}
 	else {
-		store_setup_data(3, $_POST['users'], 'data');
+		store_setup_data(3, $_POST['users'], 'post_info');
 		$page->set_message_wrapper(
 			array(
 				'title'		=> "Invalid User Data",
@@ -28,7 +28,7 @@ if($_POST) {
 	$page->conditional_header("/setup/3", TRUE);
 }
 else {
-	$myData = get_setup_data(3, 'data');
+	$myData = get_setup_data(3, 'post_info');
 	if(is_array($myData)) {
 		foreach($myData as $num=>$userArr) {
 			foreach($userArr as $userField => $userValue) {
@@ -64,7 +64,7 @@ function test_submitted_data(cs_genericPage &$page, array $users) {
 	}
 	
 	if(is_numeric($counter) && $counter == count($users)) {
-		store_setup_data(3, $storeThis, 'data');
+		store_setup_data(3, $storeThis, 'post_info');
 		$retval = TRUE;
 	}
 	
@@ -130,6 +130,8 @@ class __setupDefaultValues {
 	private $gfObj;
 	private $totalRecords=0;
 	
+	private $data=array();
+	
 	//=========================================================================
 	public function __construct() {
 		$this->db = new cs_phpDB;
@@ -151,6 +153,7 @@ class __setupDefaultValues {
 			//now that we've connected, start doing stuff.
 			$retval = $this->set_version();
 			$retval .= "<BR>\n". $this->create_log_categories_and_classes();
+			$retval .= "<BR>\n". $this->create_record_type_data();
 			$retval .= "<BR>\n". $this->create_attributes();
 			$retval .= "<BR>\n". $this->create_anonymous_contact_data();
 			$retval .= "<BR>\n". $this->create_status_records();
@@ -256,6 +259,7 @@ class __setupDefaultValues {
 						$dbVersionString = $data[0];
 						
 						if($dbVersionString === $fullVersionString) {
+							$this->data['version_string'] = $fullVersionString;
 							$retval = "Successfully set version string";
 						}
 						else {
@@ -358,6 +362,7 @@ class __setupDefaultValues {
 					//good.
 					$counter++;
 					$this->totalRecords++;
+					$this->data['logcat__'. strtolower($name)] = $num;
 				}
 				else {
 					throw new exception(__METHOD__ .": failed to create category record for (". $name .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -474,6 +479,7 @@ class __setupDefaultValues {
 			if(!strlen($dberror) && $numrows == 1) {
 				$this->totalRecords++;
 				$retval++;
+				$this->data['rectype__'. $insertArr['module']] = $recTypeId;
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to create record for ". $insertArr['name'] 
@@ -483,7 +489,7 @@ class __setupDefaultValues {
 		
 		if(count($recordTypes) == $retval) {
 			
-			$sql = "SELECT setval('record_type_table_record_type_id_seq'::text, (SELECT max(record_type_id) FROM record_type_table)))";
+			$sql = "SELECT setval('record_type_table_record_type_id_seq'::text, (SELECT max(record_type_id) FROM record_type_table))";
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
 			
@@ -979,6 +985,7 @@ class __setupDefaultValues {
 				'message'	=> "All default data was stored in the new database successfully!",
 				'type'		=> "status"
 			));
+			store_setup_data(3, $this->data, 'data');
 			$page->conditional_header("/setup/4", TRUE);
 		}
 		else {

@@ -20,7 +20,7 @@ class tagClass
 	private $db;
 	
 	/** Category for logging. */
-	private $logCategoryId = 8;
+	private $logCategoryId;
 	
 	/** Object for logging stuff */
 	private $logsObj;
@@ -33,6 +33,14 @@ class tagClass
 	 */
 	public function __construct(phpDB $db)
 	{
+		
+		if(is_numeric(LOGCAT__TAGS)) {
+			$this->logCategoryId = LOGCAT__TAGS;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid log_category_id defined for tags: did you complete setup?");
+		}
+		
 		//set the internal database handle.
 		$this->db = $db;
 		

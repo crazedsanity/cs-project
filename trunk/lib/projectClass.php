@@ -16,8 +16,8 @@ class projectClass extends mainRecord {
 	var $order = array();	//array of how to order the projects that we get back.
 	public $tagObj;
 	public $prefObj;
-	private $recordTypeId = RECTYPE__PROJECT;
-	private $logCategoryId = LOGCAT__PROJECT;
+	private $recordTypeId;
+	private $logCategoryId;
 	public $logsObj;
 	protected $groupId = NULL;
 	
@@ -28,6 +28,22 @@ class projectClass extends mainRecord {
 	 * CONSTRUCTOR.
 	 */
 	function projectClass(&$db) {
+		
+		if(is_numeric(LOGCAT__PROJECT)) {
+			$this->logCategoryId = LOGCAT__PROJECT;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid log_category_id defined for project: did you complete setup?");
+		}
+		
+		if(is_numeric(RECTYPE__PROJECT)) {
+			$this->recordTypeId = RECTYPE__PROJECT;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid record_type_id defined for project: did you complete setup?");
+		}
+		
+		
 		//check to see if the database object is valid.
 		if(is_object($db) && is_resource($db->connectionID)) {
 			$this->db = $db;

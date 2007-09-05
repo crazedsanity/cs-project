@@ -12,8 +12,8 @@ class helpdeskClass extends mainRecord {
 	
 	var $db;				//database handle.
 	var $helpdeskId	= NULL;		//bug/helpdesk
-	public $recordTypeId = 3; 
-	private $logCategoryId = 6;
+	public $recordTypeId;
+	private $logCategoryId;
 	private $allowedFields;
 	
 	protected $logsObj;
@@ -23,6 +23,22 @@ class helpdeskClass extends mainRecord {
 	 * CONSTRUCTOR.
 	 */
 	function helpdeskClass(phpDB $db) {
+		
+		if(is_numeric(LOGCAT__HELPDESK)) {
+			$this->logCategoryId = LOGCAT__HELPDESK;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid log_category_id defined for helpdesk: did you complete setup?");
+		}
+		
+		if(is_numeric(RECTYPE__HELPDESK)) {
+			$this->recordTypeId = RECTYPE__HELPDESK;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid record_type_id defined for helpdesk: did you complete setup?");
+		}
+		
+		
 		//check to see if the database object is valid.
 		if(is_object($db) && is_resource($db->connectionID)) {
 			$this->db = $db;

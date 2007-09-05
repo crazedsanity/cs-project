@@ -173,7 +173,13 @@ class GenericPage extends cs_genericPage {
 		parent::print_page($stripUndefVars);
 		
 		//log the page view.
-		$logsObj = new logsClass($this->db, 10);
+		if(is_numeric(LOGCAT__NAVIGATION)) {
+			$logCatId = LOGCAT__NAVIGATION;
+		}
+		else {
+			throw new exception(__METHOD__ .": no log_category_id for navigation: did you complete setup?");
+		}
+		$logsObj = new logsClass($this->db);
 		$logsObj->log_by_class(page_get_env(), 'information');
 		
 	}//end of print_page()

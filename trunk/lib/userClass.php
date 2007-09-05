@@ -1,9 +1,9 @@
 <?php
 /*
- * Last Author:         $Author$ 
- * Current Revision:    $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:        $Date$
+ * Last Author:         $Author:crazedsanity $ 
+ * Current Revision:    $Revision:8 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/userClass.php $ 
+ * Last Updated:        $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
  */
 
 class userClass {
@@ -12,11 +12,19 @@ class userClass {
 	protected $uid;
 	protected $isAdmin=NULL;
 	
-	protected $logCategoryId=3;
+	protected $logCategoryId;
 	protected $logsObj;
 	
 	//================================================================================================
 	function userClass(&$db, $uid=NULL) {
+		
+		if(is_numeric(LOGCAT__USERS)) {
+			$this->logCategoryId = LOGCAT__USERS;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid log_category_id defined for users: did you complete setup?");
+		}
+		
 		$this->db = $db;
 		if(is_numeric($uid)) {
 			$this->uid = $uid;
