@@ -18,9 +18,9 @@
  * 
  * 
  * SVN INFORMATION:::
- * SVN Signature: $Id$
- * Last Committted Date: $Date$
- * Last Committed Path: $HeadURL$
+ * SVN Signature: $Id:logsClass.php 8 2007-08-23 23:22:35Z crazedsanity $
+ * Last Committted Date: $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
+ * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/logsClass.php $
  */
 
 
@@ -45,7 +45,7 @@ class logsClass
 	/**
 	 * The constructor.
 	 */
-	public function __construct(phpDB &$db, $logCategoryId)
+	public function __construct(cs_phpDB &$db, $logCategoryId)
 	{
 		//assign the database object.
 		$this->db = $db;

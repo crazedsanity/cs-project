@@ -48,8 +48,8 @@ class GenericPage extends cs_genericPage {
 		parent::initialize_locals($mainTemplate);
 		
 		$this->template=new template("$TMPLDIR","keep"); //initialize a new template parser
-		$this->db = new phpDB;  				 //initialize a new database connection
-		$connID = $this->db->connect();
+		$this->db = new cs_phpDB;  				 //initialize a new database connection
+		$connID = $this->db->connect(get_config_db_params());
 		
 		//Used to have OR (eregi("db_error.tmpl", $mainTemplate) in as well. Couldn't find any reason it needed to live (no comments)
 		if((!is_resource($connID)) OR (WORKINGONIT))

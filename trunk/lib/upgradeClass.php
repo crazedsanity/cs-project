@@ -4,6 +4,8 @@
  * 
  */
 
+require_once(dirname(__FILE__) .'/globalFunctions.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.php');
 
 class upgrade {
 	
@@ -350,11 +352,10 @@ class upgrade {
 	//=========================================================================
 	private function get_database_version() {
 		//create a database object & attempt to read the database version.
-		require_once(dirname(__FILE__) .'/pg_abstraction_layer.inc');
 		
-		if(!is_object($this->db) || get_class($this->db) != 'phpDB') {
-			$this->db = new phpDB;
-			$this->db->connect();
+		if(!is_object($this->db) || get_class($this->db) != 'cs_phpDB') {
+			$this->db = new cs_phpDB;
+			$this->db->connect(get_config_db_params());
 		}
 		
 		$sql = "SELECT " .
