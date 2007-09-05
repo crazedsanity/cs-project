@@ -143,7 +143,7 @@ class __setupDefaultValues {
 	
 	//=========================================================================
 	public function go() {
-		
+		store_setup_data(3, 0, 'result');
 		try {
 			$params = get_db_params();
 			$this->db->connect($params);
@@ -915,7 +915,10 @@ class __setupDefaultValues {
 	private function create_users() {
 		
 		//retrieve the user information.
-		$userData = get_setup_data(3, 'data');
+		$userData = get_setup_data(3, 'post_info');
+		if(!is_array($userData) || count($userData) != 2) {
+			throw new exception(__METHOD__ .": no user data...?". $this->gfObj->debug_print($userData,0));
+		}
 		
 		$counter = 0;
 		$retval = "Successfully created records for::: ";
@@ -952,6 +955,7 @@ class __setupDefaultValues {
 					if(!strlen($dberror) && $numrows == 1) {
 						$data = $this->db->farray();
 						$lastUid = $data[0];
+						$counter++;
 						$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
 					}
 					else {
@@ -967,7 +971,12 @@ class __setupDefaultValues {
 			}
 		}
 		
-		$retval = $this->gfObj->create_list($retval, " --->>> done, created  (". $counter .") records", "<BR>\n");
+		if($counter == 2) {
+			$retval = $this->gfObj->create_list($retval, " --->>> done, created  (". $counter .") records", "<BR>\n");
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to create users (". $counter .")::: ". $this->gfObj->debug_print($userData,0));
+		}
 		
 		return($retval);
 	}//end create_users()
