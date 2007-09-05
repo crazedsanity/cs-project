@@ -144,4 +144,25 @@ function read_version_file() {
 }//end read_version_file()
 //=============================================================================
 
+
+
+//=============================================================================
+function get_db_params() {
+	
+	$stepOneData = get_setup_data(1, 'data');
+	if(is_array($stepOneData)) {
+		$params = array();
+		foreach($stepOneData as $name=>$value) {
+			$index = preg_replace('/^database__/', '', $name);
+			$params[$index] = $value;
+		}
+	}
+	else {
+		throw new exception(__FUNCTION__ .": unable to retrieve step one data...");
+	}
+	
+	return($params);
+}//end get_db_params()
+//=============================================================================
+
 ?>
