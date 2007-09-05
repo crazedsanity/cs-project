@@ -36,6 +36,7 @@ if($_POST) {
 			'message'	=> "Step processed successfully.",
 			'type'		=> "status"
 		));
+		$page->conditional_header("/setup/5", TRUE);
 	}
 	else {
 		store_setup_data(4, 0, 'result');
@@ -45,9 +46,9 @@ if($_POST) {
 			'message'	=> "Unable to process step data:<BR>\n". $verifyDataRes,
 			'type'		=> "error"
 		));
+		$page->conditional_header("/setup/4", TRUE);
 	}
 	
-	$page->conditional_header("/setup/4", TRUE);
 }
 else {
 	$priorSetupData = get_setup_data(4, 'data');
