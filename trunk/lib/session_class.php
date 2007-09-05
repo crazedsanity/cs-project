@@ -748,7 +748,7 @@ class Session{
 			$resultSet = $this->db->farray_fieldnames();
 			$this->logUid = $resultSet['id'];
 			
-			if(encrypt($password, $resultSet['password']) == $resultSet['password'])
+			if(md5($password) == $resultSet['password'])
 			{
 				//good password.  Good.
 				$retval = 1;
