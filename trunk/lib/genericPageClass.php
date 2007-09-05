@@ -179,7 +179,7 @@ class GenericPage extends cs_genericPage {
 		else {
 			throw new exception(__METHOD__ .": no log_category_id for navigation: did you complete setup?");
 		}
-		$logsObj = new logsClass($this->db);
+		$logsObj = new logsClass($this->db, $logCatId);
 		$logsObj->log_by_class(page_get_env(), 'information');
 		
 	}//end of print_page()
