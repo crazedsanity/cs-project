@@ -1,17 +1,33 @@
-<config generated="2007-07-03 08:07:45">
-	<isdevsite>1</isdevsite>
-	<db_host>localhost</db_host>
-	<db_name>cs_project</db_name>
-	<db_port>5432</db_port>
-	<db_user>postgres</db_user>
-	<db_pass/>
-	<helpdesk_issue_announce_email>project_helpdesk_notifications@127.0.0.1</helpdesk_issue_announce_email>
-	<workingonit>0</workingonit>
-	<max_idle>2 hours</max_idle>
+<config generated="2007-09-05 14:09:55" version="1.0.0-ALPHA1">
+	<isdevsite>0</isdevsite>
+	<proj_name>CS-Project</proj_name>
+	<project_url>project.danf.internal</project_url>
+	<helpdesk_issue_annouce_email>new_issues@yourdomain.com</helpdesk_issue_annouce_email>
 	<max_time>18 hours</max_time>
+	<max_idle>2 hours</max_idle>
 	<stop_logins_on_global_alert>1</stop_logins_on_global_alert>
-	<debugprintopt>1</debugprintopt>
 	<debugremovehr>0</debugremovehr>
-	<project_url>project.localhost</project_url>
-	<CONFIG_SESSION_NAME>CS_PROJECT_SESSID</CONFIG_SESSION_NAME>
+	<config_session_name>CS_PROJECT_SESSID</config_session_name>
+	<debugprintopt>1</debugprintopt>
+	<workingonit>0</workingonit>
+	<version_string>1.0.0-ALPHA1</version_string>
+	<logcat__database>1</logcat__database>
+	<logcat__authentication>2</logcat__authentication>
+	<logcat__users>3</logcat__users>
+	<logcat__general>4</logcat__general>
+	<logcat__project>5</logcat__project>
+	<logcat__helpdesk>6</logcat__helpdesk>
+	<logcat__todo>7</logcat__todo>
+	<logcat__tags>8</logcat__tags>
+	<logcat__estimates>9</logcat__estimates>
+	<logcat__navigation>10</logcat__navigation>
+	<logcat__preferences>11</logcat__preferences>
+	<rectype__project>1</rectype__project>
+	<rectype__todo>2</rectype__todo>
+	<rectype__helpdesk>3</rectype__helpdesk>
+	<database__dbname>__dev_cs_project</database__dbname>
+	<database__host>localhost</database__host>
+	<database__port>5432</database__port>
+	<database__user>postgres</database__user>
+	<database__password/>
 </config>
