@@ -145,7 +145,7 @@ class __setupDefaultValues {
 	public function go() {
 		
 		try {
-			$params = get_setup_data(1, 'data');
+			$params = get_db_params();
 			$this->db->connect($params);
 			$this->db->beginTrans();
 			$retval = "Connected successfully to the database.";
