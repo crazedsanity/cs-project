@@ -165,4 +165,39 @@ function get_db_params() {
 }//end get_db_params()
 //=============================================================================
 
+
+
+//=============================================================================
+function reset_all_steps($leaveText=TRUE, $afterStep=NULL) {
+	$retval=0;
+	if(is_array($_SESSION['setup'])) {
+		$unsetThis = array('data', 'result');
+		if($leaveText !== TRUE) {
+			$unsetThis[] = 'text';
+		}
+		foreach($unsetThis as $indexName) {
+			if(isset($_SESSION['setup'][$indexName])) {
+				if(is_numeric($afterStep)) {
+					foreach($_SESSION['setup'][$indexName] as $stepNum=>$stepData) {
+						if(is_numeric($stepNum) && $stepNum > $afterStep) {
+							unset($_SESSION['setup'][$indexName][$stepNum]);
+							$retval++;
+						}
+					}
+				}
+				else {
+					unset($_SESSION['setup'][$indexName]);
+					$retval++;
+				}
+			}
+		}
+	}
+	else {
+		throw new exception(__FUNCTION__ .": no step data found in session");
+	}
+	
+	return($retval);
+}//end reset_all_steps()
+//=============================================================================
+
 ?>
