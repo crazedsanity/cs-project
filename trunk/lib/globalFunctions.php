@@ -104,7 +104,7 @@ function page_get_env($showReferer = true, $showRequest = true, $returnArray=FAL
 /**
  * Generic way to log activities.
  */
-function log_activity(phpDb &$db, $eventId, $affectedUid, $details) {
+function log_activity(cs_phpDB &$db, $eventId, $affectedUid, $details) {
 	
 	//create an array to create the insert string.
 	$sqlArr = array
@@ -1627,7 +1627,7 @@ function cs_debug_backtrace($printItForMe=NULL,$removeHR=NULL) {
 
 
 
-function contact_id_from_email(phpDB &$db, $email, $autoCreate=TRUE) {
+function contact_id_from_email(cs_phpDB &$db, $email, $autoCreate=TRUE) {
 	//call a stored procedure!
 	$autoCreate = cleanString($autoCreate, 'bool_strict');
 	$email = cleanString($email, 'email');

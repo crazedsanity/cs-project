@@ -198,9 +198,14 @@ class projectClass extends mainRecord {
 			$dberror = $this->db->errorMsg();
 			
 			if($dberror || $numrows < 1) {
-				$details = "$dberror || $query";
-				$this->logsObj->log_dberror($details);
-				$retval = 0;
+				if($numrows == 0) {
+					$retval = 0;
+				}
+				else {
+					$details = __METHOD__ .": $dberror || $query";
+					$this->logsObj->log_dberror($details);
+					$retval = 0;
+				}
 			} else {
 				$retval = $this->db->farray_nvp($idField, 'username');
 			}
@@ -231,7 +236,7 @@ class projectClass extends mainRecord {
 		//now create the actual option list.
 		if(!is_array($myList)) {
 			$optionList = 0;
-			$this->logsObj->log_dberror("create_user_option_list(): no array passed... ". debug_print(func_get_args(), 0));
+			$this->logsObj->log_dberror(__METHOD__ .": no array passed... ". debug_print(func_get_args(), 0));
 		} else {
 			$baseRow = "\n\t\t" . '<option value="{contact_id}"{selected}>{username}</option>' . "\n";
 			foreach($myList as $contactId=>$username) {

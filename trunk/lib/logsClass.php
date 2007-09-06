@@ -253,7 +253,7 @@ class logsClass
 		$this->logCategoryId = $originalCategoryId;
 		
 		if(ISDEVSITE) {
-			cs_debug_backtrace();
+			cs_debug_backtrace(1);
 			throw new exception(__METHOD__ .": encountered error::: $details");
 		}
 		
