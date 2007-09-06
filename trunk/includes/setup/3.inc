@@ -76,7 +76,7 @@ function test_submitted_data(cs_genericPage &$page, array $users) {
 
 //-----------------------------------------------------------------------------------------------------
 function is_valid_user(cs_genericPage &$page, array $data) {
-	$requiredFields = array('username', 'password', 'confirmPassword', 'email');
+	$requiredFields = array('username', 'password', 'confirmPassword', 'email', 'name');
 	
 	$good=0;
 	$retval = "failure";
@@ -437,14 +437,11 @@ class __setupDefaultValues {
 					
 					//reset the sequence.
 					$sql = "SELECT setval('log_event_table_log_event_id_seq', (SELECT max(log_event_id) FROM log_event_table))";
-					$dberror = $this->db->exec($sql);
-					$numrows = $this->db->errorMsg();
-					
-					if(!strlen($dberror) && $numrows == 1) {
+					if($this->run_sql($sql) === TRUE) {
 						$retval = "Successfully created all category, class, and log event records (". $counter .")";
 					}
 					else {
-						throw new exception(__METHOD__ .": failed to reset sequence for log_event table");
+						throw new exception(__METHOD__ .": failed to reset sequence for log_event table::: ". $dberror ."<BR>\nSQL::: ". $sql);
 					}
 				}
 				else {
@@ -935,46 +932,71 @@ class __setupDefaultValues {
 		$retval = "Successfully created records for::: ";
 		foreach($userData as $num => $subData) {
 			
+			//split their name up, based upon spaces.
+			$nameData = explode(' ', $subData['name']);
+			$insertArr = array();
+			if(count($nameData) == 1) {
+				$insertArr['fname'] = $nameData[0];
+				$insertArr['lname'] = "";
+			}
+			elseif(count($nameData) == 2) {
+				$insertArr['fname'] = $nameData[0];
+				$insertArr['lname'] = $nameData[1];
+			}
+			else {
+				$insertArr['fname'] = $nameData[0];
+				$insertArr['lname'] = preg_replace('/^'. $insertArr['fname'] .' /', '', $subData['name']);
+			}
+			
 			//create their contact record.
-			$sql = "SELECT contact_create_from_email('". $subData['email'] ."');";
+			$sql = "INSERT INTO contact_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
 			
 			if(!strlen($dberror) && $numrows == 1) {
-				$this->totalRecords++;
-				
-				$data = $this->db->farray();
-				$contactId = $data[0];
-				
-				//now create the user.
-				$subData['contact_id'] = $contactId;
-				unset($subData['email']);
-				
-				//now make their password hash.
-				$subData['password'] = md5($subData['password']);
-				
-				$xUser = $subData['username'];
-				$sql = "INSERT INTO user_table ". $this->gfObj->string_from_array($subData, 'insert', NULL, 'sql');
-				$numrows = $this->db->exec($sql);
-				$dberror = $this->db->errorMsg();
-				
-				if(!strlen($dberror) && $numrows == 1) {
-					$sql = "SELECT currval('user_table_uid_seq'::text)";
-					$numrows = $this->db->exec($sql);
-					$dberror = $this->db->errorMsg();
+				$sql = "SELECT currval('contact_table_contact_id_seq'::text)";
+				if($this->run_sql($sql, 1) === TRUE) {
+					$this->totalRecords++;
 					
-					if(!strlen($dberror) && $numrows == 1) {
-						$data = $this->db->farray();
-						$lastUid = $data[0];
-						$counter++;
-						$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
+					$data = $this->db->farray();
+					$contactId = $data[0];
+					
+					//now create the user.
+					$xUser = $subData['username'];
+					$insertArr = array(
+						'username'		=> $subData['username'],
+						'password'		=> md5($subData['password'] .'_'. $contactId),
+						'is_admin'		=> interpret_bool($subData['is_admin'], array('f', 't')),
+						'contact_id'	=> $contactId
+					);
+					$sql = "INSERT INTO user_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+					
+					if($this->run_sql($sql, 1) === TRUE) {
+						$sql = "SELECT currval('user_table_uid_seq'::text)";
+						if($this->run_sql($sql,1) === TRUE) {
+							$data = $this->db->farray();
+							$lastUid = $data[0];
+							
+							//create an email attribute for them.
+							$sql = "SELECT contact_update_attribute(". $contactId .", 'email', '". $subData['email'] ."')";
+							if($this->run_sql($sql,1) === TRUE) {
+								$counter++;
+								$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
+							}
+							else {
+								throw new exception(__METHOD__ .": failed to create email for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+							}
+						}
+						else {
+							throw new exception(__METHOD__ .": failed to retrieve uid for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+						}
 					}
 					else {
-						throw new exception(__METHOD__ .": failed to retrieve uid for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+						throw new exception(__METHOD__ .": failed to create user record for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
 					}
 				}
 				else {
-					throw new exception(__METHOD__ .": failed to create user record for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
+					throw new exception(__METHOD__ .": unable to retrieve contact_id for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
 				}
 			}
 			else {
@@ -1018,6 +1040,41 @@ class __setupDefaultValues {
 		}
 		
 	}//end finish()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function run_sql($sql, $expectedNumrows=NULL) {
+		if(strlen($sql)) {
+			$numrows = $this->db->exec($sql);
+			$dberror = $this->db->errorMsg();
+			$this->lastNumrows = $numrows;
+			
+			if(!strlen($dberror) && $numrows >= 0) {
+				if(is_numeric($expectedNumrows)) {
+					if($expectedNumrows == $numrows) {
+						$retval = TRUE;
+					}
+					else {
+						$retval = FALSE;
+					}
+				}
+				else {
+					//don't care if it's numeric.
+					$retval = TRUE;
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to run SQL, got numrows=(". $numrows ."), dberror::: ". $dberror ."<BR>\nSQL::: ". $sql);
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": no SQL to run...");
+		}
+		
+		return($retval);
+	}//end run_sql()
 	//=========================================================================
 	
 	
