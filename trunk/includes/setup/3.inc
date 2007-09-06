@@ -434,7 +434,18 @@ class __setupDefaultValues {
 				
 				//FINAL SANITY CHECKS!!!
 				if($counter == (count($classes) + count($categories) + count($logEvents))) {
-					$retval = "Successfully created all category, class, and log event records (". $counter .")";
+					
+					//reset the sequence.
+					$sql = "SELECT setval('log_event_table_log_event_id_seq', (SELECT max(log_event_id) FROM log_event_table))";
+					$dberror = $this->db->exec($sql);
+					$numrows = $this->db->errorMsg();
+					
+					if(!strlen($dberror) && $numrows == 1) {
+						$retval = "Successfully created all category, class, and log event records (". $counter .")";
+					}
+					else {
+						throw new exception(__METHOD__ .": failed to reset sequence for log_event table");
+					}
 				}
 				else {
 					throw new exception(__METHOD__ .": Internal error, failed to create all category and class records");
