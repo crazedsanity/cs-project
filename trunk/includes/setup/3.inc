@@ -132,6 +132,9 @@ class __setupDefaultValues {
 	
 	private $data=array();
 	
+	private $lastNumrows=NULL;
+	private $lastDberror=NULL;
+	
 	//=========================================================================
 	public function __construct() {
 		$this->db = new cs_phpDB;
@@ -160,6 +163,7 @@ class __setupDefaultValues {
 			$retval .= "<BR>\n". $this->create_tag_names();
 			$retval .= "<BR>\n". $this->build_preferences();
 			$retval .= "<BR>\n". $this->create_users();
+			$retval .= "<BR>\n". $this->create_user_group_records();
 						
 			$commitRes = $this->db->commitTrans();
 			if($commitRes == 1) {
@@ -1050,6 +1054,7 @@ class __setupDefaultValues {
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
 			$this->lastNumrows = $numrows;
+			$this->lastDberror = $dberror;
 			
 			if(!strlen($dberror) && $numrows >= 0) {
 				if(is_numeric($expectedNumrows)) {
@@ -1075,6 +1080,21 @@ class __setupDefaultValues {
 		
 		return($retval);
 	}//end run_sql()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function create_user_group_records() {
+		$sql = "INSERT INTO user_group_table (uid, group_id) SELECT uid, group_id FROM user_table";
+		if($this->run_sql($sql, 3) === TRUE) {
+			$retval = "Successfully created user_group linkage.";
+		}
+		else {
+			throw new exception(__METHOD__ .": unable to create user group records::: ". $this->lastDberror ."<BR>\nSQL::: ". $sql);
+		}
+		return($retval);
+	}//end create_user_group_records()
 	//=========================================================================
 	
 	
