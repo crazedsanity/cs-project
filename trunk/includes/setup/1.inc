@@ -9,7 +9,7 @@ $requiredFields = array('dbname', 'host', 'port', 'user', 'password');
 //TODO: consider adding a check that the /lib directory is writable, to avoid errors later on.
 
 if($_POST) {
-	$page->gfObj->debug_print($_POST);
+	reset_all_steps(FALSE);
 	store_setup_data(1, $_POST['fields']);
 	store_setup_data(1, 1, 'result');
 	store_setup_data(1, 'Values stored successfully', 'text');

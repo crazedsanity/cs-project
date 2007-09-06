@@ -7,6 +7,7 @@
 
 if($_POST) {
 	//check that step 1 was successful.
+	reset_all_steps(FALSE, 2);
 	$stepOneData = get_setup_data(1, 'data');
 	if(get_setup_data(1, 'result')) {
 		
