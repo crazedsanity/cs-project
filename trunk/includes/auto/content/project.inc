@@ -414,7 +414,7 @@ function process_row(&$page, $projectArr, $expandArr, $baseRow, $level=0) {
 			$rowColor1 = swapValue($rowColor1, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
 			$rowColor2 = swapValue($rowColor2,"#D5D5D5", "#C2C2C2");
 		
-			$expand = "t";	
+			$expand = "clear";	
 			if($subArr['num_children'] > 0) {
 				#if(in_array($id, $expandArr)) {
 				if(isset($expandArr[$id])) {
