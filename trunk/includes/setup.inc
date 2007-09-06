@@ -171,7 +171,14 @@ function get_db_params() {
 function reset_all_steps($leaveText=TRUE, $afterStep=NULL) {
 	$retval=0;
 	if(is_array($_SESSION['setup'])) {
-		$unsetThis = array('data', 'result');
+		if(is_numeric($afterStep)) {
+			$_SESSION['setup']['lastStep'] = $afterStep;
+		}
+		else {
+			$_SESSION['setup']['lastStep'] = 1;
+		}
+		$unsetThis = array('data', 'result', 'accessible');
+		
 		if($leaveText !== TRUE) {
 			$unsetThis[] = 'text';
 		}
