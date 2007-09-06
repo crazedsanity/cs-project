@@ -67,7 +67,12 @@ $tabNames['summary']	= new Tab("", "Summary");
 $tabNames['project']	= new Tab("", "Projects");
 $tabNames['helpdesk']		= new Tab("", "Helpdesk");
 #$tabNames['tags']		= new Tab("", "Tags");
-$tabNames['settings']	= new Tab("", "Settings");
+if($user->is_admin()) {
+	$tabNames['settings']	= new Tab("", "Settings<BR>\n<b>[Admin]</b>");
+}
+else {
+	$tabNames['settings']	= new Tab("", "Settings");
+}
 
 foreach($tabNames as $moduleName=>$tab) {
 	if($moduleName == $module) {
