@@ -199,13 +199,13 @@ class projectClass extends mainRecord {
 			
 			if($dberror || $numrows < 1) {
 				if($numrows == 0) {
-					$retval = 0;
+					$details = __METHOD__ .": No rows returned... ". $query;
 				}
 				else {
 					$details = __METHOD__ .": $dberror || $query";
-					$this->logsObj->log_dberror($details);
-					$retval = 0;
 				}
+				$this->logsObj->log_dberror($details);
+				$retval = 0;
 			} else {
 				$retval = $this->db->farray_nvp($idField, 'username');
 			}

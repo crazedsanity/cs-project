@@ -753,6 +753,7 @@ class Session{
 				//good password.  Good.
 				$retval = 1;
 				$this->authInfo = $resultSet;
+				unset($this->authInfo['password']);
 			}
 			else
 			{
