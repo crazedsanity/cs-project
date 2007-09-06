@@ -14,6 +14,7 @@ if($_POST) {
 		//first, check to see if we can connect to the host's "template1" database.
 		$db = new cs_phpDB;
 		
+		store_setup_data(2, 0, 'result');
 		$result = test_db_stuff($db);
 		
 		if($result === TRUE) {
@@ -52,43 +53,6 @@ if($_POST) {
 else {
 }
 
-//=============================================================================
-function test_db_stuff(cs_phpDB &$db) {
-	
-	$stepOneData = get_setup_data(1);
-	$params = get_db_params();
-	$originalParams = $params;
-	
-	
-	
-	$params['dbname'] = 'template1';
-	$retval = "Failed to connect to ". $params['host'] .":". $params['dbname'] ." (host connection failed)";
-	
-	$gf = new cs_globalFunctions;
-	
-	try {
-		$db->connect($params);
-		$result = "Connected successfully to ". $params['host'] .":". $params['dbname'] ." (host connection good)";
-		try {
-			$newParams = $originalParams;
-			$db2 = new cs_phpDB;
-			store_setup_data(2, 0, 'result');
-			$db2->connect($originalParams );
-			$retval = "Connected successfully to ". $newParams['host'] .":". $newParams['dbname'] ." (host connection good, DATABASE EXISTS)";
-		}
-		catch(exception $e) {
-			//no database!
-			//TODO: do a preg_match() on $e->getMessage() to see if it says something about the database not existing
-			$retval = TRUE;
-		}
-	}
-	catch(exception $e) {
-		$retval = $e->getMessage();
-	}
-	
-	return($retval);
-}//end test_db_stuff()
-//=============================================================================
 
 
 
