@@ -14,15 +14,21 @@ function toggleDisplay(obj, oldDisplay) {
 
 
 function enableTodoEditTitle() {
-	var inputDiv = document.getElementById('titleInput');
-	var inputObj = document.getElementById('newTitleInput');
-	var editLink = document.getElementById('editTitle');
+	//call a less-specific function to do the work.
+	enableInput('title_text', 'titleInput', 'newTitleInput');
+}
+
+
+function enableInput(textDivName, inputDivName, inputId) {
+	var inputObj = document.getElementById(inputId);
 	
+	//enable the input.
 	inputObj.disabled = false;
-	//editLink.style.display = 'none';
 	inputObj.style.display = '';
 	
-	toggleDisplay('title_text', '');
-	toggleDisplay('titleInput', 'inline');
+	//make the text disappear.
+	toggleDisplay(textDivName, 'inline');
 	
+	//make the input div appear.
+	toggleDisplay(inputDivName, 'inline');
 }
