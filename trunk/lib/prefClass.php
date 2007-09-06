@@ -11,15 +11,20 @@ class pref {
 	private $uid;
 	private $lastError = NULL;
 	
-	//WARNING: there is no recordTypeId for prefs...
-	private $recordTypeId = RECTYPE__PREFS;
-	private $logCategoryId = LOGCAT__PREFS;
+	private $logCategoryId;
 	private $logsObj;
 	
 	//=========================================================================
-	public function __construct(phpDB &$db, $uid) {
+	public function __construct(cs_phpDB &$db, $uid) {
 		$this->db = $db;
 		$this->uid = $uid;
+		
+		if(is_numeric(LOGCAT__PREFERENCES)) {
+			$this->logCategoryId = LOGCAT__PREFERENCES;
+		}
+		else {
+			throw new exception(__METHOD__ .": no valid log_category_id defined for preferences: did you complete setup?");
+		}
 		
 		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
 	}//end __construct()
