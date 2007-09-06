@@ -27,7 +27,7 @@ class projectClass extends mainRecord {
 	/**
 	 * CONSTRUCTOR.
 	 */
-	function projectClass(&$db) {
+	function projectClass(cs_phpDB &$db) {
 		
 		if(is_numeric(LOGCAT__PROJECT)) {
 			$this->logCategoryId = LOGCAT__PROJECT;
@@ -45,7 +45,7 @@ class projectClass extends mainRecord {
 		
 		
 		//check to see if the database object is valid.
-		if(is_object($db) && is_resource($db->connectionID)) {
+		if(is_object($db) && $db->is_connected()) {
 			$this->db = $db;
 		} else {
 			exit("no database!!!");

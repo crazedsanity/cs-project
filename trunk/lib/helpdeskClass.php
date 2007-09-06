@@ -22,7 +22,7 @@ class helpdeskClass extends mainRecord {
 	/**
 	 * CONSTRUCTOR.
 	 */
-	function helpdeskClass(phpDB $db) {
+	function helpdeskClass(cs_phpDB $db) {
 		
 		if(is_numeric(LOGCAT__HELPDESK)) {
 			$this->logCategoryId = LOGCAT__HELPDESK;
@@ -40,7 +40,7 @@ class helpdeskClass extends mainRecord {
 		
 		
 		//check to see if the database object is valid.
-		if(is_object($db) && is_resource($db->connectionID)) {
+		if(is_object($db) && $db->is_connected()) {
 			$this->db = $db;
 		} else {
 			exit("no database!!!");

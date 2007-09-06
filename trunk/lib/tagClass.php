@@ -31,7 +31,7 @@ class tagClass
 	 * 
 	 * @param $db		(phpDB object) instance of phpDB class.
 	 */
-	public function __construct(phpDB $db)
+	public function __construct(cs_phpDB $db)
 	{
 		
 		if(is_numeric(LOGCAT__TAGS)) {
