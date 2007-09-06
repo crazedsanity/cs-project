@@ -7,7 +7,7 @@
 </p>
 
 
-<form method="POST">
+<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
 <table border=1 cellpadding=3 cellspacing=0>
 	<tr>
 		<th>Database Name (cs_project)</th>
@@ -48,7 +48,7 @@
 		<td>Password for connecting to PostgreSQL (for a trusted connection, this can be blank).</td>
 	</tr>
 	<tr>
-		<td colspan="3" align="center"><input type="submit" value="Go to next step"></td>
+		<td colspan="3" align="center"><input id="submitButton" type="submit" value="Go to next step"></td>
 
 	</tr>
 </table>
