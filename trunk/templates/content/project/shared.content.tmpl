@@ -8,14 +8,14 @@
 	<tr>
 		<td>Name of Project: </td>
 		<td colspan=2>
-			<div id="name_text" style="display:inline;"><font size="+1"><b>{project_name}</b></font> [<a href="javascript:void(enableInput('name'))">Edit</a>]</div>
+			<div id="name_text" style="display:inline;">[<a href="javascript:void(enableInput('name'))">Edit</a>] <font size="+1"><b>{project_name}</b></font> </div>
 			<div id="name_inputDiv" style="display:none;"><input id="name_input" type='text' name='data[name]' size='45' maxlength='80' value="{project_name}"></div>
 		</td>
 	</tr>
 	<tr>
 		<td>Category:</td>
 		<td>
-			<div id="status_id_text" style="display:inline;">{status_text} [<a href="javascript:void(enableInput('status_id'));">Edit</a>]</div>
+			<div id="status_id_text" style="display:inline;">[<a href="javascript:void(enableInput('status_id'));">Edit</a>] {status_text}</div>
 			<div id="status_id_inputDiv" style="display:none;">
 			<select id="status_id_input" name="data[status_id]" disabled>
 				<option value="0" {select_status_id_0}>New/Offered</option>
@@ -37,7 +37,7 @@
 	<tr>
 		<td>Priority:</td>
 		<td colspan="2">
-			<div id="priority_text" style="display:inline;">{priority} [<a href="javascript:void(enableInput('priority'));">Edit</a>]</div>
+			<div id="priority_text" style="display:inline;">[<a href="javascript:void(enableInput('priority'));">Edit</a>] {priority}</div>
 			<div id="priority_inputDiv" style="display:none;">
 			<select id="priority_input" name='data[priority]' disabled>
 				{select_priority}
@@ -47,29 +47,32 @@
 	</tr>
 	<tr>
 		<td nowrap>Progress: 
-			<div id="progress_text" style="display:inline">{progress} <b>%</b>[<a href="javascript:void(enableInput('progress'));">Edit</a>]</div>
-			<div id="progress_inputDiv" style="display:none;"><input id="progress_input" type="text" name="data[progress]" value="{progress}" size="3" maxlength="3" disabled><b>%</b></div>
 		</td>
-		<td colspan=2>&nbsp;</td>
+		<td colspan=2>
+			<div id="progress_text" style="display:inline">[<a href="javascript:void(enableInput('progress'));">Edit</a>] {progress}<b>%</b></div>
+			<div id="progress_inputDiv" style="display:none;">
+				<input id="progress_input" type="text" name="data[progress]" value="{progress}" size="3" maxlength="3" disabled><b>%</b>
+			</div>
+		</td>
 	</tr>
 	<tr>
 		<td>Begin:</td>
 		<td colspan=2>
-			<div id="start_date_text" style="display:inline">{start_date} [<a href="javascript:void(enableInput('start_date'));">Edit</a>]</div>
+			<div id="start_date_text" style="display:inline">[<a href="javascript:void(enableInput('start_date'));">Edit</a>] {start_date}</div>
 			<div id="start_date_inputDiv" style="display:none;"><input id="start_date_input" type='text' name='data[start_date]' size='10' maxlength='10' value="{start_date}" disabled> [yyyy-mm-dd]</div>
 		</td>
 	</tr>
 	<tr>
 		<td>End:</td>
 		<td colspan=2>
-		<div id="deadline_text" style="display:inline">{deadline} [<a href="javascript:void(enableInput('deadline'));">Edit</a>]</div>
+		<div id="deadline_text" style="display:inline">[<a href="javascript:void(enableInput('deadline'));">Edit</a>] {deadline}</div>
 		<div id="deadline_inputDiv" style="display:none"><input id="deadline_input" type='text' name='data[deadline]' size='10' maxlength='10' value="{deadline}" disabled> [yyyy-mm-dd]</u></div>
 		</td>
 	</tr>
 	<tr>
 		<td>Leader:</td>
 		<td colspan="3">
-			<div id="leader_text" style="display:inline;">{assigned} [<a href="javascript:void(enableInput('leader'));">Edit</a>]</div>
+			<div id="leader_text" style="display:inline;">[<a href="javascript:void(enableInput('leader'));">Edit</a>] {assigned}</div>
 			<div id="leader_inputDiv" style="display:none;"><select id="leader_input" name='data[leader_contact_id]' disabled>
 				{select_leader_uid}
 			</select>
