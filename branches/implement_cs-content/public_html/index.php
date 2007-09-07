@@ -15,10 +15,16 @@ EXAMPLE: public_html/content  ->  ./index.php
 */
 
 require_once(dirname(__FILE__) ."/../lib/includes.php");
+$GLOBALS['DEBUGPRINTOPT'] = 1;
+define("DEBUGPRINTOPT", 1);
+$contentObj = new contentSystem();
+$contentObj->finish();
+
+require_once(dirname(__FILE__) ."/../lib/includes.php");
 
 //done with redirection.  Here's where we define if they have to be logged-in, and then run the fast_templating engine.
 $mustBeLoggedIn = 1;
-require_once(dirname(__FILE__) ."/../includes/fast_templating.inc");
+#require_once(dirname(__FILE__) ."/../includes/fast_templating.inc");
 
 //REDIRECTION
 if(!isset($page->ftsSections[1])) {
@@ -28,6 +34,8 @@ if(!isset($page->ftsSections[1])) {
 	if(!isset($defaultModule) || strlen($defaultModule) < 2) {
 		$defaultModule = "project";
 	}
+	debug_print("defaultModule redirect... ",1);
+	exit;
 	conditional_header("/content/$defaultModule");
 	exit;
 } elseif($_GET['module']) {
