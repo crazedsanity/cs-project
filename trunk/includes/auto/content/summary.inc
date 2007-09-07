@@ -10,7 +10,12 @@ $blockRows = $page->set_all_block_rows('content');
 //retrieve the list of projects ($proj initialized in parent script).
 $filterArr = array('status_id' => array(2,6));
 $projectsArr = $proj->list_projects(NULL,NULL,$filterArr);
-$page->add_template_var('projectCount', count($projectsArr));
+
+$projectCount = 0;
+if(is_array($projectsArr)) {
+	$projectCount = count($projectsArr);
+}
+$page->add_template_var('projectCount', $projectCount);
 $projectRows = process_row($page, $projectsArr, array(), $page->templateRows['project_row'], 0);
 $page->add_template_var('project_row', $projectRows);
 
