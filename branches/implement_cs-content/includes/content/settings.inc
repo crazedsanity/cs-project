@@ -5,8 +5,8 @@
  *  Dan Falconer
  */
 
-require_once(dirname(__FILE__) .'/../../../lib/adminUserClass.php');
-require_once(dirname(__FILE__) .'/../../../lib/prefClass.php');
+require_once(dirname(__FILE__) .'/../../lib/adminUserClass.php');
+require_once(dirname(__FILE__) .'/../../lib/prefClass.php');
 
 
 if($_POST) {
