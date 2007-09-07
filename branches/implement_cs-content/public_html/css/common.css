@@ -1,0 +1,49 @@
+body, a, li { font-size: 8pt; font-family: helvetica, sans-serif; text-decoration:none; }
+a:visited {color: #0000FF; }
+td {font-size: 8pt; font-family: helvetica, sans-serif; text-decoration:none; vertical-align:top; }
+
+form {margin:0; padding:0;}
+input, textarea { background-color: #F5F5F5; font-family: courier, sans-serif; font-size: 8pt; }
+select { font-family: helvetica, sans-serif; background-color: #F5F5F5; font-size: 8pt; }
+
+#notselected { font-size: 8pt;  background-color: #006699; color: #cccccc; font-weight: bold; text-align: center; }
+#selected { font-size: 8pt;  background-color: #cccccc; color: #006699; font-weight: bold; text-align: center; }
+
+#small {font-size: 8pt;}
+#vn { color:silver; }
+#cal { background-color: #006699; color: #cccccc; font-weight: bold; text-align: right; }
+
+#ml {background-color: #006699; color: #CCCCCC; font-weight: bold; text-align: center;}
+#mh {background-color: #F0F0E0; color: #005588; font-weight: bold; text-align: center;}
+#ri { text-align: right; }
+#normal { font-size: 10pt; }
+
+.note { font-style: italic; }
+.note_block {  font-style: normal; background-color: #eee; padding: 5px; border:solid #000 1px; }
+
+/*  For message box colors */
+.fatal { color: #f00; }
+.error { color: #c33; }
+.status { color: #090; }
+.notice { color: #06c; }
+
+table.fatal { color: #000; background-color: transparent }
+table.error { color: #000; background-color: transparent }
+table.status { color: #000; background-color: transparent }
+table.notice { color: #000; background-color: transparent }
+
+table.fatal .title1 { font-size: 18px; color: #f00 }
+table.error .title1 { font-size: 16px; color: #c33 }
+table.status .title1 { font-size: 16px; color: #090 }
+table.notice .title1 { font-size: 16px; color: #06c }
+
+td.fatal { background-color: #f00 }
+td.error { background-color: #c33 }
+td.status { background-color: #090 }
+td.notice { background-color: #06c }
+
+/* Remove unwanted spacing if paragraphed text is added to set_message() */ 
+table.fatal p { margin-top: 0px; margin-bottom: 5px }
+table.error p { margin-top: 0px; margin-bottom: 5px }
+table.status p { margin-top: 0px; margin-bottom: 5px  }
+table.notice p { margin-top: 0px; margin-bottom: 5px  }

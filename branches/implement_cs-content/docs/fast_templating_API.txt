@@ -1,0 +1,112 @@
+---- FAST TEMPLATING API ----
+
+SUMMARY
+Basically, the fast templating system was built for a single purpose: to be able to create a website (or part of a website) FAST, wherein templates are automatically loaded, and scripts are automatically included.  Since only one file needs to be created in the /public_html/ folder, and everything filters through that single script, there is a pre-defined heirarchy for templates and script inclusion, which allows for more logical layout, while able to follow a flexible, powerful API.
+
+ASSUMPTIONS
+1.) When using this API is that within public_html/, there is a file (i.e. "content") which is interpretted by Apache to be a PHP file: this "content" file creates a GenericPage{} object.  
+2.) Database access is not specifically required.
+3.) Session access is not specifically required.
+4.) There exists a "main" template, specified to the GenericPage{} object through an argument,
+which defines the page's basic layout.
+	4.1) The template var "main" is reserved: if something overwrites this template var with another, this may very well cause the page to not display anything but that template.
+	4.2) "header" and footer are always at the top and bottom of the layout, respectively.
+	4.3) "content" will always be where the page's main content is located.
+5.) All templates are stored in a special directory, **beneath** public_html/, named "/templates/".  
+6.) All included files are stored in a special directory, **beneath** public_html, named "/includes/".
+7.) all included files have the extension ".inc".
+8.) all template files have the extension ".tmpl". 
+9.) included files have access to all variables that were defined by main script.
+10.) When examining a url for the purpose of includes & templates, a trailing "/" character will be removed **prior** to processing.
+
+NAMING CONVENTIONS, TEMPLATES:::
+-- for the example url "/content/users/lobby/general", the page's content template would be located in "templates/content/users/lobby/general.content.tmpl".
+-- the template used for the page will always be in the form "<sectionName>.<templateVar>.tmpl".
+-- the following explains in a "url" -> "template/location" method of how it works:
+	* /content/users -> /templates/content/users.content.tmpl
+	* /content/users/lobby -> /templates/content/users/lobby.content.tmpl
+	* /content/users/lobby/general -> /templates/content/users/lobby/general.content.tmpl
+
+CHANGING OTHER TEMPLATE VARS:
+-- it is possible to change other elements of the final rasterized page simply by naming the second portion of the template's filename.  For instance, here is how to change the "infobar" in each of the following urls ("url" -> "template/location" style):
+	* /content/members -> /templates/content/members.infobar.tmpl
+	* /content/users/lobby -> /templates/content/members/lobby.infobar.tmpl
+	* /content/users/lobby/general -> /templates/content/users/lobby/general.infobar.tmpl
+		++ NOTE: if no template for a base template var exists for the current url, the "system" template will be used, even if a base template var exists for the previous section (i.e. /content/users/lobby has an "infobar" template, but /content/users/lobby/general does not: in this case the template /templates/content/system.infobar.tmpl will be used).
+
+NAMING CONVENTIONS, INCLUDES:::
+-- for the given example, the page's include would be found in "include/content/users/lobby/", called "general.inc".
+-- prior to including the "general.inc" subsection file, "include/content/users.inc" would be included.
+-- the following is a list of "url" -> "included/file/location" information:
+	* /content/users -> /include/content/users.inc
+	* /content/users/lobby -> /include/content/users/lobby.inc
+	* /content/users/lobby/general -> /include/content/users/lobby/general.inc
+		++ NOTE: only the LAST include will be processed: if it requires other includes from previous sections, the last script to be processed should require() them.
+		
+TEMPLATES INHERITANCE:
+-- default templates can be loaded from lower URL's if no URL-specific template exists.
+	* List of applicable template files:
+		+ /templates/content/users/users.infobar.tmpl
+		+ /templates/content/users/lobby/stuff/whatever.infobar.tmpl
+	* Examples for given URL's:
+		+ /content/users/  ->  /templates/content/users/users.infobar.tmpl
+		+ /content/users/lobby/stuff/whatever  ->  /templates/content/users/lobby/stuff/whatever.infobar.tmpl
+		+ /content/users/lobby/stuff/whatever/users  ->  /templates/content/users/users.infobar.tmpl
+	
+INCLUDES INHERITANCE:
+-- when including acceptable scripts for the given URL, each include with the proper name for each section of the URL is loaded.  For the example URL of "/content/users/lobby/general", the following list of scripts would attempt to be included (in this order):
+	* /content.inc
+	* /content/users.inc
+	* /content/users/lobby.inc
+	* /content/users/lobby/general.inc
+
+CATCHES:::
+-- no sections can contain a literal ".": if given, it'll be discarded ("/content/users.test/lobby" would be interpretted the same as "/content/users/lobby").
+-- while other scripts will obviously have special needs, the templating and include specs defined here should be used as basic guidelines.
+-- Here is a list of example URLs, and how they would be interpretted:
+	* /content.php/users.html -> /content/users/
+	* /content.html/users.php?x=y/lobby.asp -> /content/users/ (everything after the "?" is interpretted as GET variables for the "members" url.)
+	* /content.html/users.php/lobby.asp?x=y -> /content/users/lobby/
+	* /content.html/users.php/lobby-general/lobby -> /content/users/lobby-general/lobby/ (note that the dash ("-") isn't excluded, so "lobby-general" is viewed as a subsection.)
+-- any include file can override ANY template var, and can include ANY other include or library: if some template for the page is located in a non-standard spot, it can be manually set.
+-- invalid URL's will still appear to be valid to Apache without script intervention.  If the base script is "/content/", and a crawler goes to "/content/database/list/users/id/54554", the fast templating engine (by default) will load the templates & scripts that would be normally executed for that URL.
+
+
+MORE EXAMPLES, WITH INCLUDES + TEMPLATES GIVEN:
+-- /content/users/lobby/special.php
+	* a special script is needed to do various processing.
+	* the infobar for this page is special.
+	+++ INC: /includes/content.inc
+	+++ INC: /includes/content/users.inc
+	+++ INC: /includes/content/users/lobby.inc
+	+++ INC: /includes/content/users/lobby/special.inc
+	+++ TMPL: /templates/system.header.tmpl
+	+++ TMPL: /templates/system.footer.tmpl
+	+++ TMPL: /templates/content/users/lobby.content.tmpl
+	+++ TMPL: /templates/content/users/lobby.infobar.tmpl
+-- /content/users/lobby/more_special.html
+	* this page needs to do all the processing of the previous section, none of it's own.
+	* the infobar remains the same from the previous section.
+	* it has a special "menu".
+	+++ INC: /includes/content.inc
+	+++ INC: /includes/content/users.inc
+	+++ INC: /includes/content/users/lobby.inc
+	+++ INC: (/includes/content/users/lobby/more_special.inc DOES NOT EXIST)
+	+++ TMPL: /templates/content/users/lobby/more_special.content.tmpl
+	+++ TMPL: /templates/content/users/lobby.infobar.tmpl
+	+++ TMPL: /templates/content/users/lobby/more_special.menu.tmpl
+	+++ TMPL: /templates/system.header.tmpl
+	+++ TMPL: /templates/system.footer.tmpl
+-- /rfqcenter/inbox/view.php
+	* has special processing.
+	* retains the infobar from the previous section.
+	* defines a new "submenu" template.
+	* uses a shared content template.
+	+++ INC: /includes/rfqcenter.inc
+	+++ INC: /includes/rfqcenter/inbox.inc
+	+++ INC: /includes/rfqcenter/inbox/view.inc
+	+++ TMPL: /templates/rfqcenter/inbox.infobar.tmpl
+	+++ TMPL: /templates/rfqcenter/inbox/view.submenu.tmpl
+	+++ TMPL: /templates/rfqcenter.content.tmpl
+	+++ TMPL: /templates/system.header.tmpl
+	+++ TMPL: /templates/system.footer.tmpl
