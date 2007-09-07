@@ -401,16 +401,17 @@ if($_POST) {
 		//pull the recordset.
 		$helpdeskArr = $proj->helpdeskObj->get_records($primaryFilterArr, $currentSortArr, $filter);
 		
-		$page->add_template_var("numRows", count($helpdeskArr));
+		$issueCount = 0;
+		if(is_array($helpdeskArr)) {
+			$issueCount = count($helpdeskArr);
+		}
+		$page->add_template_var("numRows", $issueCount);
 		//if there's an array, show it...
 		if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 			//got good data.
 			$baseRow = $page->templateRows['helpdesk_row'];
 			foreach($helpdeskArr as $helpdeskId=>$subData) {
 				unset($deleteLink);
-				if($subData['von'] == $_SESSION['uid']) {
-					$deleteLink = mini_parser($baseDeleteLink, $subData, "%%", "%%");
-				}
 				
 				
 				swapValue($bgColor, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
