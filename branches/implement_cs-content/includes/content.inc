@@ -4,8 +4,13 @@
 //initialize everything we need to display the page & remember stuff in the session.
 $page->ui = new sessionCache("/userInput/content");
 
+//The "sectionArr" is provided from contentSystem::finish() as a local var, and ftsSections is a leftover from fast_templating.
+$page->ftsSections = $sectionArr;
+
 
 //create a user class.
+$page->db = new cs_phpDB;
+$page->db->connect(get_config_db_params());
 $user = new userClass($page->db, $_SESSION['uid']);
 
 if(!$page->ui->get_cache("userData/settings")) {
