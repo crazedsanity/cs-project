@@ -5,9 +5,18 @@
  *  Dan Falconer
  */
 
-//check to make sure if an action is specified, that we've got everything needed: if
-//	 we don't, set a message & do a conditional_header().
-//initialize everything we need to display the page & remember stuff in the session.
+require_once(dirname(__FILE__) ."/../lib/includes.php");
+
+
+$db = new cs_phpDB;
+$db->connect(get_config_db_params());
+$page->db = &$db;
+
+$page->session = new Session($page->db);
+
+//The "sectionArr" is provided from contentSystem::finish() as a local var, and ftsSections is a leftover from fast_templating.
+$page->ftsSections = $sectionArr;
+
 $proj = new projectClass($page->db);
 $page->ui = new sessionCache("/userInput/extern");
 
@@ -55,5 +64,20 @@ if($_SERVER['PHP_SELF'] == "/extern/helpdesk_cust.php") {
 	conditional_header("/extern/helpdesk");
 	exit;
 }
+
+
+
+
+
+
+if(!$htmlTitle) {
+	$htmlTitle = "External Helpdesk Interface";
+	if($titleSub) {
+		$htmlTitle .= " -- ". $titleSub;
+	}
+}
+$page->add_template_var("html_title", $htmlTitle);
+$page->add_template_var("infobar", "");
+
 
 ?>

@@ -4,34 +4,11 @@
  *       by
  *  Dan Falconer
  */
-/*This file should just be **SYMLINKED** as another filename: appropriate entries need to be made in the
-	.htaccess file, to force it to be run as a PHP file.
 
-EXAMPLE: public_html/content  ->  ./index.php
-  ADD TO .htaccess:::
-<files content>
-	ForceType application/x-httpd-php
-</files>
-*/
 
 require_once(dirname(__FILE__) ."/../lib/includes.php");
-
-//before doing anything else, provide redirection for compatibility with old URL's.
-
-//done with redirection.  Here's where we define if they have to be logged-in, and then run the fast_templating engine.
-$mustBeLoggedIn = 0;
-require_once(dirname(__FILE__) ."/../includes/fast_templating.inc");
-
-
-
-if(!$htmlTitle) {
-	$htmlTitle = "External Helpdesk Interface";
-	if($titleSub) {
-		$htmlTitle .= " -- ". $titleSub;
-	}
-}
-$page->add_template_var("html_title", $htmlTitle);
-$page->add_template_var("infobar", "");
-
-$page->print_page();
+$GLOBALS['DEBUGPRINTOPT'] = 1;
+define("DEBUGPRINTOPT", 1);
+$contentObj = new contentSystem();
+$contentObj->finish();
 ?>
