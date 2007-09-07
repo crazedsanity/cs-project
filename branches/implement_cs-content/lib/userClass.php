@@ -16,7 +16,7 @@ class userClass {
 	protected $logsObj;
 	
 	//================================================================================================
-	function userClass(&$db, $uid=NULL) {
+	function userClass(cs_phpDB &$db, $uid=NULL) {
 		
 		if(is_numeric(LOGCAT__USERS)) {
 			$this->logCategoryId = LOGCAT__USERS;
