@@ -13,18 +13,22 @@ function toggleDisplay(obj, oldDisplay) {
 }
 
 
-function enableTodoEditTitle() {
-	//call a less-specific function to do the work.
-	enableInput('title_text', 'titleInput', 'newTitleInput');
-}
-
-
-function enableInput(textDivName, inputDivName, inputId) {
-	var inputObj = document.getElementById(inputId);
+/**
+ * Works simply by having 2 divs and an input with standardized 
+ * prefixes, and having special suffixes so it's easy to call 
+ * without having to pass the names of the three elements.
+**/
+function enableInput(prefixName) {
+	//set the names of the items.
+	var inputObjName = prefixName + '_input';
+	var textDivName  = prefixName + '_text';
+	var inputDivName = prefixName + '_inputDiv';
 	
-	//enable the input.
+	
+	//now enable the input.
+	var inputObj = document.getElementById(inputObjName);
 	inputObj.disabled = false;
-	inputObj.style.display = '';
+	inputObj.style.display = 'inline';
 	
 	//make the text disappear.
 	toggleDisplay(textDivName, 'inline');

@@ -15,10 +15,9 @@
 	
 	<td>
 		<div style="padding:0px;" id="titleDisplay">
-				<div id="title_text" style="display:inline;"><font size="+1"><b>{name}</b></font></div>
+				<div id="title_text" style="display:inline;"><font size="+1"><b>{name}</b></font> [<a href="javascript:void(enableInput('title'));">Edit</a>]</div>
 <!-- BEGIN edit_title_link -->
-		<div id="titleInput" style="display:none;"><input id="newTitleInput" type="text" size="80" name="updates[name]" value="{name}" disabled></div>
-		<div id="editTitle" style="display:inline;">[<a href="javascript:void(enableTodoEditTitle());">Edit Title</a>]</div>
+		<div id="title_inputDiv" style="display:none;"><input id="title_input" type="text" size="80" name="updates[name]" value="{name}" disabled></div>
 <!-- END edit_title_link -->
 		</div>
 	</td>
@@ -63,7 +62,8 @@
 	<th>Assign to: </th>
 	<td>
 		<!-- BEGIN assign_list -->
-			<select name="updates[assigned_contact_id]">
+			<div id="assigned_contact_id_text" style="display:inline;">{assigned_user} [<a href="javascript:void(enableInput('assigned_contact_id'))">Edit</a>]</div>
+			<div id="assigned_contact_id_inputDiv" style="display:none"><select id="assigned_contact_id_input" name="updates[assigned_contact_id]" disabled></div>
 				{user_assign_list}
 			</select>
 		<!-- END assign_list -->
@@ -90,7 +90,7 @@
 
 	<td nowrap>
 		<!-- BEGIN modifiable_started -->
-		<div id="started_text" style="display:inline;">{started} [<a href="javascript:void(enableInput('started_text', 'started_inputDiv', 'started_input'));">Edit</a>]</div>
+		<div id="started_text" style="display:inline;">{started} [<a href="javascript:void(enableInput('started'));">Edit</a>]</div>
 		<div id="started_inputDiv" style="display:none;"><input id="started_input" name="updates[started]" size="10" maxlength="10" value="{started}" type="text" disabled></div> 
 		<!-- END modifiable_started -->
 		<!-- BEGIN readonly_started -->
@@ -104,7 +104,7 @@
 	
 	<td>
 	<!-- BEGIN modifiable_deadline -->
-		<div id="deadline_text" style="display:inline;">{deadline} [<a href="javascript:void(enableInput('deadline_text', 'deadline_inputDiv', 'deadline_input'))">Edit</a>]</div>
+		<div id="deadline_text" style="display:inline;">{deadline} [<a href="javascript:void(enableInput('deadline'))">Edit</a>]</div>
 		<div id="deadline_inputDiv" style="display:none"><input id="deadline_input" name="updates[deadline]" size="10" maxlength="10" value="{deadline}" type="text"></div>  [yyyy-mm-dd]
 	<!-- END modifiable_deadline -->
 	<!-- BEGIN readonly_deadline -->
@@ -153,10 +153,12 @@
 					<input type="text" size="15" maxlength="15" name="updates[estimate_original]" value="">
 				<!-- END input_orig_estimate -->
 					&nbsp;&nbsp;&nbsp;&nbsp;
-					<b>Current Estimate:</b>  {estimate_current}
+					<b>Current Estimate:</b>  <div id="estimate_current_text" style="display:inline;">{estimate_current} 
 					<!-- BEGIN modifiable_curr_estimate -->
-						<input type="text" size="15" maxlength="15" name="updates[estimate_current]" value="">
+						[<a href="javascript:void(enableInput('estimate_current'))">Edit</a>]</div>
+						<div id="estimate_current_inputDiv" style="display:none;"><input id="estimate_current_input" type="text" size="15" maxlength="15" name="updates[estimate_current]" value="" disabled>
 					<!-- END modifiable_curr_estimate -->
+					</div>
 				</td>
 				
 				<td>
@@ -176,9 +178,11 @@
 			<tr>
 				<td><b>Priority: </b>
 					<!-- BEGIN modifiable_priority -->
-					<select name="updates[priority]">
+					<div id="priority_text" style="display:inline;">{priority} [<a href="javascript:void(enableInput('priority'))">Edit</a>]</div>
+					<div id="priority_inputDiv" style="display:none;"><select id="priority_input" name="updates[priority]">
 						{select_priority_list}
 					</select>
+					</div>
 					<input type="HIDDEN" name="updates[status_id]" value="{status_id}">
 					<!-- END modifiable_priority -->
 					<!-- BEGIN readonly_priority -->
