@@ -15,10 +15,10 @@
 	
 	<td>
 		<div style="padding:0px;" id="titleDisplay">
-				<div id="title_text" style="display:inline"><font size="+1"><b>{name}</b></font><BR></div>
+				<div id="title_text" style="display:inline;"><font size="+1"><b>{name}</b></font></div>
 <!-- BEGIN edit_title_link -->
-		<div id="editTitle" style="display:inline"><a href="javascript:void(enableTodoEditTitle());">Edit Title</a></div>
 		<div id="titleInput" style="display:none;"><input id="newTitleInput" type="text" size="80" name="updates[name]" value="{name}" disabled></div>
+		<div id="editTitle" style="display:inline;">[<a href="javascript:void(enableTodoEditTitle());">Edit Title</a>]</div>
 <!-- END edit_title_link -->
 		</div>
 	</td>
@@ -78,7 +78,8 @@
 </tr>
 <tr>
 	<th>Project:</th>
-	<td>[ <a href="/content/project/view?ID={public_id}">{record_name}</a> ]</td>
+	<td>[ <a href="/content/project/view?ID={public_id}">{record_name}</a> ]
+		<div class="note" style="display:inline;">NOTE: add link to facility that allows changing linked project...</div></td>
 </tr>
 <tr>
 	<th>Status: </th>
@@ -87,9 +88,10 @@
 <tr>
 	<th>Begin:</th>
 
-	<td>
+	<td nowrap>
 		<!-- BEGIN modifiable_started -->
-		<input name="updates[started]" size="10" maxlength="10" value="{started}" type="text"> 
+		<div id="started_text" style="display:inline;">{started} [<a href="javascript:void(enableInput('started_text', 'started_inputDiv', 'started_input'));">Edit</a>]</div>
+		<div id="started_inputDiv" style="display:none;"><input id="started_input" name="updates[started]" size="10" maxlength="10" value="{started}" type="text" disabled></div> 
 		<!-- END modifiable_started -->
 		<!-- BEGIN readonly_started -->
 			{started}
@@ -102,7 +104,8 @@
 	
 	<td>
 	<!-- BEGIN modifiable_deadline -->
-		<input name="updates[deadline]" size="10" maxlength="10" value="{deadline}" type="text">  [yyyy-mm-dd]
+		<div id="deadline_text" style="display:inline;">{deadline} [<a href="javascript:void(enableInput('deadline_text', 'deadline_inputDiv', 'deadline_input'))">Edit</a>]</div>
+		<div id="deadline_inputDiv" style="display:none"><input id="deadline_input" name="updates[deadline]" size="10" maxlength="10" value="{deadline}" type="text"></div>  [yyyy-mm-dd]
 	<!-- END modifiable_deadline -->
 	<!-- BEGIN readonly_deadline -->
 		{deadline}
