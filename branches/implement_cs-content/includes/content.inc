@@ -3,6 +3,12 @@
 require_once(dirname(__FILE__) ."/../lib/cs-content/cs_tabsClass.php");
 
 
+$db = new cs_phpDB;
+$db->connect(get_config_db_params());
+$page->db = &$db;
+
+$page->session = new Session($page->db);
+
 //initialize everything we need to display the page & remember stuff in the session.
 $page->ui = new sessionCache("/userInput/content");
 
