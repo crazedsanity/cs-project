@@ -16,95 +16,73 @@ $page->ui = new sessionCache("/userInput/content");
 $page->ftsSections = $sectionArr;
 
 
-$page->add_template_var('cs-content_version', VERSION_STRING);
+$page->add_template_var('cs-project_version', VERSION_STRING);
 
 
 //done with redirection.  Here's where we define if they have to be logged-in, and then run the fast_templating engine.
 //TODO: update this to be "cs-content friendly".  :) 
 $mustBeLoggedIn = 1;
 
-//REDIRECTION
-if(!isset($page->ftsSections[1])) {
-	//don't allow access to / or /content: just put them directly to /content/<lastModuleTheyWereOn>.
-	$ui = new sessionCache();
-	$defaultModule = $ui->get_cache("/userInput/content/module");
-	if(!isset($defaultModule) || strlen($defaultModule) < 2) {
-		$defaultModule = "project";
-	}
-	conditional_header("/content/$defaultModule");
-	exit;
-} elseif($_GET['module']) {
-	//redirection for compatibility with old URL's.
-	$getVarsArr = array();
-	$goHere = "/content/". $_GET['module'];
-	if($_GET['action']) {
-		 $goHere .= "/". $_GET['action'];
-		if(is_numeric($_GET['ID'])) {	
-			$getVarsArr['ID'] = $_GET['ID'];
-		}
-	}
-	$getVarsArr['autoRedir'] = "compatibility";
-	$getVarStr = string_from_array($getVarsArr,"url","&");
-	
-	//set a message so they know about the auto-redirection.
-	set_message_wrapper(array(
-		"title"		=> "Automatic Redirection",
-		"message"	=> "For compatibility with old URLs (from emails and such), you have been automatically redirected from " .
-						"<b>". $_SERVER['REQUEST_URI'] ."</b>",
-		"type"		=> "notice"
-	));
-	
-	conditional_header($goHere .'?'. $getVarStr);
-	exit;
+$userSettings = $page->ui->get_cache("userData/settings");
+$defaultModule = $userSettings['startmodule'];
+if(!isset($defaultModule) || strlen($defaultModule) < 2) {
+	$defaultModule = "project";
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//create a user class.
-$page->db = new cs_phpDB;
-$page->db->connect(get_config_db_params());
 $user = new userClass($page->db, $_SESSION['uid']);
 
 if(!$page->ui->get_cache("userData/settings")) {
 	$page->ui->set_cache("userData/settings", $user->get_settings());
 }
 
-$userSettings = $page->ui->get_cache("userData/settings");
-$defaultModule = $userSettings['startmodule'];
-if(!isset($defaultModule) || strlen($defaultModule) < 2) {
-	$defaultModule = "project";
-} 
 
+//REDIRECTION
 if(is_numeric($_GET['changeGroup'])) {
-	$lastModule = $page->ftsSections[1];
+	$lastModule = $page->ui->get_cache('lastModule');
+	
+	if(!strlen($lastModule)) {
+		$lastModule = 'project';
+	}
+	
+	//TODO: make sure the group_id given is valid!
 	$_SESSION['group_id'] = $_GET['changeGroup'];
 	conditional_header("/content/". $lastModule);
 	exit;
 }
+elseif(!isset($page->ftsSections[1]) || (count($page->ftsSections) == 2 && $page->ftsSections[1] == 'index')) {
+	//don't allow access to / or /content: just put them directly to /content/<lastModuleTheyWereOn>.
+	$ui = new sessionCache();
+	conditional_header("/content/". $defaultModule);
+	exit;
+}
+
+
+
+
+
+//remember what the last module used was, for possible redirection later.
+$page->ui->set_cache("lastModule", $page->ftsSections[1]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //before going on, let's see if the URL is set properly, so we load the correct section.
 //NOTE: "ftsSections" is a special array from the "fast_templating" engine.

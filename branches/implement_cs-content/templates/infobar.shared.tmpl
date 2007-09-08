@@ -2,7 +2,7 @@
 	<tr>
 		<td rowspan=2 valign=top nowrap><a href=http://www.partslogistics.com target='_top'>
 		<img src='/images/logo.gif' alt='CS-Project {cs-content_version}' border='0'></a><BR>
-		<font size="-7">version {cs-content_version}</font>
+		<font size="-7">version {cs-project_version}</font>
 		</td>
 		<td rowspan=2><img src='/images/pixel_clear.gif' border='0' width=3 height=10></td>
 		<td rowspan=2 colspan=30><img src='/images/pixel_clear.gif' border='0' height=25></td>
@@ -17,7 +17,7 @@
 		<form action="/content" method=get>
 		<td valign=top><img src='/images/tab_left_inactive.gif' border='0' height="100%"></td>
 		<td id='notselected' valign=top><input type=hidden name='module' value='projects'>
-			<input type=hidden name='mode2' value=''>
+			<input type="hidden" name="version" value="{cs-project_version}">
 			<select name=changeGroup onchange='document.forms[0].submit()'>
 				{group_option_list}
 			</select></form>
