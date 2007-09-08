@@ -220,7 +220,7 @@ else {
 		//Group administration.
 		{
 			$showGroup = $page->ui->get_cache("settings/showGroup");
-			if($_GET['showGroup']) {
+			if(is_numeric($_GET['showGroup'])) {
 				$showGroup = $_GET['showGroup'];
 			}
 			elseif(!is_numeric($showGroup)) {
