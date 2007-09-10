@@ -24,8 +24,7 @@
  */
 
 
-class logsClass
-{
+class logsClass {
 	/** Database handle */
 	private $db;
 	
@@ -45,22 +44,19 @@ class logsClass
 	/**
 	 * The constructor.
 	 */
-	public function __construct(cs_phpDB &$db, $logCategoryId)
-	{
+	public function __construct(cs_phpDB &$db, $logCategoryId) {
 		//assign the database object.
 		$this->db = $db;
 		
 		//assign the log_category_id.
-		if(!is_numeric($logCategoryId))
-		{
+		if(!is_numeric($logCategoryId)) {
 			//oh, jeez.
 			throw new exception(__METHOD__ .": FATAL: unable to set logCategoryId");
 		}
 		$this->logCategoryId = $logCategoryId;
 		
 		//check for a uid in the session.
-		if(is_numeric($_SESSION['uid']))
-		{
+		if(is_numeric($_SESSION['uid'])) {
 			//got an ID in the session.
 			$this->defaultUid = $_SESSION['uid'];
 		}
@@ -73,20 +69,17 @@ class logsClass
 	
 	
 	//=========================================================================
-	private function build_cache()
-	{
+	private function build_cache() {
 		//build query, run it, check for errors.
 		$sql = "SELECT log_class_id, lower(name) as name FROM log_class_table";
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(strlen($dberror) || $numrows < 5)
-		{
+		if(strlen($dberror) || $numrows < 5) {
 			//something bad happened.
 			throw new exception(__METHOD__ .": not enough data ($numrows) or database error:::\n$dberror");
 		}
-		else
-		{
+		else {
 			//got it.
 			$this->logClassCache = $this->db->farray_nvp('name', 'log_class_id');
 		}
@@ -96,18 +89,15 @@ class logsClass
 	
 	
 	//=========================================================================
-	private function get_log_class_id($name)
-	{
+	private function get_log_class_id($name) {
 		$name = strtolower($name);
 		
 		//get the id.
-		if(isset($this->logClassCache[$name]))
-		{
+		if(isset($this->logClassCache[$name])) {
 			//set the id.
 			$retval = $this->logClassCache[$name];
 		}
-		else
-		{
+		else {
 			//ick.
 			throw new exception(__METHOD__ .": unable to get log_class_id for ($name)". debug_print($this->logClassCache,0));
 		}
@@ -119,10 +109,8 @@ class logsClass
 	
 	
 	//=========================================================================
-	function get_log_event_id($logClassName)
-	{
-		$sqlArr = array
-		(
+	function get_log_event_id($logClassName) {
+		$sqlArr = array(
 			'log_class_id'		=> $this->get_log_class_id($logClassName),
 			'log_category_id'	=> $this->logCategoryId
 		);
@@ -131,18 +119,15 @@ class logsClass
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(!strlen($dberror) && $numrows == 0 && is_numeric($sqlArr['log_class_id']))
-		{
+		if(!strlen($dberror) && $numrows == 0 && is_numeric($sqlArr['log_class_id'])) {
 			//no records & no error: create one.
 			$retval = $this->auto_insert_record($sqlArr['log_class_id']);
 		}
-		elseif(strlen($dberror) || $numrows !== 1)
-		{
+		elseif(strlen($dberror) || $numrows !== 1) {
 			//database error... DIE.
 			throw new exception(__METHOD__ .": database error:::\n$dberror\nSQL:::$sql");
 		}
-		else
-		{
+		else {
 			//get the data & return it.
 			$data = $this->db->farray();
 			$retval = $data[0];
@@ -155,11 +140,9 @@ class logsClass
 	
 	
 	//=========================================================================
-	public function log_by_class($details, $className="error", $uid=NULL, $recTypeId=NULL, $recId=NULL)
-	{
+	public function log_by_class($details, $className="error", $uid=NULL, $recTypeId=NULL, $recId=NULL) {
 		//make sure we've got a uid to log under.
-		if(is_null($uid) || !is_numeric($uid))
-		{
+		if(is_null($uid) || !is_numeric($uid)) {
 			//set it.
 			$uid = $this->defaultUid;
 		}
@@ -167,15 +150,15 @@ class logsClass
 		//determine the log_event_id.
 		try {
 			$logEventId = $this->get_log_event_id($className);
-		} catch(Exception $e) {
+		}
+		catch(Exception $e) {
 			throw new exception(__METHOD__ .": while attempting to retrieve logEventId, encountered an exception:::\n". $e->getMessage()
 			."\n\nCLASS: $className\nDETAILS: $details");
 		}
 		
 		//check to see what uid to use.
 		$myUid = $_SESSION['user_ID'];
-		if(!is_numeric($myUid))
-		{
+		if(!is_numeric($myUid)) {
 			//use the internal default uid.
 			$myUid = $this->defaultUid;
 		}
@@ -188,8 +171,7 @@ class logsClass
 			'affected_uid'	=> 'numeric',
 			'details'		=> 'sql'
 		);
-		$sqlArr = array
-		(
+		$sqlArr = array (
 			'log_event_id'	=> cleanString($logEventId, 'numeric'),
 			'group_id'		=> $_SESSION['group_id'],
 			'uid'			=> $myUid,
@@ -207,13 +189,11 @@ class logsClass
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(strlen($dberror) || $numrows !== 1)
-		{
+		if(strlen($dberror) || $numrows !== 1) {
 			//bad.
 			throw new exception(__METHOD__ .": no records created ($numrows) or database error:::\n$dberror\n$sql");
 		}
-		else
-		{
+		else {
 			//good to go.
 			$retval = $numrows;
 			
@@ -223,8 +203,7 @@ class logsClass
 			$dberror = $this->db->errorMsg();
 			
 			//it's okay if it doesn't work.
-			if(!strlen($dberror) && $numrows == 1)
-			{
+			if(!strlen($dberror) && $numrows == 1) {
 				//got it!
 				$data = $this->db->farray();
 				$retval = $data[0];
@@ -238,8 +217,7 @@ class logsClass
 	
 	
 	//=========================================================================
-	public function log_dberror($details, $uid=NULL, $skipCurrentCatLog=FALSE)
-	{
+	public function log_dberror($details, $uid=NULL, $skipCurrentCatLog=FALSE) {
 		//set the error for the current category.
 		if(!$skipCurrentCatLog && ($this->logCategoryId !== $this->databaseCategory)) {
 			//yep, log it!
@@ -268,8 +246,7 @@ class logsClass
 	/**
 	 * Attempts to auto-recover if a class was requested that doesn't exist.
 	 */
-	private function auto_insert_record($logClassId)
-	{
+	private function auto_insert_record($logClassId) {
 		//generate a default name
 		$sql = "SELECT (select name FROM log_class_table WHERE log_class_id=". $logClassId .") || ': ' || " .
 				"(select name FROM log_category_table WHERE log_category_id=". $this->logCategoryId .") || " .
@@ -277,21 +254,18 @@ class logsClass
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(strlen($dberror) || $numrows !== 1)
-		{
+		if(strlen($dberror) || $numrows !== 1) {
 			//something bad happened.  Unable to recover.
 			throw new exception(__METHOD__ .": failed to recover with log_class_id=(". $logClassId .") " .
 					"AND log_category_id=(". $this->logCategoryId .")");
 		}
-		else
-		{
+		else {
 			//retrieve the record.
 			$myData = $this->db->farray();
 			$details = $myData[0];
 			
 			//create the sql array.
-			$sqlArr = array
-			(
+			$sqlArr = array (
 				'log_class_id'		=> $logClassId,
 				'log_category_id'	=> $this->logCategoryId,
 				'description'		=> "'". cleanString($details, 'sql') ."'"
@@ -302,26 +276,22 @@ class logsClass
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
 			
-			if(strlen($dberror) || $numrows !== 1)
-			{
+			if(strlen($dberror) || $numrows !== 1) {
 				//terrible.  So close to auto-recovery.
 				throw new exception(__METHOD__ .": unable to recover, numrows=($numrows), dberror:::\n$dberror\n$sql");
 			}
-			else
-			{
+			else {
 				//got it.  Retrieve the id.
 				$sql = "SELECT currval('log_event_table_log_event_id_seq'::text)";
 				$numrows = $this->db->exec($sql);
 				$dberror = $this->db->errorMsg();
 				
-				if(strlen($dberror) || $numrows !== 1)
-				{
+				if(strlen($dberror) || $numrows !== 1) {
 					//couldn't get the value... but we inserted it....
 					throw new exception(__METHOD__ .": unable to retrieve newly inserted id... " .
 							"numrows=($numrows), dberror:::\n$dberror");
 				}
-				else
-				{
+				else {
 					//got our value!!!
 					$data = $this->db->farray();
 					$retval = $data[0];
@@ -336,8 +306,7 @@ class logsClass
 	
 	
 	//=========================================================================
-	public function get_logs(array $criteria, array $orderBy=NULL, $limit=20, $excludeNavigation=TRUE)
-	{
+	public function get_logs(array $criteria, array $orderBy=NULL, $limit=20, $excludeNavigation=TRUE) {
 		//set a default for the limit.
 		if(!is_numeric($limit) || $limit < 1) {
 			//set it again.
@@ -372,13 +341,11 @@ class logsClass
 				$cleanStringArg = $myFieldData[1];
 				
 				//clean the data.
-				if($field == 'creation' && is_numeric($value))
-				{
+				if($field == 'creation' && is_numeric($value)) {
 					$value = cleanString($value, 'numeric');
 					$cleanedData = ">= (NOW() - interval '". $value ." hours')";
 				}
-				else
-				{
+				else {
 					$cleanedData = cleanString($value, $cleanStringArg);
 				}
 				
@@ -392,15 +359,13 @@ class logsClass
 		
 		
 		//build the criteria.
-		if($excludeNavigation)
-		{
+		if($excludeNavigation) {
 			$sqlArr['ca.log_category_id'] = '<>10';
 		}
 		$critString = string_from_array($sqlArr, 'select');
 		
 		//check if "timeperiod" is in there (it's special)
-		if(isset($criteria['timeperiod']) && isset($criteria['timeperiod']['start']) && isset($criteria['timeperiod']['end']))
-		{
+		if(isset($criteria['timeperiod']) && isset($criteria['timeperiod']['start']) && isset($criteria['timeperiod']['end'])) {
 			//add it in!
 			$myTime = $criteria['timeperiod'];
 			$addThis = "(l.creation >= '". $myTime['start'] ."'::date AND l.creation <= '". $myTime['end'] ."'::date + interval '1 day')";
@@ -433,13 +398,11 @@ class logsClass
 		$dberror = $this->db->errorMsg();
 		
 		$retval = array();
-		if(strlen($dberror) || $numrows < 0)
-		{
+		if(strlen($dberror) || $numrows < 0) {
 			//log the problem, and make sure it's not logged twice.
 			$this->log_dberror(__METHOD__ .": no rows ($numrows) or database error:::\n". $dberror, NULL, TRUE);
 		}
-		elseif($numrows > 0)
-		{
+		elseif($numrows > 0) {
 			//retrieve the data.
 			$retval = $this->db->farray_fieldnames('log_id', NULL, 0);
 		}
@@ -451,8 +414,7 @@ class logsClass
 	
 	
 	//=========================================================================
-	public function get_recent_logs()
-	{
+	public function get_recent_logs() {
 		//set the criteria so we only get things within the last hour.
 		$criteria = array(
 			'creation'	=> 1
