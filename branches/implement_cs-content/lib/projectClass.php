@@ -348,13 +348,9 @@ class projectClass extends mainRecord {
 		$updateResult = parent::update_record($criteria, $updatesArr);
 
 		if($updateResult != 1) {
-			//shithead!!!
-			$this->db->rollbackTrans();
 			$this->logsObj->log_dberror("update_project(): failed to update... numrows=($numrows), dberror::: $dberror");
 			$retval = 0;
 		} else {
-			//good to go.
-			$this->db->commitTrans();
 			$retval = $updateResult;
 			
 			//send off the list of users for assignment.
