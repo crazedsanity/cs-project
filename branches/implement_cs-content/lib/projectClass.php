@@ -80,6 +80,9 @@ class projectClass extends mainRecord {
 			$this->groupId = $newId;
 			$retval = $newId;
 		}
+		else {
+			throw new exception(__METHOD__ .": unable to determine group_id... session probably invalid");
+		}
 		
 		return($retval);
 		
