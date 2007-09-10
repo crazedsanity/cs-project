@@ -56,7 +56,6 @@ require_once(dirname(__FILE__) ."/todoClass.php");
 require_once(dirname(__FILE__) ."/helpdeskClass.php");
 require_once(dirname(__FILE__) ."/emailFaxClass.php");
 require_once(dirname(__FILE__) ."/userClass.php");
-require_once(dirname(__FILE__) ."/fileSystemClass.php");
 require_once(dirname(__FILE__) ."/tagClass.php");
 require_once(dirname(__FILE__) ."/prefClass.php");
 ?>
