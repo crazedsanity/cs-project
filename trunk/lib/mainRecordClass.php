@@ -498,10 +498,8 @@ class mainRecord {
 	/**
 	 * Retrieves all parents of the given project.
 	 */
-	function get_ancestry($projectId, $isHelpdeskIssue=FALSE)
-	{
-		if(!is_numeric($projectId))
-		{
+	function get_ancestry($projectId, $isHelpdeskIssue=FALSE) {
+		if(!is_numeric($projectId)) {
 			$projectId = $this->projectId;
 		}
 		$isHelpdeskIssue = cleanString($isHelpdeskIssue,'boolean_strict');
