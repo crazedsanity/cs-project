@@ -161,8 +161,7 @@ class helpdeskClass extends mainRecord {
 		);
 		$retval = $noteObj->create_note($noteData);
 		
-		if($retval > 0)
-		{
+		if($retval > 0) {
 			//send the submitter an email		
 			$newRemarks = $remark;
 			$emailTemplate = html_file_to_string("email/helpdesk-remark.tmpl");
@@ -197,8 +196,7 @@ class helpdeskClass extends mainRecord {
 				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			}
 		}
-		else
-		{
+		else {
 			//something went wrong.
 			$this->logsObj->log_by_class("remark(): failed to update record ($retval)", 'error', NULL, $this->recordTypeId, $helpdeskId);
 		}
@@ -243,8 +241,7 @@ class helpdeskClass extends mainRecord {
 				$retval = $this->update_record($helpdeskId, $updatesArr);
 				
 				//only send an email if the update succeeded.
-				if($retval == 1)
-				{
+				if($retval == 1) {
 					//send the submitter an email		
 					$parseArr = $this->get_record($helpdeskId);
 					$emailTemplate = html_file_to_string("email/helpdesk-solve.tmpl");
@@ -285,12 +282,11 @@ class helpdeskClass extends mainRecord {
 					$this->logsObj->log_by_class("Solve notice sent to: ". $sendEmailRes, 'information', NULL, $this->recordTypeId, $helpdeskId);
 					$this->logsObj->log_by_class("Solved issue #". $helpdeskId .": ". $parseArr['name'], 'report', NULL, $this->recordTypeId, $helpdeskId);
 				}
-				else
-				{
+				else {
 					//log the problem.
 					$this->logsObj->log_by_class("solve(): failed to update record ($retval)", 'report', NULL, $this->recordTypeId, $helpdeskId);
 				}
-				}
+			}
 			else {
 				//failed to create the solution remark.
 				$this->logsObj->log_dberror("Unable to create solution note: (". $createSolution .")");
