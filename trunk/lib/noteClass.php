@@ -183,7 +183,8 @@ class noteClass {
 		
 		if($this->lastError || $numrows != 1) {
 			$retval = 0;
-		} else {
+		}
+		else {
 			$retval = 1;
 		}
 		
@@ -250,7 +251,8 @@ class noteClass {
 				throw new exception("create_note(): ". $this->lastError);
 			}
 			$retval = 0;
-		} else {
+		}
+		else {
 			//got good data... get the note_id.
 			$numrows = $this->db->exec("SELECT currval('note_table_note_id_seq')");
 			$this->lastError = $this->db->errorMsg();
@@ -258,7 +260,8 @@ class noteClass {
 			//make sure we're still okay.
 			if($this->lastError || $numrows != 1) {
 				$retval = -1;
-			} else {
+			}
+			else {
 				$tmp = $this->db->farray();
 				$retval = $tmp[0];
 			}
