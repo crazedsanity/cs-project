@@ -45,7 +45,6 @@ define('FORMAT_WORDWRAP',	100);
 
 
 require_once(dirname(__FILE__) ."/cs-content/contentSystemClass.php");
-require_once(dirname(__FILE__) ."/pg_abstraction_layer.inc");
 require_once(dirname(__FILE__) ."/logsClass.php");
 require_once(dirname(__FILE__) ."/session_class.php");
 require_once(dirname(__FILE__) ."/sessionCacheClass.php");
