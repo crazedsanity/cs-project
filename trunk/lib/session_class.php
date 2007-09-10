@@ -32,8 +32,7 @@ class Session{
 
 
 	//##########################################################################
-	function __construct(&$db, $create_session=1)
-	{
+	function __construct(&$db, $create_session=1) 	{
 		
 		if(is_numeric(LOGCAT__AUTHENTICATION)) {
 			$this->logCategoryId = LOGCAT__AUTHENTICATION;
@@ -53,14 +52,12 @@ class Session{
 		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=||
 		//	MUCHO IMPORTANTE!!!! DB MUST BE CONNECTED!!!	||
 		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=||
-		if(!is_object($db))
-		{
+		if(!is_object($db)) {
 			//looks like we haven't got a database yet... create one.
 			$this->db = new phpDB;
 			$this->db->connect();
 		}
-		else
-		{
+		else {
 			$this->db = $db;
 		}
 		
@@ -68,8 +65,7 @@ class Session{
 		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
 		
 		//create a session, if needs be.
-		if($create_session)
-		{
+		if($create_session) {
 			$this->create_session();
 
 			// grabs the user's IP.
@@ -85,8 +81,7 @@ class Session{
 
 
 	//##########################################################################
-	function validate_session_id($sid)
-	{
+	function validate_session_id($sid) {
 		//makes sure that the given sid is alphanumeric & length of 32.
 		$sid=cleanString($sid, "all");
 		if(strlen($sid) > 0) {
@@ -108,8 +103,7 @@ class Session{
 	 * @param (void)
 	 * @return NULL
 	 */
-	function create_session()
-	{
+	function create_session() {
 		ob_start();
 		//initializes all session vars.
 		session_start();
@@ -122,32 +116,26 @@ class Session{
 		//  if we can't determine who the user is supposed to be, we'll assume they're
 		//  anonymous.
 	
-		if($_SESSION['uid'])
-		{
+		if($_SESSION['uid']) {
 			//self-righting mechanism....
 			// if the uid isn't an integer, send flying monkeys to burn the city!
-			if(is_numeric($_SESSION['uid']))
-			{
+			if(is_numeric($_SESSION['uid'])) {
 				$this->uid = $_SESSION['uid'];
 			}
-			else
-			{
+			else {
 				throw new exception("Session(): FATAL: uid was NOT an integer! " . $_SESSION['uid'] . "<BR>\n\n");
 			}
 		}
-		elseif(strlen($this->sid) == 32)
-		{
+		elseif(strlen($this->sid) == 32) {
 			//self-righting mechanism... something seems to have killed $_SESSION['uid'], but we've
 			//	still got their sessionId... fix the session & log the issue...
 			
 			$this->uid=$this->uid_from_sid($this->sid);
-			if ($this->uid > 0)
-			{
+			if ($this->uid > 0) {
 				$_SESSION['uid'] = $this->uid;
 			}
 		}
-		else
-		{
+		else {
 			$debugInfo  = "_SESSION uid: ". $_SESSION['uid'] ." || this->uid: ". $this->uid ." || this->sid: ". $this->sid;
 			$debugInfo .= " || Referer list: ". print_r($_SESSION['referrers']);
 			$debugInfo .= " || LAST QUERY: ". $this->db->last_query;
@@ -172,28 +160,22 @@ class Session{
 	 * @return 1		PASS
 	 * @return 0		FAIL
 	 */
-	function Auth_SID()
-	{
-		//
-		if($this->validate_session_id($this->sid) && is_numeric($_SESSION['user_ID']) && $_SESSION['user_ID'] > 0)
-		{
+	function Auth_SID() {
+		if($this->validate_session_id($this->sid) && is_numeric($_SESSION['user_ID']) && $_SESSION['user_ID'] > 0) {
 			//how many minutes do they have left?
 			$secondsLeft = $this->check_session_idleness();
-			if(($secondsLeft > 0))
-			{
+			if(($secondsLeft > 0)) {
 				//set it.
 				$this->sessionTimeLeft = ($secondsLeft / 60);
 				$this->sid_check = 1;
 			}
-			else
-			{
+			else {
 				//hrm... session is expired.
 				$this->sessionTimeLeft = 0;
 				$this->sid_check = 0;
 			}
 		}
-		else
-		{
+		else {
 			//nope.
 			$this->sessionTimeLeft = 0;
 			$this->sid_check = 0;
@@ -221,8 +203,7 @@ class Session{
 	*
 	* NOTE: User should see generic error when either a "1" or a "2" is returned.
 	*/
-	function login($username, $password)
-	{
+	function login($username, $password) {
 		
 		//precheck... 
 		#if((STOP_LOGINS_ON_GLOBAL_ALERT) AND ($this->check_global_alerts(0))) {
@@ -235,42 +216,35 @@ class Session{
 		$authResult = $this->authenticate_user($username,$password);
 
 		//log based-upon the code returned from authenticate_user() 
-		if($authResult === "null")
-		{
+		if($authResult === "null") {
 			//username and/or password is null.
 			$this->logsObj->log_by_class("Username/or password blank", 'error', $this->logUid);
 			$this->set_error_message("login-blank");
 			$this->sid_check = 0;
 			$retval = -1;
 		}
-		elseif($authResult === "nouser")
-		{
+		elseif($authResult === "nouser") {
 			//no record found!!
 			$this->logsObj->log_by_class("Invalid username (". $username .")", 'error', $this->logUid);
 			$this->set_error_message("login-error");
 			$this->sid_check = 0;
 			$retval = 2;
 		}
-		elseif($authResult === "toomany")
-		{
+		elseif($authResult === "toomany") {
 			//duplicate records!!!
 			$this->logsObj->log_by_class("duplicate records: $username", 'error', $this->logUid);
 			$this->set_error_message("login-error");
 			$this->sid_check = 0;
 			$retval = 3;
 		}
-		else
-		{
-			if($authResult === 1)
-			{
+		else {
+			if($authResult === 1) {
 				//good to go!
 				//CONCURRENT SESSIONS...
-				if(ENFORCE_MAX_SESSIONS == 1)
-				{
+				if(ENFORCE_MAX_SESSIONS == 1) {
 					$maxSessionsInfo = $this->check_max_sessions($this->logUid);
 					$sessionsAvailable = $maxSessionsInfo['available'];
-					if($sessionsAvailable < 1)
-					{
+					if($sessionsAvailable < 1) {
 						//no sluts... er... *slots* available.  Log it.
 						$details = "Too many active sessions. [More info: Used: ". $maxSessionsInfo['used'] 
 						."/". $maxSessionsInfo['max'] ."];";
@@ -289,8 +263,7 @@ class Session{
 				$_SESSION['uid'] = $this->uid;
 				
 				//
-				foreach($this->authInfo as $tIndex=>$tval)
-				{
+				foreach($this->authInfo as $tIndex=>$tval) {
 					$_SESSION["login_". $tIndex] = $tval;
 					$_SESSION[$tIndex] = $tval;
 				}
@@ -303,8 +276,7 @@ class Session{
 				$retval = 1;
 				$this->sid_check = $retval;
 	
-				if($retval == 1)
-				{
+				if($retval == 1) {
 					//remove stale sessions.
 					$this->auto_logout();
 					
@@ -314,37 +286,29 @@ class Session{
 					}
 				}
 			}
-			elseif($authResult === 0)
-			{
+			elseif($authResult === 0) {
 				//bad password
 				//EXTRA LOG INFO (without logging the actual passsword) TO HELP TROUBLESHOOT.
-				if(strtolower($password) == $password)
-				{
+				if(strtolower($password) == $password) {
 					$xDet = create_list($xDet, "all lowercase");
 				}
-				elseif(strtoupper($password) == $password)
-				{
+				elseif(strtoupper($password) == $password) {
 					$xDet = create_list($xDet, "ALL UPPERCASE");
 				}
-				else
-				{
+				else {
 					$xDet = create_list($xDet, "MiXeD CaSe");
 				}
 				$xDet = create_list($xDet, "pass_len=". strlen($password));
-				if(ereg("[0-9]", $password))
-				{
+				if(ereg("[0-9]", $password)) {
 					$xDet = create_list($xDet, "has_numbers=yes");
 				}
-				else
-				{
+				else {
 					$xDet = create_list($xDet, "has_numbers=no");
 				}
-				if(eregi("[a-z]", $password))
-				{
+				if(eregi("[a-z]", $password)) {
 					$xDet = create_list($xDet, "has_letters=yes");
 				}
-				else
-				{
+				else {
 					$xDet = create_list($xDet, "has_letters=no");
 				}
 				$details = "USERNAME: $username -- IP: ". $this->ip ." || $xDet || $authResult";
@@ -353,8 +317,7 @@ class Session{
 				$this->sid_check = 0;
 				$retval = 0;
 			}
-			elseif("awaiting_activation")
-			{
+			elseif("awaiting_activation") {
 				//hasn't activated yet.
 				$details = "Waiting for activation.";
 				$this->logsObj->log_by_class($details, 'error', $this->logUid);
@@ -362,8 +325,7 @@ class Session{
 				$this->sid_check = 0;
 				$retval = -2;
 			}
-			else
-			{
+			else {
 				//disabled or internal problem.
 				$details = "DISABLED USER";
 				$this->logsObj->log_by_class($details, 'error', $this->logUid);
@@ -382,8 +344,7 @@ class Session{
 
 
 	//##########################################################################
-	function logout($sid=NULL, $uid=NULL, $autoLogout=NULL, $details=NULL)
-	{
+	function logout($sid=NULL, $uid=NULL, $autoLogout=NULL, $details=NULL) {
 		//////////////////////////////////////////////////////////////////
 		// eliminates the PHP session, along with removing session from //
 		//	database.						//
@@ -397,19 +358,16 @@ class Session{
 		//	>1	OK: number of sessions removed.			//
 		//////////////////////////////////////////////////////////////////
 		//do some input checking...
-		if(!$uid)
-		{
+		if(!$uid) {
 			//if this->sid doesn't match $sid, don't try to logout based on uid.
 			$uid = $this->uid;
 		}
 
 		
 		//before we try to log or return values, let's get rid of the session.
-		if($sid)
-		{
+		if($sid) {
 			//don't destroy if it's not the current user.
-			if($this->sid == $sid)
-			{
+			if($this->sid == $sid) {
 				//check for correctness
 				ob_start();
 				session_unset();
@@ -435,8 +393,7 @@ class Session{
 		//add the extra info to the log, so we can figure-out what's going on with 
 		// the issue of giving-out session_id's of "0".
 		$tX = create_list($tX, $xInfo, " || ");
-		if(!strlen($sid))
-		{
+		if(!strlen($sid)) {
 			$sid = $this->sid;
 		}
 		$details = create_list($details, "SID: ". $sid ." -- IP: ". $this->ip . $tX, ' -- ');
@@ -455,8 +412,7 @@ class Session{
 
 	
 	//##########################################################################
-	function uid_from_sid($sid)
-	{
+	function uid_from_sid($sid) {
 		//////////////////////////////////////////////////////////////////
 		// Simple query to get a uid from the given sid.		//
 		//								//
@@ -479,8 +435,7 @@ class Session{
 	
 
 	//##########################################################################
-	function update_last_action()
-	{
+	function update_last_action() {
 		//////////////////////////////////////////////////////////////////
 		//Updates the last_action field in the session... just a quick 
 		//	wrapper for $this->update_session_table()" with a specific
@@ -502,8 +457,7 @@ class Session{
 		
 		//set default return (failure), then do some checking.
 		$retval = 0;
-		if(!strlen($dberror) && $numrows == 1)
-		{
+		if(!strlen($dberror) && $numrows == 1) {
 			//worked.
 			$retval = 1;
 			
@@ -522,12 +476,10 @@ class Session{
 	 * Updates the last page the user viewed (and their last_action) to the 
 	 * specified value, which must be longer than 5 characters.
 	 */
-	public function set_last_page_viewed($url)
-	{
+	public function set_last_page_viewed($url) {
 		//
 		$retval = 0;
-		if(strlen($url) > 5)
-		{
+		if(strlen($url) > 5) {
 			//create the SQL statement.
 			$sql = 'UPDATE '. $this->dbTable .' SET last_page_viewed=\''. cleanString($url, 'sql')
 				.'\', last_action=NOW() WHERE session_id=\''. cleanString($this->sid, 'sql') .'\'';
@@ -537,8 +489,7 @@ class Session{
 			$dberror = $this->db->errorMsg();
 			
 			//see if it worked.
-			if(!strlen($dberror) && $numrows == 1)
-			{
+			if(!strlen($dberror) && $numrows == 1) {
 				//good to go.
 				$retval = 1;
 			}
@@ -551,8 +502,7 @@ class Session{
 
 
 	//##########################################################################
-	function update_session_internals($varArr)
-	{
+	function update_session_internals($varArr) {
 		//
 		//Updates internal variables just in case they're called externally.
 		//allowedVarArr holds the values that CAN be replaced.  The foreach
@@ -561,16 +511,13 @@ class Session{
 		//	update, but not otherwise; eliminates possible problems
 		//	later on).
 		//		
-		$allowedVarArr = array
-		(
+		$allowedVarArr = array(
 			"date_created", "last_action", "sid_check", 
 			"last_activity", "uid"
 		);
 		
-		foreach($allowedVarArr as $varName)
-		{
-			if(isset($varArr[$varName]))
-			{
+		foreach($allowedVarArr as $varName) {
+			if(isset($varArr[$varName])) {
 				$this->$varName=$varArr[$varName];
 			}
 		}
@@ -585,15 +532,13 @@ class Session{
 
 
 	//##########################################################################
-	function update_session_vars($varArr)
-	{
+	function update_session_vars($varArr) {
 		//////////////////////////////////////////////////////////////////////////
 		//NOTE::: this will UNCONDITIONALLY add/update variables in the 	//
 		//	session.  NO CHECKS are made on them. You've been warned.	//
 		//	Updates or *ADDS* PHP session variables.			//
 		//////////////////////////////////////////////////////////////////////////
-		foreach($varArr as $key=>$value)
-		{
+		foreach($varArr as $key=>$value) {
 			//
 			$_SESSION["$key"] = $value;
 		}
@@ -604,8 +549,7 @@ class Session{
 
 
 	//##########################################################################
-	function set_error_message($status=NULL)
-	{
+	function set_error_message($status=NULL) {
 		//////////////////////////////////////////////////////////////////
 		//this makes a call to set_message(), located			//
 		//	in globalFunctions.php.					//
@@ -677,8 +621,7 @@ class Session{
 		//	<none>		(ALWAYS EXITS)				//
 		//////////////////////////////////////////////////////////////////
 		
-		if(!is_null($message))
-		{
+		if(!is_null($message)) {
 			$this->create_session();
 			$this->set_error_message($message);
 		}
@@ -706,13 +649,11 @@ class Session{
 	* @return 1 - Valid.
 	* @return <string> - ERROR: string denotes error.
 	*/
-	function authenticate_user($username,$password)
-	{
+	function authenticate_user($username,$password) {
 		//pre-check and cleaning.
 		$username = strtolower(cleanString($username, "email"));
 
-		if(!$username || !$password)
-		{
+		if(!$username || !$password) {
 			//something was null.
 			return("null");
 		}
@@ -726,37 +667,31 @@ class Session{
 		$dberror = $this->db->errorMsg(0,1,0,"authenticate_user(): ", " QUERY: $query");
 		
 		//see what happened...
-		if($dberror)
-		{
+		if($dberror) {
 			//database error...
 			throw new exception("authenticate_user(): DATABASE ERROR!!!\n$dberror\nSQL::: $query");
 		}
-		elseif($numrows == 0)
-		{
+		elseif($numrows == 0) {
 			//no user...
 			$retval = "nouser";
 		}
-		elseif($numrows > 1)
-		{
+		elseif($numrows > 1) {
 			//too many users...
 			$retval = "toomany";
 		}
-		else
-		{
+		else {
 			//okay, no dberror, and numrows is 1...
 			// options left: -4,-3,-2,0,1
 			$resultSet = $this->db->farray_fieldnames();
 			$this->logUid = $resultSet['id'];
 			
-			if(md5($password .'_'. $resultSet['contact_id']) == $resultSet['password'])
-			{
+			if(md5($password .'_'. $resultSet['contact_id']) == $resultSet['password']) {
 				//good password.  Good.
 				$retval = 1;
 				$this->authInfo = $resultSet;
 				unset($this->authInfo['password']);
 			}
-			else
-			{
+			else {
 				//bad password...
 				$retval = 0;
 			}
@@ -772,11 +707,9 @@ class Session{
  	/**
  	 * Insert a record into the table defined by $this->dbTable.
  	 */
- 	private function insert_session_record()
- 	{
+ 	private function insert_session_record() {
  		//create the SQL array.
- 		$insertData = array
- 		(
+ 		$insertData = array(
  			'session_id'	=> "'". cleanString($this->sid, 'sql') ."'",
  			'uid'			=> cleanString($this->uid, 'numeric'),
  			'ip'			=> "'". cleanString($this->ip, 'sql') ."'"
@@ -790,15 +723,13 @@ class Session{
 		$dberror = $this->db->errorMsg();
 		
 		//set a default return value, then check to see if it worked (default to failed).
-		if(strlen($dberror) || $numrows !== 1)
-		{
+		if(strlen($dberror) || $numrows !== 1) {
 			//failed.
 			$this->logsObj->log_dberror(__METHOD__ .": Failed to insert record, numrows=($numrows), " .
 					"dberror:::\n$dberror");
 			$retval = FALSE;
 		}
-		else
-		{
+		else {
 			//it worked.
 			$retval = TRUE;
 		}
@@ -810,10 +741,8 @@ class Session{
  	
  	
  	//##########################################################################
- 	private function delete_session_record($details=NULL, $sid=NULL)
- 	{
- 		if(is_null($sid))
- 		{
+ 	private function delete_session_record($details=NULL, $sid=NULL) {
+ 		if(is_null($sid)) {
  			//use internal session id.
  			$sid = $this->sid;
  		}
@@ -822,14 +751,12 @@ class Session{
  		$numrows = $this->db->exec($sql);
  		$dberror = $this->db->errorMsg();
  		
- 		if(strlen($dberror))
- 		{
+ 		if(strlen($dberror)) {
  			//log the problem & set return val.
  			$this->logsObj->log_dberror("delete_session_record(): failed to delete ($numrows), or dberror::: $dberror");
  			$retval = 0;
  		}
- 		else
- 		{
+ 		else {
  			//we're fine.
  			$retval = 1;
  		}
@@ -848,8 +775,7 @@ class Session{
  	 * @return TRUE		PASS: no records were removed.
  	 * @return FALSE	FAIL: database error.
  	 */
- 	public function auto_logout()
- 	{
+ 	public function auto_logout() {
  		//build the SQL.
  		$sql = "SELECT *, (NOW() - last_action) as idle, (NOW() - creation) as total_time " .
  			"FROM ". $this->dbTable ." WHERE ((NOW() - last_action) > ". 
@@ -859,25 +785,21 @@ class Session{
  		$numrows = $this->db->exec($sql);
  		$dberror = $this->db->errorMsg();
  		
- 		if(strlen($dberror) || $numrows < 0)
- 		{
+ 		if(strlen($dberror) || $numrows < 0) {
  			//failed.
  			$this->logsObj->log_dberror("auto_logout(): query failed with error::: $dberror");
  			$retval = FALSE;
  		}
- 		elseif($numrows == 0)
- 		{
+ 		elseif($numrows == 0) {
  			//no rows.
  			$retval = TRUE;
  		}
- 		else
- 		{
+ 		else {
  			//retrieve the data, & logout each in turn.
  			$data = $this->db->farray_fieldnames('session_id');
  			
  			$retval = 0;
- 			foreach($data as $mySid=>$subData)
- 			{
+ 			foreach($data as $mySid=>$subData) {
  				//build the details.
  				$details = "Automatic logout: session_id=(". $mySid ."), ip=(". $subData['ip'] ."), " .
  					"idle for ". $subData['idle'] .", total session length was ". $subData['total_time'];
@@ -897,8 +819,7 @@ class Session{
  	/**
  	 * Return the number of seconds available for this session.
  	 */
- 	private function check_session_idleness()
- 	{
+ 	private function check_session_idleness() {
  		//build the SQL to see what the current sessions idleness/length is, compared to
  		//	the maximum idleness/length settings.
  		$sql = "SELECT extract(epoch from (NOW() - creation))::int as total_time, " .
@@ -910,8 +831,7 @@ class Session{
  		$numrows = $this->db->exec($sql);
  		$dberror = $this->db->errorMsg();
  		
- 		if(strlen($dberror) || $numrows !== 1)
- 		{
+ 		if(strlen($dberror) || $numrows !== 1) {
 			//failed.
 			if(strlen($dberror)) {
 				//Ooops, looks like there was a database error.
@@ -921,8 +841,7 @@ class Session{
 			}
  			$retval = NULL;
  		}
- 		else
- 		{
+ 		else {
  			//retrieve data.
  			$data = $this->db->farray_fieldnames();
  			
