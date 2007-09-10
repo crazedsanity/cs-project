@@ -16,7 +16,7 @@ class userClass {
 	protected $logsObj;
 	
 	//================================================================================================
-	function userClass(&$db, $uid=NULL) {
+	function userClass(cs_phpDB &$db, $uid=NULL) {
 		
 		if(is_numeric(LOGCAT__USERS)) {
 			$this->logCategoryId = LOGCAT__USERS;
@@ -286,8 +286,14 @@ class userClass {
 	//=========================================================================
 	public function encrypt_pass($pass) {
 		//encrypt it... 
-		//TODO: convert encryption to use MD5, so it's a little more secure.
-		$retval = crypt($pass, $pass);
+		$myInfo = $this->get_user_info($this->uid);
+		
+		if(is_numeric($myInfo['contact_id'])) {
+			$retval = md5($pass .'_'. $myInfo['contact_id']);
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to get a useable contact_id for uid=(". $this->uid .")");
+		}
 		return($retval);
 	}//end encrypt_pass()
 	//=========================================================================

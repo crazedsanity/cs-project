@@ -401,10 +401,7 @@ class mainRecord {
 			if(isset($updatesArr['start_date']) && !strlen($updatesArr['start_date'])) {
 				$updatesArr['start_date'] = 'NULL';
 			}
-			if(is_numeric($updatesArr['status_id']) && $updatesArr['status_id'] == 4) {
-				//it's being solved.... 
-			}
-			elseif(isset($updatesArr['status_id']) && is_numeric($updatesArr['status_id']) && (($myRecordData['status_id'] == 0) || ($myRecordData['status_id'] == 1))) {
+			if(!is_numeric($updatesArr['status_id'])) {
 				//Changes for new/pending records...
 				//got a new status, and the old status is new/pending
 				if(isset($updatesArr['leader_contact_id']) && is_numeric($updatesArr['leader_contact_id'])) {
