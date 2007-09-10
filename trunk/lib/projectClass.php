@@ -47,7 +47,8 @@ class projectClass extends mainRecord {
 		//check to see if the database object is valid.
 		if(is_object($db) && $db->is_connected()) {
 			$this->db = $db;
-		} else {
+		}
+		else {
 			exit("no database!!!");
 		}
 		
@@ -187,8 +188,7 @@ class projectClass extends mainRecord {
 	
 	//================================================================================================
 	function list_users($useUid=FALSE) {
-		if(isset($this->groupId) && is_numeric($this->groupId))
-		{
+		if(isset($this->groupId) && is_numeric($this->groupId)) {
 			$idField = 'contact_id';
 			if($useUid) {
 				$idField = 'uid';
@@ -209,12 +209,12 @@ class projectClass extends mainRecord {
 				}
 				$this->logsObj->log_dberror($details);
 				$retval = 0;
-			} else {
+			}
+			else {
 				$retval = $this->db->farray_nvp($idField, 'username');
 			}
 		}
-		else
-		{
+		else {
 			//no session: could be running from the command line.  :) 
 			$retval = NULL;
 		}
@@ -240,7 +240,8 @@ class projectClass extends mainRecord {
 		if(!is_array($myList)) {
 			$optionList = 0;
 			$this->logsObj->log_dberror(__METHOD__ .": no array passed... ". debug_print(func_get_args(), 0));
-		} else {
+		}
+		else {
 			$baseRow = "\n\t\t" . '<option value="{contact_id}"{selected}>{username}</option>' . "\n";
 			foreach($myList as $contactId=>$username) {
 				$selected = "";
@@ -350,19 +351,18 @@ class projectClass extends mainRecord {
 		if($updateResult != 1) {
 			$this->logsObj->log_dberror("update_project(): failed to update... numrows=($numrows), dberror::: $dberror");
 			$retval = 0;
-		} else {
+		}
+		else {
 			$retval = $updateResult;
 			
 			//send off the list of users for assignment.
 			$assignUsersRes = $this->assign_users_to_project($this->projectId, $updatesArr['linked_users']);
 			
 			//log each item that was changed.
-			foreach($updatesArr as $field=>$value)
-			{
+			foreach($updatesArr as $field=>$value) {
 				//
 				$noLogThese = array('personen');
-				if(($oldProjectDetails[$field] != $updatesArr[$field]) && (!in_array($field, $noLogThese)))
-				{
+				if(($oldProjectDetails[$field] != $updatesArr[$field]) && (!in_array($field, $noLogThese))) {
 					//log the changes.
 					$details = "Changed settings for $field:::  OLD=(". $oldProjectDetails[$field] .") to " .
 							"NEW=(". $updatesArr[$field] .")";
@@ -372,26 +372,18 @@ class projectClass extends mainRecord {
 			
 			//TODO: better logging for more than just "ENDED" projects.
 			$useThisName = $oldProjectDetails['name'];
-			if(isset($updatesArr['name']))
-			{
+			if(isset($updatesArr['name'])) {
 				$useThisName = $updatesArr['name'];
 			}
-			$useThisAim = $oldProjectDetails['ziel'];
-			if(isset($updatesArr['ziel']))
-			{
-				$useThisAim = $updatesArr['ziel'];
-			}
-			if($updatesArr['status_id'] == 4)
-			{
+			if($updatesArr['status_id'] == 4) {
 				//they've ENDED the project: log it as such.
-				$details = "Ended project #". $this->projectId .": ". $useThisName ."\nAim: ". $useThisAim;
+				$details = "Ended project #". $this->projectId .": ". $useThisName;
 				$this->logsObj->log_by_class($details, 'report', NULL, $this->recordTypeId, $this->projectId);
 			}
-			elseif(($oldProjectDetails['status_id'] == 4) && (isset($updatesArr['status_id'])))
-			{
+			elseif(($oldProjectDetails['status_id'] == 4) && (isset($updatesArr['status_id']))) {
 				//it's been re-opened.
 				$details = "Project re-opened (new status_id=". $updatesArr['status_id'] ."): #". $this->projectId
-					.": ". $useThisName ."\nAIM: ". $useThisAim;
+					.": ". $useThisName;
 				$this->logsObj->log_by_class($details, 'report', NULL, $this->recordTypeId, $this->projectId);
 			}
 		}
@@ -434,7 +426,8 @@ class projectClass extends mainRecord {
 			//something bad happened.
 			$this->logsObj->log_dberror("create_project(): failed to insert data ($numrows)... $dberror");
 			$retval = 0;
-		} else {
+		}
+		else {
 			
 			//TODO: deal with ancestry (associated parent record) here.
 			if(is_numeric($dataArr['parentRecordId']) && $dataArr['parentRecordId'] > 0) {
@@ -450,7 +443,8 @@ class projectClass extends mainRecord {
 			if(!is_numeric($retval) || $retval < 1) {
 				//something bad happened...
 				$retval = -1;
-			} else {
+			}
+			else {
 				//now assign the users.
 				if(!is_null($myLinkedUsers)) {
 					$this->assign_users_to_project($retval, $myLinkedUsers);
@@ -511,8 +505,7 @@ class projectClass extends mainRecord {
 			$projects = parent::get_records(array('record_id' => $ancestorList, 'status_id' => 'all'));
 			
 			//if we've got a proper array, loop through it.
-			if(is_array($projects) && count($projects) > 0)
-			{
+			if(is_array($projects) && count($projects) > 0) {
 				//GO FOR IT
 				//NOTE: *must* loop through the ancestorList, as $projects has them ordered (for lineage).
 				$finalData = array();
@@ -523,8 +516,7 @@ class projectClass extends mainRecord {
 					$finalData[$ancestorNum] = $projects[$publicId];
 				}
 				ksort($finalData);
-				foreach($finalData as $crap => $data)
-				{
+				foreach($finalData as $crap => $data) {
 					$id = $data['public_id'];
 					$name = $data['name'];
 					//concatenation.  Woot.
@@ -603,11 +595,9 @@ class projectClass extends mainRecord {
 		
 		//if it's not null, loop it.
 		$retval = NULL;
-		if(!is_null($childrenList))
-		{
+		if(!is_null($childrenList)) {
 			//LOOP IT!
-			foreach($childrenList as $id=>$name)
-			{
+			foreach($childrenList as $id=>$name) {
 				//create the string.
 				$name = cleanString($name, "htmlspecial_nq");
 				$name = cleanString($name, "htmlentity_plus_brackets");
