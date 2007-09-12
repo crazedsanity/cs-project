@@ -1,14 +1,15 @@
-<config generated="2007-09-05 14:09:55" version="1.0.0-ALPHA1">
+<config generated="2007-09-12 11:09:47" version="1.0.0-ALPHA1" svnLastAuthor="$Author$" svnSignature="$Id$">
 	<isdevsite>0</isdevsite>
 	<proj_name>CS-Project</proj_name>
 	<project_url>project.danf.internal</project_url>
 	<helpdesk_issue_annouce_email>new_issues@yourdomain.com</helpdesk_issue_annouce_email>
+	<config_email_server_ip>127.0.0.1</config_email_server_ip>
 	<max_time>18 hours</max_time>
 	<max_idle>2 hours</max_idle>
-	<stop_logins_on_global_alert>1</stop_logins_on_global_alert>
-	<debugremovehr>0</debugremovehr>
 	<config_session_name>CS_PROJECT_SESSID</config_session_name>
-	<debugprintopt>1</debugprintopt>
+	<stop_logins_on_global_alert>0</stop_logins_on_global_alert>
+	<debugprintopt>0</debugprintopt>
+	<debugremovehr>0</debugremovehr>
 	<workingonit>0</workingonit>
 	<version_string>1.0.0-ALPHA1</version_string>
 	<logcat__database>1</logcat__database>
