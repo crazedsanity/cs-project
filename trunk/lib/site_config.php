@@ -7,6 +7,7 @@
  * Last Committed Path: $HeadURL$
  */
 
+require_once(dirname(__FILE__) .'/cs-content/contentSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlParserClass.php');
@@ -56,6 +57,8 @@ function read_config_file() {
 	
 }//end read_config_file()
 //-------------------------------------------------------------------
+
+check_external_lib_versions();
 
 	
 if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {

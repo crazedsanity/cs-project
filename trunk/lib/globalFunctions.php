@@ -6,7 +6,63 @@
  * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/globalFunctions.php $
  */
 
-include_once ("site_config.php");
+include_once (dirname(__FILE__) ."/site_config.php");
+
+
+
+//##########################################################################
+/**
+ * Check to make sure we've got the versions required to run.
+ */
+function check_external_lib_versions() {
+	$retval = 0;
+	//format: {className} => array({projectName} => {exactVersion})
+	$requirements = array(
+		'contentSystem'		=> array('cs-content',		'0.8.0'),
+		'XMLParser'			=> array('cs-phpxml',		'0.5.2'),
+		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.1')
+	);
+	
+	foreach($requirements as $className => $more) {
+		$matchProject = $more[0];
+		$matchVersion = $more[1];
+		
+		
+		if(class_exists($className)) {
+			//hopefully, this initializes each of them as a TEST class.
+			$obj = new $className('unit_test');
+			if($obj->isTest === TRUE) {
+				//okay, get version & project names.
+				if(method_exists($obj, 'get_version') && method_exists($obj, 'get_project')) {
+					$realVersion = $obj->get_version();
+					$realProject = $obj->get_project();
+					
+					if($realVersion === $matchVersion && $realProject === $matchProject) {
+						//all looks good.
+						$retval++;
+					}
+					else {
+						throw new exception(__FUNCTION__ .": version mismatch (". $realVersion ." != ". $matchVersion .") or " .
+							"invalid project name (". $realProject ." != ". $matchProject .")");
+					}
+				}
+				else {
+					throw new exception(__FUNCTION__ .": required checking method(s) for (". $className .") missing");
+				}
+			}
+			else {
+				throw new exception(__FUNCTION__ .": ". $className ."::isTest isn't set, something is broken");
+			}
+		}
+		else {
+			throw new exception(__FUNCTION__ .": required class (". $className .") could not be found");
+		}
+	}
+	
+	return($retval);
+	
+}//end check_external_lib_versions()
+//##########################################################################
 
 
 
