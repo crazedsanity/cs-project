@@ -3,9 +3,12 @@
  * Created on May 11, 2007
  * 
  * SVN INFORMATION:::
- * SVN Signature: $Id$
- * Last Committted Date: $Date$
- * Last Committed Path: $HeadURL$
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
  */
 
 
