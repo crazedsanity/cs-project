@@ -1,4 +1,14 @@
 <?php
+/*
+ * 
+ * SVN INFORMATION:::
+ * ------------------
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
+
+ */
 
 $page->set_all_block_rows("header");
 
