@@ -1,4 +1,12 @@
 <?php
+/*
+ * SVN INFORMATION:::
+ * ------------------
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
+ */
 
 require_once(dirname(__FILE__) ."/../lib/includes.php");
 require_once(dirname(__FILE__) ."/../lib/prefClass.php");

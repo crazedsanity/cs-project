@@ -1,8 +1,14 @@
 <?php
 /*
  * Created on Mar 20, 2006
- *       by
- *  Dan Falconer
+ * 
+ * SVN INFORMATION:::
+ * ------------------
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
+
  */
 
 require_once(dirname(__FILE__) ."/../lib/includes.php");
