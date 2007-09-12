@@ -2,6 +2,10 @@
 /*
  * Created on Dec 7, 2006
  * 
+ * Last Author:         $Author$ 
+ * Current Revision:    $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:        $Date$
  */
 
 //remove block rows.

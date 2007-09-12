@@ -1,8 +1,11 @@
 <?php
 /*
  * Created on Feb 16, 2006
- *       by
- *  Dan Falconer
+ * 
+ * Last Author:         $Author$ 
+ * Current Revision:    $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:        $Date$
  */
 
 require_once(dirname(__FILE__) .'/../../lib/adminUserClass.php');

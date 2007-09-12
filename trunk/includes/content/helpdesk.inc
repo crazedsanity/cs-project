@@ -1,9 +1,9 @@
 <?php
 /*
- * Last Author:         $Author:danf $ 
- * Current Revision:    $Revision:859 $ 
- * Repository Location: $HeadURL:svn://charybdis.crazedsanity.com/main/projects/cs-project/trunk/includes/auto/content/helpdesk.inc $ 
- * Last Updated:        $Date:2007-07-01 23:15:12 -0500 (Sun, 01 Jul 2007) $
+ * Last Author:         $Author$ 
+ * Current Revision:    $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:        $Date$
  */
 if($_POST) {
 	$action = strtolower($_POST['action']);
