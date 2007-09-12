@@ -51,6 +51,7 @@ elseif(count($sectionArr) == 2 && is_numeric($sectionArr[1]) && $sectionArr[1] !
 
 $page->add_template_var("VERSION_STRING", read_version_file());
 $page->rip_all_block_rows('stepData');
+$page->clear_content('infobar');
 
 
 //determine the current step based on the URL ($sectionArr is provided by contentSystem).
