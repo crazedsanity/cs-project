@@ -1,9 +1,12 @@
 <?php
 /*
- * Last Author:         $Author:crazedsanity $ 
- * Current Revision:    $Revision:8 $ 
- * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/noteClass.php $ 
- * Last Updated:        $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
+ * SVN INFORMATION:::
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
  */
  
 
