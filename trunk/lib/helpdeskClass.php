@@ -1,9 +1,12 @@
 <?php
 /*
- * Last Author:         $Author:danf $ 
- * Current Revision:    $Revision:860 $ 
- * Repository Location: $HeadURL:svn://charybdis.crazedsanity.com/main/projects/cs-project/trunk/lib/helpdeskClass.php $ 
- * Last Updated:        $Date:2007-07-01 23:38:48 -0500 (Sun, 01 Jul 2007) $
+ * SVN INFORMATION:::
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
  */
 
 //TODO: convert all methods to use $this->helpdeskId...?
