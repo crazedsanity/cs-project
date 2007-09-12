@@ -2,6 +2,8 @@
 /*
  * Created on Dec 7, 2006
  * 
+ * SVN INFORMATION:::
+ * ------------------
  * Last Author:         $Author$ 
  * Current Revision:    $Revision$ 
  * Repository Location: $HeadURL$ 

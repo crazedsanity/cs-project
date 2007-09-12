@@ -1,5 +1,7 @@
 <?php
 /*
+ * SVN INFORMATION:::
+ * ------------------
  * Last Author:         $Author$ 
  * Current Revision:    $Revision$ 
  * Repository Location: $HeadURL$ 
