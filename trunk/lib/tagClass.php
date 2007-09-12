@@ -2,15 +2,19 @@
 /*
  * Created on Feb 21, 2007
  * 
+ * SVN INFORMATION:::
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
+ * 
+ * 
  * Class for tagging items, so they can be viewed in a different way: this way, for items pertaining to
  * the "S.A.L.E.S. Shortlist" can be viewed separately, and potentially even to non-authenticated users.
  * I'm hoping this will help to eliminate the use of excel spreadsheets, as it's frustrating to have to 
  * keep track of things in multiple locations.
- * 
- * SVN INFORMATION:::
- * SVN Signature: $Id:tagClass.php 8 2007-08-23 23:22:35Z crazedsanity $
- * Last Committted Date: $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
- * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/tagClass.php $
  * 
  */
 

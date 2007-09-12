@@ -2,6 +2,14 @@
 /*
  * Created on Jul 2, 2007
  * 
+ * SVN INFORMATION:::
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
+ * 
  */
 
 require_once(dirname(__FILE__) .'/globalFunctions.php');

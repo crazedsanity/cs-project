@@ -4,9 +4,12 @@
 ##	02-12-2002
 /*
  * SVN INFORMATION:::
- * SVN Signature: $Id:session_class.php 8 2007-08-23 23:22:35Z crazedsanity $
- * Last Committted Date: $Date:2007-08-23 18:22:35 -0500 (Thu, 23 Aug 2007) $
- * Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/session_class.php $
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
  */
 ##
 

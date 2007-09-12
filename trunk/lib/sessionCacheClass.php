@@ -1,9 +1,15 @@
 <?
 
 /*
- * Written by:
- * 	Dan Falconer
- * 	2005-10-04
+ * Written 2005-10-04
+ * 
+ * SVN INFORMATION:::
+ * ------------------
+ * SVN Signature::::::: $Id$
+ * Last Author::::::::: $Author$ 
+ * Current Revision:::: $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:::::::: $Date$
  * 
  * Basically, it's a way to store things in the session in a standard way, without having to 
  * access $_SESSION directly.  Data is, by default, stored on a per-page basis, and thus the
@@ -22,10 +28,6 @@
  * to describe a location in $_SESSION: e.g. "/cache/x/y/z/myIndex" refers to $_SESSION[cache][x][y][z][myIndex].
  * 
  * 
- * SVN INFORMATION:::
- * SVN Signature: $Id$
- * Last Committted Date: $Date$
- * Last Committed Path: $HeadURL$
  */ 	
 
 class sessionCache {
