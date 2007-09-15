@@ -18,3 +18,17 @@ COMMENT ON SCHEMA public IS 'Standard public schema';
 
 
 SET search_path = public, pg_catalog;
+
+
+
+
+
+
+CREATE FUNCTION _test_plpgsql_exists() RETURNS integer
+    AS $_$
+DECLARE
+BEGIN
+	RETURN NULL;
+END;
+$_$
+    LANGUAGE plpgsql;
