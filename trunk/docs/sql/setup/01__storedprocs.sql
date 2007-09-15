@@ -78,7 +78,7 @@ DECLARE
 	
 	-- internal vars.
 	x_attributeId integer;
-	x_record contact_attribute_link_table%ROWTYPE;
+	x_record RECORD;
 	x_counter integer DEFAULT 0;
 	x_array TEXT[];
 	
@@ -224,7 +224,7 @@ DECLARE
 	
 	-- internal vars.
 	x_attributeId integer;
-	x_contactAttributeData attribute_table%ROWTYPE;
+	x_contactAttributeData RECORD;
 	x_numRows integer DEFAULT 0;
 	x_retval integer DEFAULT 0;
 BEGIN
