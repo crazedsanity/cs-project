@@ -542,52 +542,9 @@ function query_as_option_list(&$db, $selFields, $table, $critSent, $selectVal=NU
 
 
 //##########################################################################
-function conditional_header($url,$permRedir=FALSE)
-{
-	//checks to see if headers were sent; if yes: use a meta redirect.
-	//	if no: send header("location") info...
-	//NOTE if $http_response_code is set, it could possibly not work, due to
-	//	headers already being sent.
-
-	//there's a GLOBAL setting to determine if we should expend resources logging this.
-	if($GLOBALS['LOG_REDIRECTS']) {
-		//log that we're going to redirect.
-		ob_start();
-		include_once("pg_abstraction_layer.inc");
-		$db = new phpDb;
-		$db->connect();
-	
-		$pageEnv = page_get_env(TRUE,TRUE,TRUE);
-		$details = "conditional_header():<br>\nCURRENT=". $pageEnv['current_page'] ."<br>\nREFERER=". $pageEnv['referer'] ."<br>\nDESTINATION=$url";
-		
-		if($_POST) {
-			$details .= "<br>\nNOTE: _POST vars present!!!";
-		}
-		#log_activity($db,59, $_SESSION['uid'], $details);
-		ob_end_clean();
-	}
-
-	if(headers_sent())
-	{
-		//headers sent.  Use the meta redirect.
-		print "
-		<HTML>
-		<HEAD>
-		<TITLE>Redirect Page</TITLE>
-		<META HTTP-EQUIV='refresh' content='0; URL=$url'>
-		</HEAD>
-		<a href=\"$url\"></a>
-		</HTML>
-		";
-	}
-	else {
-		if($permRedir) {
-			//tell the client this redirect is a permanent one: don't come back to 
-			//	this page, but go to $url instead.
-			header("HTTP/1.1 301 Moved Permanently");
-		}
-		header("location:$url");
-	}
+function conditional_header($url,$permRedir=FALSE) {
+	$gf = new cs_globalFunctions;
+	$gf->conditional_header($url, FALSE, $permRedir);
 }//end conditional_header()
 //##########################################################################
 
