@@ -85,14 +85,21 @@ class __tmpSetupClass {
 			$retval = $this->load_schema();
 			
 			if($retval === TRUE) {
-				$this->page->set_message_wrapper(
-					array(
-						'title'		=> "Step Successful",
-						'message'	=> "Finished step two with result:::<BR>\n". get_setup_data(2,'text'),
-						'type'		=> "status"
-					)
-				);
-				$this->page->conditional_header('/setup/3', TRUE);
+				$retval = $this->handle_plpgsql();
+				if($retval === TRUE) {
+					$this->page->set_message_wrapper(
+						array(
+							'title'		=> "Step Successful",
+							'message'	=> "Finished step two with result:::<BR>\n". get_setup_data(2,'text'),
+							'type'		=> "status"
+						)
+					);
+					$this->page->conditional_header('/setup/3', TRUE);
+				}
+				else {
+					$retval = "There was an error while testing PL/PGSQL functionality: ". $retval;
+					store_setup_data(2, $retval, 'text');
+				}
 			}
 		}
 		else {
@@ -115,7 +122,7 @@ class __tmpSetupClass {
 		$params = get_db_params();
 		
 		//okay, let's try to create the database.
-		$numrows = $this->db->exec("CREATE DATABASE ". $params['dbname']);
+		$numrows = $this->db->exec("CREATE DATABASE ". $params['dbname'] ." WITH ENCODING='SQL_ASCII'");
 		$dberror = $this->db->errorMsg();
 		
 		if(strlen($dberror)) {
@@ -197,6 +204,42 @@ class __tmpSetupClass {
 		
 		return($retval);
 	}//end load_schema()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Try to load PL/pgsql functions...
+	 * 
+	 * NOTE: this is a terrible requirement, which requires PostgreSQL to be 
+	 * compiled with certain options...
+	 */
+	private function handle_plpgsql() {
+		$this->db->beginTrans();
+		$fileData = $this->fsObj->read("plpgsql.sql");
+		
+		$numrows = $this->db->exec($fileData);
+		$dberror = $this->db->errorMsg();
+		
+		if(!strlen($dberror)) {
+			$this->db->commitTrans();
+			$retval = TRUE;
+		}
+		else {
+			//figure out WHY this failed: if they're already loaded it's okay, otherwise it's bad.
+			$this->db->rollbackTrans();
+			
+			if(preg_match('/"plpgsql_call_handler" already exists/', $dberror)) {
+				$retval = TRUE;
+			}
+			else {
+				$retval = $dberror;
+			}
+		}
+		
+		return($retval);
+	}//end handl_plpgsql()
 	//=========================================================================
 }
 
