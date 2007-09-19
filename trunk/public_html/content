@@ -24,6 +24,7 @@ $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();
 $contentObj->handle_session($session);
+$contentObj->force_authentication("/login.php");
 $contentObj->finish();
 
 ?>
