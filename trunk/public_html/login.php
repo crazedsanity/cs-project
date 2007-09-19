@@ -17,7 +17,13 @@ EXAMPLE: public_html/content  ->  ./index.php
 require_once(dirname(__FILE__) ."/../lib/includes.php");
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
+
+$db = new cs_phpDB;
+$db->connect(get_config_db_params());
+$session = new Session($db);
+
 $contentObj = new contentSystem();
+$contentObj->handle_session($session);
 $contentObj->finish();
 
 ?>

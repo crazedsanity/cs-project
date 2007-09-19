@@ -17,8 +17,6 @@ $db = new cs_phpDB;
 $db->connect(get_config_db_params());
 $page->db = &$db;
 
-$page->session = new Session($page->db);
-
 if(!$_GET['logout'] && !$_POST && $page->session->sid_check == 1) {
 	//they came here & need to be redirected.
 	conditional_header("/content?from=login&reason=alreadyLoggedIn");
