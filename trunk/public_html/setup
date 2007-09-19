@@ -24,6 +24,7 @@ require_once(dirname(__FILE__) ."/../lib/includes.php");
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();
+$contentObj->handle_session();
 $contentObj->finish();
 
 ?>
