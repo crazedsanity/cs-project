@@ -96,6 +96,15 @@ class Test_cscontent extends UnitTestCase {
 					'update'	=> "field1='value1', field2='value2'"
 				)
 			),
+			'magicalStuff' => array(
+				'input'	=> array(
+					'field1'		=> 'value1',
+					'field2'		=> 'value2'
+				),
+				'styles' => array(
+					'select'		=> "field1='value1' AND field2='value2'"
+				)
+			)
 		);
 		
 		foreach($testData as $name=>$data) {
