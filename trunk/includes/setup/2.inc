@@ -82,10 +82,10 @@ class __tmpSetupClass {
 	public function go() {
 		$retval = "Nothing done... something went horribly wrong.";
 		if($this->create_database()) {
-			$retval = $this->load_schema();
+			$retval = $this->handle_plpgsql();
 			
 			if($retval === TRUE) {
-				$retval = $this->handle_plpgsql();
+				$retval = $this->load_schema();
 				if($retval === TRUE) {
 					$this->page->set_message_wrapper(
 						array(
@@ -239,7 +239,7 @@ class __tmpSetupClass {
 		}
 		
 		return($retval);
-	}//end handl_plpgsql()
+	}//end handle_plpgsql()
 	//=========================================================================
 }
 
