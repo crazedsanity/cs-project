@@ -17,6 +17,22 @@ if($_POST) {
 	$page->conditional_header("/setup/5", TRUE);
 }
 else {
+	if(get_setup_data(5, 'result')) {
+		$page->clear_content();
+		#$page->set_block_row('content', 'submitButton');
+		
+		$test = &new TestSuite("All Tests");
+		$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-content_tests.php');
+		#$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-arrayToPath_tests.php');
+		#$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-phpxml_tests.php');
+		$display = new HtmlReporter();
+		$test->run($display);
+		
+		$page->gfObj->debug_print("Passes: (". $display->getPassCount() .")");
+	}
+	else {
+		
+	}
 }
 
 
@@ -93,6 +109,45 @@ class __finalStep {
 		return($retval);
 	}//end write_config()
 	//=========================================================================
+}
+
+
+//#######################################################################################
+/**
+ * Built to avoid always printing-out the results (so we can retrieve result data separately.
+ */
+class MyDisplay extends SimpleReporter {
+    
+    function paintHeader($test_name) {
+    }
+    
+    function paintFooter($test_name) {
+    }
+    
+    function paintStart($test_name, $size) {
+        parent::paintStart($test_name, $size);
+    }
+    
+    function paintEnd($test_name, $size) {
+        parent::paintEnd($test_name, $size);
+    }
+    
+    function paintPass($message) {
+        parent::paintPass($message);
+    }
+    
+    function paintFail($message) {
+        parent::paintFail($message);
+    }
+}
+//#######################################################################################
+
+
+class unitTest extends UnitTestCase {
+	
+	function testOfTester () {
+		$this->assertTrue(FALSE);
+	}
 }
 
 ?>
