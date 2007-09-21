@@ -7,12 +7,12 @@
 	
 	
 	
-<table border="0" cellpadding=2 cellspacing=2>
+<table border="0" cellpadding=2 cellspacing=0>
 <form action="{PHP_SELF}" method="POST" name=frm>
 <input name="module" value="project" type="HIDDEN">
 <tr>
 	<td>
-	<table border="0" cellpadding="2" cellspacing="2">
+	<table border="0" cellpadding="2" cellspacing="0">
 	<tr>
 		<td>Name of Project: </td>
 		<td colspan=2>
@@ -36,7 +36,6 @@
 			</select>
 			</div>
 		</td>
-		<td></td>
 		<td rowspan="5" align="center"><b>Participants:</b><BR>
 			<select name='data[linked_users][]' multiple size='10'>
 				{select_linked_users}
@@ -44,7 +43,7 @@
 	</tr>
 	<tr>
 		<td>Priority:</td>
-		<td colspan="2">
+		<td>
 			<div id="priority_text" style="display:inline;">[<a href="javascript:void(enableInput('priority'));">Edit</a>] {priority}</div>
 			<div id="priority_inputDiv" style="display:none;">
 			<select id="priority_input" name='data[priority]' disabled>
@@ -56,7 +55,7 @@
 	<tr>
 		<td nowrap>Progress: 
 		</td>
-		<td colspan=2>
+		<td>
 			<div id="progress_text" style="display:inline">[<a href="javascript:void(enableInput('progress'));">Edit</a>] {progress}<b>%</b></div>
 			<div id="progress_inputDiv" style="display:none;">
 				<input id="progress_input" type="text" name="data[progress]" value="{progress}" size="3" maxlength="3" disabled><b>%</b>
@@ -65,21 +64,21 @@
 	</tr>
 	<tr>
 		<td>Begin:</td>
-		<td colspan=2>
+		<td>
 			<div id="start_date_text" style="display:inline">[<a href="javascript:void(enableInput('start_date'));">Edit</a>] {start_date}</div>
 			<div id="start_date_inputDiv" style="display:none;"><input id="start_date_input" type='text' name='data[start_date]' size='10' maxlength='10' value="{start_date}" disabled> [yyyy-mm-dd]</div>
 		</td>
 	</tr>
 	<tr>
 		<td>End:</td>
-		<td colspan=2>
+		<td>
 		<div id="deadline_text" style="display:inline">[<a href="javascript:void(enableInput('deadline'));">Edit</a>] {deadline}</div>
 		<div id="deadline_inputDiv" style="display:none"><input id="deadline_input" type='text' name='data[deadline]' size='10' maxlength='10' value="{deadline}" disabled> [yyyy-mm-dd]</u></div>
 		</td>
 	</tr>
 	<tr>
 		<td>Leader:</td>
-		<td colspan="3">
+		<td>
 			<div id="leader_text" style="display:inline;">[<a href="javascript:void(enableInput('leader'));">Edit</a>] {assigned}</div>
 			<div id="leader_inputDiv" style="display:none;"><select id="leader_input" name='data[leader_contact_id]' disabled>
 				{select_leader_uid}
@@ -89,17 +88,13 @@
 	</tr>
 <!-- BEGIN show_ancestry_data -->
 	<tr>
-		<td colspan="3">
-			<b>List of Parents Projects:</b><BR>
-			{ancestry_string}
-		</td>
-		<td rowspan="2">
+		<td align="left" colspan="2">
+			<b>Parent Projects:</b> {ancestry_string}
 		</td>
 	</tr>
 	<tr>
-		<td colspan="3">
-			<b>List of Child Projects:</b><BR>
-			<div style=" width:100%; height:{children_string_height}px; overflow:auto;">{children_string}</div>
+		<td align="left" colspan="2">
+			<b>Child Projects:</b> <div style="display:inline;width:100%; height:{children_string_height}px; overflow:auto;">{children_string}</div>
 		</td>
 	</tr>
 <!-- END show_ancestry_data -->
@@ -111,7 +106,7 @@
 	<table border="0">
 		<tr>
 			<td colspan="4"><h3><u>Remark:</u></h3>
-				<div style=" width:100%; height:240px; overflow:auto;">{subject}</div>
+				<div style="width:100%; height:200px; overflow:auto;border:solid #777 1px;">{subject}</div>
 				<input type="hidden" name="ID" value="{public_id}">
 			</td>
 		</tr>
@@ -123,7 +118,7 @@
 		<table border="0" width="100%">
 		
 		<tr>
-			<td colspan=6><img src='/images/pixel_black.gif' width="100%" height=10 width=10></td>
+			<td colspan=6><img src='/images/pixel_black.gif' width="100%" height=1></td>
 		</tr>
 	
 <!-- BEGIN modify_button -->
@@ -164,7 +159,7 @@
 </tr>
 <tr>
 	<td>
-	{related_todo}xxx
+	{related_todo}
 	</td>
 	
 	<td>
