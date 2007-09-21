@@ -38,6 +38,7 @@
          */
         function execute($command) {
             $this->_output = false;
+            $ret = NULL;
             exec($command, $this->_output, $ret);
             return $ret;
         }

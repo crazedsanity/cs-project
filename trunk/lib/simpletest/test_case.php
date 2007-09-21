@@ -504,6 +504,7 @@
          *    @access public
          */
         function add(&$test_case) {
+        	$class=NULL;
             if (! is_string($test_case)) {
                 $this->_test_cases[] = &$test_case;
             } elseif (TestSuite::getBaseTestCase($class) == 'testsuite') {

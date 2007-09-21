@@ -21,6 +21,7 @@
     	 */
     	function copy($object) {
             if (version_compare(phpversion(), '5') >= 0) {
+            	$copy = NULL;
             	eval('$copy = clone $object;');
             	return $copy;
             }
@@ -143,6 +144,7 @@
                         }
                     }
                 }
+                $is_a = NULL;
                 eval("\$is_a = \$object instanceof $class;");
                 return $is_a;
             }
