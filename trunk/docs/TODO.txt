@@ -23,7 +23,7 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	"PHPMailer" (http://sourceforge.net/projects/phpmailer/) instead.
 	
 4.) Display Issues
-	* wordwrapping gets hairy on some helpdesk issues: sometimes it wraps to the 
+	* word wrapping gets hairy on some helpdesk issues: sometimes it wraps to the 
 	next line, one word is displayed, then it's wrapped again.
 	* consider something *besides* using the <pre> tags for display...
 	* consider using/supporting BBCode, for nicer display of code & such.
@@ -41,6 +41,8 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 		-- submitted user
 		-- users that have made comments
 		-- users that have assigned tasks (see "Tasks for Helpdesk Issues")
+	* option to remove self from being notified on an issue (requires 
+	maintaining a list of users that should be contacted per issue)?
 
 7.) Permissions System (consider PHPGACL)
 	* roles:
@@ -53,8 +55,67 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 		-- write/modify
 		-- create
 		-- delete
+	* ANONYMOUS PERMISSIONS
+		-- what items can be read
+		-- what can be modified/commented on
+	* specific items to assign permissions to:
+		-- contact records
+		-- projects
+		-- parents of projects that aren't assigned to user
+		-- helpdesk issues
+		-- todo's (tasks)
+		-- user settings (is_admin, group_id, etc)
  
-8.)User Registration
+8.) User Registration
 	* users should be able to register for an account
 	* new users have access to read but not edit items.
+
+9.) Group Problems
+	* Should groups be re-implemented? (consider removing from this release)
+		-- remove ability to switch active group
+		-- ability to assign a project/helpdesk issue to a specific group 
+		(make a valid reason for it... think YagNi).
+	* Summary shows items created in different groups (clicking them causes 
+	errors), possibly in a group the user isn't a member of.
+	* Helpdesk issues aren't displayed on a per-group basis (should they?)
+	* Need ability to create new groups.
+
+10.) Defaults for Data
+	* end date for project not set
+	* begin date for todo not set
+	
+11.) Cascading Changes
+	* deadline extensions:
+		-- capture extension interval:
+		-- offer to extend all deadlines by that much
+		-- show screen which allows mass-edit of associated items
+	* deadline tightening
+		-- capture tightened interval (number of days lost)
+		-- show screen which allows mass-edit of associated items; mark all 
+		sub-items that go beyond the new deadline in red (or otherwise show them 
+		as needing attention)
+	* user association
+		-- should user also be assigned to all parent projects when assigning to 
+		a given project?
+
+12.) Contact Listing/Modification
+	* logged-in users can view their own contact details
+	* group admins can modify contact details of *users* in their group
+	* administrators (NOT group admin) can modify contact details of any user
+
+13.) Search Options
+	* ability to find/display ended projects	
+	* find ANY record (project, helpdesk, todo, note) based on:
+		-- attached tag (project/helpdesk only)
+		-- name
+		-- body
+		-- begin/create date
+		-- deadline/ended date
+		-- status
+	
+	
+NOTES ON REMOVING GROUPS (possibility thereof):::
+	* what about supporting the ability from previous versions?
+	* PHProject (I believe) still has this ability... would it detract them 
+	from using cs-project over PHProject?
 
