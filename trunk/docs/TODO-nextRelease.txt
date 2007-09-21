@@ -1,48 +1,27 @@
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id$
- * Last Author::::::::: $Author$
- * Current Revision:::: $Revision$
- * Repository Location: $HeadURL$
- * Last Updated:::::::: $Date$
+ * SVN Signature::::::: $Id:TODO-nextRelease.txt 213 2007-09-21 19:29:31Z crazedsanity $
+ * Last Author::::::::: $Author:crazedsanity $
+ * Current Revision:::: $Revision:213 $
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/docs/TODO-nextRelease.txt $
+ * Last Updated:::::::: $Date:2007-09-21 14:29:31 -0500 (Fri, 21 Sep 2007) $
 
 This is the place where pending items will be placed, until such time as 
 cs-project is stable enough to setup a tracker on CrazedSanity.com...
 
-1.) Session Issues
-	* errors seem to randomly occur "projectClass::set_group_id: unable to 
-	determine group_id... session probably invalid"
-	
 2.) Remove Dependency on Stored Procedures
 	* build code that handles what the stored procedures do, so there's no 
 	longer a reliance on if PL/pgsql is built-in to PostgreSQL or not (its just 
 	another hurdle for setup, and makes it less easy to use).
 	
-3.) Email Classes
-	* the current classes are very out-of-date: look into something like 
-	"PHPMailer" (http://sourceforge.net/projects/phpmailer/) instead.
-	
 4.) Display Issues
-	* word wrapping gets hairy on some helpdesk issues: sometimes it wraps to the 
-	next line, one word is displayed, then it's wrapped again.
 	* consider something *besides* using the <pre> tags for display...
-	* consider using/supporting BBCode, for nicer display of code & such.
 	
 5.) Tasks for Helpdesk Issues
 	* allow adding of tasks to helpdesk issues just like projects.
 	* anonymous users can only view list of tasks (no details).
 	* notes are for users that can't access the tasks, and for general 
 	information/discussion.
-
-6;) Email Notifications
-	* don't always get sent
-	* Applicability (should be sent to):
-		-- assigned user
-		-- submitted user
-		-- users that have made comments
-		-- users that have assigned tasks (see "Tasks for Helpdesk Issues")
-	* option to remove self from being notified on an issue (requires 
-	maintaining a list of users that should be contacted per issue)?
 
 7.) Permissions System (consider PHPGACL)
 	* roles:
@@ -80,10 +59,6 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	* Helpdesk issues aren't displayed on a per-group basis (should they?)
 	* Need ability to create new groups.
 
-10.) Defaults for Data
-	* end date for project not set
-	* begin date for todo not set
-	
 11.) Cascading Changes
 	* deadline extensions:
 		-- capture extension interval:
@@ -103,16 +78,6 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	* group admins can modify contact details of *users* in their group
 	* administrators (NOT group admin) can modify contact details of any user
 
-13.) Search Options
-	* ability to find/display ended projects	
-	* find ANY record (project, helpdesk, todo, note) based on:
-		-- attached tag (project/helpdesk only)
-		-- name
-		-- body
-		-- begin/create date
-		-- deadline/ended date
-		-- status
-		
 	
 NOTES ON REMOVING GROUPS (possibility thereof):::
 	* what about supporting the ability from previous versions?
