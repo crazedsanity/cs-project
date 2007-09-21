@@ -10,7 +10,8 @@ This is the place where pending items will be placed, until such time as
 cs-project is stable enough to setup a tracker on CrazedSanity.com...
 
 1.) Session Issues
-	* errors seem to randomly occur "projectClass::set_group_id: unable to determine group_id... session probably invalid"
+	* errors seem to randomly occur "projectClass::set_group_id: unable to 
+	determine group_id... session probably invalid"
 	
 2.) Remove Dependency on Stored Procedures
 	* build code that handles what the stored procedures do, so there's no 
@@ -26,3 +27,34 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	next line, one word is displayed, then it's wrapped again.
 	* consider something *besides* using the <pre> tags for display...
 	* consider using/supporting BBCode, for nicer display of code & such.
+	
+5.) Tasks for Helpdesk Issues
+	* allow adding of tasks to helpdesk issues just like projects.
+	* anonymous users can only view list of tasks (no details).
+	* notes are for users that can't access the tasks, and for general 
+	information/discussion.
+
+6;) Email Notifications
+	* don't always get sent
+	* Applicability (should be sent to):
+		-- assigned user
+		-- submitted user
+		-- users that have made comments
+		-- users that have assigned tasks (see "Tasks for Helpdesk Issues")
+
+7.) Permissions System (consider PHPGACL)
+	* roles:
+		-- administrator
+		-- developer
+		-- manager
+		-- user (not quite anonymous)
+	* permissions:
+		-- read
+		-- write/modify
+		-- create
+		-- delete
+ 
+8.)User Registration
+	* users should be able to register for an account
+	* new users have access to read but not edit items.
+
