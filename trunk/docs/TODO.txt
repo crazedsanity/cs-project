@@ -112,7 +112,7 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 		-- begin/create date
 		-- deadline/ended date
 		-- status
-	
+		
 	
 NOTES ON REMOVING GROUPS (possibility thereof):::
 	* what about supporting the ability from previous versions?
