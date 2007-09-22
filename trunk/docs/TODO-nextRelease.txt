@@ -23,6 +23,15 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	* notes are for users that can't access the tasks, and for general 
 	information/discussion.
 
+6;) Email Notifications
+	* Applicability (should be sent to):
+		-- assigned user
+		-- submitted user
+		-- users that have made comments
+		-- users that have assigned tasks (see "Tasks for Helpdesk Issues")
+	* option to remove self from being notified on an issue (requires 
+	maintaining a list of users that should be contacted per issue)?
+
 7.) Permissions System (consider PHPGACL)
 	* roles:
 		-- administrator

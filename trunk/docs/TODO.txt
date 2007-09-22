@@ -13,24 +13,10 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	* errors seem to randomly occur "projectClass::set_group_id: unable to 
 	determine group_id... session probably invalid"
 	
-3.) Email Classes
-	* the current classes are very out-of-date: look into something like 
-	"PHPMailer" (http://sourceforge.net/projects/phpmailer/) instead.
-	
 4.) Display Issues
 	* word wrapping gets hairy on some helpdesk issues: sometimes it wraps to the 
 	next line, one word is displayed, then it's wrapped again.
 	* consider using/supporting BBCode, for nicer display of code & such.
-
-6;) Email Notifications
-	* don't always get sent
-	* Applicability (should be sent to):
-		-- assigned user
-		-- submitted user
-		-- users that have made comments
-		-- users that have assigned tasks (see "Tasks for Helpdesk Issues")
-	* option to remove self from being notified on an issue (requires 
-	maintaining a list of users that should be contacted per issue)?
 
 10.) Defaults for Data
 	* end date for project not set
