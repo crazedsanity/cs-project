@@ -1416,6 +1416,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 	{
 		//pre-check on the $toAddr.
 		$precheck = FALSE;
+		$failureString = "";
 		if(is_array($toAddr)) {
 			$toAddr = array_unique($toAddr);
 			foreach($toAddr as $garbage=>$myEmail2Check) {
@@ -1426,14 +1427,21 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			if(count($toAddr) > 0) {
 				$precheck = TRUE;
 			}
+			else {
+				$failureString = "toAddr not set properly (". $toAddr .")";
+			}
 		} else {
 			if(valid_email($toAddr)) {
 				$precheck = TRUE;
 			}
+			else {
+				$failureString = "invalid email: ". $toAddr;
+			}
 		}
 		
 		if(!$precheck) {
-			return;
+			#return;
+			throw new exception(__METHOD__ .": failed precheck: ". $failureString);
 		}
 		
 		
@@ -1474,13 +1482,35 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
-				$emailFaxObj = new emailFax(NULL, $efArg2, $efArg3, $contentType, 1);
-				$emailFaxObj->sendMail($emailAddr, "projekt@avsupport.com", $subject);
-				unset($emailFaxObj);
+				$mail = new PHPMailer();
+				$mail->IsSMTP();
+				$mail->Host = CONFIG_EMAIL_SERVER_IP;
+				
+				//TODO: have this a configurable option: eventually, we could have something that automatically checks that mailbox.
+				$mail->From = "cs-project__DO_NOT_REPLY";
+				$mail->FromName = PROJ_NAME ." Notice";
+				$mail->AddAddress($emailAddr);
+				$mail->ContentType = "text/html";
+				$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
+				$mail->Body = $body;
+				if(!$mail->Send()) {
+					throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
+				}
+				unset($mail);
 			}
 		} else {
-			$emailFaxObj = new emailFax(NULL, $efArg2, $efArg3, $contentType, 1);
-			$emailFaxObj->sendMail($toAddr, "projekt@avsupport.com", $subject);
+			$mail = new PHPMailer();
+			$mail->IsSMTP();
+			$mail->Host = CONFIG_EMAIL_SERVER_IP;
+			$mail->From = "cs-project__DO_NOT_REPLY";
+			$mail->FromName = PROJ_NAME ." Notice";
+			$mail->AddAddress($toAddr);
+			$mail->ContentType = "text/html";
+			$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
+			$mail->Body = $body;
+			if(!$mail->Send()) {
+				throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
+			}
 			$toAddr = array($toAddr);
 		}
 		
@@ -1495,6 +1525,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 	return($retval);
 }//end send_email()
 //================================================================================================
+
 
 
 //--------------------------------------------------------------------------------------------------.
