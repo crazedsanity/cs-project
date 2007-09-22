@@ -2,7 +2,7 @@
 	<isdevsite>0</isdevsite>
 	<proj_name>CS-Project</proj_name>
 	<project_url>project.danf.internal</project_url>
-	<helpdesk_issue_annouce_email>new_issues@yourdomain.com</helpdesk_issue_annouce_email>
+	<helpdesk_issue_announce_email>new_issues@yourdomain.com</helpdesk_issue_announce_email>
 	<config_email_server_ip>127.0.0.1</config_email_server_ip>
 	<max_time>18 hours</max_time>
 	<max_idle>2 hours</max_idle>
