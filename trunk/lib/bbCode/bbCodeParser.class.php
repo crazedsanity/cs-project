@@ -14,17 +14,22 @@
  * 
  * Originally from a snippet (just the function) on PHPFreaks.com: http://www.phpfreaks.com/quickcode/BBCode/712.php
  * The original code had parse errors, so it had to be fixed... While it was posted as just a basic function, 
- * the code within (such as the reference to "$this->bbcodedata" indicated it was from a class... so it has 
+ * the code within (such as the reference to "$this->bbCodeData" indicated it was from a class... so it has 
  * been converted.
  */
 
 class bbCodeParser {
 	
-	function verifyBBCode($data, $newlines2BR=FALSE) {
-		$data = str_replace("\n", '||newline||', $data); 
+	/** Array containing all the codes & how to parse them. */
+	private $bbCodeData = NULL;
 	
+	//=========================================================================
+	/**
+	 * Setup internal structures.
+	 */
+	function __construct() {
 		# Which BBCode is accepted here
-		$this->bbcodedata = array(
+		$this->bbCodeData = array(
 			'bold' => array(
 				'start'	=> array('[b]', '\[b\](.*)', '<b>\\1'),
 				'end'	=> array('[/b]', '\[\/b\]', '</b>'),
@@ -62,19 +67,47 @@ class bbCodeParser {
 				'end'	=> array('[/code]', '\[\/code\]', '</div>'),
 			),
 		);
-		
-		foreach( $this->bbcodedata as $k => $v ) {
-			$data = preg_replace("/".$this->bbcodedata[$k]['start'][1].$this->bbcodedata[$k]['end'][1]."/U", $this->bbcodedata[$k]['start'][2].$this->bbcodedata[$k]['end'][2], $data);
+	}//end __construct()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Ensure the object is initialized properly, throw exception if not.
+	 */
+	private function isInitialized() {
+		if(!is_array($this->bbCodeData) || !count($this->bbCodeData)) {
+			throw new exception(__METHOD__ .": BBCode array not initialized");
 		}
-		
-		$replaceNewlineStr = "\n";
-		if($newlines2BR) {
-			$replaceNewlineStr = "<br />\n";
+	}//end isInitialized()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Parse BBCode from the given string & return it with formatting.
+	 */
+	function parseString($data, $newlines2BR=FALSE) {
+		if(is_string($data) && strlen($data) > 10) {
+			$this->isInitialized();
+			$data = str_replace("\n", '||newline||', $data); 
+			
+			foreach( $this->bbCodeData as $k => $v ) {
+				$data = preg_replace("/".$this->bbCodeData[$k]['start'][1].$this->bbCodeData[$k]['end'][1]."/U", $this->bbCodeData[$k]['start'][2].$this->bbCodeData[$k]['end'][2], $data);
+			}
+			
+			$replaceNewlineStr = "\n";
+			if($newlines2BR) {
+				$replaceNewlineStr = "<br />\n";
+			}
+			$data = str_replace('||newline||', $replaceNewlineStr, $data); 
+			
 		}
-		$data = str_replace('||newline||', $replaceNewlineStr, $data); 
-		
 		return $data;
-	}//end 
+	}//end parseString()
+	//=========================================================================
 	
 }
 ?>
