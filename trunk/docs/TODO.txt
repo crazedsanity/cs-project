@@ -12,11 +12,6 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 1.) Session Issues
 	* errors seem to randomly occur "projectClass::set_group_id: unable to 
 	determine group_id... session probably invalid"
-	
-4.) Display Issues
-	* word wrapping gets hairy on some helpdesk issues: sometimes it wraps to the 
-	next line, one word is displayed, then it's wrapped again.
-	* consider using/supporting BBCode, for nicer display of code & such.
 
 10.) Defaults for Data
 	* end date for project not set
