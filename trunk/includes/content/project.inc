@@ -115,8 +115,9 @@ if($_POST) {
 		$page->add_template_var("select_priority", $priorityOptionLIst);
 		
 		//give a default for the begin & end dates.
-		//TODO: if it's a sub-project (if $_GET['parent'] > 0), use the "ende" value for the parent.
+		//TODO: if it's a sub-project (if $_GET['parent'] > 0), use the "end" value for the parent.
 		$page->add_template_var("start_date", date("Y-m-d"));
+		$page->add_template_var("deadline", strftime("%Y-%m-%d", strtotime("+1 month")));
 		
 		$page->add_template_var("parentProjectId", $_GET['parent']);
 	
