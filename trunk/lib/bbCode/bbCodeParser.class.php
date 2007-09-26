@@ -52,13 +52,13 @@ class bbCodeParser {
 			
 			#  [url]http://x.com[/url]
 			'url1' => array(
-				'start'	=> array('[url]', '\[url\](http:\/\/|ftp:\/\/)(.*)', '<a href=\'\\1\\2\'>\\1\\2'),
+				'start'	=> array('[url]', '\[url\](http:\/\/|ftp:\/\/)(.*)', '<a target="_blank" href=\'\\1\\2\'>\\1\\2'),
 				'end'	=> array('[/url]', '\[\/url\]', '</a>'),
 			),
 			
 			# [url=http://x.com]stuff[/url]
 			'url2' => array(
-				'start'	=> array('[url]', '\[url=(http:\/\/|ftp:\/\/)(.*)\](.*)', '<a href=\'\\1\\2\'>\\3'), 
+				'start'	=> array('[url]', '\[url=(http:\/\/|ftp:\/\/)(.*)\](.*)', '<a target="_blank" href=\'\\1\\2\'>\\3'), 
 				'end'	=> array('[/url]', '\[\/url\]', '</a>'),
 			),
 			

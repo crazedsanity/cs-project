@@ -412,6 +412,7 @@ if($_POST) {
 		if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 			//got good data.
 			$baseRow = $page->templateRows['helpdesk_row'];
+			$bbParser = new bbCodeParser;
 			foreach($helpdeskArr as $helpdeskId=>$subData) {
 				unset($deleteLink);
 				
@@ -424,7 +425,7 @@ if($_POST) {
 				
 				//define the text fields, so they can be cleaned & truncated.
 				$previewLength = 110;
-				$textFieldArr = array("name", "subject", "solution", "remark");
+				$textFieldArr = array("name", "subject");
 				foreach($textFieldArr as $cleanThisField) {
 					//truncate them...
 					$subData[$cleanThisField] = truncate_string($subData[$cleanThisField], $previewLength, "... [more]", TRUE);
@@ -436,8 +437,8 @@ if($_POST) {
 					$subData[$cleanThisField] = str_replace('$', '\$', $subData[$cleanThisField]);
 				}
 				
-				//force the "text" preview to wrap.
-				$subData['note'] = wordwrap($subData['note'], (($previewLength * 2)/3), "\n", 1);
+				//parse bbCode in preview...
+				$subData['subject'] = $bbParser->parseString($subData['subject']);
 				
 				//truncate the email address...
 				$subData['email'] = truncate_string($subData['email'], 20, "...", TRUE);
