@@ -1459,7 +1459,6 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 	
 			foreach($parseArr as $index=>$value) {
 				$parseArr[$index] = cleanString($value, "html_entity_plus_brackets");
-				$parseArr[$index] = wordwrap($value, 60);
 			}
 			$body = mini_parser($bodyTemplate, $parseArr);
 		}
