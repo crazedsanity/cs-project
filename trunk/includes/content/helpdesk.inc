@@ -237,14 +237,14 @@ if($_POST) {
 		$categoryList = $proj->helpdeskObj->get_category_list($helpdeskData['helpdesk_cat_id']);
 		$page->add_template_var("select_category_list", $categoryList);
 		
+		$bbParser = new bbCodeParser;
+		
 		//convert the returned data into htmlentities so brackets show properly.
-		$helpdeskData['subject'] = cleanString($helpdeskData['subject'], "htmlentity_plus_brackets");
+		$helpdeskData['subject'] = $bbParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"));
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlentity_plus_brackets");
-		$helpdeskData['remark'] = cleanString($helpdeskData['remark'], "htmlentity_plus_brackets");
 		$helpdeskData['solution'] = cleanString($helpdeskData['solution'], "htmlentity_plus_brackets");
 		
 		//make the wrapping SANE.
-		$helpdeskData['remark'] = wordwrap($helpdeskData['remark'], FORMAT_WORDWRAP);
 		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
 		$rowsToUse = count(explode("\n", $helpdeskData['subject']));
 		if($rowsToUse < 5) {
@@ -357,7 +357,7 @@ if($_POST) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
 				$repArr['body'] = wordwrap($repArr['body'], FORMAT_WORDWRAP);
-				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
+				$repArr['body'] = $bbParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
 				
 				$repArr['solutionIndicator'] = "";
