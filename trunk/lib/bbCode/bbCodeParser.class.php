@@ -45,27 +45,29 @@ class bbCodeParser {
 				'end'	=> array('[/img]', '\[\/img\]', ''), 
 			),
 			
+			#  [url]http://x.com[/url]
 			'url1' => array(
 				'start'	=> array('[url]', '\[url\](http:\/\/|ftp:\/\/)(.*)', '<a href=\'\\1\\2\'>\\1\\2'),
 				'end'	=> array('[/url]', '\[\/url\]', '</a>'),
 			),
 			
+			# [url=http://x.com]stuff[/url]
 			'url2' => array(
 				'start'	=> array('[url]', '\[url=(http:\/\/|ftp:\/\/)(.*)\](.*)', '<a href=\'\\1\\2\'>\\3'), 
 				'end'	=> array('[/url]', '\[\/url\]', '</a>'),
 			),
 			
 			'code' => array(
-				'start'	=> array('[code]', '\[code\](.*)', 'CODE : <br /><div id="code">\\1'),
+				'start'	=> array('[code]', '\[code\](.*)', 'CODE : <br /><div class="code">\\1'),
 				'end'	=> array('[/code]', '\[\/code\]', '</div>'),
 			),
 		);
 		
 		foreach( $this->bbcodedata as $k => $v ) {
-			$data = preg_replace("#".$this->bbcodedata[$k]['start'][1].$this->bbcodedata[$k]['end'][1]."#", $this->bbcodedata[$k]['start'][2].$this->bbcodedata[$k]['end'][2], $data);
+			$data = preg_replace("/".$this->bbcodedata[$k]['start'][1].$this->bbcodedata[$k]['end'][1]."/U", $this->bbcodedata[$k]['start'][2].$this->bbcodedata[$k]['end'][2], $data);
 		}
 		
-		$data = str_replace('\newline\\', '<br />', $data); 
+		$data = str_replace('\newline\\', "<br />\n", $data); 
 		
 		return $data;
 	}//end 
