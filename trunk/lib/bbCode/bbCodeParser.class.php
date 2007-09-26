@@ -20,8 +20,8 @@
 
 class bbCodeParser {
 	
-	function verifyBBCode($data) {
-		$data = str_replace("\n", '\newline\\', $data); 
+	function verifyBBCode($data, $newlines2BR=FALSE) {
+		$data = str_replace("\n", '||newline||', $data); 
 	
 		# Which BBCode is accepted here
 		$this->bbcodedata = array(
@@ -41,7 +41,7 @@ class bbCodeParser {
 			),
 			
 			'image' => array(
-				'start'	=> array('[img]', '\[img\](http:\/\/|ftp:\/\/)(.*)(.jpg|.jpeg|.bmp|.gif|.png)', '<img src=\'\\1\\2\\3\' />'),
+				'start'	=> array('[img]', '\[img\](http:\/\/|ftp:\/\/|\/)(.*)(.jpg|.jpeg|.bmp|.gif|.png)', '<img src=\'\\1\\2\\3\' />'),
 				'end'	=> array('[/img]', '\[\/img\]', ''), 
 			),
 			
@@ -67,7 +67,11 @@ class bbCodeParser {
 			$data = preg_replace("/".$this->bbcodedata[$k]['start'][1].$this->bbcodedata[$k]['end'][1]."/U", $this->bbcodedata[$k]['start'][2].$this->bbcodedata[$k]['end'][2], $data);
 		}
 		
-		$data = str_replace('\newline\\', "<br />\n", $data); 
+		$replaceNewlineStr = "\n";
+		if($newlines2BR) {
+			$replaceNewlineStr = "<br />\n";
+		}
+		$data = str_replace('||newline||', $replaceNewlineStr, $data); 
 		
 		return $data;
 	}//end 
