@@ -47,3 +47,12 @@ table.fatal p { margin-top: 0px; margin-bottom: 5px }
 table.error p { margin-top: 0px; margin-bottom: 5px }
 table.status p { margin-top: 0px; margin-bottom: 5px  }
 table.notice p { margin-top: 0px; margin-bottom: 5px  }
+
+/* BBCode styles */
+.code { 
+	font-style: italic;
+	font-size: 12px;
+	font-weigth: bold;
+	padding-left:20px;
+	background-color: white; 
+}
