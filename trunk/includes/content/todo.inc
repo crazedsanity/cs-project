@@ -116,7 +116,7 @@ if($_POST) {
 		$page->add_template_var("select_priority_list", create_priority_option_list(9,9,0));
 		
 		//automatically fill the begin date & deadline.
-		$page->add_template_var("begin_date", date("Y-m-d"));
+		$page->add_template_var("started", date("Y-m-d"));
 		$page->add_template_var("deadline", date('Y-m-d', strtotime('1 month')));
 		
 		$doNotRipRows = array("assign_list", "action_buttons", "display_modifiable", "input_orig_estimate");
