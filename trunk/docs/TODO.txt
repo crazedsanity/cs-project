@@ -13,11 +13,6 @@ cs-project is stable enough to setup a tracker on CrazedSanity.com...
 	* errors seem to randomly occur "projectClass::set_group_id: unable to 
 	determine group_id... session probably invalid"
 
-10.) Defaults for Data
-	* end date for project not set
-	* begin date for todo not set
-	
-
 13.) Search Options
 	* ability to find/display ended projects	
 	* find ANY record (project, helpdesk, todo, note) based on:
