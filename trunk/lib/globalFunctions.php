@@ -1458,7 +1458,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$parseArr["project_url"] = PROJECT_URL;
 	
 			foreach($parseArr as $index=>$value) {
-				$parseArr[$index] = cleanString($value, "html_entity_plus_brackets");
+				$parseArr[$index] = cleanString($value, "htmlentity_plus_brackets");
 			}
 			$body = mini_parser($bodyTemplate, $parseArr);
 		}
