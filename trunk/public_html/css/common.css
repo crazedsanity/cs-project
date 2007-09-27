@@ -54,5 +54,6 @@ table.notice p { margin-top: 0px; margin-bottom: 5px  }
 	font-size: 12px;
 	font-weigth: bold;
 	padding-left:20px;
-	background-color: white; 
+	background-color: white;
+	border: dashed #000 1px;
 }
