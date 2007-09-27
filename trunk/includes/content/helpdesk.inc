@@ -248,6 +248,9 @@ if($_POST) {
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlentity_plus_brackets");
 		$helpdeskData['solution'] = cleanString($helpdeskData['solution'], "htmlentity_plus_brackets");
 		
+		//make the wrapping SANE.
+		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
+		
 		//show the buttons appropriate to their membership level & ownership.
 		//if they're the owner, show the "solution" section.
 		$assignedStr = $helpdeskData['leader_contact_id'];
