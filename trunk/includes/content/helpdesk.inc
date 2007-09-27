@@ -187,6 +187,10 @@ if($_POST) {
 	$helpdeskId = $_GET['ID'];
 	$action = $page->ftsSections[2];
 	
+	if(is_numeric($page->ui->get_cache("project/linkToIssue"))) {
+		$page->ui->unset_cache("project/linkToIssue");
+	}
+	
 	
 	//remove the link in the session that they should return to if not requested.
 	if($_SESSION['goBackLink'] && !$_GET['goBack']) {

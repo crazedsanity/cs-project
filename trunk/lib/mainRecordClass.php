@@ -580,7 +580,7 @@ class mainRecord {
 		//	as that might accidentally set the "is_helpdesk_issue" flag which would
 		//	not help as much as one might think).
 		$data = self::get_records(array('record_id' => $recordId));
-		$retval = $data[$recordId];
+		$retval = $data[$this->lastRecordId];
 		
 		return($retval);
 	}//end get_parent_record()

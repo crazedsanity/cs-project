@@ -59,6 +59,21 @@ if($_POST) {
 		$filterData = array();
 		$page->ui->set_cache("$module/filter", $filterData);
 	}
+	
+	//setup the "linkExtra"...
+	if(is_numeric($_GET['linkToIssue'])) {
+		$page->ui->set_cache("project/linkToIssue", $_GET['linkToIssue']);
+	}
+	
+	if(is_numeric($page->ui->get_cache("project/linkToIssue"))) {
+		$page->set_message_wrapper(array(
+			'title'		=> "Re-linking Issue",
+			'message'	=> "Please select the project that issue #". $page->ui->get_cache("project/linkToIssue") ." will be linked to.",
+			'type'		=> "notice",
+			'linkURL'	=> "/content/helpdesk/view?ID=". $page->ui->get_cache("project/linkToIssue"),
+			'linkText'	=> "Back to issue #". $page->ui->get_cache("project/linkToIssue")
+		));
+	}
 		
 	//the data will already show only items with the given status, so don't add that to the filter again.
 	$primaryFilterArr = array("status_id" => $filterData['status_id']);
@@ -141,6 +156,34 @@ if($_POST) {
 		$showAllProjects = FALSE;
 		$projectId = $page->ui->magic_cache("ID", NULL, "project","_GET,_SESSION");
 		$detailsArr = $proj->get_details($projectId);
+		
+		if(is_numeric($page->ui->get_cache("project/linkToIssue"))) {
+			$linkIssue = $page->ui->get_cache("project/linkToIssue");
+			$page->ui->unset_cache("project/linkToIssue");
+			
+			//now link it!
+			$helpdeskObj = new helpdeskClass($proj->db);
+			$helpdeskObj->helpdeskId = $linkIssue;
+			$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
+			
+			if($linkRes) {
+				$page->set_message_wrapper(array(
+					'title'		=> "Issue Linked Successfully",
+					'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.",
+					'type'		=> "status"
+				));
+			}
+			else {
+				$page->set_message_wrapper(array(
+					'title'		=> "Issue Linking FAILED",
+					'message'	=> "Failed to link issue #". $linkIssue ." to this project, result was (". $linkRes .").",
+					'type'		=> "status"
+				));
+			}
+			
+			//now get the details for this project again.
+			$detailsArr = $proj->get_details($projectId);
+		}
 		
 		//TODO: Create a link or something for moving it to a new parent (something like the main list, where clicking will change the parent).
 		$page->add_template_var("submit_name", "Modify");
