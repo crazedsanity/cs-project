@@ -63,8 +63,8 @@ class bbCodeParser {
 			),
 			
 			'code' => array(
-				'start'	=> array('[code]', '\[code\](.*)', 'CODE : <br /><div class="code">\\1'),
-				'end'	=> array('[/code]', '\[\/code\]', '</div>'),
+				'start'	=> array('[code]', '\[code\](.*)', '<br /><br /><b>CODE</b>:<div class="code">\\1'),
+				'end'	=> array('[/code]', '\[\/code\]', '</div><br />'),
 			),
 		);
 	}//end __construct()
