@@ -167,7 +167,6 @@ class upgrade {
 		//parse the file.
 		$xmlParser = new xmlParser($xmlString);
 		
-		//TODO: upgrade the XMLParser{} so either it has something that handles turning it into a useable array, or update get_tree() to do it.
 		$config = $xmlParser->get_tree(TRUE);
 		$this->config = $config['UPGRADE'];
 	}//end read_upgrade_config_file()
@@ -187,8 +186,6 @@ class upgrade {
 			//TODO: to overcome filesystem permission issues, consider adding something to the config.xml to indicate it's locked.
 			//TODO: stop lying about creating the lockfile.
 			$this->fsObj->cd("/");
-			#$oldVersionFileData = $this->fsObj->read("VERSION");
-			#$createFileRes = $this->fsObj->create_file("UPGRADING_VERSION");
 			$createFileRes = 1;
 			
 			//TODO: not only should the "create_file()" method be run, but also do a sanity check by calling lock_file_exists().
