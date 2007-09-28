@@ -13,35 +13,26 @@ SET client_min_messages = warning;
 COMMENT ON SCHEMA public IS 'Standard public schema';
 
 
+--
+-- Name: plpgsql; Type: PROCEDURAL LANGUAGE; Schema: -; Owner: 
+--
+
+CREATE PROCEDURAL LANGUAGE plpgsql;
+
+
 SET search_path = public, pg_catalog;
 
 --
--- Name: plpgsql_call_handler(); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: dblink_pkey_results; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
-    AS '$libdir/plpgsql', 'plpgsql_call_handler'
-    LANGUAGE c;
+CREATE TYPE dblink_pkey_results AS (
+	"position" integer,
+	colname text
+);
 
 
-ALTER FUNCTION public.plpgsql_call_handler() OWNER TO postgres;
-
---
--- Name: plpgsql_validator(oid); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION plpgsql_validator(oid) RETURNS void
-    AS '$libdir/plpgsql', 'plpgsql_validator'
-    LANGUAGE c;
-
-
-ALTER FUNCTION public.plpgsql_validator(oid) OWNER TO postgres;
-
---
--- Name: plpgsql; Type: PROCEDURAL LANGUAGE; Schema: public; Owner: 
---
-
-CREATE TRUSTED PROCEDURAL LANGUAGE plpgsql HANDLER plpgsql_call_handler VALIDATOR plpgsql_validator;
+ALTER TYPE public.dblink_pkey_results OWNER TO postgres;
 
 --
 -- Name: attribute_get_create(text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -76,6 +67,17 @@ $_$
 
 
 ALTER FUNCTION public.attribute_get_create(text) OWNER TO postgres;
+
+--
+-- Name: cipher_exists(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION cipher_exists(text) RETURNS boolean
+    AS '$libdir/pgcrypto', 'pg_cipher_exists'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.cipher_exists(text) OWNER TO postgres;
 
 --
 -- Name: contact_create_from_email(text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -117,7 +119,7 @@ DECLARE
 	
 	-- internal vars.
 	x_attributeId integer;
-	x_record contact_attribute_link_table%ROWTYPE;
+	x_record RECORD;
 	x_counter integer DEFAULT 0;
 	x_array TEXT[];
 	
@@ -263,7 +265,7 @@ DECLARE
 	
 	-- internal vars.
 	x_attributeId integer;
-	x_contactAttributeData attribute_table%ROWTYPE;
+	x_contactAttributeData RECORD;
 	x_numRows integer DEFAULT 0;
 	x_retval integer DEFAULT 0;
 BEGIN
@@ -297,6 +299,38 @@ $_$
 
 ALTER FUNCTION public.contact_update_attribute(integer, text, text) OWNER TO postgres;
 
+--
+-- Name: digest(text, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION digest(text, text) RETURNS bytea
+    AS '$libdir/pgcrypto', 'pg_digest'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.digest(text, text) OWNER TO postgres;
+
+--
+-- Name: digest(bytea, text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION digest(bytea, text) RETURNS bytea
+    AS '$libdir/pgcrypto', 'pg_digest'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.digest(bytea, text) OWNER TO postgres;
+
+--
+-- Name: digest_exists(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION digest_exists(text) RETURNS boolean
+    AS '$libdir/pgcrypto', 'pg_digest_exists'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.digest_exists(text) OWNER TO postgres;
 
 --
 -- Name: internal_data_get_value(text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -371,6 +405,28 @@ $_$
 ALTER FUNCTION public.internal_data_set_value(text, text) OWNER TO postgres;
 
 --
+-- Name: plpgsql_call_handler(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
+    AS '$libdir/plpgsql', 'plpgsql_call_handler'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.plpgsql_call_handler() OWNER TO postgres;
+
+--
+-- Name: plpgsql_validator(oid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_validator(oid) RETURNS void
+    AS '$libdir/plpgsql', 'plpgsql_validator'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.plpgsql_validator(oid) OWNER TO postgres;
+
+--
 -- Name: record_get_num_children(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -443,6 +499,46 @@ $_$
 
 ALTER FUNCTION public.record_id_from_public_id(integer, boolean) OWNER TO postgres;
 
+--
+-- Name: replace(character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION "replace"(character varying, character varying, character varying) RETURNS character varying
+    AS $_$ 
+DECLARE 
+subject ALIAS for $1; 
+match ALIAS for $2; 
+replace ALIAS for $3; 
+r varchar; 
+matchpos int; 
+remain varchar; 
+rempos int; 
+BEGIN 
+
+if (char_length(match) = 0) then 
+raise exception 'replace function was called with null match string. This is not permitted.'; 
+end if; 
+
+remain := subject; 
+r := ''; 
+matchpos := strpos(subject,match); 
+WHILE (matchpos > 0 ) LOOP 
+r := r || substring(remain, 0,matchpos) || replace; 
+rempos := matchpos + char_length(match); 
+remain := substring(remain,rempos); 
+matchpos := strpos(remain,match); 
+END LOOP; 
+
+r := r || remain; 
+return r; 
+
+END; 
+
+$_$
+    LANGUAGE plpgsql;
+
+
+ALTER FUNCTION public."replace"(character varying, character varying, character varying) OWNER TO postgres;
 
 --
 -- Name: tag_add(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -611,6 +707,52 @@ CREATE TABLE group_table (
 
 ALTER TABLE public.group_table OWNER TO postgres;
 
+SET default_with_oids = false;
+
+--
+-- Name: helpdesk_note_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE helpdesk_note_table (
+    helpdesk_note_id serial NOT NULL,
+    title text NOT NULL,
+    body text NOT NULL,
+    created timestamp with time zone DEFAULT now() NOT NULL,
+    updated timestamp with time zone,
+    creator_contact_id integer NOT NULL,
+    helpdesk_id integer NOT NULL,
+    is_solution boolean DEFAULT false
+);
+
+
+ALTER TABLE public.helpdesk_note_table OWNER TO postgres;
+
+--
+-- Name: helpdesk_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE helpdesk_table (
+    helpdesk_id serial NOT NULL,
+    group_id integer,
+    creator_contact_id integer,
+    leader_contact_id integer,
+    status_id integer DEFAULT 0 NOT NULL,
+    priority smallint,
+    progress smallint DEFAULT 0 NOT NULL,
+    start_date timestamp without time zone DEFAULT now(),
+    deadline date,
+    last_updated timestamp without time zone DEFAULT now(),
+    title text NOT NULL,
+    body text NOT NULL,
+    project_id integer,
+    is_internal_only boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.helpdesk_table OWNER TO postgres;
+
+SET default_with_oids = true;
+
 --
 -- Name: internal_data_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -744,27 +886,45 @@ CREATE TABLE pref_type_table (
 
 ALTER TABLE public.pref_type_table OWNER TO postgres;
 
+SET default_with_oids = false;
+
 --
--- Name: record_contact_link_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: project_contact_link_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE record_contact_link_table (
-    record_contact_link_id serial NOT NULL,
-    record_id integer NOT NULL,
+CREATE TABLE project_contact_link_table (
+    project_contact_link_id serial NOT NULL,
+    project_id integer NOT NULL,
     contact_id integer NOT NULL
 );
 
 
-ALTER TABLE public.record_contact_link_table OWNER TO postgres;
+ALTER TABLE public.project_contact_link_table OWNER TO postgres;
 
 --
--- Name: record_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: project_note_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE record_table (
-    record_id serial NOT NULL,
-    public_id integer DEFAULT currval('record_table_record_id_seq'::text) NOT NULL,
-    ancestry text DEFAULT currval('record_table_record_id_seq'::text) NOT NULL,
+CREATE TABLE project_note_table (
+    project_note_id serial NOT NULL,
+    title text NOT NULL,
+    body text NOT NULL,
+    created timestamp with time zone DEFAULT now() NOT NULL,
+    updated timestamp with time zone,
+    creator_contact_id integer NOT NULL,
+    project_id integer NOT NULL
+);
+
+
+ALTER TABLE public.project_note_table OWNER TO postgres;
+
+--
+-- Name: project_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE project_table (
+    project_id serial NOT NULL,
+    ancestry text DEFAULT currval(('project_table_project_id_seq'::text)::regclass) NOT NULL,
     ancestry_level smallint DEFAULT 0 NOT NULL,
     group_id integer,
     creator_contact_id integer,
@@ -775,14 +935,15 @@ CREATE TABLE record_table (
     start_date timestamp without time zone DEFAULT ('now'::text)::date,
     deadline date,
     last_updated timestamp with time zone DEFAULT now(),
-    name text NOT NULL,
-    subject text NOT NULL,
-    is_helpdesk_issue boolean NOT NULL,
+    title text NOT NULL,
+    body text NOT NULL,
     is_internal_only boolean DEFAULT false NOT NULL
 );
 
 
-ALTER TABLE public.record_table OWNER TO postgres;
+ALTER TABLE public.project_table OWNER TO postgres;
+
+SET default_with_oids = true;
 
 --
 -- Name: record_type_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -818,6 +979,7 @@ ALTER TABLE public.session_table OWNER TO postgres;
 --
 
 CREATE SEQUENCE special__helpdesk_public_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -831,6 +993,7 @@ ALTER TABLE public.special__helpdesk_public_id_seq OWNER TO postgres;
 --
 
 CREATE SEQUENCE special__project_public_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -912,7 +1075,7 @@ CREATE TABLE todo_table (
     status_id integer DEFAULT 0 NOT NULL,
     priority smallint DEFAULT 50 NOT NULL,
     progress numeric DEFAULT 0 NOT NULL,
-    record_id integer NOT NULL,
+    project_id integer NOT NULL,
     estimate_original numeric(10,2) DEFAULT 1 NOT NULL,
     estimate_current numeric(10,2) DEFAULT 1 NOT NULL,
     estimate_elapsed numeric(10,2) DEFAULT 0 NOT NULL
@@ -959,7 +1122,7 @@ CREATE TABLE user_table (
     "password" character varying(32),
     is_admin boolean DEFAULT false NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
-    group_id integer NOT NULL,
+    group_id integer DEFAULT 1 NOT NULL,
     contact_id integer NOT NULL
 );
 
@@ -974,8 +1137,6 @@ ALTER TABLE ONLY attribute_table
     ADD CONSTRAINT attribute_table_pkey PRIMARY KEY (attribute_id);
 
 
-ALTER INDEX public.attribute_table_pkey OWNER TO postgres;
-
 --
 -- Name: contact_attribute_link_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -983,8 +1144,6 @@ ALTER INDEX public.attribute_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY contact_attribute_link_table
     ADD CONSTRAINT contact_attribute_link_table_pkey PRIMARY KEY (contact_attribute_link_id);
 
-
-ALTER INDEX public.contact_attribute_link_table_pkey OWNER TO postgres;
 
 --
 -- Name: contact_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -994,8 +1153,6 @@ ALTER TABLE ONLY contact_table
     ADD CONSTRAINT contact_table_pkey PRIMARY KEY (contact_id);
 
 
-ALTER INDEX public.contact_table_pkey OWNER TO postgres;
-
 --
 -- Name: group_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1004,7 +1161,13 @@ ALTER TABLE ONLY group_table
     ADD CONSTRAINT group_table_pkey PRIMARY KEY (group_id);
 
 
-ALTER INDEX public.group_table_pkey OWNER TO postgres;
+--
+-- Name: helpdesk_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY helpdesk_table
+    ADD CONSTRAINT helpdesk_table_pkey PRIMARY KEY (helpdesk_id);
+
 
 --
 -- Name: internal_data_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1014,8 +1177,6 @@ ALTER TABLE ONLY internal_data_table
     ADD CONSTRAINT internal_data_table_pkey PRIMARY KEY (internal_data_id);
 
 
-ALTER INDEX public.internal_data_table_pkey OWNER TO postgres;
-
 --
 -- Name: log_category_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1023,8 +1184,6 @@ ALTER INDEX public.internal_data_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY log_category_table
     ADD CONSTRAINT log_category_table_pkey PRIMARY KEY (log_category_id);
 
-
-ALTER INDEX public.log_category_table_pkey OWNER TO postgres;
 
 --
 -- Name: log_class_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1034,8 +1193,6 @@ ALTER TABLE ONLY log_class_table
     ADD CONSTRAINT log_class_table_pkey PRIMARY KEY (log_class_id);
 
 
-ALTER INDEX public.log_class_table_pkey OWNER TO postgres;
-
 --
 -- Name: log_estimate_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1043,8 +1200,6 @@ ALTER INDEX public.log_class_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY log_estimate_table
     ADD CONSTRAINT log_estimate_table_pkey PRIMARY KEY (log_estimate_id);
 
-
-ALTER INDEX public.log_estimate_table_pkey OWNER TO postgres;
 
 --
 -- Name: log_event_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1054,8 +1209,6 @@ ALTER TABLE ONLY log_event_table
     ADD CONSTRAINT log_event_table_pkey PRIMARY KEY (log_event_id);
 
 
-ALTER INDEX public.log_event_table_pkey OWNER TO postgres;
-
 --
 -- Name: log_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1063,8 +1216,6 @@ ALTER INDEX public.log_event_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY log_table
     ADD CONSTRAINT log_table_pkey PRIMARY KEY (log_id);
 
-
-ALTER INDEX public.log_table_pkey OWNER TO postgres;
 
 --
 -- Name: note_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1074,8 +1225,6 @@ ALTER TABLE ONLY note_table
     ADD CONSTRAINT note_table_pkey PRIMARY KEY (note_id);
 
 
-ALTER INDEX public.note_table_pkey OWNER TO postgres;
-
 --
 -- Name: pref_option_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1083,8 +1232,6 @@ ALTER INDEX public.note_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY pref_option_table
     ADD CONSTRAINT pref_option_table_pkey PRIMARY KEY (pref_option_id);
 
-
-ALTER INDEX public.pref_option_table_pkey OWNER TO postgres;
 
 --
 -- Name: pref_type_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1094,27 +1241,21 @@ ALTER TABLE ONLY pref_type_table
     ADD CONSTRAINT pref_type_table_pkey PRIMARY KEY (pref_type_id);
 
 
-ALTER INDEX public.pref_type_table_pkey OWNER TO postgres;
-
 --
--- Name: record_contact_link_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: project_contact_link_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY record_contact_link_table
-    ADD CONSTRAINT record_contact_link_table_pkey PRIMARY KEY (record_contact_link_id);
+ALTER TABLE ONLY project_contact_link_table
+    ADD CONSTRAINT project_contact_link_table_pkey PRIMARY KEY (project_contact_link_id);
 
-
-ALTER INDEX public.record_contact_link_table_pkey OWNER TO postgres;
 
 --
--- Name: record_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: project_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY record_table
-    ADD CONSTRAINT record_table_pkey PRIMARY KEY (record_id);
+ALTER TABLE ONLY project_table
+    ADD CONSTRAINT project_table_pkey PRIMARY KEY (project_id);
 
-
-ALTER INDEX public.record_table_pkey OWNER TO postgres;
 
 --
 -- Name: record_type_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1124,8 +1265,6 @@ ALTER TABLE ONLY record_type_table
     ADD CONSTRAINT record_type_table_pkey PRIMARY KEY (record_type_id);
 
 
-ALTER INDEX public.record_type_table_pkey OWNER TO postgres;
-
 --
 -- Name: session_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1133,8 +1272,6 @@ ALTER INDEX public.record_type_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY session_table
     ADD CONSTRAINT session_table_pkey PRIMARY KEY (session_id);
 
-
-ALTER INDEX public.session_table_pkey OWNER TO postgres;
 
 --
 -- Name: status_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1144,8 +1281,6 @@ ALTER TABLE ONLY status_table
     ADD CONSTRAINT status_table_pkey PRIMARY KEY (status_id);
 
 
-ALTER INDEX public.status_table_pkey OWNER TO postgres;
-
 --
 -- Name: tag_name_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1153,8 +1288,6 @@ ALTER INDEX public.status_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY tag_name_table
     ADD CONSTRAINT tag_name_table_pkey PRIMARY KEY (tag_name_id);
 
-
-ALTER INDEX public.tag_name_table_pkey OWNER TO postgres;
 
 --
 -- Name: tag_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1164,8 +1297,6 @@ ALTER TABLE ONLY tag_table
     ADD CONSTRAINT tag_table_pkey PRIMARY KEY (tag_id);
 
 
-ALTER INDEX public.tag_table_pkey OWNER TO postgres;
-
 --
 -- Name: todo_comment_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1173,8 +1304,6 @@ ALTER INDEX public.tag_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY todo_comment_table
     ADD CONSTRAINT todo_comment_table_pkey PRIMARY KEY (todo_comment_id);
 
-
-ALTER INDEX public.todo_comment_table_pkey OWNER TO postgres;
 
 --
 -- Name: todo_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1184,8 +1313,6 @@ ALTER TABLE ONLY todo_table
     ADD CONSTRAINT todo_table_pkey PRIMARY KEY (todo_id);
 
 
-ALTER INDEX public.todo_table_pkey OWNER TO postgres;
-
 --
 -- Name: user_group_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1193,8 +1320,6 @@ ALTER INDEX public.todo_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY user_group_table
     ADD CONSTRAINT user_group_table_pkey PRIMARY KEY (user_group_id);
 
-
-ALTER INDEX public.user_group_table_pkey OWNER TO postgres;
 
 --
 -- Name: user_pref_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1204,8 +1329,6 @@ ALTER TABLE ONLY user_pref_table
     ADD CONSTRAINT user_pref_table_pkey PRIMARY KEY (user_pref_id);
 
 
-ALTER INDEX public.user_pref_table_pkey OWNER TO postgres;
-
 --
 -- Name: user_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1214,16 +1337,12 @@ ALTER TABLE ONLY user_table
     ADD CONSTRAINT user_table_pkey PRIMARY KEY (uid);
 
 
-ALTER INDEX public.user_table_pkey OWNER TO postgres;
-
 --
 -- Name: contact_attrbute_link_table_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE UNIQUE INDEX contact_attrbute_link_table_uidx ON contact_attribute_link_table USING btree (contact_id, attribute_id);
 
-
-ALTER INDEX public.contact_attrbute_link_table_uidx OWNER TO postgres;
 
 --
 -- Name: internal_data_table_internal_name_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
@@ -1232,16 +1351,12 @@ ALTER INDEX public.contact_attrbute_link_table_uidx OWNER TO postgres;
 CREATE UNIQUE INDEX internal_data_table_internal_name_uidx ON internal_data_table USING btree (internal_name);
 
 
-ALTER INDEX public.internal_data_table_internal_name_uidx OWNER TO postgres;
-
 --
 -- Name: log_class_name_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE UNIQUE INDEX log_class_name_uidx ON log_class_table USING btree (lower(name));
 
-
-ALTER INDEX public.log_class_name_uidx OWNER TO postgres;
 
 --
 -- Name: log_event__class_category__uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
@@ -1250,8 +1365,6 @@ ALTER INDEX public.log_class_name_uidx OWNER TO postgres;
 CREATE UNIQUE INDEX log_event__class_category__uidx ON log_event_table USING btree (log_class_id, log_category_id);
 
 
-ALTER INDEX public.log_event__class_category__uidx OWNER TO postgres;
-
 --
 -- Name: tag_name__uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1259,16 +1372,12 @@ ALTER INDEX public.log_event__class_category__uidx OWNER TO postgres;
 CREATE UNIQUE INDEX tag_name__uidx ON tag_name_table USING btree (name);
 
 
-ALTER INDEX public.tag_name__uidx OWNER TO postgres;
-
 --
 -- Name: user_table_username_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE UNIQUE INDEX user_table_username_uidx ON user_table USING btree (lower((username)::text));
 
-
-ALTER INDEX public.user_table_username_uidx OWNER TO postgres;
 
 --
 -- Name: contact_attribute_link_table_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -1291,7 +1400,23 @@ ALTER TABLE ONLY contact_attribute_link_table
 --
 
 ALTER TABLE ONLY group_table
-    ADD CONSTRAINT group_table_leader_uid_fkey FOREIGN KEY (leader_uid) REFERENCES user_table(uid);
+    ADD CONSTRAINT group_table_leader_uid_fkey FOREIGN KEY (leader_uid) REFERENCES user_table(uid) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: helpdesk_note_table_helpdesk_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY helpdesk_note_table
+    ADD CONSTRAINT helpdesk_note_table_helpdesk_id_fkey FOREIGN KEY (helpdesk_id) REFERENCES helpdesk_table(helpdesk_id);
+
+
+--
+-- Name: helpdesk_table_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY helpdesk_table
+    ADD CONSTRAINT helpdesk_table_project_id_fkey FOREIGN KEY (project_id) REFERENCES project_table(project_id);
 
 
 --
@@ -1375,14 +1500,6 @@ ALTER TABLE ONLY note_table
 
 
 --
--- Name: note_table_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY note_table
-    ADD CONSTRAINT note_table_record_id_fkey FOREIGN KEY (record_id) REFERENCES record_table(record_id);
-
-
---
 -- Name: pref_option_table_pref_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1391,51 +1508,27 @@ ALTER TABLE ONLY pref_option_table
 
 
 --
--- Name: record_contact_link_table_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: project_contact_link_table_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY record_contact_link_table
-    ADD CONSTRAINT record_contact_link_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
-
-
---
--- Name: record_contact_link_table_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY record_contact_link_table
-    ADD CONSTRAINT record_contact_link_table_record_id_fkey FOREIGN KEY (record_id) REFERENCES record_table(record_id);
+ALTER TABLE ONLY project_contact_link_table
+    ADD CONSTRAINT project_contact_link_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
 
 
 --
--- Name: record_table_creator_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: project_contact_link_table_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY record_table
-    ADD CONSTRAINT record_table_creator_contact_id_fkey FOREIGN KEY (creator_contact_id) REFERENCES contact_table(contact_id);
-
-
---
--- Name: record_table_group_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY record_table
-    ADD CONSTRAINT record_table_group_id_fkey FOREIGN KEY (group_id) REFERENCES group_table(group_id);
+ALTER TABLE ONLY project_contact_link_table
+    ADD CONSTRAINT project_contact_link_table_project_id_fkey FOREIGN KEY (project_id) REFERENCES project_table(project_id);
 
 
 --
--- Name: record_table_leader_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: project_note_table_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY record_table
-    ADD CONSTRAINT record_table_leader_contact_id_fkey FOREIGN KEY (leader_contact_id) REFERENCES contact_table(contact_id);
-
-
---
--- Name: record_table_status_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY record_table
-    ADD CONSTRAINT record_table_status_id_fkey FOREIGN KEY (status_id) REFERENCES status_table(status_id);
+ALTER TABLE ONLY project_note_table
+    ADD CONSTRAINT project_note_table_project_id_fkey FOREIGN KEY (project_id) REFERENCES project_table(project_id);
 
 
 --
@@ -1487,11 +1580,11 @@ ALTER TABLE ONLY todo_table
 
 
 --
--- Name: todo_table_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: todo_table_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY todo_table
-    ADD CONSTRAINT todo_table_record_id_fkey FOREIGN KEY (record_id) REFERENCES record_table(record_id);
+    ADD CONSTRAINT todo_table_project_id_fkey FOREIGN KEY (project_id) REFERENCES project_table(project_id);
 
 
 --
@@ -1539,7 +1632,7 @@ ALTER TABLE ONLY user_pref_table
 --
 
 ALTER TABLE ONLY user_table
-    ADD CONSTRAINT user_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
+    ADD CONSTRAINT user_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
