@@ -2,22 +2,27 @@
 /*
  * Created on September 28th, 2007
  * 
+ * For the 1.x series, only projects will have todo's.
+ * 	* WORKFLOW:
+ * 		-- create project (overview of what will be done)
+ * 		-- create features
+ * 		-- accept features (complete issue)
+ * 			* complete issue
+ * 			* create todo(s) based on completed feature
+ * 		-- assign bugs
+ * 			* note all work for bug on issue
+ * 			* completing issue == bug is fixed.
  * 
- * options for todo's (assuming helpdesk will also have them):::
- * 		1.) single todo table + single linker table
- * 			* remove "record_id" constraint
- * 			* create linker table with constraint to todo_id, and a column indicating helpdesk/project
- * 			* PROBLEM: no linked records might disappear, no db constraint
- * 		2.) single todo table + multiple linker tables
- * 			* remove record_id constraint
- * 			* create table for linking to helpdesk (constraints for todo & helpdesk)
- * 			* create table for linking to project (constraints for todo & project)
- * 			* PROBLEM: future linking requires additional tables, todo can be linked to project AND helpdesk records
- * 		3.) multiple todo tables
- * 			* create helpdesk_todo table
- * 			* create project_todo table
- * 			* convert data from old table into new table(s)
- * 			* PROBLEM: code is duplicated (once helpdesk gets records)
+ * For the 2.x series, no more project todo's; they'll be converted to helpdesk tasks.
+ * 	* WORKFLOW:
+ * 		-- create project (overview of what will be done)
+ * 		-- create list of features
+ * 			* tasks = research
+ * 		-- accept features
+ * 			* tasks = to be complete before feature is complete
+ * 		-- assign bugs
+ * 			* tasks = list of things to fix
+ * 	* SUBPROJECTS: just like regular projects, but a smaller subset.
  */
 
 
@@ -36,7 +41,7 @@ class upgradeTo1_0_0_alpha3 {
 	public function __construct(cs_phpDB &$db) {
 		$this->db = $db;
 		$this->gfObj = new cs_globalFunctions;
-		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../docs/sql/setup/1.0.0-ALPHA2_to_1.0.0-ALPHA3');
+		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../docs/sql/upgrades');
 	}//end __construct()
 	//=========================================================================
 	
@@ -50,11 +55,9 @@ class upgradeTo1_0_0_alpha3 {
 	 */
 	public function run_upgrade() {
 		
-		$this->perform_db_changes();
-		$this->convert_note_records();
+		$retval = $this->perform_db_changes();
 		
-		throw new exception(__METHOD__ .": cowardly");
-		
+		return($retval);
 	}//end run_upgrade()
 	//=========================================================================
 	
@@ -62,17 +65,18 @@ class upgradeTo1_0_0_alpha3 {
 	
 	//=========================================================================
 	private function perform_db_changes() {
-		$fileList = array(
-			'project_tables', 'helpdesk_tables.sql', 'populate_tables.sql'
-		);
+		$retval = 0;
+			
+		$contents = $this->fsObj->read("1.0.0-ALPHA2_to_1.0.0-ALPHA3.sql");
+		if($this->run_sql($contents, 0)) {
+			$retval++;
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to execute SQL... ");
+		}
+		
+		return($retval);
 	}//end perform_db_changes()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function convert_note_records() {
-	}//end convert_note_records()
 	//=========================================================================
 	
 	
@@ -100,33 +104,6 @@ class upgradeTo1_0_0_alpha3 {
 		
 		return($retval);
 	}//end run_sql()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function convert_existing_data() {
-		//update some preferences.
-		$sqlArr = array(
-			"UPDATE pref_type_table SET default_value='helpdesk' WHERE name='startModule' AND default_value='rts'" => 1,
-			"UPDATE pref_option_table SET effective_value='helpdesk' WHERE name='Helpdesk'"	=> 1,
-			"UPDATE record_type_table SET module='helpdesk' WHERE module='rts'"	=> 1
-		);
-		
-		$retval = 0;
-		foreach($sqlArr as $sql=>$expectedRows) {
-			$result = $this->run_sql($sql, $expectedRows);
-			if($result === TRUE) {
-				$retval++;
-			}
-			else {
-				throw new exception(__METHOD__ .": could not run update... ");
-			}
-		}
-		
-		$this->gfObj->debug_print(__METHOD__ .": finished with ($retval)");
-		return($retval);
-	}//end convert_existing_data()
 	//=========================================================================
 	
 }//end tempUpgradeClass{}
