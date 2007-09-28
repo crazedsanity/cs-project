@@ -437,9 +437,9 @@ class upgrade {
 				//now, figure out if it's a simple version upgrade, or if it requires
 				//	a script to do the deed.
 				if(count($upgradeData) > 1) {
-					if(isset($upgradeData['SCRIPT_NAME']) && isset($upgradeData['CLASS_NAME']) && isset($upgradeData['METHOD_NAME'])) {
+					if(isset($upgradeData['SCRIPT_NAME']) && isset($upgradeData['CLASS_NAME']) && isset($upgradeData['CALL_METHOD'])) {
 						//good to go; it's a scripted upgrade.
-						$this->run_scripted_upgrade($upgradeData);
+						$this->do_scripted_upgrade($upgradeData);
 						
 					}
 					else {

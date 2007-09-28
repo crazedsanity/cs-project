@@ -7,7 +7,7 @@
 	you would find information under matching for "v5.2.4").  This section 
 	indicates the version that it should upgrade the database to 
 	("target_version"), the name of the script ("script_name"), the class name 
-	("class_name"), and the name of the method within that class ("method_name") 
+	("class_name"), and the name of the method within that class ("call_method") 
 	to call in order to perform the upgrade.  The method should return TRUE on 
 	success: anything else would indicate failure.  Upgrade failure may leave 
 	the system in an inconsistent state.
@@ -20,5 +20,11 @@
 		<v1.0.0-ALPHA1>
 			<target_version>1.0.0-ALPHA2</target_version>
 		</v1.0.0-ALPHA1>
+		<V1.0.0-ALPHA2>
+			<target_version>1.0.0-ALPHA3</target_version>
+			<script_name>1.0.0-ALPHA2_to_1.0.0-ALPHA3.php</script_name>
+			<class_name>upgradeTo1_0_0_alpha3</class_name>
+			<call_method>run_upgrade</call_method>
+		</V1.0.0-ALPHA2>
 	</matching>
 </upgrade>
