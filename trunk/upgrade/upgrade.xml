@@ -1,33 +1,24 @@
 <upgrade>
-	<system_note>The database and version listed in the config.xml file should normally ALWAYS match.  Since the previous version 
-	didn't include that information in config.xml, nor was there a facility to automatically add/update it, we have to go off a 
-	blank version. 
+	<system_note>The database and version listed in the config.xml file should 
+	ALWAYS match.
 	
-	To determine which section in matching to use, heed only the information beneath the tag that indicates the current database 
-	version.  This section indicates the version that it should upgrade the database to, the name of the script, the class name, 
-	and the name of the method within that class to call in order to perform the upgrade.  The method should return TRUE on success: 
-	anything else would indicate failure.  Failing may leave the system in an inconsistent state.
+	To determine which section in matching to use, heed only the information 
+	beneath the tag that indicates the current database version (for 5.2.4, 
+	you would find information under matching for "v5.2.4").  This section 
+	indicates the version that it should upgrade the database to 
+	("target_version"), the name of the script ("script_name"), the class name 
+	("class_name"), and the name of the method within that class ("method_name") 
+	to call in order to perform the upgrade.  The method should return TRUE on 
+	success: anything else would indicate failure.  Upgrade failure may leave 
+	the system in an inconsistent state.
 	
-	When determining success vs. failure: the method called should return the same string as the VERSION file has.  Any result other 
-	than that EXACT STRING would be interpretted as failure.
-	
-	It's important to note that only the "matching" section is currently used.  The "current_version" is there only as 
-	a visual reference to anyone having upgrade difficulties, etc.</system_note>
-	
-	<current_version>BETA-3.3.0</current_version>
+	IMPORTANT: in order to facilitate doing multiple version upgrades, the name 
+	of the class must be UNIQUE to all the other classes.  For this reason, the 
+	class name should be something like "v1_0_0_ALPHA1__to__v1_0_0_ALPHA2".</system_note>
 	
 	<matching>
-		<BETA-3.2.1>
-			<target_version>BETA-3.3</target_version>
-			<script_name>BETA-3.2.1_to_BETA-3.3.0.php</script_name>
-			<class_name>upgradeToBeta_3_3_0</class_name>
-			<call_method>run_upgrade</call_method>
-		</BETA-3.2.1>
-		<BETA-3.3.0>
-			<target_version>BETA-3.3.1</target_version>
-			<script_name>BETA-3.3.0_to_BETA-3.3.1.php</script_name>
-			<class_name>upgradeToBeta_3_3_1</class_name>
-			<call_method>run_upgrade</call_method>
-		</BETA-3.3.0>
+		<v1.0.0-ALPHA1>
+			<target_version>1.0.0-ALPHA2</target_version>
+		</v1.0.0-ALPHA1>
 	</matching>
 </upgrade>

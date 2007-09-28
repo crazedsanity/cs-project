@@ -20,6 +20,7 @@ class upgrade {
 	private $fsObj;
 	private $gfObj;
 	private $config = NULL;
+	private $db;
 	
 	private $versionFileVersion = NULL;
 	private $configVersion = NULL;
@@ -198,6 +199,11 @@ class upgrade {
 			else {
 				$this->gfObj->debug_print(__METHOD__ .": result of trying to create lockfile: (". $createFileRes .")");
 				
+				//check to see if our config file is writable.
+				if(!$this->fsObj->is_writable("lib/config.xml")) {
+					throw new exception(__METHOD__ .": config file isn't writable!");
+				}
+				
 				//push data into our internal "config" array.
 				$this->read_upgrade_config_file();
 				$this->get_database_version();
@@ -267,14 +273,36 @@ class upgrade {
 			$retval['version_maintenance'] = "0";
 		}
 		
-		//check for BETA (if "major" is "BETA-3", then the major version is 3, & the prefix is "BETA").
-		if(preg_match('/-/', $retval['version_major'])) {
-			$tmp = explode('-', $retval['version_major']);
-			$retval['version_major'] = $tmp[1];
-			$retval['prefix'] = $tmp[0];
+		//check for a prefix or a suffix.
+		if(preg_match('/-/', $versionString)) {
+			//make sure there's only ONE dash.
+			$tmp = explode('-', $versionString);
+			if(count($tmp) == 2) {
+				if(preg_match('/-/', $retval['version_major'])) {
+					//example: BETA-3.3.0
+					
+					throw new exception(__METHOD__ .": versions that contain prefixes cannot be upgraded");
+					
+					#$tmp = explode('-', $retval['version_major']);
+					#$retval['version_major'] = $tmp[1];
+					#$retval['prefix'] = $tmp[0];
+				}
+				elseif(preg_match('/-/', $retval['version_maintenance'])) {
+					//example: 1.0.0-ALPHA1
+					$tmp = explode('-', $retval['version_maintenance']);
+					$retval['version_maintenance'] = $tmp[0];
+					$retval['version_suffix'] = $tmp[1];
+				}
+				else {
+					throw new exception(__METHOD__ .": invalid location of prefix/suffix in (". $versionString .")");
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": too many dashes in version string (". $versionString .")");
+			}
 		}
 		else {
-			$retval['prefix'] = "";
+			$retval['version_suffix'] = "";
 		}
 		
 		return($retval);
@@ -316,38 +344,39 @@ class upgrade {
 		}
 		else {
 			//NOTE: this seems very convoluted, but it works.
-			if($versionFileData['prefix'] == $dbVersion['prefix']) {
-				if($versionFileData['version_major'] == $dbVersion['version_major']) {
-					if($versionFileData['version_minor'] == $dbVersion['version_minor']) {
-						if($versionFileData['version_maintenance'] == $dbVersion['version_maintenance']) {
+			if($versionFileData['version_major'] == $dbVersion['version_major']) {
+				if($versionFileData['version_minor'] == $dbVersion['version_minor']) {
+					if($versionFileData['version_maintenance'] == $dbVersion['version_maintenance']) {
+						if($versionFileData['version_suffix'] == $dbVersion['version_suffix']) {
 							throw new exception(__METHOD__ .": no version upgrade detected, but version strings don't match (versionFile=". $versionFileData['version_string'] .", dbVersion=". $dbVersion['version_string'] .")");
 						}
-						elseif($versionFileData['version_maintenance'] > $dbVersion['version_maintenance']) {
-							$this->gfObj->debug_print(__METHOD__ .": upgrading maintenance versions");
-							$retval = "maintenance";
-						}
 						else {
-							throw new exception(__METHOD__ .": downgrading from maintenance versions is unsupported");
+							$this->gfObj->debug_print(__METHOD__ .": upgrading suffix");
+							$retval = "suffix";
 						}
 					}
-					elseif($versionFileData['version_minor'] > $dbVersion['version_minor']) {
-						$this->gfObj->debug_print(__METHOD__ .": upgrading minor versions");
-						$retval = "minor";
+					elseif($versionFileData['version_maintenance'] > $dbVersion['version_maintenance']) {
+						$this->gfObj->debug_print(__METHOD__ .": upgrading maintenance versions");
+						$retval = "maintenance";
 					}
 					else {
-						throw new exception(__METHOD__ .": downgrading minor versions is unsupported");
+						throw new exception(__METHOD__ .": downgrading from maintenance versions is unsupported");
 					}
 				}
-				elseif($versionFileData['version_major'] > $dbVersion['version_major']) {
-					$this->gfObj->debug_print(__METHOD__ .": upgrading major versions");
-					$retval = "major";
+				elseif($versionFileData['version_minor'] > $dbVersion['version_minor']) {
+					$this->gfObj->debug_print(__METHOD__ .": upgrading minor versions");
+					$retval = "minor";
 				}
 				else {
-					throw new exception(__METHOD__ .": downgrading major versions is unsupported");
+					throw new exception(__METHOD__ .": downgrading minor versions is unsupported");
 				}
 			}
+			elseif($versionFileData['version_major'] > $dbVersion['version_major']) {
+				$this->gfObj->debug_print(__METHOD__ .": upgrading major versions");
+				$retval = "major";
+			}
 			else {
-				throw new exception(__METHOD__ .": transitioning from (or to) non-production versions is not supported (". $dbVersion['version_string'] ." to ". $versionFileData['version_string'] .")");
+				throw new exception(__METHOD__ .": downgrading major versions is unsupported");
 			}
 		}
 		
@@ -400,44 +429,213 @@ class upgrade {
 	//=========================================================================
 	private function do_single_upgrade() {
 		//Use the "matching_syntax" data in the upgrade.xml file to determine the filename.
-		if(isset($this->config['MATCHING'][$this->databaseVersion])) {
-			$scriptIndex = $this->databaseVersion;
-			$myConfigFile = $this->config['MATCHING'][$scriptIndex]['SCRIPT_NAME'];
-			$this->gfObj->debug_print("myConfigFile=($myConfigFile)");
+		$versionIndex = "V". $this->databaseVersion;
+		if(isset($this->config['MATCHING'][$versionIndex])) {
+			$scriptIndex = $versionIndex;
 			
-			//we've got the filename, see if it exists.
-			$fileName = UPGRADE_DIR .'/'. $myConfigFile;
-			if(file_exists($fileName)) {
-				$createClassName = $this->config['MATCHING'][strtoupper($scriptIndex)]['CLASS_NAME'];
-				$classUpgradeMethod = $this->config['MATCHING'][strtoupper($scriptIndex)]['CALL_METHOD'];
-				$this->gfObj->debug_print(__METHOD__ .": classname: ". $createClassName);
-				require_once($fileName);
-				
-				//now check to see that the class we need actually exists.
-				if(class_exists($createClassName)) {
-					$upgradeObj = new $createClassName($this->db);
-					if(method_exists($upgradeObj, $classUpgradeMethod)) {
-						$upgradeResult = $upgradeObj->$classUpgradeMethod();
+			$upgradeData = $this->config['MATCHING'][$versionIndex];
+			
+			if(isset($upgradeData['TARGET_VERSION'])) {
+				$this->newVersion = $upgradeData['TARGET_VERSION'];
+				//now, figure out if it's a simple version upgrade, or if it requires
+				//	a script to do the deed.
+				if(count($upgradeData) > 1) {
+					if(isset($upgradeData['SCRIPT_NAME']) && isset($upgradeData['CLASS_NAME']) && isset($upgradeData['METHOD_NAME'])) {
+						//good to go; it's a scripted upgrade.
+						$this->run_scripted_upgrade($upgradeData);
+						
 					}
 					else {
-						throw new exception(__METHOD__ .": upgrade method doesn't exist (". $createClassName ."::". $classUpgradeMethod 
-							."), unable to perform upgrade ");
+						throw new exception(__METHOD__ .": not enough information to run scripted upgrade for ". $versionIndex);
 					}
-					$this->gfObj->debug_print($upgradeObj);
 				}
 				else {
-					throw new exception(__METHOD__ .": unable to locate upgrade class name (". $createClassName .")");
+					//version-only upgrade.
+					$this->update_database_version($upgradeData['TARGET_VERSION']);
 				}
-				
+				$this->update_config_file();
 			}
 			else {
-				throw new exception(__METHOD__ .": upgrade filename (". $fileName .") does not exist");
+				throw new exception(__METHOD__ .": target version not specified, unable to proceed with upgrade for ". $versionIndex);
 			}
 		}
 		else {
 			throw new exception(__METHOD__ .": could not retrieve syntax to determine upgrade filename from (". $this->databaseVersion .")");
 		}
 	}//end do_single_upgrade()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Updates information that's stored in the database, internal to cs-project, 
+	 * so the version there is consistent with all the others.
+	 */
+	private function update_database_version($newVersionString) {
+		$versionArr = $this->parse_version_string($newVersionString);
+		
+		$queryArr = array();
+		foreach($versionArr as $index=>$value) {
+			$queryArr[$index] = "SELECT internal_data_set_value('". $index ."', '". $value ."');";
+		}
+		
+		$retval = NULL;
+		foreach($queryArr as $name=>$sql) {
+			if($this->run_sql($sql, 1)) {
+				$retval++;
+			}
+		}
+		
+		//okay, now check that the version string matches the updated bits.
+		if(!$this->check_database_version($this->newVersion)) {
+			throw new exception(__METHOD__ .": database version information is invalid: (". $this->newVersion .")");
+		}
+		
+		return($retval);
+		
+	}//end update_database_version()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Checks consistency of version information in the database, and optionally 
+	 * against a given version string.
+	 */
+	private function check_database_version($checkThisVersion=NULL) {
+		//retrieve the internal version information.
+		$sql = "select internal_data_get_value('version_string') as version_string, (" .
+			"internal_data_get_value('version_major') || '.' || " .
+			"internal_data_get_value('version_minor') || '.' || " .
+			"internal_data_get_value('version_maintenance')) as check_version, " .
+			"internal_data_get_value('version_suffix') AS version_suffix";
+		
+		$retval = NULL;
+		if($this->run_sql($sql,1)) {
+			$data = $this->db->farray_fieldnames();
+			$versionString = $data['version_string'];
+			$checkVersion = $data['check_version'];
+			
+			if(strlen($data['version_suffix'])) {
+				//the version string already would have this, but the checked version wouldn't.
+				$checkVersion .= "-". $data['version_suffix'];
+			}
+			
+			if($versionString == $checkVersion) {
+				$retval = TRUE; 
+			}
+			else {
+				$retval = FALSE;
+			}
+		}
+		else {
+			$retval = FALSE;
+		}
+		
+		if(!$retval) {
+			$this->gfObj->debug_print($data);
+			$this->gfObj->debug_print(__METHOD__ .": versionString=(". $versionString ."), checkVersion=(". $checkVersion .")");
+		}
+		
+		return($retval);
+		
+	}//end check_database_version()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function do_scripted_upgrade(array $upgradeData) {
+		$myConfigFile = $upgradeData['SCRIPT_NAME'];
+		$this->gfObj->debug_print("myConfigFile=($myConfigFile)");
+		
+		//we've got the filename, see if it exists.
+		$fileName = UPGRADE_DIR .'/'. $myConfigFile;
+		if(file_exists($fileName)) {
+			$createClassName = $upgradeData['CLASS_NAME'];
+			$classUpgradeMethod = $upgradeData['CALL_METHOD'];
+			$this->gfObj->debug_print(__METHOD__ .": classname: ". $createClassName);
+			require_once($fileName);
+			
+			//now check to see that the class we need actually exists.
+			if(class_exists($createClassName)) {
+				$upgradeObj = new $createClassName($this->db);
+				if(method_exists($upgradeObj, $classUpgradeMethod)) {
+					$upgradeResult = $upgradeObj->$classUpgradeMethod();
+				}
+				else {
+					throw new exception(__METHOD__ .": upgrade method doesn't exist (". $createClassName ."::". $classUpgradeMethod 
+						."), unable to perform upgrade ");
+				}
+				$this->gfObj->debug_print($upgradeObj);
+			}
+			else {
+				throw new exception(__METHOD__ .": unable to locate upgrade class name (". $createClassName .")");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": upgrade filename (". $fileName .") does not exist");
+		}
+	}//end do_scripted_upgrade()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function run_sql($sql, $expectedNumrows=1) {
+		if(!$this->db->is_connected()) {
+			$this->db->connect(get_config_db_params());
+		}
+		$numrows = $this->db->exec($sql);
+		$dberror = $this->db->errorMsg();
+		
+		if(strlen($dberror)) {
+			$details = "DBERROR::: ". $dberror;
+			throw new exception(__METHOD__ .": SQL FAILED::: ". $sql ."\n\nDETAILS: ". $details);
+		}
+		elseif(!is_null($expectedNumrows) && $numrows != $expectedNumrows) {
+			throw new exception(__METHOD__ .": SQL FAILED::: ". $sql ."\n\nDETAILS: " .
+				"rows affected didn't match expectation (". $numrows ." != ". $expectedNumrows .")");
+		}
+		elseif(is_null($expectedNumrows) && $numrows < 1) {
+			throw new exception(__METHOD__ .": SQL FAILED::: ". $sql ."\n\nDETAILS: " .
+				"invalid number of rows affected (". $numrows .")");
+		}
+		else {
+			$retval = TRUE;
+		}
+		
+		return($retval);
+	}//end run_sql()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function update_config_file() {
+		$gf = new cs_globalFunctions;
+		$myConfigFile = 'lib/'. CONFIG_FILENAME;
+		$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
+		$xmlParser = new XMLParser($fs->read($myConfigFile));
+		$xmlCreator = new XMLCreator;
+		$xmlCreator->load_xmlparser_data($xmlParser);
+		
+		//define items that should be added to the config.
+		$newElements = array(
+			'version_string'				=> $this->newVersion
+		);
+		
+		$gf->debug_print(__METHOD__ .": running... ");
+		
+		foreach($newElements as $name=>$value) {
+			$xmlCreator->add_tag($name, $value);
+		}
+		
+		$xmlString = $xmlCreator->create_xml_string();
+		$fs->write($xmlString, $myConfigFile);
+	}//end update_config_file()
 	//=========================================================================
 	
 	
