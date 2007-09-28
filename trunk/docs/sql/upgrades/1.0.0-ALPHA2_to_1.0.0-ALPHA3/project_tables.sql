@@ -6,6 +6,11 @@
 -- Last Committed Path::: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/docs/sql/upgrades/1.0.0-ALPHA2_to_1.0.0-ALPHA3/project_tables.sql $
 --
 
+
+ALTER TABLE todo_table DROP CONSTRAINT "todo_table_record_id_fkey";
+ALTER TABLE record_contact_link_table DROP CONSTRAINT record_contact_link_table_record_id_fkey;
+ALTER TABLE note_table DROP CONSTRAINT note_table_record_id_fkey;
+
 CREATE TABLE project_table (
     project_id serial NOT NULL PRIMARY KEY,
     ancestry text DEFAULT currval('project_table_project_id_seq'::text) NOT NULL,
