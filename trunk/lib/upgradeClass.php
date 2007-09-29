@@ -440,7 +440,7 @@ class upgrade {
 					if(isset($upgradeData['SCRIPT_NAME']) && isset($upgradeData['CLASS_NAME']) && isset($upgradeData['CALL_METHOD'])) {
 						//good to go; it's a scripted upgrade.
 						$this->do_scripted_upgrade($upgradeData);
-						
+						$this->update_database_version($upgradeData['TARGET_VERSION']);
 					}
 					else {
 						throw new exception(__METHOD__ .": not enough information to run scripted upgrade for ". $versionIndex);

@@ -355,7 +355,6 @@ if($_POST) {
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = wordwrap($repArr['body'], FORMAT_WORDWRAP);
 				$repArr['body'] = $bbParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
 				

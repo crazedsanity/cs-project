@@ -1491,6 +1491,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 				$mail->AddAddress($emailAddr);
 				$mail->ContentType = "text/html";
 				$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
+				$mail->WordWrap = 75;
 				$mail->Body = $body;
 				if(!$mail->Send()) {
 					throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
@@ -1506,6 +1507,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$mail->AddAddress($toAddr);
 			$mail->ContentType = "text/html";
 			$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
+			$mail->WordWrap = 75;
 			$mail->Body = $body;
 			if(!$mail->Send()) {
 				throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
