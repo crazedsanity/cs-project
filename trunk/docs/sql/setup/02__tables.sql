@@ -9,7 +9,6 @@ SET default_tablespace = '';
 
 SET default_with_oids = true;
 
-
 --
 -- Name: attribute_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -63,52 +62,6 @@ CREATE TABLE group_table (
 
 
 ALTER TABLE public.group_table OWNER TO postgres;
-
-SET default_with_oids = false;
-
---
--- Name: helpdesk_note_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE helpdesk_note_table (
-    helpdesk_note_id serial NOT NULL,
-    title text NOT NULL,
-    body text NOT NULL,
-    created timestamp with time zone DEFAULT now() NOT NULL,
-    updated timestamp with time zone,
-    creator_contact_id integer NOT NULL,
-    helpdesk_id integer NOT NULL,
-    is_solution boolean DEFAULT false
-);
-
-
-ALTER TABLE public.helpdesk_note_table OWNER TO postgres;
-
---
--- Name: helpdesk_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE helpdesk_table (
-    helpdesk_id serial NOT NULL,
-    group_id integer,
-    creator_contact_id integer,
-    leader_contact_id integer,
-    status_id integer DEFAULT 0 NOT NULL,
-    priority smallint,
-    progress smallint DEFAULT 0 NOT NULL,
-    start_date timestamp without time zone DEFAULT now(),
-    deadline date,
-    last_updated timestamp without time zone DEFAULT now(),
-    title text NOT NULL,
-    body text NOT NULL,
-    project_id integer,
-    is_internal_only boolean DEFAULT false NOT NULL
-);
-
-
-ALTER TABLE public.helpdesk_table OWNER TO postgres;
-
-SET default_with_oids = true;
 
 --
 -- Name: internal_data_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -243,45 +196,27 @@ CREATE TABLE pref_type_table (
 
 ALTER TABLE public.pref_type_table OWNER TO postgres;
 
-SET default_with_oids = false;
-
 --
--- Name: project_contact_link_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: record_contact_link_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE project_contact_link_table (
-    project_contact_link_id serial NOT NULL,
-    project_id integer NOT NULL,
+CREATE TABLE record_contact_link_table (
+    record_contact_link_id serial NOT NULL,
+    record_id integer NOT NULL,
     contact_id integer NOT NULL
 );
 
 
-ALTER TABLE public.project_contact_link_table OWNER TO postgres;
+ALTER TABLE public.record_contact_link_table OWNER TO postgres;
 
 --
--- Name: project_note_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: record_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE project_note_table (
-    project_note_id serial NOT NULL,
-    title text NOT NULL,
-    body text NOT NULL,
-    created timestamp with time zone DEFAULT now() NOT NULL,
-    updated timestamp with time zone,
-    creator_contact_id integer NOT NULL,
-    project_id integer NOT NULL
-);
-
-
-ALTER TABLE public.project_note_table OWNER TO postgres;
-
---
--- Name: project_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
---
-
-CREATE TABLE project_table (
-    project_id serial NOT NULL,
-    ancestry text DEFAULT currval(('project_table_project_id_seq'::text)::regclass) NOT NULL,
+CREATE TABLE record_table (
+    record_id serial NOT NULL,
+    public_id integer DEFAULT currval('record_table_record_id_seq'::text) NOT NULL,
+    ancestry text DEFAULT currval('record_table_record_id_seq'::text) NOT NULL,
     ancestry_level smallint DEFAULT 0 NOT NULL,
     group_id integer,
     creator_contact_id integer,
@@ -292,15 +227,14 @@ CREATE TABLE project_table (
     start_date timestamp without time zone DEFAULT ('now'::text)::date,
     deadline date,
     last_updated timestamp with time zone DEFAULT now(),
-    title text NOT NULL,
-    body text NOT NULL,
+    name text NOT NULL,
+    subject text NOT NULL,
+    is_helpdesk_issue boolean NOT NULL,
     is_internal_only boolean DEFAULT false NOT NULL
 );
 
 
-ALTER TABLE public.project_table OWNER TO postgres;
-
-SET default_with_oids = true;
+ALTER TABLE public.record_table OWNER TO postgres;
 
 --
 -- Name: record_type_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -336,7 +270,6 @@ ALTER TABLE public.session_table OWNER TO postgres;
 --
 
 CREATE SEQUENCE special__helpdesk_public_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -350,7 +283,6 @@ ALTER TABLE public.special__helpdesk_public_id_seq OWNER TO postgres;
 --
 
 CREATE SEQUENCE special__project_public_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -432,7 +364,7 @@ CREATE TABLE todo_table (
     status_id integer DEFAULT 0 NOT NULL,
     priority smallint DEFAULT 50 NOT NULL,
     progress numeric DEFAULT 0 NOT NULL,
-    project_id integer NOT NULL,
+    record_id integer NOT NULL,
     estimate_original numeric(10,2) DEFAULT 1 NOT NULL,
     estimate_current numeric(10,2) DEFAULT 1 NOT NULL,
     estimate_elapsed numeric(10,2) DEFAULT 0 NOT NULL
@@ -479,7 +411,7 @@ CREATE TABLE user_table (
     "password" character varying(32),
     is_admin boolean DEFAULT false NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
-    group_id integer DEFAULT 1 NOT NULL,
+    group_id integer NOT NULL DEFAULT 1,
     contact_id integer NOT NULL
 );
 
