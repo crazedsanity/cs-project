@@ -224,12 +224,9 @@ if($_POST) {
 			unset($associatedTags, $tagId, $tagName, $tagsRepArr);
 		}
 		#*/
-	
-		//set some restrictions, based upon who owns it.
-		#if(!strlen($detailsArr['chef']) || $detailsArr['chef'] == $_SESSION['kurz']) {
-			//re-add the "modify" button.
-			$page->add_template_var("modify_button", $page->templateRows['modify_button']);
-		#}
+		
+		//re-add the "modify" button.
+		$page->add_template_var("modify_button", $page->templateRows['modify_button']);
 		
 		//format the "note" area.
 		if(strlen($detailsArr['subject']) > 0)
@@ -266,12 +263,18 @@ if($_POST) {
 		}
 		$page->add_template_var('children_string_height', $childAncestryBoxSize);
 		$page->add_template_var('children_string', $childrenString);
-	
+		
+		
+		//format the start_date
+		$tmpStartDate = explode(" ", $detailsArr['start_date']);
+		$detailsArr['start_date'] = $tmpStartDate[0];
+		
 		foreach($detailsArr as $field=>$value) {
 			$page->add_template_var($field, $value);
 		}
 		$page->add_template_var("project_name", $detailsArr['name']);
 		$page->add_template_var("select_status_id_". $detailsArr['status_id'], "selected");
+		
 		
 		//TODO: make this use a better name...
 		$linkedUserList = array();
