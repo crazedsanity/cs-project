@@ -964,188 +964,195 @@ function valid_email($email_address)
 //================================================================================================================
 function cleanString($cleanThis=NULL, $cleanType="all",$sqlQuotes=NULL) {
 	$cleanType = strtolower($cleanType);
-	switch ($cleanType) {
-		case "none":
-			//nothing to see here (no cleaning wanted/needed).  Move along.
-			$sqlQuotes = 0;
-		break;
-		
-		case "query":
-			/*
-				replace \' with '
-				gets rid of evil characters that might lead to SQL injection attacks.
-				replace line-break characters
-			*/
-			$evilChars = array("\$", "%", "~", "*",">", "<", "-", "{", "}", "[", "]", ")", "(", "&", "#", "?", ".", "\,","\/","\\","\"","\|","!","^","+","`","\n","\r");
-			$cleanThis = preg_replace("/\|/","",$cleanThis);
-			$cleanThis = str_replace($evilChars,"", $cleanThis);
-			$cleanThis = stripslashes(addslashes($cleanThis));
-		break;
-		
-		case "sql":
-			$cleanThis = addslashes(stripslashes($cleanThis));
-		break;
-
-		case "double_quote":
-			//This will remove all double quotes from a string.
-			$cleanThis = str_replace('"',"",$cleanThis);
-		break;
-
-		case "htmlspecial":
-			/*
-			This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application. 
-				The translations performed are:
-			      '&' (ampersand) becomes '&amp;'
-			      '"' (double quote) becomes '&quot;'.
-			      '<' (less than) becomes '&lt;'
-			      '>' (greater than) becomes '&gt;' 
-				Also converts "{" and "}" to their html entity.
-			*/
-			$cleanThis = htmlspecialchars($cleanThis);
-			$cleanThis = str_replace('{', '&#123;', $cleanThis);
-			$cleanThis = str_replace('}', '&#125;', $cleanThis);
-		break;
-
-		case "htmlspecial_q":
-		/*
-			'&' (ampersand) becomes '&amp;'
-			'"' (double quote) becomes '&quot;'.
-			''' (single quote) becomes '&#039;'.
-			'<' (less than) becomes '&lt;'
-			'>' (greater than) becomes '&gt;
-				Also converts "{" and "}" to their html entity.
-		*/
-			$cleanThis = htmlspecialchars($cleanThis,ENT_QUOTES);
-			$cleanThis = str_replace('{', '&#123;', $cleanThis);
-			$cleanThis = str_replace('}', '&#125;', $cleanThis);
-		break;
-
-		case "htmlspecial_nq":
-		/*
-			'&' (ampersand) becomes '&amp;'
-			'<' (less than) becomes '&lt;'
-			'>' (greater than) becomes '&gt;
-		*/
-			$cleanThis = htmlspecialchars($cleanThis,ENT_NOQUOTES);
-		break;
-
-		case "htmlentity":
-			/*	
-				Convert all applicable text to its html entity
-				Will convert double-quotes and leave single-quotes alone
-			*/
-			$cleanThis = htmlentities(html_entity_decode($cleanThis));
-			$cleanThis = str_replace('$', '&#36;', $cleanThis);
-		break;
-
-		case "htmlentity_plus_brackets":
-			/*	
-				Just like htmlentity, but also converts "{" and "}" (prevents template 
-				from being incorrectly parse).
-				Also converts "{" and "}" to their html entity.
-			*/
-			$cleanThis = htmlentities(html_entity_decode($cleanThis));
-			$cleanThis = str_replace('$', '&#36;', $cleanThis);
-			$cleanThis = str_replace('{', '&#123;', $cleanThis);
-			$cleanThis = str_replace('}', '&#125;', $cleanThis);
-		break;
-
-		case "double_entity":
-			//Removed double quotes, then calls html_entities on it.
-			$cleanThis = str_replace('"',"",$cleanThis);
-			$cleanThis = htmlentities(html_entity_decode($cleanThis));
-		break;
-	
-		case "meta":
-			// Returns a version of str with a backslash character (\) before every character that is among these:
-			// . \\ + * ? [ ^ ] ( $ )
-			$cleanThis = quotemeta($cleanThis);
-		break;
-
-		case "email":
-			//Remove all characters that aren't allowed in an email address.
-			$cleanThis = preg_replace("/[^A-Za-z0-9\._@-]/","",$cleanThis);
-		break;
-
-		case "email_plus_spaces":
-			//Remove all characters that aren't allowed in an email address.
-			$cleanThis = preg_replace("/[^A-Za-z0-9\ \._@-]/","",$cleanThis);
-		break;
-
-		case "phone_fax":
-			//Remove everything that's not numeric or +()-   example: +1 (555)-555-2020 is valid
-			$cleanThis = preg_replace("/[^0-9-+() ]/","",$cleanThis);
-		break;
-		
-		case "integer":
-		case "numeric":
-		case "number":
-			//Remove everything that's not numeric.
-			$sqlQuotes = 0;
-			if(is_null($cleanThis) || !is_numeric($cleanThis)) {
-				//non-numeric: set it as a string NULL..
-				$cleanThis = "NULL";
-			}
-			else {
-				$cleanThis = preg_replace("/[^0-9\.-]/","",$cleanThis);
-			}
-		break;
-		
-		case "decimal":
-		case "float":
-			//same as integer only the decimal point is allowed
-			$cleanThis = preg_replace("/[^0-9\.]/","",$cleanThis);
-		break;
-		
-		case "name":
-		case "names":
-			//removes everything in the "alpha" case, but allows "'".
-			$cleanThis = preg_replace("/[^a-zA-Z']/", "", $cleanThis);
-		break;
-
-		case "alpha":
-			//Removes anything that's not English a-zA-Z
-			$cleanThis = preg_replace("/[^a-zA-Z]/","",$cleanThis);
-		break;
-		
-		case "bool":
-		case "boolean":
-			//makes it either T or F (gotta lower the string & only check the first char to ensure accurate results).
-			$cleanThis = interpret_bool($cleanThis, array('f', 't'));
-		break;
-		
-		case "bool_strict":
-		case "boolean_strict";
-			$cleanThis = interpret_bool($cleanThis, array('false', 'true'));
-		break;
-		
-		case "varchar":
-			$cleanThis=cleanString($cleanThis,"query");
-			$cleanThis="'" . $cleanThis . "'";
-			if($cleanThis == "''")
-			{
-				$cleanThis="NULL";	
-			}
-		break;
-		
-		case "date":
-			$cleanThis = preg_replace("/[^0-9\-]/","",$cleanThis);
+	if(is_array($cleanThis)) {
+		foreach($cleanThis as $index=>$value) {
+			$cleanThis[$index] = cleanString($value, $cleanType, $sqlQuotes);
+		}
+	}
+	else {
+		switch ($cleanType) {
+			case "none":
+				//nothing to see here (no cleaning wanted/needed).  Move along.
+				$sqlQuotes = 0;
 			break;
 			
-		case "datetime":
-			$cleanThis=preg_replace("/[^A-Za-z0-9\/: \-\'\.]/","",$cleanThis);
-		break;
+			case "query":
+				/*
+					replace \' with '
+					gets rid of evil characters that might lead to SQL injection attacks.
+					replace line-break characters
+				*/
+				$evilChars = array("\$", "%", "~", "*",">", "<", "-", "{", "}", "[", "]", ")", "(", "&", "#", "?", ".", "\,","\/","\\","\"","\|","!","^","+","`","\n","\r");
+				$cleanThis = preg_replace("/\|/","",$cleanThis);
+				$cleanThis = str_replace($evilChars,"", $cleanThis);
+				$cleanThis = stripslashes(addslashes($cleanThis));
+			break;
 			
-		case "all":
-		default:
-			// 1. Remove all naughty characters we can think of except alphanumeric.
-			$cleanThis = preg_replace("/[^A-Za-z0-9]/","",$cleanThis);
-			$sqlQuotes = 0;
-		break;
-
-	}
-	if($sqlQuotes) {
-		$cleanThis = "'". $cleanThis ."'";
+			case "sql":
+				$cleanThis = addslashes(stripslashes($cleanThis));
+			break;
+	
+			case "double_quote":
+				//This will remove all double quotes from a string.
+				$cleanThis = str_replace('"',"",$cleanThis);
+			break;
+	
+			case "htmlspecial":
+				/*
+				This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application. 
+					The translations performed are:
+				      '&' (ampersand) becomes '&amp;'
+				      '"' (double quote) becomes '&quot;'.
+				      '<' (less than) becomes '&lt;'
+				      '>' (greater than) becomes '&gt;' 
+					Also converts "{" and "}" to their html entity.
+				*/
+				$cleanThis = htmlspecialchars($cleanThis);
+				$cleanThis = str_replace('{', '&#123;', $cleanThis);
+				$cleanThis = str_replace('}', '&#125;', $cleanThis);
+			break;
+	
+			case "htmlspecial_q":
+			/*
+				'&' (ampersand) becomes '&amp;'
+				'"' (double quote) becomes '&quot;'.
+				''' (single quote) becomes '&#039;'.
+				'<' (less than) becomes '&lt;'
+				'>' (greater than) becomes '&gt;
+					Also converts "{" and "}" to their html entity.
+			*/
+				$cleanThis = htmlspecialchars($cleanThis,ENT_QUOTES);
+				$cleanThis = str_replace('{', '&#123;', $cleanThis);
+				$cleanThis = str_replace('}', '&#125;', $cleanThis);
+			break;
+	
+			case "htmlspecial_nq":
+			/*
+				'&' (ampersand) becomes '&amp;'
+				'<' (less than) becomes '&lt;'
+				'>' (greater than) becomes '&gt;
+			*/
+				$cleanThis = htmlspecialchars($cleanThis,ENT_NOQUOTES);
+			break;
+	
+			case "htmlentity":
+				/*	
+					Convert all applicable text to its html entity
+					Will convert double-quotes and leave single-quotes alone
+				*/
+				$cleanThis = htmlentities(html_entity_decode($cleanThis));
+				$cleanThis = str_replace('$', '&#36;', $cleanThis);
+			break;
+	
+			case "htmlentity_plus_brackets":
+				/*	
+					Just like htmlentity, but also converts "{" and "}" (prevents template 
+					from being incorrectly parse).
+					Also converts "{" and "}" to their html entity.
+				*/
+				$cleanThis = htmlentities(html_entity_decode($cleanThis));
+				$cleanThis = str_replace('$', '&#36;', $cleanThis);
+				$cleanThis = str_replace('{', '&#123;', $cleanThis);
+				$cleanThis = str_replace('}', '&#125;', $cleanThis);
+			break;
+	
+			case "double_entity":
+				//Removed double quotes, then calls html_entities on it.
+				$cleanThis = str_replace('"',"",$cleanThis);
+				$cleanThis = htmlentities(html_entity_decode($cleanThis));
+			break;
+		
+			case "meta":
+				// Returns a version of str with a backslash character (\) before every character that is among these:
+				// . \\ + * ? [ ^ ] ( $ )
+				$cleanThis = quotemeta($cleanThis);
+			break;
+	
+			case "email":
+				//Remove all characters that aren't allowed in an email address.
+				$cleanThis = preg_replace("/[^A-Za-z0-9\._@-]/","",$cleanThis);
+			break;
+	
+			case "email_plus_spaces":
+				//Remove all characters that aren't allowed in an email address.
+				$cleanThis = preg_replace("/[^A-Za-z0-9\ \._@-]/","",$cleanThis);
+			break;
+	
+			case "phone_fax":
+				//Remove everything that's not numeric or +()-   example: +1 (555)-555-2020 is valid
+				$cleanThis = preg_replace("/[^0-9-+() ]/","",$cleanThis);
+			break;
+			
+			case "integer":
+			case "numeric":
+			case "number":
+				//Remove everything that's not numeric.
+				$sqlQuotes = 0;
+				if(is_null($cleanThis) || !is_numeric($cleanThis)) {
+					//non-numeric: set it as a string NULL..
+					$cleanThis = "NULL";
+				}
+				else {
+					$cleanThis = preg_replace("/[^0-9\.-]/","",$cleanThis);
+				}
+			break;
+			
+			case "decimal":
+			case "float":
+				//same as integer only the decimal point is allowed
+				$cleanThis = preg_replace("/[^0-9\.]/","",$cleanThis);
+			break;
+			
+			case "name":
+			case "names":
+				//removes everything in the "alpha" case, but allows "'".
+				$cleanThis = preg_replace("/[^a-zA-Z']/", "", $cleanThis);
+			break;
+	
+			case "alpha":
+				//Removes anything that's not English a-zA-Z
+				$cleanThis = preg_replace("/[^a-zA-Z]/","",$cleanThis);
+			break;
+			
+			case "bool":
+			case "boolean":
+				//makes it either T or F (gotta lower the string & only check the first char to ensure accurate results).
+				$cleanThis = interpret_bool($cleanThis, array('f', 't'));
+			break;
+			
+			case "bool_strict":
+			case "boolean_strict";
+				$cleanThis = interpret_bool($cleanThis, array('false', 'true'));
+			break;
+			
+			case "varchar":
+				$cleanThis=cleanString($cleanThis,"query");
+				$cleanThis="'" . $cleanThis . "'";
+				if($cleanThis == "''")
+				{
+					$cleanThis="NULL";	
+				}
+			break;
+			
+			case "date":
+				$cleanThis = preg_replace("/[^0-9\-]/","",$cleanThis);
+				break;
+				
+			case "datetime":
+				$cleanThis=preg_replace("/[^A-Za-z0-9\/: \-\'\.]/","",$cleanThis);
+			break;
+				
+			case "all":
+			default:
+				// 1. Remove all naughty characters we can think of except alphanumeric.
+				$cleanThis = preg_replace("/[^A-Za-z0-9]/","",$cleanThis);
+				$sqlQuotes = 0;
+			break;
+	
+		}
+		if($sqlQuotes) {
+			$cleanThis = "'". $cleanThis ."'";
+		}
 	}
 	return $cleanThis;
 }//end cleanString()
