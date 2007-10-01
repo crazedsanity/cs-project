@@ -498,7 +498,7 @@ class projectClass extends mainRecord {
 	
 	
 	//================================================================================================
-	function get_ancestry_link_list($projectId, $formatIt=TRUE) {
+	function get_ancestry_link_list($projectId, $formatIt=TRUE, $lastItemIsLink=FALSE) {
 		//get the list of ancestors.
 		$myAncestors = $this->get_ancestry($projectId);
 		$ancestorList = explode(':', $myAncestors);
@@ -526,7 +526,7 @@ class projectClass extends mainRecord {
 					$name = cleanString($name, "htmlspecial_nq");
 					$name = cleanString($name, "htmlentity_plus_brackets");
 					if($formatIt === TRUE) {
-						if($id == $projectId) {
+						if($id == $projectId && $lastItemIsLink === FALSE) {
 							$string = '<b>'. $name .'</b>';
 						}
 						else {

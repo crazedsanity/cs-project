@@ -26,5 +26,8 @@
 			<class_name>upgradeTo1_0_0_ALPHA3</class_name>
 			<call_method>run_upgrade</call_method>
 		</v1.0.0-ALPHA2>
+		<v1.0.0-ALPHA3>
+			<target_version>1.0.0-ALPHA4</target_version>
+		</v1.0.0-ALPHA3>
 	</matching>
 </upgrade>

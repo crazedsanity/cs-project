@@ -293,8 +293,7 @@ if($_POST) {
 			
 			//get the parent.
 			$parentData = $proj->helpdeskObj->get_parent_record($helpdeskData['ancestry']);
-			$page->add_template_var('parent_record_name', $parentData['name']);
-			$page->add_template_var('parent_record_public_id', $parentData['public_id']);
+			$page->add_template_var("ancestryLinkList", $proj->get_ancestry_link_list($parentData['public_id'], TRUE, TRUE),1);
 		}
 		
 		//create the priority list.
