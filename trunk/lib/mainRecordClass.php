@@ -204,6 +204,15 @@ class mainRecord {
 			//get the data.
 			$retval = $this->db->farray_fieldnames("public_id",NULL,0);
 			
+			//format the start_date
+			foreach($retval as $index=>$data) {
+				$tmp = explode('.', $data['start_date']);
+				if(preg_match('/00:00:00$/', $tmp[0])) {
+					$tmp[0] = preg_replace('/ 00:00:00$/', '', $tmp[0]);
+				}
+				$retval[$index]['start_date'] = $tmp[0];
+			}
+			
 			//set it into cache.
 			if($numrows == 1) {
 				$mainRecord = array_keys($retval);
