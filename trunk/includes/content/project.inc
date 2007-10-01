@@ -164,7 +164,10 @@ if($_POST) {
 			//now link it!
 			$helpdeskObj = new helpdeskClass($proj->db);
 			$helpdeskObj->helpdeskId = $linkIssue;
+			$issueData = $helpdeskObj->get_record($linkIssue);
+			$issueParentData = $helpdeskObj->get_parent_record($issueData['ancestry']);
 			$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
+			$helpdeskObj->remark($linkIssue, "Re-linked to [project_id=". $projectId ."] from [project_id=". $issueParentData['public_id'] ."]");
 			
 			if($linkRes) {
 				$page->set_message_wrapper(array(
