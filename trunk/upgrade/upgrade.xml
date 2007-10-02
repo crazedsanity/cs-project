@@ -29,5 +29,8 @@
 		<v1.0.0-ALPHA3>
 			<target_version>1.0.0-ALPHA4</target_version>
 		</v1.0.0-ALPHA3>
+		<v1.0.0-ALPHA4>
+			<target_version>1.0.0-ALPHA5</target_version>
+		</v1.0.0-ALPHA4>
 	</matching>
 </upgrade>
