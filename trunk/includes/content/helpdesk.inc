@@ -241,10 +241,8 @@ if($_POST) {
 		$categoryList = $proj->helpdeskObj->get_category_list($helpdeskData['helpdesk_cat_id']);
 		$page->add_template_var("select_category_list", $categoryList);
 		
-		$bbParser = new bbCodeParser;
-		
 		//convert the returned data into htmlentities so brackets show properly.
-		$helpdeskData['subject'] = $bbParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"));
+		$helpdeskData['subject'] = $bbCodeParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"));
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlentity_plus_brackets");
 		$helpdeskData['solution'] = cleanString($helpdeskData['solution'], "htmlentity_plus_brackets");
 		
@@ -354,7 +352,7 @@ if($_POST) {
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = $bbParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
+				$repArr['body'] = $bbCodeParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
 				
 				$repArr['solutionIndicator'] = "";
@@ -409,7 +407,6 @@ if($_POST) {
 		if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 			//got good data.
 			$baseRow = $page->templateRows['helpdesk_row'];
-			$bbParser = new bbCodeParser;
 			foreach($helpdeskArr as $helpdeskId=>$subData) {
 				unset($deleteLink);
 				
@@ -435,7 +432,7 @@ if($_POST) {
 				}
 				
 				//parse bbCode in preview...
-				$subData['subject'] = $bbParser->parseString($subData['subject']);
+				$subData['subject'] = $bbCodeParser->parseString($subData['subject']);
 				
 				//truncate the email address...
 				$subData['email'] = truncate_string($subData['email'], 20, "...", TRUE);
