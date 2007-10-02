@@ -541,6 +541,27 @@ class projectClass extends mainRecord {
 					}
 				}
 			}
+			elseif(count($ancestorList) == 1) {
+				$allData = array_values($this->get_records(array('record_id' => $ancestorList[0])));
+				$data = $allData[0];
+				$id = $data['public_id'];
+				$name = $data['name'];
+				//concatenation.  Woot.
+				$name = cleanString($name, "htmlspecial_nq");
+				$name = cleanString($name, "htmlentity_plus_brackets");
+				if($formatIt === TRUE) {
+					if($id == $projectId && $lastItemIsLink === FALSE) {
+						$string = '<b>'. $name .'</b>';
+					}
+					else {
+						$string = '<a href="/content/project/view/?ID=' . $id . '">' . $name . '</a>';
+					}
+					$retval = create_list($retval, $string, " / ");
+				}
+				else {
+					$retval = create_list($retval, $name, " / ");
+				}
+			}
 		}
 		else {
 			throw new exception(__METHOD__ .": invalid project_id (". $projectId .")");
