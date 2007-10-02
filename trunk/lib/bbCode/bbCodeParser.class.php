@@ -51,7 +51,7 @@ class bbCodeParser extends cs_bbCodeParser {
 		$retval = '&#91;project_id='. $projectId .'&#93;';
 		if(is_numeric($projectId)) {
 			try {
-				$linkList = $this->projectObj->get_ancestry_link_list($projectId, TRUE, TRUE);
+				$linkList = $this->projectObj->get_ancestry_link_list($projectId, TRUE, TRUE, TRUE);
 				$retval = '&#91;<div style="display:inline;">'. $linkList .'</div>&#93;';
 			}
 			catch(exception $e) {

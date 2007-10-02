@@ -166,27 +166,37 @@ if($_POST) {
 			$helpdeskObj->helpdeskId = $linkIssue;
 			$issueData = $helpdeskObj->get_record($linkIssue);
 			$issueParentData = $helpdeskObj->get_parent_record($issueData['ancestry']);
-			if($issueData['ancestry'] !== $issueParentData['ancestry']) {
-				$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
-				$helpdeskObj->remark($linkIssue, "Re-linked to [project_id=". $projectId ."] from [project_id=". $issueParentData['public_id'] ."]");
-				
-				if($linkRes) {
+			$fixedIssueAncestry = preg_replace('/:'. $issueData['record_id'] .'$/', '', $issueData['ancestry']);
+			if($fixedIssueAncestry !== $detailsArr['ancestry']) {
+				try {
+					$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
+					$helpdeskObj->remark($linkIssue, "Re-linked to [project_id=". $projectId ."] from [project_id=". $issueParentData['public_id'] ."]");
+					
+					if($linkRes) {
+						$page->set_message_wrapper(array(
+							'title'		=> "Issue Linked Successfully",
+							'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.",
+							'type'		=> "status"
+						));
+					}
+					else {
+						$page->set_message_wrapper(array(
+							'title'		=> "Issue Linking FAILED",
+							'message'	=> "Failed to link issue #". $linkIssue ." to this project, result was (". $linkRes .").",
+							'type'		=> "status"
+						));
+					}
+					
+					//now get the details for this project again.
+					$detailsArr = $proj->get_details($projectId);
+				}
+				catch(exception $e) {
 					$page->set_message_wrapper(array(
-						'title'		=> "Issue Linked Successfully",
-						'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.",
-						'type'		=> "status"
+						'title'		=> "An Error Occurred",
+						'message'	=> "While trying to link the record, a fatal error was encountered: ". $e->getMessage(),
+						'type'		=> 'error'
 					));
 				}
-				else {
-					$page->set_message_wrapper(array(
-						'title'		=> "Issue Linking FAILED",
-						'message'	=> "Failed to link issue #". $linkIssue ." to this project, result was (". $linkRes .").",
-						'type'		=> "status"
-					));
-				}
-				
-				//now get the details for this project again.
-				$detailsArr = $proj->get_details($projectId);
 			}
 			else {
 				$page->set_message_wrapper(array(
