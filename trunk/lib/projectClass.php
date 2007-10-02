@@ -498,7 +498,7 @@ class projectClass extends mainRecord {
 	
 	
 	//================================================================================================
-	function get_ancestry_link_list($projectId, $formatIt=TRUE, $lastItemIsLink=FALSE) {
+	function get_ancestry_link_list($projectId, $formatIt=TRUE, $lastItemIsLink=FALSE, $showSingleAncestry=FALSE) {
 		if(is_numeric($projectId) && $projectId > 0) {
 			//get the list of ancestors.
 			$myAncestors = $this->get_ancestry($projectId);
@@ -541,7 +541,7 @@ class projectClass extends mainRecord {
 					}
 				}
 			}
-			elseif(count($ancestorList) == 1) {
+			elseif($showSingleAncestry === TRUE && is_array($ancestorList) && count($ancestorList) == 1) {
 				$allData = array_values($this->get_records(array('record_id' => $ancestorList[0])));
 				$data = $allData[0];
 				$id = $data['public_id'];
