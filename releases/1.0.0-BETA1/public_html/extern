@@ -1,0 +1,14 @@
+<?php
+/*
+ * Created on Mar 10, 2006
+ *       by
+ *  Dan Falconer
+ */
+
+
+require_once(dirname(__FILE__) ."/../lib/includes.php");
+$GLOBALS['DEBUGPRINTOPT'] = 1;
+define("DEBUGPRINTOPT", 1);
+$contentObj = new contentSystem();
+$contentObj->finish();
+?>
