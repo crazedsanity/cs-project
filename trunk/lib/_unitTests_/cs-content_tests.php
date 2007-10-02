@@ -13,7 +13,7 @@ class Test_cscontent extends UnitTestCase {
 	}//end setUp()
 	
 	function testVersionAndProject() {
-		$expectedVersion = '0.8.0';
+		$expectedVersion = '0.9.0';
 		$expectedProject = 'cs-content';
 		
 		$this->assertEqual($this->gfObj->get_version(), $expectedVersion);
