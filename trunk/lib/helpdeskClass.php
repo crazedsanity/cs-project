@@ -25,7 +25,7 @@ class helpdeskClass extends mainRecord {
 	/**
 	 * CONSTRUCTOR.
 	 */
-	function helpdeskClass(cs_phpDB $db) {
+	function __construct(cs_phpDB $db) {
 		
 		if(is_numeric(LOGCAT__HELPDESK)) {
 			$this->logCategoryId = LOGCAT__HELPDESK;
@@ -65,8 +65,9 @@ class helpdeskClass extends mainRecord {
 			"group_id"			=> "numeric",
 			"progress"			=> "numeric"
 		);
+		$this->isHelpdeskIssue=TRUE;
 		parent::__construct();
-	}//end helpdeskClass()
+	}//end __construct()
 	//================================================================================================
 	
 	

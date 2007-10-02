@@ -30,7 +30,7 @@ class projectClass extends mainRecord {
 	/**
 	 * CONSTRUCTOR.
 	 */
-	function projectClass(cs_phpDB &$db) {
+	function __construct(cs_phpDB &$db) {
 		
 		if(is_numeric(LOGCAT__PROJECT)) {
 			$this->logCategoryId = LOGCAT__PROJECT;
@@ -67,7 +67,7 @@ class projectClass extends mainRecord {
 		$this->prefObj = new pref($this->db, $_SESSION['uid']);
 		
 		parent::__construct();
-	}//end projectClass()
+	}//end __construct()
 	//================================================================================================
 	
 	
@@ -499,6 +499,7 @@ class projectClass extends mainRecord {
 	
 	//================================================================================================
 	function get_ancestry_link_list($projectId, $formatIt=TRUE, $lastItemIsLink=FALSE, $showSingleAncestry=FALSE) {
+		$retval = NULL;
 		if(is_numeric($projectId) && $projectId > 0) {
 			//get the list of ancestors.
 			$myAncestors = $this->get_ancestry($projectId);
@@ -562,9 +563,6 @@ class projectClass extends mainRecord {
 					$retval = create_list($retval, $name, " / ");
 				}
 			}
-		}
-		else {
-			throw new exception(__METHOD__ .": invalid project_id (". $projectId .")");
 		}
 		
 		return($retval);

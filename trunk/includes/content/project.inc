@@ -165,12 +165,16 @@ if($_POST) {
 			$helpdeskObj = new helpdeskClass($proj->db);
 			$helpdeskObj->helpdeskId = $linkIssue;
 			$issueData = $helpdeskObj->get_record($linkIssue);
-			$issueParentData = $helpdeskObj->get_parent_record($issueData['ancestry']);
 			$fixedIssueAncestry = preg_replace('/:'. $issueData['record_id'] .'$/', '', $issueData['ancestry']);
 			if($fixedIssueAncestry !== $detailsArr['ancestry']) {
 				try {
+					$remarkDetails = "Re-linked to [project_id=". $projectId ."]";
+					if($issueData['ancestry_level'] > 1) {
+						$issueParentData = $helpdeskObj->get_parent_record($issueData['ancestry']);
+						$remarkDetails .= " from [project_id=". $issueParentData['public_id'] ."]";
+					}
 					$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
-					$helpdeskObj->remark($linkIssue, "Re-linked to [project_id=". $projectId ."] from [project_id=". $issueParentData['public_id'] ."]");
+					$helpdeskObj->remark($linkIssue, $remarkDetails);
 					
 					if($linkRes) {
 						$page->set_message_wrapper(array(

@@ -290,7 +290,12 @@ if($_POST) {
 			$doNotRipRows[] = "link_to_parent_project";
 			
 			//get the parent.
+			//TODO: since mainRecord{} tries to enforce having criteria of "is_helpdesk_issue" set, there's extra crap logic required.
+			//TODO: fix the afore-mentioned bug by splitting helpdesk & project issues into separate tables.
+			$oldIsHelpdesk = $proj->helpdeskObj->isHelpdeskIssue;
+			$proj->helpdeskObj->isHelpdeskIssue=FALSE;
 			$parentData = $proj->helpdeskObj->get_parent_record($helpdeskData['ancestry']);
+			$proj->helpdeskObj->isHelpdeskIssue=$oldIsHelpdesk;
 			$page->add_template_var("ancestryLinkList", $proj->get_ancestry_link_list($parentData['public_id'], TRUE, TRUE, TRUE));
 		}
 		

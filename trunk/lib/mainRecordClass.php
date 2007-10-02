@@ -15,6 +15,7 @@
 class mainRecord {
 	
 	public $db;
+	public $isHelpdeskIssue = FALSE;
 	
 	protected $updateableFieldsArr = array();
 	protected $restrictedFieldsArr = array();
@@ -73,8 +74,8 @@ class mainRecord {
 	 */
 	protected function get_records(array $critArr, array $primaryOrder=NULL) {
 		
-		if(!isset($critArr['record_id']) && !isset($critArr['is_helpdesk_issue'])) {
-			throw new exception(__METHOD__ .": is_helpdesk_issue undefined: ". debug_print($critArr,0));
+		if(!isset($critArr['is_helpdesk_issue'])) {
+			$critArr['is_helpdesk_issue'] = interpret_bool($this->isHelpdeskIssue, array('f', 't'));
 		}
 		
 		if(is_array($primaryOrder) && count($primaryOrder)) {
@@ -196,7 +197,7 @@ class mainRecord {
 			if($dberror)
 			{
 				//log the problem.
-				cs_debug_backtrace();
+				cs_debug_backtrace(1);
 				throw new exception(__METHOD__ .": no data ($numrows) or dberror::: $dberror\nSQL::$query\n\n");
 				$this->logsObj->log_dberror(__METHOD__ .": no data ($numrows) or dberror::: $dberror");
 			}
@@ -583,13 +584,18 @@ class mainRecord {
 	 * is given, data for '55' will be retrieved.
 	 */
 	public function get_parent_record($ancestryString) {
-		$recordId = $this->get_parent_from_ancestry($ancestryString);
-		
-		//now retrieve that record (make sure not to go through the parent class, 
-		//	as that might accidentally set the "is_helpdesk_issue" flag which would
-		//	not help as much as one might think).
-		$data = self::get_records(array('record_id' => $recordId));
-		$retval = $data[$this->lastRecordId];
+		if(strlen($ancestryString)) {
+			$recordId = $this->get_parent_from_ancestry($ancestryString);
+			
+			//now retrieve that record (make sure not to go through the parent class, 
+			//	as that might accidentally set the "is_helpdesk_issue" flag which would
+			//	not help as much as one might think).
+			$data = self::get_records(array('record_id' => $recordId));
+			$retval = $data[$this->lastRecordId];
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid ancestry string (". $ancestryString .")");
+		}
 		
 		return($retval);
 	}//end get_parent_record()
