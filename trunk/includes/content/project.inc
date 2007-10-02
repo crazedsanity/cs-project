@@ -166,26 +166,37 @@ if($_POST) {
 			$helpdeskObj->helpdeskId = $linkIssue;
 			$issueData = $helpdeskObj->get_record($linkIssue);
 			$issueParentData = $helpdeskObj->get_parent_record($issueData['ancestry']);
-			$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
-			$helpdeskObj->remark($linkIssue, "Re-linked to [project_id=". $projectId ."] from [project_id=". $issueParentData['public_id'] ."]");
-			
-			if($linkRes) {
-				$page->set_message_wrapper(array(
-					'title'		=> "Issue Linked Successfully",
-					'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.",
-					'type'		=> "status"
-				));
+			if($issueData['ancestry'] !== $issueParentData['ancestry']) {
+				$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
+				$helpdeskObj->remark($linkIssue, "Re-linked to [project_id=". $projectId ."] from [project_id=". $issueParentData['public_id'] ."]");
+				
+				if($linkRes) {
+					$page->set_message_wrapper(array(
+						'title'		=> "Issue Linked Successfully",
+						'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.",
+						'type'		=> "status"
+					));
+				}
+				else {
+					$page->set_message_wrapper(array(
+						'title'		=> "Issue Linking FAILED",
+						'message'	=> "Failed to link issue #". $linkIssue ." to this project, result was (". $linkRes .").",
+						'type'		=> "status"
+					));
+				}
+				
+				//now get the details for this project again.
+				$detailsArr = $proj->get_details($projectId);
 			}
 			else {
 				$page->set_message_wrapper(array(
-					'title'		=> "Issue Linking FAILED",
-					'message'	=> "Failed to link issue #". $linkIssue ." to this project, result was (". $linkRes .").",
-					'type'		=> "status"
+					'title'		=> "Issue Linkage Not Updated",
+					'message'	=> "You chose the project that issue #". $linkIssue ." was already attached to; doing nothing.",
+					'type'		=> 'error',
+					'linkText'	=> "Back to issue #". $linkIssue,
+					'linkUrl'	=> "/content/helpdesk/view?ID=". $linkIssue
 				));
 			}
-			
-			//now get the details for this project again.
-			$detailsArr = $proj->get_details($projectId);
 		}
 		
 		//TODO: Create a link or something for moving it to a new parent (something like the main list, where clicking will change the parent).

@@ -36,8 +36,11 @@ class bbCodeParser extends cs_bbCodeParser {
 		parent::__construct();
 		
 		//register some extra parsing things.
-		
 		$this->register_code_with_callback('project_id', 'get_project_bbcode');
+		$this->register_code_with_callback('project', 'get_project_bbcode');
+		$this->register_code_with_callback('helpdesk_id', 'get_helpdesk_bbcode');
+		$this->register_code_with_callback('heldpesk_id', 'get_helpdesk_bbcode');
+		
 	}//end __construct()
 	//=========================================================================
 	
@@ -45,9 +48,36 @@ class bbCodeParser extends cs_bbCodeParser {
 	
 	//=========================================================================
 	protected function get_project_bbcode($projectId) {
-		$retval = '&#91;<div style="display:inline;">'. $this->projectObj->get_ancestry_link_list($projectId, TRUE, TRUE) .'</div>&#93;';
+		$retval = '&#91;project_id='. $projectId .'&#93;';
+		if(is_numeric($projectId)) {
+			try {
+				$linkList = $this->projectObj->get_ancestry_link_list($projectId, TRUE, TRUE);
+				$retval = '&#91;<div style="display:inline;">'. $linkList .'</div>&#93;';
+			}
+			catch(exception $e) {
+				debug_print($e->getMessage());
+			}
+		}
 		return($retval);
 	}//end get_project_bbcode();
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	protected function get_helpdesk_bbcode($helpdeskId) {
+		$retval = '&#91;helpdesk_id='. $helpdeskId .'&#93;';
+		if(is_numeric($helpdeskId)) {
+			try {
+			$data = $this->helpdeskObj->get_record($helpdeskId);
+			$retval = '&#91;<a href="/content/helpdesk/view?ID='. $helpdeskId .'">'. $data['name'] .'</a>&#93;';
+			}
+			catch(exception $e) {
+				debug_print($e->getMessage);
+			}
+		}
+		return($retval);
+	}//end get_helpdesk_bbcode()
 	//=========================================================================
 	
 }
