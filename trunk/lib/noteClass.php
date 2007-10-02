@@ -88,7 +88,7 @@ class noteClass {
 			//something bad happened.
 			//TODO: log a database error if there was one.
 			if(strlen($this->lastError)) {
-				throw new exception("get_notes(): ". $this->lastError);
+				throw new exception(__METHOD__ .": ". $this->lastError);
 			}
 			$retval = 0;
 		} else {

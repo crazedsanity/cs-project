@@ -499,46 +499,51 @@ class projectClass extends mainRecord {
 	
 	//================================================================================================
 	function get_ancestry_link_list($projectId, $formatIt=TRUE, $lastItemIsLink=FALSE) {
-		//get the list of ancestors.
-		$myAncestors = $this->get_ancestry($projectId);
-		$ancestorList = explode(':', $myAncestors);
-		
-		$retval = NULL;
-		if(count($ancestorList) > 1) {
-			$projects = parent::get_records(array('record_id' => $ancestorList, 'status_id' => 'all'));
+		if(is_numeric($projectId) && $projectId > 0) {
+			//get the list of ancestors.
+			$myAncestors = $this->get_ancestry($projectId);
+			$ancestorList = explode(':', $myAncestors);
 			
-			//if we've got a proper array, loop through it.
-			if(is_array($projects) && count($projects) > 0) {
-				//GO FOR IT
-				//NOTE: *must* loop through the ancestorList, as $projects has them ordered (for lineage).
-				$finalData = array();
-				$useThis = array_flip($ancestorList);
-				foreach($projects as $publicId=>$data) {
-					$internalId = $data['record_id'];
-					$ancestorNum = $useThis[$internalId];
-					$finalData[$ancestorNum] = $projects[$publicId];
-				}
-				ksort($finalData);
-				foreach($finalData as $crap => $data) {
-					$id = $data['public_id'];
-					$name = $data['name'];
-					//concatenation.  Woot.
-					$name = cleanString($name, "htmlspecial_nq");
-					$name = cleanString($name, "htmlentity_plus_brackets");
-					if($formatIt === TRUE) {
-						if($id == $projectId && $lastItemIsLink === FALSE) {
-							$string = '<b>'. $name .'</b>';
+			$retval = NULL;
+			if(count($ancestorList) > 1) {
+				$projects = parent::get_records(array('record_id' => $ancestorList, 'status_id' => 'all'));
+				
+				//if we've got a proper array, loop through it.
+				if(is_array($projects) && count($projects) > 0) {
+					//GO FOR IT
+					//NOTE: *must* loop through the ancestorList, as $projects has them ordered (for lineage).
+					$finalData = array();
+					$useThis = array_flip($ancestorList);
+					foreach($projects as $publicId=>$data) {
+						$internalId = $data['record_id'];
+						$ancestorNum = $useThis[$internalId];
+						$finalData[$ancestorNum] = $projects[$publicId];
+					}
+					ksort($finalData);
+					foreach($finalData as $crap => $data) {
+						$id = $data['public_id'];
+						$name = $data['name'];
+						//concatenation.  Woot.
+						$name = cleanString($name, "htmlspecial_nq");
+						$name = cleanString($name, "htmlentity_plus_brackets");
+						if($formatIt === TRUE) {
+							if($id == $projectId && $lastItemIsLink === FALSE) {
+								$string = '<b>'. $name .'</b>';
+							}
+							else {
+								$string = '<a href="/content/project/view/?ID=' . $id . '">' . $name . '</a>';
+							}
+							$retval = create_list($retval, $string, " / ");
 						}
 						else {
-							$string = '<a href="/content/project/view/?ID=' . $id . '">' . $name . '</a>';
+							$retval = create_list($retval, $name, " / ");
 						}
-						$retval = create_list($retval, $string, " || ");
-					}
-					else {
-						$retval = create_list($retval, $name, " || ");
 					}
 				}
 			}
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid project_id (". $projectId .")");
 		}
 		
 		return($retval);

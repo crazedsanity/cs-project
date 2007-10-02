@@ -95,17 +95,22 @@ class helpdeskClass extends mainRecord {
 	
 	//================================================================================================
 	function get_record($helpdeskId) {
-		$criteria = array(
-			'public_id'			=> $helpdeskId,
-			'is_helpdesk_issue'	=> 't',
-			'status_id'			=> 'all'
-		);
-		$tmp = $this->get_records($criteria);
-		$retval = $tmp[$helpdeskId];
-		
-		//before continuing, get notes for this issue.
-		$noteObj = new noteClass($this->db);
-		$retval['notes'] = $noteObj->get_notes(array('record_id' => $retval['record_id']));
+		if(is_numeric($helpdeskId) && $helpdeskId > 0) {
+			$criteria = array(
+				'public_id'			=> $helpdeskId,
+				'is_helpdesk_issue'	=> 't',
+				'status_id'			=> 'all'
+			);
+			$tmp = $this->get_records($criteria);
+			$retval = $tmp[$helpdeskId];
+			
+			//before continuing, get notes for this issue.
+			$noteObj = new noteClass($this->db);
+			$retval['notes'] = $noteObj->get_notes(array('record_id' => $retval['record_id']));
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid helpdeskId (". $helpdeskId .")");
+		}
 		
 		return($retval);
 	}//end get_record()
