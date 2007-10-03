@@ -44,6 +44,7 @@ class convertDatabase {
 			$retval = $e->getMessage();
 		}
 		
+		$this->gfObj->debug_print(__METHOD__ .": returning::: ". $retval);
 		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($this->configData,0));
 		
 		return($retval);
@@ -94,6 +95,7 @@ class convertDatabase {
 		
 		if(strlen($dberror)) {
 			$details = "DBERROR::: ". $dberror;
+			cs_debug_backtrace(1);
 			throw new exception(__METHOD__ .": SQL FAILED::: ". $sql ."\n\nDETAILS: ". $details);
 		}
 		elseif(!is_null($atLeastNumRows) && $numrows < $atLeastNumRows) {
@@ -118,6 +120,7 @@ class convertDatabase {
 	private function convert_log_categories_and_classes() {
 		$this->gfObj->debug_print(__METHOD__ .": starting... ");
 		$retval = 0;
+		$exception = NULL;
 		
 		//retrieve the log categories.
 		$data = $this->get_data("SELECT * FROM log_category_table");
@@ -125,21 +128,62 @@ class convertDatabase {
 		if(is_array($data)) {
 			foreach($data as $id=>$dataArr) {
 				$name = $dataArr['name'];
+				
+				$insertStr = $this->gfObj->string_from_array($dataArr, 'insert', NULL, 'sql');
 				//run an insert, capture the inserted id, and store it.
-				$this->run_sql("INSERT INTO log_category_table (name) VALUES ('". $name ."')");
+				$this->run_sql("INSERT INTO log_category_table ". $insertStr);
 				
 				//now get the inserted ID.
-				$this->run_sql("SELECT currval('log_category_table_log_category_id_seq'::text)");
+				$this->run_sql("SELECT log_category_id FROM log_category_table WHERE name='". $name ."'");
 				$seqData = $this->db->farray();
 				$this->configData['logcat__'. strtolower($name)] = $seqData[0];
 				$retval++;
 			}
+			
+			//now retrieve the classes & insert 'em into the new database.
+			$classData = $this->get_data("SELECT * FROM log_class_table");
+			
+			if(is_array($classData)) {
+				foreach($classData as $id => $dataArr) {
+					$insertStr = $this->gfObj->string_from_array($dataArr, 'insert', NULL, 'sql');
+					$this->run_sql("INSERT INTO log_class_table ". $insertStr);
+					$retval++;
+				}
+				
+				//now retrieve & insert the log events.
+				$eventData = $this->get_data("SELECT * FROM log_event_table", 'log_event_id');
+				
+				if(is_array($eventData)) {
+					foreach($eventData as $id => $dataArr) {
+						$insertStr = $this->gfObj->string_from_array($dataArr, 'insert', NULL, 'sql');
+						$this->run_sql("INSERT INTO log_event_table ". $insertStr);
+						$retval++;
+					}
+				}
+				else {
+					$exception = "no log event data::: ". $this->gfObj->debug_print($eventData,0);
+				}
+			}
+			else {
+				$exception = "no data returned for classes::: ". $this->gfObj->debug_print($classData,0);
+			}
 		}
 		else {
-			throw new exception(__METHOD__ .": invalid data returned::: ". $this->gfObj->debug_print($data,0));
+			$exception = "invalid data returned::: ". $this->gfObj->debug_print($data,0);
+		}
+		
+		//now reset some sequences.
+		$this->run_sql("SELECT setval('log_category_table_log_category_id_seq'::text, (SELECT max(log_category_id) FROM log_category_table))");
+		$this->run_sql("SELECT setval('log_class_table_log_class_id_seq'::text, (SELECT max(log_class_id) FROM log_class_table))");
+		$this->run_sql("SELECT setval('log_event_table_log_event_id_seq'::text, (SELECT max(log_event_id) FROM log_event_table))");
+		
+		if(!is_null($exception)) {
+			throw new exception(__METHOD__ .": ". $exception);
 		}
 		
 		$this->gfObj->debug_print(__METHOD__ .": retval=(". $retval .")");
+		
+		return("Successfully converted ". $retval ." records.");
 	}//end convert_log_categories_and_classes()
 	//=========================================================================
 	
