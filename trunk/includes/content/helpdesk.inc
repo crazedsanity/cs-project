@@ -284,6 +284,7 @@ if($_POST) {
 			#$page->add_template_var("select_project_list", $proj->create_project_option_list($helpdeskData['ancestry'], NULL));
 		}
 		$doNotRipRows[] = 'update_button';
+		$doNotRipRows[] = 'accessBlock__modifyButton';
 		
 		//TODO: get ancestry data for this!
 		if($helpdeskData['ancestry_level'] > 1) {

@@ -48,10 +48,17 @@
 							</tr>
 	<!-- END link_to_parent_project -->
 							<tr>
-								<td colspan="2" style="border-left:solid #000 1px;border-right:solid #000 1px;border-bottom:solid #000 1px;" nowrap>
+								<td colspan="2" style="border-left:solid #000 1px;border-right:solid #000 1px;" nowrap>
 									<a href="/content/project?linkToIssue={public_id}">Link to a different project....</a>
 									</td>
 							</tr>
+	<!-- BEGIN accessBlock__modifyButton -->
+							<tr>
+								<td align="center" colspan="2" style="border-left:solid #000 1px;border-right:solid #000 1px;border-bottom:solid #000 1px;">
+									<input id="accessBlock__modifyButton" type="submit" name="action" value="Modify">
+								</td>
+							</tr>
+	<!-- END accessBlock__modifyButton -->
 						</table>
 <!-- END access_block -->
 					</td>
@@ -152,7 +159,6 @@
 		<input name="action" value="solve" type="submit">&nbsp;
 		<input name="action" value="stall" type="submit">&nbsp;
 <!-- END owner_options -->
-		<!-- input name="delete" value="Delete" onclick="return confirm('Are you sure?')" type="submit">&nbsp; -->
 	</td>
 </tr>
 <!-- END buttons_row -->
