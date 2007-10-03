@@ -1,0 +1,47 @@
+<h2>Help desk</h2>
+
+<img src="/images/s.gif" border="0" height="1" vspace="2" width="400">
+
+<h4>request form</h4>
+<form action="{PHP_SELF}" method="post">
+<table>
+<tbody>
+<tr>
+	<td>Enter your email:</td>
+	
+	<td colspan="5">
+		<input name="data[email]" value="{email}" size="20" maxlength="80" type="text" {cust_email_readonly}></td>
+
+</tr>
+<tr>
+	<td>Give your request a name:</td>
+	
+	<td colspan="5"><input name="data[name]" size="80" maxlength="80" type="text"><br></td>
+</tr>
+<tr>
+	<td>Describe your request:</td>
+	
+	<td colspan="5"><textarea name="data[subject]" cols="65" rows="10"></textarea><br></td>
+
+</tr>
+<tr>
+	<td>Issue Category:</td>
+	<td colspan="5">
+		<select name="data[initialTag]">
+			{select_tags}
+		</select>
+		</td>
+</tr>
+<tr>
+	<td align="right">
+		<input name="module" value="helpdesk" type="HIDDEN">
+		<input name="data[parentRecordId]" value="{linked_proj}" type="HIDDEN">
+		<input name="submit" value="go" type="submit">
+	</td>
+</tr>
+</tbody>
+</table>
+</form>
+<br><img src="/images/s.gif" border="0" height="1" vspace="2" width="400"><br><br>
+<a href="helpdesk_cust.php?step=kb">Search the knowledge database</a>
+
