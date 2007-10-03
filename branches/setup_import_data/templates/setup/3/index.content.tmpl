@@ -1,6 +1,21 @@
 
 {stepData}
 
+<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
+<div id="setup_text" style="display:inline;">
+<h2>Please Select an Option:</h2>
+<a href="javascript:void(setup__enableInput('setup', 'newInstall'));">Perform New Install</a>
+
+or 
+
+<a href="javascript:void(setup__enableInput('setup', 'convertExisting'));">Convert Existing Database</a>
+</div>
+
+<input type="hidden" id="setup_selectedOption" name="selectedOption" value="">
+
+<div id="setup_newInstall_div" style="display:none;">
+
+
 <p>
 	This step will build the following default values in the database:
 	<ul>
@@ -14,10 +29,6 @@
 		<li>Administrator/user information</li>
 	</ul>
 </p>
-
-<hr>
-
-<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
 
 <table border="1" cellpadding="3" cellspacing="0">
 	<tr>
@@ -48,8 +59,76 @@
 	</tr>
 	
 </table>
+</div>
 
-<input id="submitButton" type="submit" name="go" value="Create default values &amp; proceed to the next step">
+<div id="setup_convertExisting_div" style="display:none;">
+<p>
+	This step will attempt to do the following:
+	<ul>
+		<li>Determine existing database version</li>
+		<li>Convert existing information</li>
+		<li>Ensure the following items contain the necessary values (in new database):
+		<ul>
+			<li>Version information</li>
+			<li>Log categories, classes, and record type data</li>
+			<li>Attribute records</li>
+			<li>Anonymous contact data &amp; groups</li>
+			<li>Status records</li>
+			<li>Tag names</li>
+			<li>Preferences &amp; options</li>
+			<li>Administrator/user information</li>
+		</ul>
+		</li>
+	</ul>
+</p>
+<table border="1" cellpadding="3" cellspacing="0">
+	<tr>
+		<th>Database Name (cs_project)</th>
+		
+		<td><input type="text" name="fields[database__dbname]" value="{database__dbname}"></td>
+		
+		<td>Name of the database within PostgreSQL (i.e. "cs_project")</td>
+	</tr>
+	<tr>
+
+		<th>Hostname (localhost)</th>
+		
+		<td><input type="text" name="fields[database__host]" value="{database__host}"></td>
+		
+		<td>Fully qualified host name (like "taz.google.com" or "localhost").</td>
+	</tr>
+	<tr>
+		<th>Port (5432)</th>
+		
+		<td><input type="text" name="fields[database__port]" value="{database__port}"></td>
+
+		
+		<td>Port to connect to PostgreSQL on (default is 5432).</td>
+	</tr>
+	<tr>
+		<th>Database Username (postgres)</th>
+		
+		<td><input type="text" name="fields[database__user]" value="{database__user}"></td>
+		
+		<td>Username for connecting to PostgreSQL (if you don't know, it's probably "postgres", though connecting as a SUPERUSER is generally accepted as a BAD THING).</td>
+	</tr>
+
+	<tr>
+		<th>Database Password</th>
+		
+		<td><input type="text" name="fields[database__password]" value="{database__password}"></td>
+		
+		<td>Password for connecting to PostgreSQL (for a trusted connection, this can be blank).</td>
+	</tr>
+</table>
+</div>
+
+<div id="setup_newInstall_submitButton" style="display:none;">
+	<input id="submitButton" type="submit" name="go" value="Create default values &amp; proceed to the next step">
+</div>
+<div id="setup_convertExisting_submitButton" style="display:none;">
+	<input id="submitButton" type="submit" name="go" value="Convert existing database &amp; proceed to the next step">
+</div>
 
 </form>
 

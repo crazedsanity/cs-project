@@ -6,24 +6,41 @@
 
 
 if($_POST) {
-	
-	$validSubmission = test_submitted_data($page, $_POST['users']);
-	if($validSubmission === TRUE) {
-		$obj = new __setupDefaultValues();
-		store_setup_data(3, $obj->go(), 'text');
-		$obj->finish($page);
-	}
-	else {
-		store_setup_data(3, $_POST['users'], 'post_info');
-		$page->set_message_wrapper(
-			array(
-				'title'		=> "Invalid User Data",
-				'message'	=> "The user data you submitted appears to be invalid: <BR>\n". $validSubmission,
-				'type'		=> "error"
-			)
-		);
-		$page->conditional_header("/setup/3", TRUE);
-	}
+	switch($_POST['selectedOption']) {
+		case 'convertExisting': {
+			store_setup_data(3, $_POST['fields'], 'convertExisting_post_info');
+			$convertObj = new __convertDatabase;
+			$convertObj->go();
+		}
+		break;
+		
+		
+		case 'newInstall': {
+			$validSubmission = test_submitted_data($page, $_POST['users']);
+			if($validSubmission === TRUE) {
+				$obj = new __setupDefaultValues();
+				store_setup_data(3, $obj->go(), 'text');
+				$obj->finish($page);
+			}
+			else {
+				store_setup_data(3, $_POST['users'], 'post_info');
+				$page->set_message_wrapper(
+					array(
+						'title'		=> "Invalid User Data",
+						'message'	=> "The user data you submitted appears to be invalid: <BR>\n". $validSubmission,
+						'type'		=> "error"
+					)
+				);
+				$page->conditional_header("/setup/3", TRUE);
+			}
+		}
+		break;
+		
+		
+		default:
+			throw new exception("Invalid option selected!");
+	};
+	exit;
 	
 	$page->conditional_header("/setup/3", TRUE);
 }
@@ -39,6 +56,14 @@ else {
 				}
 				$page->add_template_var($varName, $userValue);
 			}
+		}
+	}
+	
+	//now parse the "convertExisting" stuff...
+	$convertData = get_setup_data(3, 'convertExisting_post_info');
+	if(is_array($convertData)) {
+		foreach($convertData as $userField => $userValue) {
+			$page->add_template_var($userField, $userValue);
 		}
 	}
 }
@@ -1099,5 +1124,67 @@ class __setupDefaultValues {
 	
 	
 }//end __setupDefaultValues{}
+
+
+
+class __convertDatabase {
+	
+	
+	
+	private $db;
+	private $gfObj;
+	
+	private $lastNumrows=NULL;
+	private $lastDberror=NULL;
+	
+	//=========================================================================
+	public function __construct() {
+		$this->db = new cs_phpDB;
+		
+		$this->gfObj = new cs_globalFunctions;
+		$this->gfObj->debugPrintOpt=1;
+	}//end __construct()
+	//=========================================================================
+	
+	
+	//=========================================================================
+	public function go() {
+		//determine what script we have to include & run.
+		$this->gfObj->debug_print(__METHOD__ .": starting...");
+		
+		//retrieve the connection parameters.
+		$storedParams = get_setup_data(3, 'convertExisting_post_info');
+		
+		$params = array();
+		foreach($storedParams as $index=>$value) {
+			$key = preg_replace('/^database__/', '', $index);
+			$params[$key] = $value;
+		}
+		$this->gfObj->debug_print($params);
+		
+		$this->db->connect($params);
+		if(!$this->db->is_connected()) {
+			throw new exception(__METHOD__ .": failed to connect to database...");
+		}
+		else {
+			$this->gfObj->debug_print(__METHOD__ .": connected.  Determining version...");
+			
+			$numrows = $this->db->exec("SELECT internal_data_get_value('version_string')");
+			$dberror = $this->db->errorMsg();
+			
+			if(!strlen($dberror) && $numrows == 1) {
+				$data = $this->db->farray();
+				$version = $data[0];
+				$this->gfObj->debug_print(__METHOD__ .": version is (". $version .")");
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to get version... ". $dberror);
+			}
+		}
+		
+	}//end go()
+	//=========================================================================
+	
+}//end __convertDatabase{}
 
 ?>
