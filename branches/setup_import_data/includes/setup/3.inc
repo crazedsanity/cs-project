@@ -9,7 +9,7 @@ if($_POST) {
 	switch($_POST['selectedOption']) {
 		case 'convertExisting': {
 			store_setup_data(3, $_POST['fields'], 'convertExisting_post_info');
-			$convertObj = new __convertDatabase;
+			$convertObj = new __convertDatabase();
 			$convertObj->go();
 		}
 		break;
@@ -1176,6 +1176,8 @@ class __convertDatabase {
 				$data = $this->db->farray();
 				$version = $data[0];
 				$this->gfObj->debug_print(__METHOD__ .": version is (". $version .")");
+				
+				$this->run_conversion($version);
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to get version... ". $dberror);
@@ -1183,6 +1185,37 @@ class __convertDatabase {
 		}
 		
 	}//end go()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function run_conversion($fromVersion) {
+		
+		//check if the script exists.
+		$convertScript = dirname(__FILE__) .'/../../upgrade/convert/'. $fromVersion .'.php';
+		if(file_exists($convertScript)) {
+			require_once($convertScript);
+			try {
+				//create the object...
+				$newDb = new cs_phpDb;;
+				$newDb->connect(get_db_params());
+				$obj = new convertDatabase($this->db, $newDb);
+				if(method_exists($obj, 'go')) {
+					$result = $obj->go();
+				}
+				else {
+					throw new exception(__METHOD__ .": convertDatabase::go() does not exist");
+				}
+			}
+			catch(exception $e) {
+				$this->gfObj->debug_print(__METHOD__ .": FATAL EXCEPTION OCCURRED::: ". $e->getMessage());
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": conversion script does not exist: ". $convertScript);
+		}
+	}//end run_conversion()
 	//=========================================================================
 	
 }//end __convertDatabase{}
