@@ -1,0 +1,117 @@
+
+{stepData}
+
+<p>
+	In this step, we need to get some final information before writing out the configuration file and completing the tests.
+</p>
+
+
+<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<th>Is Development Site?</th>
+		<td>
+			<SELECT name="fields[isdevsite]">
+				<option value="0" {isdevsite__0__checked}>0 (False)</option>
+				<option value="1" {isdevsite__1__checked}>1 (True)</option>
+			</SELECT>
+		</td>
+		<td>Whether it's a development site for cs-project or not... (TODO: add more info here)</td>
+	</tr>
+	
+	<tr>
+		<th>Project Name</th>
+		<td><input type="text" name="fields[proj_name]" value="{proj_name}" size="40"></td>
+		<td>Displayed name of the project (like "CS-Project")</td>
+	</tr>
+	
+	<tr>
+		<th>Project URL</th>
+		<td><input type="text" name="fields[project_url]" value="{project_url}" size="40"></td>
+		<td>Generally it's this website: ( <i>http://{currentUrl}</i> ).</td>
+	</tr>
+	
+	<tr>
+		<th nowrap>Helpdesk Issue Announce Email</th>
+		<td><input type="text" name="fields[helpdesk_issue_announce_email]" value="{helpdesk_issue_announce_email}" size="40"></td>
+		<td>This would be something like "<i>new_issues@yourdomain.com</i>"</td>
+	</tr>
+	
+	<tr>
+		<th nowrap>Mail Server IP</th>
+		<td><input type="text" name="fields[config_email_server_ip]" value="{config_email_server_ip}" size="40"></td>
+		<td>This should be the IP of your mailserver, like <i>127.0.0.1</i>...</td>
+	</tr>
+
+
+	<tr>
+		<th>Maximum Session Length</th>
+		<td><input type="text" name="fields[max_time]" value="{max_time}" size="10"></td>
+		<td>This is how long any single session can be open before it's automatically removed from the server.</td>
+	</tr>
+
+	<tr>
+		<th>Maximum Idleness</th>
+		<td><input type="text" name="fields[max_idle]" value="{max_idle}" size="10"></td>
+		<td>How long a session can be idle (no page views/activities) before it is removed.</td>
+	</tr>
+
+	<tr>
+		<th>Session Name</th>
+		<td><input type="text" name="fields[config_session_name]" value="{config_session_name}" size="40"></td>
+		<td>Name of the session: really, this only matters if you have other websites running under the same 
+		domain using PHP sessions, in which case this should be unique to avoid random annoying issues.</td>
+	</tr>
+
+
+	<tr>
+		<th>Stop Logins on Global Alert</th>
+		<td><SELECT name="fields[stop_logins_on_global_alert]">
+				<option value="0" {stop_logins_on_global_alert__0__checked}>0 (off)</option>
+				<option value="1" {stop_logins_on_global_alert__1__checked}>1 (on)</option>
+			</SELECT></td>
+		<td>(<font color="red"><b>Currently unimplemented</b></font>) Stop users from logging in if a global alert has been created.</td>
+	</tr>
+
+
+	<tr>
+		<th>Debug Printing?</th>
+		<td><SELECT name="fields[debugprintopt]">
+				<option value="0" {debugprintopt__0__checked}>0 (off)</option>
+				<option value="1" {debugprintopt__1__checked}>1 (on)</option>
+			</SELECT>
+		</td>
+		<td>Generally, this should only be turned on if you're running a development site for cs-project...</td>
+	</tr>
+
+
+	<tr>
+		<th>Debug Print: Add "HR" Tag?</th>
+		<td><SELECT name="fields[debugremovehr]">
+				<option value="0" {debugremovehr__0__checked}>0 (no separator)</option>
+				<option value="1" {debugremovehr__1__checked}>1 (add separator)</option>
+			</SELECT>
+		</td>
+		<td>This setting affects whether or not there are separators between debug_print()'s (useful to discover if there's a print occurring that is otherwise not visible)</td>
+	</tr>
+
+
+	<tr>
+		<th>Working On It?</th>
+		<td>0 (no)<input type="HIDDEN" name="fields[workingonit]" value="0"></td>
+		<td><font color="red"><b><blink>WARNING!</blink></b></font>  Setting this to a non-zero value 
+		will DISABLE all connections to the database, and make your site unuseable.  It is provided as 
+		a simple, fast way to stop connections to your database, usually for maintenance purposes.  It 
+		is displayed here for reference only.</td>
+	</tr>
+	
+	
+	
+	<tr>
+		<td colspan="3" align="center"><input id="submitButton" type="submit" value="Go to next step"><td>
+	</tr>
+	
+</table>
+</form>
+
+
