@@ -1,6 +1,8 @@
 <?php
 /*
  * Created on Oct 3, 2007
+ * 
+ * TODO: set internal data 'converted_from' = (version_string)
  */
 
 
@@ -30,8 +32,9 @@ class convertDatabase {
 		//start converting data.
 		try {
 			$this->db->beginTrans();
-			$retval = $this->convert_log_categories_and_classes();
-			#$retval .= "<BR>\n". $this->create_record_type_data();
+			$retval = $this->convert_data_part1();
+			#$retval = $this->convert_log_categories_and_classes();
+			#$retval .= "<BR>\n". $this->convert_record_type_data();
 			#$retval .= "<BR>\n". $this->create_attributes();
 			#$retval .= "<BR>\n". $this->create_anonymous_contact_data();
 			#$retval .= "<BR>\n". $this->create_status_records();
@@ -117,6 +120,64 @@ class convertDatabase {
 	
 	
 	//=========================================================================
+	private function convert_data_part1() {
+		$insertedRecords = 0;
+		$tables = array(
+			'log_class_table',
+			'log_category_table',
+			'log_event_table',
+			'record_type_table',
+			'status_table',
+			'attribute_table',
+			'tag_name_table',
+			'contact_table',
+			'group_table',
+			'user_table',
+			'user_group_table',
+			'pref_type_table',
+			'pref_option_table',
+			'user_pref_table',
+			#'record_table',
+			#'record_contact_link_table',
+			#'note_table',
+			#'todo_table',
+			#'todo_comment_table',
+			#'tag_table'
+		);
+		
+		foreach($tables as $tableName) {
+			$data = $this->get_data("SELECT * FROM ". $tableName);
+			
+			foreach($data as $index=>$tableData) {
+				
+				$sqlArr = array();
+				foreach($tableData as $field=>$value) {
+					if(!strlen($value) && (preg_match('/_id$/', $field) || preg_match('/date/', $field) || preg_match('/time/', $field))) {
+						
+					}
+					else {
+						$sqlArr[$field] = $value;
+					}
+				}
+				$insertStr = $this->gfObj->string_from_array($sqlArr, 'insert', NULL, 'sql');
+				try {
+					$this->run_sql("INSERT INTO ". $tableName ." ". $insertStr);
+				}
+				catch(exception $e) {
+					$this->gfObj->debug_print(__METHOD__ .": failed after inserting (". $insertedRecords .") records::: ". $e->getMessage());
+					exit;
+				}
+				$insertedRecords++;
+			}
+		}
+		
+		$this->gfObj->debug_print(__METHOD__ .": inserted (". $insertedRecords .") records");
+	}//end convert_data_part1()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
 	private function convert_log_categories_and_classes() {
 		$this->gfObj->debug_print(__METHOD__ .": starting... ");
 		$retval = 0;
@@ -185,6 +246,17 @@ class convertDatabase {
 		
 		return("Successfully converted ". $retval ." records.");
 	}//end convert_log_categories_and_classes()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function convert_record_type_data() {
+		$retval = 0;
+		$data = $this->get_data("SELECT * FROM record_type_table");
+		
+		#$this->configData['rectype__'. strtolower($name)] = $recTypeId;
+	}//end convert_record_type_data()
 	//=========================================================================
 	
 	
