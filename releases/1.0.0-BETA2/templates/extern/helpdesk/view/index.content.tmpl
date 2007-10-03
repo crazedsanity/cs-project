@@ -1,0 +1,66 @@
+<form method="POST" action="{PHP_SELF}">
+<input name="module" value="helpdesk" type="HIDDEN">
+<table border="0" cellpadding="4" cellspacing="0">
+<tbody>
+<tr>
+	<th align="right" width="100px">Issue Number:</th>
+	<td width="390px">{public_id}&nbsp;</td>
+	
+	<td rowspan="4">
+	</td>
+</tr>
+<tr>
+	<th align="right">Customer: </th>
+	<td>{email}&nbsp;</td>
+</tr>
+<tr>
+
+	<th align="right">Submission Date: </th>
+	<td>&nbsp;{start_date}</td>
+</tr>
+		<tr>
+			<th align="right">Status: </th>
+	
+			<td><b>{status_text}</b></td>
+		</tr>
+<tr>
+	<th align="right">Title: </th>
+	
+	<td colspan="2">{name}</td>
+
+</tr>
+<tr>
+
+	<th style="border-bottom:solid #000 1px;" align="right">Issue Text:</th>
+	
+	<td style="border-bottom:solid #000 1px;" width="400" colspan="2" nowrap><pre>{subject}</pre></td>
+</tr>
+<tr>
+	<th style="border-bottom:solid #000 1px;" align="right">Notes:<BR><font size="-3"><i>(Includes previous/current<BR>solution(s), if available)</i></font></th>
+	<td style="border-bottom:solid #000 1px;" colspan="2">&nbsp;
+<!-- BEGIN issueNotes --><div style="border-top:dotted #000 1px;">%%solutionIndicator%% <u> [#%%note_id%%] <b>%%subject%%</b> (<a href="mailto:%%email%%">%%fname%%</a>@%%created%%)</u></div>
+	<pre>%%body%%</pre>
+<!-- END issueNotes -->
+	</td>
+</tr>
+<!-- BEGIN remark_row -->
+<tr>
+
+	<td colspan="3">Remark:  <br>
+		<textarea name="remark" rows="8" cols="80"></textarea>
+	</td>
+</tr>
+<tr>
+	<td colspan="3">&nbsp;&nbsp;
+	<input name="action" value="Remark" type="submit">&nbsp;
+	<input name="ID" value="{id}" type="HIDDEN">
+</td></tr>
+<!-- END remark_row -->
+
+<tr><td>
+	<a href="/extern/helpdesk/">Search the Knowledge Base</a>
+	</td>
+</tr>
+</tbody>
+</table>
+</form>
