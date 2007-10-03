@@ -44,6 +44,8 @@ class convertDatabase {
 			$retval = $e->getMessage();
 		}
 		
+		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($this->configData,0));
+		
 		return($retval);
 	}//end go()
 	//=========================================================================
@@ -121,12 +123,14 @@ class convertDatabase {
 		$data = $this->get_data("SELECT * FROM log_category_table");
 		
 		if(is_array($data)) {
-			foreach($data as $id=>$name) {
+			foreach($data as $id=>$dataArr) {
+				$name = $dataArr['name'];
 				//run an insert, capture the inserted id, and store it.
 				$this->run_sql("INSERT INTO log_category_table (name) VALUES ('". $name ."')");
 				
 				//now get the inserted ID.
-				$seqData = $this->run_sql("SELECT currval('log_category_table_log_category_id_seq'::text)");
+				$this->run_sql("SELECT currval('log_category_table_log_category_id_seq'::text)");
+				$seqData = $this->db->farray();
 				$this->configData['logcat__'. strtolower($name)] = $seqData[0];
 				$retval++;
 			}
