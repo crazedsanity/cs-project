@@ -1249,7 +1249,7 @@ class __convertDatabase {
 			foreach($info['data'] as $itemName) {
 				$configIndex = $info['prefix'] .'__'. $itemName;
 				
-				$getItemSql = "SELECT * FROM ". $tableName ." WHERE lower(". $info['idColumn'] .") = '". $itemName ."'";
+				$getItemSql = "SELECT * FROM ". $tableName ." WHERE lower(name) = '". $itemName ."'";
 				$numrows = $this->db->exec($getItemSql);
 				$dberror = $this->db->errorMsg();
 				
@@ -1257,30 +1257,7 @@ class __convertDatabase {
 					if($numrows == 1) {
 						//retrieve the id & store it.
 						$data = $this->db->farray_fieldnames();
-						$configData[$configIndex] = $data[$info['colName']];
-					}
-					elseif($numrows == 0) {
-						$this->gfObj->debug_print(__METHOD__ .": inserting data for missing item (". $itemName .")");
-						//insert the data.
-						$sql = "INSERT INTO ". $tableName ." (name) VALUES ('". ucwords($itemName) ."')";
-						$numrows = $this->db->exec($sql);
-						$dberror = $this->db->errorMsg();
-						
-						if(!strlen($dberror) && $numrows == 1) {
-							//okay, now let's retrieve the id we just inserted.
-							$numrows = $this->db->exec($getItemSql);
-							$dberror = $this->db->errorMsg();
-							if(!strlen($dberror) && $numrows == 1) {
-								$data = $this->db->farray_fieldnames();
-								$configData[$configIndex] = $data[$info['colName']];
-							}
-							else {
-								throw new exception(__METHOD__ .": failed to retrieve ID of newly inserted (". $itemName .")");
-							}
-						}
-						else {
-							throw new exception(__METHOD__ .": failed to insert, numrows=(". $numrows ."), dberror::: ". $dberror ."<BR>\nSQL::: ". $sql);
-						}
+						$configData[$configIndex] = $data[$info['idColumn']];
 					}
 					else {
 						throw new exception(__METHOD__ .": invalid data...? numrows=(". $numrows .")");
