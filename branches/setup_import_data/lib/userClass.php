@@ -18,6 +18,8 @@ class userClass {
 	protected $logCategoryId;
 	protected $logsObj;
 	
+	public $bypassAuthCheck = FALSE;
+	
 	//================================================================================================
 	function userClass(cs_phpDB &$db, $uid=NULL) {
 		
@@ -216,7 +218,9 @@ class userClass {
 			//now check to see authentication.
 			$tSessClass = new Session($this->db,0);
 			$userName = $_SESSION['login_username'];
-			$authCheck = $tSessClass->authenticate_user($userName, $oldPass);
+			if(!$this->bypassAuthCheck) {
+				$authCheck = $tSessClass->authenticate_user($userName, $oldPass);
+			}
 			
 			//only proceed if the old password was correct.
 			if($authCheck) {

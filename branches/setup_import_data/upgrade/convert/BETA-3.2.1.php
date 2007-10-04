@@ -43,6 +43,8 @@ class convertDatabase {
 			$retval .= "<BR>\n". $this->convert_todo_data();
 			$retval .= "<BR>\n". $this->convert_data_part2();
 			
+			$this->fix_stuff();
+			
 			$endTime = time();
 			
 			//TODO: retrieve data for the config file!
@@ -140,6 +142,7 @@ class convertDatabase {
 			'attribute_table',
 			'tag_name_table',
 			'contact_table',
+			'contact_attribute_link_table',
 			'group_table',
 			'user_table',
 			'user_group_table',
@@ -354,7 +357,9 @@ class convertDatabase {
 			'note_table',
 			#'todo_table',
 			'todo_comment_table',
-			'tag_table'
+			'tag_table',
+			'log_table',
+			'log_estimate_table'
 		);
 		
 		foreach($tables as $tableName) {
@@ -395,6 +400,15 @@ class convertDatabase {
 		
 		return($retval);
 	}//end convert_data_part2()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function fix_stuff() {
+		$this->run_sql("UPDATE record_type_table SET module='helpdesk' WHERE module='rts'");
+		$this->run_sql("UPDATE pref_option_table SET effective_value='helpdesk' WHERE effective_value='rts'");
+	}//end fix_stuff()
 	//=========================================================================
 	
 	

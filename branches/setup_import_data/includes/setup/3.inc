@@ -1132,6 +1132,7 @@ class __convertDatabase {
 	
 	
 	private $db;
+	private $newDb;
 	private $gfObj;
 	
 	private $lastNumrows=NULL;
@@ -1141,8 +1142,21 @@ class __convertDatabase {
 	public function __construct() {
 		$this->db = new cs_phpDB;
 		
+		//retrieve the connection parameters.
+		$storedParams = get_setup_data(3, 'convertExisting_post_info');
+		$params = array();
+		foreach($storedParams as $index=>$value) {
+			$key = preg_replace('/^database__/', '', $index);
+			$params[$key] = $value;
+		}
+		$this->db->connect($params);
+		
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt=1;
+		
+		
+		$this->newDb = new cs_phpDb;;
+		$this->newDb->connect(get_db_params());
 	}//end __construct()
 	//=========================================================================
 	
@@ -1152,17 +1166,6 @@ class __convertDatabase {
 		//determine what script we have to include & run.
 		$this->gfObj->debug_print(__METHOD__ .": starting...");
 		
-		//retrieve the connection parameters.
-		$storedParams = get_setup_data(3, 'convertExisting_post_info');
-		
-		$params = array();
-		foreach($storedParams as $index=>$value) {
-			$key = preg_replace('/^database__/', '', $index);
-			$params[$key] = $value;
-		}
-		$this->gfObj->debug_print($params);
-		
-		$this->db->connect($params);
 		if(!$this->db->is_connected()) {
 			throw new exception(__METHOD__ .": failed to connect to database...");
 		}
@@ -1178,7 +1181,6 @@ class __convertDatabase {
 				$this->gfObj->debug_print(__METHOD__ .": version is (". $version .")");
 				
 				$this->run_conversion($version);
-				$configData = $this->get_config_values();
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to get version... ". $dberror);
@@ -1199,9 +1201,7 @@ class __convertDatabase {
 			require_once($convertScript);
 			try {
 				//create the object...
-				$newDb = new cs_phpDb;;
-				$newDb->connect(get_db_params());
-				$obj = new convertDatabase($this->db, $newDb);
+				$obj = new convertDatabase($this->db, $this->newDb);
 				if(method_exists($obj, 'go')) {
 					$result = $obj->go();
 				}
@@ -1261,7 +1261,7 @@ class __convertDatabase {
 						$configData[$configIndex] = $data[$info['idColumn']];
 					}
 					else {
-						throw new exception(__METHOD__ .": invalid data...? numrows=(". $numrows .")");
+						throw new exception(__METHOD__ .": invalid data...? numrows=(". $numrows ."), dberror::: ". $dberror ."<BR>\nSQL::: ". $getItemSql);
 					}
 				}
 				else {
@@ -1273,6 +1273,7 @@ class __convertDatabase {
 		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($configData,0));
 		
 		//set this step's results.
+		store_setup_data(3, $configData, 'data');
 		store_setup_data(3, 1, 'result');
 		
 		return($configData);
@@ -1283,6 +1284,12 @@ class __convertDatabase {
 	
 	//=========================================================================
 	public function finish(cs_genericPage &$page) {
+		//retrieve some configuration values.
+		$this->get_config_values();
+		
+		//create an upgrade{} object, for setting some internal values.
+		$obj = new _setupUpgrade($this->newDb);
+		$obj->finalize_conversion();
 		
 		store_setup_data(4, 1, 'accessible');
 		$stepRes = get_setup_data(3, 'result');
@@ -1292,7 +1299,6 @@ class __convertDatabase {
 				'message'	=> "All default data was stored in the new database successfully!",
 				'type'		=> "status"
 			));
-			store_setup_data(3, $this->configData, 'data');
 			$page->conditional_header("/setup/4", TRUE);
 		}
 		else {
@@ -1308,5 +1314,24 @@ class __convertDatabase {
 	//=========================================================================
 	
 }//end __convertDatabase{}
+
+
+class _setupUpgrade extends upgrade {
+	
+	public function __construct(cs_phpDB $db) {
+		$this->db = $db;
+		parent::__construct();
+	}//end __construct()
+	
+	public function finalize_conversion() {
+		$myVersion = parent::read_version_file();
+		$setDataResult = parent::run_sql("SELECT internal_data_set_value('converted_from_version', '". parent::read_version_file() ."')");
+		parent::update_num_users_to_convert();
+		$retval = parent::update_database_version($myVersion);
+		debug_print(__METHOD__ .": myVersion=(". $myVersion ."), setDataResult=(". $setDataResult ."), retval=(". $retval .")");
+		
+		return($retval);
+	}//end finalize_conversion()
+}//end _setupUpgrade{}
 
 ?>
