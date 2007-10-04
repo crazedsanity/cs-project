@@ -1178,6 +1178,7 @@ class __convertDatabase {
 				$this->gfObj->debug_print(__METHOD__ .": version is (". $version .")");
 				
 				$this->run_conversion($version);
+				$configData = $this->get_config_values();
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to get version... ". $dberror);
@@ -1216,6 +1217,85 @@ class __convertDatabase {
 			throw new exception(__METHOD__ .": conversion script does not exist: ". $convertScript);
 		}
 	}//end run_conversion()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function get_config_values() {
+		
+		$configData = array();
+		//setup the list of required items.
+		$requiredItems = array(
+			'log_category_table' => array(
+				'prefix'	=> 'logcat',
+				'idColumn'	=> 'log_category_id',
+				'data'		=> array(
+					'database', 'authentication', 'users', 'general', 'project', 'helpdesk', 'todo', 
+					'tags', 'estimates', 'navigation', 'preferences' 
+				),
+			),
+			'record_type_table' => array(
+				'prefix'	=> 'rectype',
+				'idColumn'	=> 'record_type_id',
+				'data'		=> array(
+					'project', 'todo', 'helpdesk'
+				)
+			)
+		);
+		
+		foreach($requiredItems as $tableName => $info) {
+			//check that all the required values are present.}
+			foreach($info['data'] as $itemName) {
+				$configIndex = $info['prefix'] .'__'. $itemName;
+				
+				$getItemSql = "SELECT * FROM ". $tableName ." WHERE lower(". $info['idColumn'] .") = '". $itemName ."'";
+				$numrows = $this->db->exec($getItemSql);
+				$dberror = $this->db->errorMsg();
+				
+				if(!strlen($dberror)) {
+					if($numrows == 1) {
+						//retrieve the id & store it.
+						$data = $this->db->farray_fieldnames();
+						$configData[$configIndex] = $data[$info['colName']];
+					}
+					elseif($numrows == 0) {
+						$this->gfObj->debug_print(__METHOD__ .": inserting data for missing item (". $itemName .")");
+						//insert the data.
+						$sql = "INSERT INTO ". $tableName ." (name) VALUES ('". ucwords($itemName) ."')";
+						$numrows = $this->db->exec($sql);
+						$dberror = $this->db->errorMsg();
+						
+						if(!strlen($dberror) && $numrows == 1) {
+							//okay, now let's retrieve the id we just inserted.
+							$numrows = $this->db->exec($getItemSql);
+							$dberror = $this->db->errorMsg();
+							if(!strlen($dberror) && $numrows == 1) {
+								$data = $this->db->farray_fieldnames();
+								$configData[$configIndex] = $data[$info['colName']];
+							}
+							else {
+								throw new exception(__METHOD__ .": failed to retrieve ID of newly inserted (". $itemName .")");
+							}
+						}
+						else {
+							throw new exception(__METHOD__ .": failed to insert, numrows=(". $numrows ."), dberror::: ". $dberror ."<BR>\nSQL::: ". $sql);
+						}
+					}
+					else {
+						throw new exception(__METHOD__ .": invalid data...? numrows=(". $numrows .")");
+					}
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to retrieve id for (". $itemName ."), rows=(". $numrows .") ERROR::: ". $dberror ."<BR>\nSQL::: ". $getItemSql);
+				}
+			}
+		}
+		
+		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($configData,0));
+		
+		return($configData);
+	}//end get_config_values()
 	//=========================================================================
 	
 }//end __convertDatabase{}
