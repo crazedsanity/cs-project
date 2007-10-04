@@ -58,7 +58,7 @@ class __finalStep {
 	
 	//=========================================================================
 	function write_config() {
-		if($this->fsObj->is_writable()) {
+		if($this->fsObj->is_writable(NULL)) {
 			$lsData = $this->fsObj->ls();
 			if(!is_array($lsData['config.xml'])) {
 				$myData = array();
