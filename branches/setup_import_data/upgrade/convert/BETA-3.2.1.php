@@ -46,6 +46,8 @@ class convertDatabase {
 			$endTime = time();
 			
 			//TODO: retrieve data for the config file!
+			
+			$this->db->commitTrans();
 		}
 		catch(exception $e) {
 			$retval = $e->getMessage();
