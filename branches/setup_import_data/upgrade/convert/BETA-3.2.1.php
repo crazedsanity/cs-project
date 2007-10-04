@@ -33,15 +33,11 @@ class convertDatabase {
 		try {
 			$this->db->beginTrans();
 			$retval = $this->convert_data_part1();
-			#$retval = $this->convert_log_categories_and_classes();
-			#$retval .= "<BR>\n". $this->convert_record_type_data();
-			#$retval .= "<BR>\n". $this->create_attributes();
-			#$retval .= "<BR>\n". $this->create_anonymous_contact_data();
-			#$retval .= "<BR>\n". $this->create_status_records();
-			#$retval .= "<BR>\n". $this->create_tag_names();
-			#$retval .= "<BR>\n". $this->build_preferences();
-			#$retval .= "<BR>\n". $this->create_users();
-			#$retval .= "<BR>\n". $this->create_user_group_records();
+			$retval .= "<BR>\n". $this->convert_record_table();
+			
+			//TODO: convert todo & todo comments.
+			
+			$retval .= "<BR>\n". $this->convert_data_part2();
 		}
 		catch(exception $e) {
 			$retval = $e->getMessage();
@@ -171,92 +167,132 @@ class convertDatabase {
 			}
 		}
 		
-		$this->gfObj->debug_print(__METHOD__ .": inserted (". $insertedRecords .") records");
+		$retval = __METHOD__ .": inserted (". $insertedRecords .") records";
+		$this->gfObj->debug_print($retval);
+		
+		return($retval);
 	}//end convert_data_part1()
 	//=========================================================================
 	
 	
 	
 	//=========================================================================
-	private function convert_log_categories_and_classes() {
-		$this->gfObj->debug_print(__METHOD__ .": starting... ");
-		$retval = 0;
-		$exception = NULL;
+	private function convert_record_table() {
+		$recordTableData = $this->get_data("SELECT * FROM record_table");
+		$insertedRecords = 0;
 		
-		//retrieve the log categories.
-		$data = $this->get_data("SELECT * FROM log_category_table");
-		
-		if(is_array($data)) {
-			foreach($data as $id=>$dataArr) {
-				$name = $dataArr['name'];
+		if(is_array($recordTableData)) {
+			foreach($recordTableData as $num=>$data) {
+				//fix certain columns...
+				$cleanArr = array(
+					'record_id'				=> 'int',
+					'public_id'				=> 'int',
+					'ancestry'				=> 'sql',
+					'ancestry_level'		=> 'int',
+					'group_id'				=> 'int',
+					'creator_contact_id'	=> 'int',
+					'leader_contact_id'		=> 'int',
+					'status_id'				=> 'int',
+					'priority'				=> 'int',
+					'progress'				=> 'int',
+					'start_date'			=> 'datetime',
+					'deadline'				=> 'datetime',
+					'last_updated'			=> 'datetime',
+					'name'					=> 'sql',
+					'subject'				=> 'sql',
+					'is_helpdesk_issue'		=> 'bool',
+					'is_internal_only'		=> 'bool'
+				);
 				
-				$insertStr = $this->gfObj->string_from_array($dataArr, 'insert', NULL, 'sql');
-				//run an insert, capture the inserted id, and store it.
-				$this->run_sql("INSERT INTO log_category_table ". $insertStr);
-				
-				//now get the inserted ID.
-				$this->run_sql("SELECT log_category_id FROM log_category_table WHERE name='". $name ."'");
-				$seqData = $this->db->farray();
-				$this->configData['logcat__'. strtolower($name)] = $seqData[0];
-				$retval++;
-			}
-			
-			//now retrieve the classes & insert 'em into the new database.
-			$classData = $this->get_data("SELECT * FROM log_class_table");
-			
-			if(is_array($classData)) {
-				foreach($classData as $id => $dataArr) {
-					$insertStr = $this->gfObj->string_from_array($dataArr, 'insert', NULL, 'sql');
-					$this->run_sql("INSERT INTO log_class_table ". $insertStr);
-					$retval++;
-				}
-				
-				//now retrieve & insert the log events.
-				$eventData = $this->get_data("SELECT * FROM log_event_table", 'log_event_id');
-				
-				if(is_array($eventData)) {
-					foreach($eventData as $id => $dataArr) {
-						$insertStr = $this->gfObj->string_from_array($dataArr, 'insert', NULL, 'sql');
-						$this->run_sql("INSERT INTO log_event_table ". $insertStr);
-						$retval++;
+				foreach($cleanArr as $field=>$cleanArg) {
+					if($cleanArg == 'int' && !strlen($data[$field])) {
+						$data[$field] = NULL;
+					}
+					elseif($cleanArg == 'datetime') {
+						if(!strlen($data[$field])) {
+							$data[$field] = "NULL";
+						}
+						else {
+							$data[$field] = "'". $this->gfObj->cleanString($data[$field], $cleanArg, 0) ."'::timestamp";
+						}
+					}
+					else {
+						$sqlQuotes = 1;
+						if($cleanArg == "int") {
+							$sqlQuotes = 0;
+						}
+						$data[$field] = $this->gfObj->cleanString($data[$field], $cleanArg, $sqlQuotes);
 					}
 				}
-				else {
-					$exception = "no log event data::: ". $this->gfObj->debug_print($eventData,0);
+				
+				$insertStr = $this->gfObj->string_from_array($data, 'insert');
+				
+				try {
+					$this->run_sql("INSERT INTO record_table ". $insertStr);
 				}
-			}
-			else {
-				$exception = "no data returned for classes::: ". $this->gfObj->debug_print($classData,0);
+				catch(exception $e) {
+					$this->gfObj->debug_print(__METHOD__ .": failed after inserting (". $insertedRecords .")... ". $e->getMessage());
+					exit;
+				}
+				$insertedRecords++;
 			}
 		}
 		else {
-			$exception = "invalid data returned::: ". $this->gfObj->debug_print($data,0);
+			throw new exception(__METHOD__ .": failed to retrieve any records to convert");
 		}
 		
-		//now reset some sequences.
-		$this->run_sql("SELECT setval('log_category_table_log_category_id_seq'::text, (SELECT max(log_category_id) FROM log_category_table))");
-		$this->run_sql("SELECT setval('log_class_table_log_class_id_seq'::text, (SELECT max(log_class_id) FROM log_class_table))");
-		$this->run_sql("SELECT setval('log_event_table_log_event_id_seq'::text, (SELECT max(log_event_id) FROM log_event_table))");
+		$retval = __METHOD__ .": finished, inserted (". $insertedRecords .") of (". count($recordTableData) .")";
+		$this->gfObj->debug_print($retval);
 		
-		if(!is_null($exception)) {
-			throw new exception(__METHOD__ .": ". $exception);
-		}
+		return($retval);
 		
-		$this->gfObj->debug_print(__METHOD__ .": retval=(". $retval .")");
-		
-		return("Successfully converted ". $retval ." records.");
-	}//end convert_log_categories_and_classes()
+	}//end convert_record_table()
 	//=========================================================================
 	
 	
 	
 	//=========================================================================
-	private function convert_record_type_data() {
-		$retval = 0;
-		$data = $this->get_data("SELECT * FROM record_type_table");
+	private function convert_data_part2() {
+		$insertedRecords = 0;
+		$tables = array(
+			'record_contact_link_table',
+			'note_table',
+			#'todo_table',
+			#'todo_comment_table',
+			'tag_table'
+		);
 		
-		#$this->configData['rectype__'. strtolower($name)] = $recTypeId;
-	}//end convert_record_type_data()
+		foreach($tables as $tableName) {
+			$data = $this->get_data("SELECT * FROM ". $tableName);
+			
+			foreach($data as $index=>$tableData) {
+				
+				$sqlArr = array();
+				foreach($tableData as $field=>$value) {
+					if(!strlen($value) && (preg_match('/_id$/', $field) || preg_match('/date/', $field) || preg_match('/time/', $field))) {
+						
+					}
+					else {
+						$sqlArr[$field] = $value;
+					}
+				}
+				$insertStr = $this->gfObj->string_from_array($sqlArr, 'insert', NULL, 'sql');
+				try {
+					$this->run_sql("INSERT INTO ". $tableName ." ". $insertStr);
+				}
+				catch(exception $e) {
+					$this->gfObj->debug_print(__METHOD__ .": failed after inserting (". $insertedRecords .") records::: ". $e->getMessage());
+					exit;
+				}
+				$insertedRecords++;
+			}
+		}
+		
+		$retval = __METHOD__ .": inserted (". $insertedRecords .") records";
+		$this->gfObj->debug_print($retval);
+		
+		return($retval);
+	}//end convert_data_part2()
 	//=========================================================================
 	
 	
