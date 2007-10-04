@@ -52,7 +52,7 @@ table.notice p { margin-top: 0px; margin-bottom: 5px  }
 .code { 
 	font-style: italic;
 	font-size: 12px;
-	font-weigth: bold;
+	font-weight: bold;
 	padding-left:20px;
 	background-color: white;
 	border: dashed #000 1px;
