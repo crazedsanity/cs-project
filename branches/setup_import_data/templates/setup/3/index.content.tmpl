@@ -1,7 +1,7 @@
 
 {stepData}
 
-<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
+<form method="POST">
 <div id="setup_text" style="display:inline;">
 <h2>Please Select an Option:</h2>
 <a href="javascript:void(setup__enableInput('setup', 'newInstall'));">Perform New Install</a>
@@ -124,10 +124,10 @@ or
 </div>
 
 <div id="setup_newInstall_submitButton" style="display:none;">
-	<input id="submitButton" type="submit" name="go" value="Create default values &amp; proceed to the next step">
+	<input id="submitButton" type="submit" name="go" value="Create default values &amp; proceed to the next step" onClick="new Effect.DropOut('submitButton');">
 </div>
 <div id="setup_convertExisting_submitButton" style="display:none;">
-	<input id="submitButton" type="submit" name="go" value="Convert existing database &amp; proceed to the next step">
+	<input id="submitButton2" type="submit" name="go" value="Convert existing database &amp; proceed to the next step" onClick="new Effect.DropOut('submitButton2');">
 </div>
 
 </form>
