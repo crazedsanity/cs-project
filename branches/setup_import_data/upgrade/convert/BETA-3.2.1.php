@@ -3,6 +3,11 @@
  * Created on Oct 3, 2007
  * 
  * TODO: set internal data 'converted_from' = (version_string)
+ * TODO: retrieve required items for the config.xml file...
+ * 		-- logcat__{loweredLogCategoryName}
+ * 		-- rectype__{loweredRecordTypeName}
+ * 
+ * TODO: for speed, consider converting straight INSERT statements into a few COPY commands (unnecessary, unless multiple installs of BETA-3.2.1 are discovered)
  */
 
 
@@ -31,20 +36,26 @@ class convertDatabase {
 	public function go() {
 		//start converting data.
 		try {
+			$startTime = time();
 			$this->db->beginTrans();
 			$retval = $this->convert_data_part1();
 			$retval .= "<BR>\n". $this->convert_record_table();
-			
-			//TODO: convert todo & todo comments.
-			
+			$retval .= "<BR>\n". $this->convert_todo_data();
 			$retval .= "<BR>\n". $this->convert_data_part2();
+			
+			$endTime = time();
+			
+			//TODO: retrieve data for the config file!
 		}
 		catch(exception $e) {
 			$retval = $e->getMessage();
 		}
 		
-		$this->gfObj->debug_print(__METHOD__ .": returning::: ". $retval);
+		$totalTime = ($endTime - $startTime);
+		$totalMinutes = number_format(($totalTime / 60),2);
+		
 		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($this->configData,0));
+		$this->gfObj->debug_print(__METHOD__ .": took (". $totalTime .") seconds ( or about ". $totalMinutes ." minutes) returning::: ". $retval);
 		
 		return($retval);
 	}//end go()
@@ -132,20 +143,15 @@ class convertDatabase {
 			'user_group_table',
 			'pref_type_table',
 			'pref_option_table',
-			'user_pref_table',
-			#'record_table',
-			#'record_contact_link_table',
-			#'note_table',
-			#'todo_table',
-			#'todo_comment_table',
-			#'tag_table'
+			'user_pref_table'
 		);
 		
 		foreach($tables as $tableName) {
 			$data = $this->get_data("SELECT * FROM ". $tableName);
 			
+			$totalRecords = count($data);
+			$totalTableInserts = 0;
 			foreach($data as $index=>$tableData) {
-				
 				$sqlArr = array();
 				foreach($tableData as $field=>$value) {
 					if(!strlen($value) && (preg_match('/_id$/', $field) || preg_match('/date/', $field) || preg_match('/time/', $field))) {
@@ -164,6 +170,11 @@ class convertDatabase {
 					exit;
 				}
 				$insertedRecords++;
+				$totalTableInserts++;
+			}
+			
+			if($totalRecords !== $totalTableInserts) {
+				throw new exception(__METHOD__ .": didn't insert all records, got (". $totalTableInserts ."/". $totalRecords .")");
 			}
 		}
 		
@@ -236,6 +247,9 @@ class convertDatabase {
 				}
 				$insertedRecords++;
 			}
+			if($insertedRecords !== count($recordTableData)) {
+				throw new exception(__METHOD__ .": didn't insert all records, got ". $insertedRecords ."/". count($recordTableData));
+			}
 		}
 		else {
 			throw new exception(__METHOD__ .": failed to retrieve any records to convert");
@@ -252,19 +266,100 @@ class convertDatabase {
 	
 	
 	//=========================================================================
+	private function convert_todo_data() {
+		
+		$insertedRecords = 0;
+		
+		$todoTableData = $this->get_data("SELECT * FROM todo_table;");
+		
+		$cleanArr = array(
+			'todo_id'				=> 'int',
+			'creator_contact_id'	=> 'int',
+			'name'					=> 'sql',
+			'body'					=> 'sql',
+			'assigned_contact_id'	=> 'int',
+			'created'				=> 'datetime',
+			'updated'				=> 'datetime',
+			'deadline'				=> 'datetime',
+			'started'				=> 'datetime',
+			'status_id'				=> 'int',
+			'priority'				=> 'int',
+			'progress'				=> 'int',
+			'record_id'				=> 'int',
+			'estimate_original'		=> 'float',
+			'estimate_current'		=> 'float',
+			'estimate_elapsed'		=> 'float'
+		);
+		
+		if(is_array($todoTableData)) {
+			$totalTableRecords = count($todoTableData);
+			foreach($todoTableData as $field => $data) {
+				foreach($cleanArr as $field=>$cleanArg) {
+					if($cleanArg == 'int' && !strlen($data[$field])) {
+						$data[$field] = NULL;
+					}
+					elseif($cleanArg == 'datetime') {
+						if(!strlen($data[$field])) {
+							$data[$field] = "NULL";
+						}
+						else {
+							$data[$field] = "'". $this->gfObj->cleanString($data[$field], $cleanArg, 0) ."'::timestamp";
+						}
+					}
+					else {
+						$sqlQuotes = 1;
+						if($cleanArg == "int") {
+							$sqlQuotes = 0;
+						}
+						$data[$field] = $this->gfObj->cleanString($data[$field], $cleanArg, $sqlQuotes);
+					}
+				}
+				
+				$insertStr = $this->gfObj->string_from_array($data, 'insert');
+				
+				try {
+					$this->run_sql("INSERT INTO todo_table ". $insertStr);
+				}
+				catch(exception $e) {
+					$this->gfObj->debug_print(__METHOD__ .": failed after inserting (". $insertedRecords .")... ". $e->getMessage());
+					exit;
+				}
+				$insertedRecords++;
+			}
+			
+			if($totalTableRecords !== $insertedRecords) {
+				throw new exception(__METHOD__ .": failed to insert all records, got (". $insertedRecords ."/". $totalTableRecords .")");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": no data to convert");
+		}
+		
+		$retval = __METHOD__ .": converted ". $insertedRecords ."/". $totalTableRecords ." records";
+		
+		return($retval);
+		
+	}//end convert_todo_data()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
 	private function convert_data_part2() {
 		$insertedRecords = 0;
 		$tables = array(
 			'record_contact_link_table',
 			'note_table',
 			#'todo_table',
-			#'todo_comment_table',
+			'todo_comment_table',
 			'tag_table'
 		);
 		
 		foreach($tables as $tableName) {
 			$data = $this->get_data("SELECT * FROM ". $tableName);
 			
+			$totalRecords = count($data);
+			$totalTableInserts = 0;
 			foreach($data as $index=>$tableData) {
 				
 				$sqlArr = array();
@@ -285,6 +380,11 @@ class convertDatabase {
 					exit;
 				}
 				$insertedRecords++;
+				$totalTableInserts++;
+			}
+			
+			if($totalRecords !== $totalTableInserts) {
+				throw new exception(__METHOD__ .": didn't insert all records, got (". $totalTableInserts ."/". $totalRecords .")");
 			}
 		}
 		
