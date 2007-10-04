@@ -216,7 +216,7 @@ class convertDatabase {
 					'last_updated'			=> 'datetime',
 					'name'					=> 'sql',
 					'subject'				=> 'sql',
-					'is_helpdesk_issue'		=> 'bool',
+					'is_helpdesk_issue'		=> 'sql',
 					'is_internal_only'		=> 'bool'
 				);
 				
