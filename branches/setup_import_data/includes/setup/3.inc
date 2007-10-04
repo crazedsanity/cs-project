@@ -10,7 +10,8 @@ if($_POST) {
 		case 'convertExisting': {
 			store_setup_data(3, $_POST['fields'], 'convertExisting_post_info');
 			$convertObj = new __convertDatabase();
-			$convertObj->go();
+			store_setup_data(3, $convertObj->go(), 'text');
+			$convertObj->finish($page);
 		}
 		break;
 		
@@ -40,7 +41,6 @@ if($_POST) {
 		default:
 			throw new exception("Invalid option selected!");
 	};
-	exit;
 	
 	$page->conditional_header("/setup/3", TRUE);
 }
@@ -1224,6 +1224,7 @@ class __convertDatabase {
 	//=========================================================================
 	private function get_config_values() {
 		
+		store_setup_data(3, 0, 'result');
 		$configData = array();
 		//setup the list of required items.
 		$requiredItems = array(
@@ -1271,8 +1272,39 @@ class __convertDatabase {
 		
 		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($configData,0));
 		
+		//set this step's results.
+		store_setup_data(3, 1, 'result');
+		
 		return($configData);
 	}//end get_config_values()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function finish(cs_genericPage &$page) {
+		
+		store_setup_data(4, 1, 'accessible');
+		$stepRes = get_setup_data(3, 'result');
+		if($stepRes == 1) {
+			$page->set_message_wrapper(array(
+				'title'		=> "Successfully Setup Data",
+				'message'	=> "All default data was stored in the new database successfully!",
+				'type'		=> "status"
+			));
+			store_setup_data(3, $this->configData, 'data');
+			$page->conditional_header("/setup/4", TRUE);
+		}
+		else {
+			$page->set_message_wrapper(array(
+				'title'		=> "Step Failed",
+				'message'	=> "Please review the errors below and proceed accordingly.",
+				'type'		=> "error"
+			));
+			$page->conditional_header("/setup/3", TRUE);
+		}
+		
+	}//end finish()
 	//=========================================================================
 	
 }//end __convertDatabase{}
