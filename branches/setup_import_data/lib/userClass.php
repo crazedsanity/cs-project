@@ -185,6 +185,7 @@ class userClass {
 				//no dice, dude.
 				if($dberror) {
 					$this->logsObj->log_dberror("get_user_info(): error::: ". $dberror);
+					throw new exception(__METHOD__ .": failed to get user data... ");
 				}
 				$retval = 0;
 			} else {
@@ -218,7 +219,10 @@ class userClass {
 			//now check to see authentication.
 			$tSessClass = new Session($this->db,0);
 			$userName = $_SESSION['login_username'];
-			if(!$this->bypassAuthCheck) {
+			if($this->bypassAuthCheck) {
+				$authCheck = 1;
+			}
+			else {
 				$authCheck = $tSessClass->authenticate_user($userName, $oldPass);
 			}
 			
@@ -243,6 +247,7 @@ class userClass {
 						$this->lastError = "Invalid user!";
 					}
 					$retval = 0;
+					throw new exception(__METHOD__ .": failed to update password... ");
 				} else {
 					//got it!
 					$retval = $numrows;
