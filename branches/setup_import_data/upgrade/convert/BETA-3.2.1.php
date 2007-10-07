@@ -7,6 +7,7 @@
  * 		-- logcat__{loweredLogCategoryName}
  * 		-- rectype__{loweredRecordTypeName}
  * 
+ * TODO: reset all sequences, including the two special ones, so new records can be created.
  * TODO: for speed, consider converting straight INSERT statements into a few COPY commands (unnecessary, unless multiple installs of BETA-3.2.1 are discovered)
  */
 
