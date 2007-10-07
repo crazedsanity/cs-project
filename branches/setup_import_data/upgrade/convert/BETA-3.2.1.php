@@ -43,7 +43,9 @@ class convertDatabase {
 			$retval .= "<BR>\n". $this->convert_record_table();
 			$retval .= "<BR>\n". $this->convert_todo_data();
 			$retval .= "<BR>\n". $this->convert_data_part2();
+			$this->db->commitTrans();
 			
+			$this->db->beginTrans();
 			$this->fix_stuff();
 			
 			$endTime = time();
@@ -409,6 +411,55 @@ class convertDatabase {
 	private function fix_stuff() {
 		$this->run_sql("UPDATE record_type_table SET module='helpdesk' WHERE module='rts'");
 		$this->run_sql("UPDATE pref_option_table SET effective_value='helpdesk' WHERE effective_value='rts'");
+		
+		$sequenceList = array(
+			'attribute_table_attribute_id_seq',
+			'contact_attribute_link_table_contact_attribute_link_id_seq',
+			'contact_table_contact_id_seq',
+			'group_table_group_id_seq',
+			'internal_data_table_internal_data_id_seq',
+			'log_category_table_log_category_id_seq',
+			'log_class_table_log_class_id_seq',
+			'log_estimate_table_log_estimate_id_seq',
+			'log_event_table_log_event_id_seq',
+			'log_table_log_id_seq',
+			'note_table_note_id_seq',
+			'pref_option_table_pref_option_id_seq',
+			'pref_type_table_pref_type_id_seq',
+			'record_contact_link_table_record_contact_link_id_seq',
+			'record_table_record_id_seq',
+			'record_type_table_record_type_id_seq',
+			'special__helpdesk_public_id_seq',
+			'special__project_public_id_seq',
+			'status_table_status_id_seq',
+			'tag_name_table_tag_name_id_seq',
+			'tag_table_tag_id_seq',
+			'todo_comment_table_todo_comment_id_seq',
+			'todo_table_todo_id_seq',
+			'user_group_table_user_group_id_seq',
+			'user_pref_table_user_pref_id_seq',
+			'user_table_uid_seq'
+		);
+		
+		foreach($sequenceList as $sequenceName) {
+			if($sequenceName == 'special__helpdesk_public_id_seq') {
+				$sql = "SELECT setval('". $sequenceName ."'::text, (SELECT max(public_id) FROM " .
+					"record_table WHERE is_helpdesk_issue IS TRUE));";
+			}
+			elseif($sequenceName == 'special__project_public_id_seq') {
+				$sql = "SELECT setval('". $sequenceName ."'::text, (SELECT max(public_id) FROM " .
+					"record_table WHERE is_helpdesk_issue IS FALSE));";
+			}
+			else {
+				$bits = explode('_table_', $sequenceName);
+				$tableName = $bits[0] .'_table';
+				$columnName = preg_replace('/_seq$/', '', $bits[1]);
+				
+				$sql = "SELECT setval('". $sequenceName ."'::text, (SELECT max(". $columnName .") FROM " . $tableName ."))";
+			}
+			
+			$this->run_sql($sql);
+		}
 	}//end fix_stuff()
 	//=========================================================================
 	
