@@ -704,11 +704,11 @@ class Session extends upgrade {
 			}
 			else {
 				//crap.  Use the old method...
-				if(encrypt($password, $resultSet['password']) == $resultSet['password']) {
+				if(encrypt($password, $password) == $resultSet['password']) {
 					//sweet.  Convert their password!
 					$userObj = new userClass($this->db, $this->logUid);
-					$userObj->bypassAuthCheck;
-					$userObj->change_password($password, $password, $password);
+					$userObj->bypassAuthCheck = TRUE;
+					$retval = $userObj->change_password($password, $password, $password);
 				}
 				else {
 					$retval = 0;
