@@ -1289,7 +1289,9 @@ class __convertDatabase {
 		
 		//create an upgrade{} object, for setting some internal values.
 		$obj = new _setupUpgrade($this->newDb);
-		$obj->finalize_conversion();
+		$config = get_setup_data(3, 'data');
+		$config['version_string'] = $obj->finalize_conversion();
+		store_setup_data(3, $config, 'data');
 		
 		store_setup_data(4, 1, 'accessible');
 		$stepRes = get_setup_data(3, 'result');
@@ -1330,7 +1332,7 @@ class _setupUpgrade extends upgrade {
 		$retval = parent::update_database_version($myVersion);
 		debug_print(__METHOD__ .": myVersion=(". $myVersion ."), setDataResult=(". $setDataResult ."), retval=(". $retval .")");
 		
-		return($retval);
+		return($myVersion);
 	}//end finalize_conversion()
 }//end _setupUpgrade{}
 
