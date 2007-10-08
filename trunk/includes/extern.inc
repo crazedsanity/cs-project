@@ -12,6 +12,7 @@
  */
 
 require_once(dirname(__FILE__) ."/../lib/includes.php");
+require_once(dirname(__FILE__) ."/../lib/bbCode/bbCodeParser.class.php");
 
 
 $db = new cs_phpDB;

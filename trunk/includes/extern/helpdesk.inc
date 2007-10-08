@@ -113,13 +113,13 @@ else
 		$htmlTitle = "View Issue #$helpdeskId";
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 		
+		$bbCodeParser = new bbCodeParser($proj, $proj->helpdeskObj);
+		
 		//show it's "access" properly..
 		$page->add_template_var("select_acc_". $helpdeskData['acc'], "selected");
 		
 		//convert the returned data into htmlentities so brackets show properly.
-		$helpdeskData['note'] = cleanString($helpdeskData['note'], "htmlspecial");
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlspecial");
-		$helpdeskData['remark'] = cleanString($helpdeskData['remark'], "htmlspecial");
 		$myNotes = $helpdeskData['notes'];
 		unset($helpdeskData['notes']);
 		
@@ -150,6 +150,7 @@ else
 			foreach($myNotes as $repArr) {
 				$repArr['body'] = wordwrap($repArr['body'], FORMAT_WORDWRAP);
 				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
+				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], FALSE);
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
 				
 				$repArr['solutionIndicator'] = "";
