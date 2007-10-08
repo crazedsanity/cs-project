@@ -85,7 +85,15 @@ class projectClass extends mainRecord {
 			$retval = $newId;
 		}
 		else {
-			throw new exception(__METHOD__ .": unable to determine group_id... session probably invalid");
+			if(is_numeric($_SESSION['uid'])) {
+				$userObj = new userClass($this->db, $_SESSION['uid']);
+				$info = $userObj->get_user_info($_SESSION['uid']);
+				$_SESSION['group_id'] = $info['group_id'];
+				$this->groupId = $info['group_id'];
+			}
+			else {
+				throw new exception(__METHOD__ .": unable to determine group_id... session probably invalid... newId=(". $newId ."), sessionGroupId=(". $_SESSION['group_id'] .")");
+			}
 		}
 		
 		return($retval);
