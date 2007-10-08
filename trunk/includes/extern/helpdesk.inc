@@ -125,12 +125,7 @@ else
 		
 		//make the wrapping SANE.
 		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);
-		$helpdeskData['note'] = wordwrap($helpdeskData['note'], FORMAT_WORDWRAP);	
-		$rowsToUse = count(explode("\n", $helpdeskData['note']));
-		if($rowsToUse < 5) {
-			$rowsToUse = 5;
-		}
-		$page->add_template_var("note_rows", $rowsToUse);
+		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject'],FALSE);
 		
 		//add everything to the page as a template var...
 		foreach($helpdeskData as $field=>$value) {
@@ -148,7 +143,6 @@ else
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = wordwrap($repArr['body'], FORMAT_WORDWRAP);
 				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
 				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], FALSE);
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
