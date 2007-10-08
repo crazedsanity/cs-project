@@ -1,7 +1,7 @@
 
 
 <form method="POST" action="{PHP_SELF}" name="main">
-<input name="id" value="{public_id}" type="HIDDEN">
+<input name="ID" value="{public_id}" type="HIDDEN">
 <input name="module" value="helpdesk" type="HIDDEN">
 <table border="0" cellpadding="4" cellspacing="0">
 	<tbody>
@@ -35,7 +35,7 @@
 		</tr>
 		<tr>
 		
-			<th style="border-bottom:solid #000 1px;" align="right">Issue Text:</th>
+			<th style="border-bottom:solid #000 1px;" align="right" valign="top">Issue Text:</th>
 			
 			<td style="border-bottom:solid #000 1px;" width="600" colspan="2"><pre>{subject}</pre></td>
 		</tr>
@@ -47,21 +47,13 @@
 		<!-- END issueNotes -->
 			</td>
 		</tr>
-		<!-- END info_block -->
-		<!-- BEGIN remark_row -->
+<!-- BEGIN remark_row -->
 		<tr>
 		
 			<td colspan="3">Remark:  <br>
 				<textarea name="remark" rows="8" cols="80"></textarea>
 			</td>
 		</tr>
-		<!-- END remark_row -->
-		<!-- BEGIN reopen_button -->
-			<tr>
-				<td>&nbsp;</td>
-				<td><input type="submit" name="action" value='Re-Open'></td>
-			</tr>
-		<!-- END reopen_button -->
 		<tr>
 			<td colspan="3"><i>(Changes only take effect when clicking "modify", while "solve" only cares about the solution field, and "remark" only cares about the remarks field.)</i></td>
 		</tr>
@@ -70,6 +62,7 @@
 			<input name="action" value="Remark" type="submit">&nbsp;
 			</td>
 		</tr>
+<!-- END remxark_row -->
 	</tbody>
 </table>
 </form>
