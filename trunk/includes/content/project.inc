@@ -261,6 +261,7 @@ if($_POST) {
 		{
 			$detailsArr['subject'] = cleanString($detailsArr['subject'], "htmlspecial_nq");
 			$detailsArr['subject'] = cleanString($detailsArr['subject'], "htmlentity_plus_brackets");
+			$detailsArr['subject'] = $bbCodeParser->parseString($detailsArr['subject']);
 			$detailsArr['subject'] = preg_replace("/\n/", "<BR>\n", $detailsArr['subject']);
 			$detailsArr['subject'] = preg_replace("/\s\s/", "&nbsp;&nbsp;", $detailsArr['subject']);
 		}
