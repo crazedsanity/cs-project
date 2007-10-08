@@ -170,8 +170,8 @@ if($_POST) {
 				try {
 					$remarkDetails = "Re-linked to [project_id=". $projectId ."]";
 					if($issueData['ancestry_level'] > 1) {
-						$issueParentData = $helpdeskObj->get_parent_record($issueData['ancestry']);
-						$remarkDetails .= " from [project_id=". $issueParentData['public_id'] ."]";
+						$parentRecord= $helpdeskObj->get_parent_record($issueData['ancestry']);
+						$remarkDetails .= " from [project_id=". $parentRecord['public_id'] ."]";
 					}
 					$linkRes = $helpdeskObj->update_record($linkIssue, array('parentRecordId' => $projectId));
 					$helpdeskObj->remark($linkIssue, $remarkDetails);
