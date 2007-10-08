@@ -70,7 +70,7 @@ class bbCodeParser extends cs_bbCodeParser {
 		if(is_numeric($helpdeskId)) {
 			try {
 			$data = $this->helpdeskObj->get_record($helpdeskId);
-			$retval = '&#91;<a href="/content/helpdesk/view?ID='. $helpdeskId .'">'. $data['name'] .'</a>&#93;';
+			$retval = '&#91;<a href="http://'. PROJECT_URL .'/content/helpdesk/view?ID='. $helpdeskId .'">'. $data['name'] .'</a>&#93;';
 			}
 			catch(exception $e) {
 				debug_print($e->getMessage);

@@ -20,7 +20,7 @@ class upgrade {
 	private $fsObj;
 	private $gfObj;
 	private $config = NULL;
-	private $db;
+	protected $db;
 	
 	private $versionFileVersion = NULL;
 	private $configVersion = NULL;
@@ -28,7 +28,6 @@ class upgrade {
 	
 	//=========================================================================
 	public function __construct() {
-		$GLOBALS['DEBUGPRINTOPT'] = 1;
 		$this->fsObj =  new cs_fileSystemClass(dirname(__FILE__) .'/../');
 		$this->gfObj = new cs_globalFunctions;
 		clearstatcache();
@@ -102,7 +101,7 @@ class upgrade {
 	
 	
 	//=========================================================================
-	private function read_version_file() {
+	protected function read_version_file() {
 		$retval = NULL;
 		
 		//okay, all files present: check the version in the VERSION file.
@@ -469,7 +468,7 @@ class upgrade {
 	 * Updates information that's stored in the database, internal to cs-project, 
 	 * so the version there is consistent with all the others.
 	 */
-	private function update_database_version($newVersionString) {
+	protected function update_database_version($newVersionString) {
 		$versionArr = $this->parse_version_string($newVersionString);
 		
 		$queryArr = array();
@@ -581,7 +580,7 @@ class upgrade {
 	
 	
 	//=========================================================================
-	private function run_sql($sql, $expectedNumrows=1) {
+	protected function run_sql($sql, $expectedNumrows=1) {
 		if(!$this->db->is_connected()) {
 			$this->db->connect(get_config_db_params());
 		}
@@ -633,6 +632,36 @@ class upgrade {
 		$xmlString = $xmlCreator->create_xml_string();
 		$fs->write($xmlString, $myConfigFile);
 	}//end update_config_file()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	protected function get_num_users_to_convert() {
+		
+		$retval = 0;
+		try {
+			//if this generates an error, there are no users...
+			$this->run_sql("SELECT internal_data_get_value('users_to_convert')");
+			$data = $this->db->farray();
+			$retval = $data[0];
+		}
+		catch(exception $e) {
+			$this->gfObj->debug_print(__METHOD__ .": failed to retrieve users to convert: ");
+		}
+		
+		return($retval);
+		
+	}//end get_num_users_to_convert()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	protected function update_num_users_to_convert() {
+		$retval = $this->run_sql("SELECT internal_data_set_value('users_to_convert', (select count(*) FROM user_table WHERE length(password) != 32))");
+		return($retval);
+	}//end update_num_users_to_convert()
 	//=========================================================================
 	
 	

@@ -13,11 +13,12 @@
  */
 ##
 
-include_once("site_config.php");
-include_once("globalFunctions.php");
+require_once(dirname(__FILE__) ."/site_config.php");
+require_once(dirname(__FILE__) ."/globalFunctions.php");
+require_once(dirname(__FILE__) ."/upgradeClass.php");
 
 
-class Session{
+class Session extends upgrade {
 
 	var $db;
 	var $uid;
@@ -688,15 +689,30 @@ class Session{
 			$resultSet = $this->db->farray_fieldnames();
 			$this->logUid = $resultSet['id'];
 			
-			if(md5($password .'_'. $resultSet['contact_id']) == $resultSet['password']) {
-				//good password.  Good.
-				$retval = 1;
-				$this->authInfo = $resultSet;
-				unset($this->authInfo['password']);
+			//check if we should use an old version of the authentication...
+			if(strlen($resultSet['password']) == 32) {
+				if(md5($password .'_'. $resultSet['contact_id']) == $resultSet['password']) {
+					//good password.  Good.
+					$retval = 1;
+					$this->authInfo = $resultSet;
+					unset($this->authInfo['password']);
+				}
+				else {
+					//bad password...
+					$retval = 0;
+				}
 			}
 			else {
-				//bad password...
-				$retval = 0;
+				//crap.  Use the old method...
+				if(encrypt($password, $password) == $resultSet['password']) {
+					//sweet.  Convert their password!
+					$userObj = new userClass($this->db, $this->logUid);
+					$userObj->bypassAuthCheck = TRUE;
+					$retval = $userObj->change_password($password, $password, $password);
+				}
+				else {
+					$retval = 0;
+				}
 			}
 		}
 		

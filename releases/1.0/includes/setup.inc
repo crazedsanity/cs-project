@@ -19,6 +19,7 @@
 require_once(dirname(__FILE__) ."/../lib/cs-content/cs_phpDB.php");
 require_once(dirname(__FILE__) .'/../lib/simpletest/unit_tester.php');
 require_once(dirname(__FILE__) .'/../lib/simpletest/reporter.php');
+require_once(dirname(__FILE__) .'/../lib/upgradeClass.php');
 
 if(!is_numeric($_SESSION['setup']['lastStep'])) {
 	$_SESSION['setup']['lastStep'] = 1;

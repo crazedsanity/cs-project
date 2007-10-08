@@ -1485,6 +1485,13 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$contentType = "html";
 		}
 		
+		//in order to parse special BBCode, gotta create a lot of objects.
+		$db = new cs_phpDB;
+		$db->connect(get_config_db_params());
+		$proj = new projectClass($db);
+		$help = new helpdeskClass($db);
+		$bbCodeParser = new bbCodeParser($proj, $help);
+		
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
@@ -1499,7 +1506,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 				$mail->ContentType = "text/html";
 				$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
 				$mail->WordWrap = 75;
-				$mail->Body = $body;
+				$mail->Body = $bbCodeParser->parseString($body);
 				if(!$mail->Send()) {
 					throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
 				}
@@ -1515,7 +1522,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$mail->ContentType = "text/html";
 			$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
 			$mail->WordWrap = 75;
-			$mail->Body = $body;
+			$mail->Body = $bbCodeParser->parseString($body);
 			if(!$mail->Send()) {
 				throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
 			}

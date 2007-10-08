@@ -139,8 +139,7 @@ class helpdeskClass extends mainRecord {
 	
 	//================================================================================================
 	/**
-	 * A simple wrapper for update_record()... this is where the appendage to the remark should
-	 * occur...
+	 * Create a remark on the given issue.
 	 * 
 	 * @param $helpdeskId			(int) ID to remark on.
 	 * @param $remark			(str) Remark to add...
@@ -251,45 +250,8 @@ class helpdeskClass extends mainRecord {
 				
 				//only send an email if the update succeeded.
 				if($retval == 1) {
-					//send the submitter an email		
-					$parseArr = $this->get_record($helpdeskId);
-					$emailTemplate = html_file_to_string("email/helpdesk-solve.tmpl");
-					
-					//Parse-in the previous comments....
-					//TODO: make this part of a different system, or something...
-					$previousCommentsRow = "\n\n<!-- BEGIN issueNotes -->\n<div style=\"border-top:dotted #000 1px;\">" .
-							"\n%%solutionIndicator%% <u>" .
-							"[#%%note_id%%] <b>%%subject%%</b> (%%fname%% @ %%created%%)\n</u></div> " .
-							"<pre>%%body%%</pre><!-- END  -->\n\n";
-					$allComments = $parseArr['notes'];
-					unset($parseArr['notes']);
-					$myRow = "";
-					if(is_array($allComments) && count($allComments)) {
-						foreach($allComments as $noteId=>$data) {
-							$data['solutionIndicator'] = "";
-							if($data['is_solution'] == 't') {
-								$data['solutionIndicator'] = '[X]';
-							}
-							$data['body'] = cleanString($data['body'], 'htmlentity_plus_brackets');
-							$myRow .= mini_parser($previousCommentsRow, $data, '%%', '%%');
-						}
-					}
-					$parseArr['remark'] = $myRow;
-					
-					$recipientsArr = array();
-					if($_SESSION['login_email'] != $parseArr['email']) {
-						$recipientsArr[] = $_SESSION['login_email'];
-					}
-					$recipientsArr[] = $parseArr['email'];
-					
 					//send the submitter a notification.
-					$sendEmailRes = send_email($recipientsArr, "Helpdesk Issue #$helpdeskId was Solved", $emailTemplate, $parseArr);
-					
-					$notifySubject = "[ALERT] Helpdesk Issue #$helpdeskId was Solved by ". $_SESSION['login_loginname'];
-					$sendEmailRes .= ", ". send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $notifySubject, $emailTemplate, $parseArr);
-					
-					$this->logsObj->log_by_class("Solve notice sent to: ". $sendEmailRes, 'information', NULL, $this->recordTypeId, $helpdeskId);
-					$this->logsObj->log_by_class("Solved issue #". $helpdeskId .": ". $parseArr['name'], 'report', NULL, $this->recordTypeId, $helpdeskId);
+					$this->logsObj->log_by_class("Solved issue #". $helpdeskId, 'report', NULL, $this->recordTypeId, $helpdeskId);
 				}
 				else {
 					//log the problem.
