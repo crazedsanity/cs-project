@@ -38,5 +38,8 @@
 		<v1.0.0-BETA1>
 			<target_version>1.0.0-BETA2</target_version>
 		</v1.0.0-BETA1>
+		<v1.0.0-BETA2>
+			<target_version>1.0.0-BETA3</target_version>
+		</v1.0.0-BETA2>
 	</matching>
 </upgrade>
