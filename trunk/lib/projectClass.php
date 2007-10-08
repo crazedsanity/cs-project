@@ -540,7 +540,7 @@ class projectClass extends mainRecord {
 								$string = '<b>'. $name .'</b>';
 							}
 							else {
-								$string = '<a href="/content/project/view/?ID=' . $id . '">' . $name . '</a>';
+								$string = '<a href="http://'. PROJECT_URL .'/content/project/view/?ID=' . $id . '">' . $name . '</a>';
 							}
 							$retval = create_list($retval, $string, " / ");
 						}
