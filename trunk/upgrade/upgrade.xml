@@ -47,5 +47,8 @@
 			<class_name>upgradeTo1_0_0_BETA4</class_name>
 			<call_method>run_upgrade</call_method>
 		</v1.0.0-BETA3>
+		<v1.0.0-BETA4>
+			<target_version>1.0.0</target_version>
+		</v1.0.0-BETA4>
 	</matching>
 </upgrade>
