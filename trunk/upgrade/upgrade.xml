@@ -23,5 +23,8 @@
 		<v1.0.1>
 			<target_version>1.0.2</target_version>
 		</v1.0.1>
+		<v1.0.2>
+			<target_version>1.0.3</target_version>
+		</v1.0.2>
 	</matching>
 </upgrade>
