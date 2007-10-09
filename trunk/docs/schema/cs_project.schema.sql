@@ -3,8 +3,10 @@
 --
 
 SET client_encoding = 'SQL_ASCII';
+SET standard_conforming_strings = off;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+SET escape_string_warning = off;
 
 --
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
@@ -13,35 +15,26 @@ SET client_min_messages = warning;
 COMMENT ON SCHEMA public IS 'Standard public schema';
 
 
+--
+-- Name: plpgsql; Type: PROCEDURAL LANGUAGE; Schema: -; Owner: postgres
+--
+
+CREATE PROCEDURAL LANGUAGE plpgsql;
+
+
 SET search_path = public, pg_catalog;
 
 --
--- Name: plpgsql_call_handler(); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: dblink_pkey_results; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
-    AS '$libdir/plpgsql', 'plpgsql_call_handler'
-    LANGUAGE c;
+CREATE TYPE dblink_pkey_results AS (
+	"position" integer,
+	colname text
+);
 
 
-ALTER FUNCTION public.plpgsql_call_handler() OWNER TO postgres;
-
---
--- Name: plpgsql_validator(oid); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION plpgsql_validator(oid) RETURNS void
-    AS '$libdir/plpgsql', 'plpgsql_validator'
-    LANGUAGE c;
-
-
-ALTER FUNCTION public.plpgsql_validator(oid) OWNER TO postgres;
-
---
--- Name: plpgsql; Type: PROCEDURAL LANGUAGE; Schema: public; Owner: 
---
-
-CREATE TRUSTED PROCEDURAL LANGUAGE plpgsql HANDLER plpgsql_call_handler VALIDATOR plpgsql_validator;
+ALTER TYPE public.dblink_pkey_results OWNER TO postgres;
 
 --
 -- Name: attribute_get_create(text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -117,7 +110,7 @@ DECLARE
 	
 	-- internal vars.
 	x_attributeId integer;
-	x_record contact_attribute_link_table%ROWTYPE;
+	x_record RECORD;
 	x_counter integer DEFAULT 0;
 	x_array TEXT[];
 	
@@ -263,7 +256,7 @@ DECLARE
 	
 	-- internal vars.
 	x_attributeId integer;
-	x_contactAttributeData attribute_table%ROWTYPE;
+	x_contactAttributeData RECORD;
 	x_numRows integer DEFAULT 0;
 	x_retval integer DEFAULT 0;
 BEGIN
@@ -296,7 +289,6 @@ $_$
 
 
 ALTER FUNCTION public.contact_update_attribute(integer, text, text) OWNER TO postgres;
-
 
 --
 -- Name: internal_data_get_value(text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -371,6 +363,28 @@ $_$
 ALTER FUNCTION public.internal_data_set_value(text, text) OWNER TO postgres;
 
 --
+-- Name: plpgsql_call_handler(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
+    AS '$libdir/plpgsql', 'plpgsql_call_handler'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.plpgsql_call_handler() OWNER TO postgres;
+
+--
+-- Name: plpgsql_validator(oid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_validator(oid) RETURNS void
+    AS '$libdir/plpgsql', 'plpgsql_validator'
+    LANGUAGE c;
+
+
+ALTER FUNCTION public.plpgsql_validator(oid) OWNER TO postgres;
+
+--
 -- Name: record_get_num_children(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -443,6 +457,46 @@ $_$
 
 ALTER FUNCTION public.record_id_from_public_id(integer, boolean) OWNER TO postgres;
 
+--
+-- Name: replace(character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION "replace"(character varying, character varying, character varying) RETURNS character varying
+    AS $_$ 
+DECLARE 
+subject ALIAS for $1; 
+match ALIAS for $2; 
+replace ALIAS for $3; 
+r varchar; 
+matchpos int; 
+remain varchar; 
+rempos int; 
+BEGIN 
+
+if (char_length(match) = 0) then 
+raise exception 'replace function was called with null match string. This is not permitted.'; 
+end if; 
+
+remain := subject; 
+r := ''; 
+matchpos := strpos(subject,match); 
+WHILE (matchpos > 0 ) LOOP 
+r := r || substring(remain, 0,matchpos) || replace; 
+rempos := matchpos + char_length(match); 
+remain := substring(remain,rempos); 
+matchpos := strpos(remain,match); 
+END LOOP; 
+
+r := r || remain; 
+return r; 
+
+END; 
+
+$_$
+    LANGUAGE plpgsql;
+
+
+ALTER FUNCTION public."replace"(character varying, character varying, character varying) OWNER TO postgres;
 
 --
 -- Name: tag_add(integer, text); Type: FUNCTION; Schema: public; Owner: postgres
@@ -562,7 +616,7 @@ SET default_with_oids = true;
 --
 
 CREATE TABLE attribute_table (
-    attribute_id serial NOT NULL,
+    attribute_id integer NOT NULL,
     name text NOT NULL,
     clean_as text DEFAULT 'sql'::text NOT NULL
 );
@@ -571,11 +625,31 @@ CREATE TABLE attribute_table (
 ALTER TABLE public.attribute_table OWNER TO postgres;
 
 --
+-- Name: attribute_table_attribute_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE attribute_table_attribute_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.attribute_table_attribute_id_seq OWNER TO postgres;
+
+--
+-- Name: attribute_table_attribute_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE attribute_table_attribute_id_seq OWNED BY attribute_table.attribute_id;
+
+
+--
 -- Name: contact_attribute_link_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE contact_attribute_link_table (
-    contact_attribute_link_id serial NOT NULL,
+    contact_attribute_link_id integer NOT NULL,
     contact_id integer NOT NULL,
     attribute_id integer NOT NULL,
     attribute_value text
@@ -585,11 +659,31 @@ CREATE TABLE contact_attribute_link_table (
 ALTER TABLE public.contact_attribute_link_table OWNER TO postgres;
 
 --
+-- Name: contact_attribute_link_table_contact_attribute_link_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE contact_attribute_link_table_contact_attribute_link_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.contact_attribute_link_table_contact_attribute_link_id_seq OWNER TO postgres;
+
+--
+-- Name: contact_attribute_link_table_contact_attribute_link_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE contact_attribute_link_table_contact_attribute_link_id_seq OWNED BY contact_attribute_link_table.contact_attribute_link_id;
+
+
+--
 -- Name: contact_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE contact_table (
-    contact_id serial NOT NULL,
+    contact_id integer NOT NULL,
     fname text NOT NULL,
     lname text NOT NULL
 );
@@ -598,11 +692,31 @@ CREATE TABLE contact_table (
 ALTER TABLE public.contact_table OWNER TO postgres;
 
 --
+-- Name: contact_table_contact_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE contact_table_contact_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.contact_table_contact_id_seq OWNER TO postgres;
+
+--
+-- Name: contact_table_contact_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE contact_table_contact_id_seq OWNED BY contact_table.contact_id;
+
+
+--
 -- Name: group_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE group_table (
-    group_id serial NOT NULL,
+    group_id integer NOT NULL,
     name text NOT NULL,
     short_name character varying(15) NOT NULL,
     leader_uid integer NOT NULL
@@ -612,11 +726,31 @@ CREATE TABLE group_table (
 ALTER TABLE public.group_table OWNER TO postgres;
 
 --
+-- Name: group_table_group_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE group_table_group_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.group_table_group_id_seq OWNER TO postgres;
+
+--
+-- Name: group_table_group_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE group_table_group_id_seq OWNED BY group_table.group_id;
+
+
+--
 -- Name: internal_data_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE internal_data_table (
-    internal_data_id serial NOT NULL,
+    internal_data_id integer NOT NULL,
     internal_name text NOT NULL,
     internal_value text NOT NULL
 );
@@ -625,11 +759,31 @@ CREATE TABLE internal_data_table (
 ALTER TABLE public.internal_data_table OWNER TO postgres;
 
 --
+-- Name: internal_data_table_internal_data_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE internal_data_table_internal_data_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.internal_data_table_internal_data_id_seq OWNER TO postgres;
+
+--
+-- Name: internal_data_table_internal_data_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE internal_data_table_internal_data_id_seq OWNED BY internal_data_table.internal_data_id;
+
+
+--
 -- Name: log_category_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE log_category_table (
-    log_category_id serial NOT NULL,
+    log_category_id integer NOT NULL,
     name text NOT NULL
 );
 
@@ -637,11 +791,31 @@ CREATE TABLE log_category_table (
 ALTER TABLE public.log_category_table OWNER TO postgres;
 
 --
+-- Name: log_category_table_log_category_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE log_category_table_log_category_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_category_table_log_category_id_seq OWNER TO postgres;
+
+--
+-- Name: log_category_table_log_category_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE log_category_table_log_category_id_seq OWNED BY log_category_table.log_category_id;
+
+
+--
 -- Name: log_class_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE log_class_table (
-    log_class_id serial NOT NULL,
+    log_class_id integer NOT NULL,
     name text NOT NULL
 );
 
@@ -649,11 +823,31 @@ CREATE TABLE log_class_table (
 ALTER TABLE public.log_class_table OWNER TO postgres;
 
 --
+-- Name: log_class_table_log_class_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE log_class_table_log_class_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_class_table_log_class_id_seq OWNER TO postgres;
+
+--
+-- Name: log_class_table_log_class_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE log_class_table_log_class_id_seq OWNED BY log_class_table.log_class_id;
+
+
+--
 -- Name: log_estimate_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE log_estimate_table (
-    log_estimate_id serial NOT NULL,
+    log_estimate_id integer NOT NULL,
     creation timestamp with time zone DEFAULT now() NOT NULL,
     uid integer NOT NULL,
     todo_id integer NOT NULL,
@@ -665,11 +859,31 @@ CREATE TABLE log_estimate_table (
 ALTER TABLE public.log_estimate_table OWNER TO postgres;
 
 --
+-- Name: log_estimate_table_log_estimate_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE log_estimate_table_log_estimate_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_estimate_table_log_estimate_id_seq OWNER TO postgres;
+
+--
+-- Name: log_estimate_table_log_estimate_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE log_estimate_table_log_estimate_id_seq OWNED BY log_estimate_table.log_estimate_id;
+
+
+--
 -- Name: log_event_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE log_event_table (
-    log_event_id serial NOT NULL,
+    log_event_id integer NOT NULL,
     log_class_id integer NOT NULL,
     log_category_id integer NOT NULL,
     description text NOT NULL
@@ -679,11 +893,31 @@ CREATE TABLE log_event_table (
 ALTER TABLE public.log_event_table OWNER TO postgres;
 
 --
+-- Name: log_event_table_log_event_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE log_event_table_log_event_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_event_table_log_event_id_seq OWNER TO postgres;
+
+--
+-- Name: log_event_table_log_event_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE log_event_table_log_event_id_seq OWNED BY log_event_table.log_event_id;
+
+
+--
 -- Name: log_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE log_table (
-    log_id serial NOT NULL,
+    log_id integer NOT NULL,
     creation timestamp with time zone DEFAULT now() NOT NULL,
     log_event_id integer NOT NULL,
     group_id integer,
@@ -698,11 +932,31 @@ CREATE TABLE log_table (
 ALTER TABLE public.log_table OWNER TO postgres;
 
 --
+-- Name: log_table_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE log_table_log_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_table_log_id_seq OWNER TO postgres;
+
+--
+-- Name: log_table_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE log_table_log_id_seq OWNED BY log_table.log_id;
+
+
+--
 -- Name: note_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE note_table (
-    note_id serial NOT NULL,
+    note_id integer NOT NULL,
     subject text NOT NULL,
     body text NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
@@ -716,11 +970,31 @@ CREATE TABLE note_table (
 ALTER TABLE public.note_table OWNER TO postgres;
 
 --
+-- Name: note_table_note_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE note_table_note_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.note_table_note_id_seq OWNER TO postgres;
+
+--
+-- Name: note_table_note_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE note_table_note_id_seq OWNED BY note_table.note_id;
+
+
+--
 -- Name: pref_option_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE pref_option_table (
-    pref_option_id serial NOT NULL,
+    pref_option_id integer NOT NULL,
     pref_type_id integer NOT NULL,
     name text NOT NULL,
     effective_value text
@@ -730,11 +1004,31 @@ CREATE TABLE pref_option_table (
 ALTER TABLE public.pref_option_table OWNER TO postgres;
 
 --
+-- Name: pref_option_table_pref_option_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE pref_option_table_pref_option_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.pref_option_table_pref_option_id_seq OWNER TO postgres;
+
+--
+-- Name: pref_option_table_pref_option_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE pref_option_table_pref_option_id_seq OWNED BY pref_option_table.pref_option_id;
+
+
+--
 -- Name: pref_type_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE pref_type_table (
-    pref_type_id serial NOT NULL,
+    pref_type_id integer NOT NULL,
     name text NOT NULL,
     default_value text,
     display_name text NOT NULL,
@@ -745,11 +1039,31 @@ CREATE TABLE pref_type_table (
 ALTER TABLE public.pref_type_table OWNER TO postgres;
 
 --
+-- Name: pref_type_table_pref_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE pref_type_table_pref_type_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.pref_type_table_pref_type_id_seq OWNER TO postgres;
+
+--
+-- Name: pref_type_table_pref_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE pref_type_table_pref_type_id_seq OWNED BY pref_type_table.pref_type_id;
+
+
+--
 -- Name: record_contact_link_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE record_contact_link_table (
-    record_contact_link_id serial NOT NULL,
+    record_contact_link_id integer NOT NULL,
     record_id integer NOT NULL,
     contact_id integer NOT NULL
 );
@@ -758,13 +1072,33 @@ CREATE TABLE record_contact_link_table (
 ALTER TABLE public.record_contact_link_table OWNER TO postgres;
 
 --
+-- Name: record_contact_link_table_record_contact_link_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE record_contact_link_table_record_contact_link_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.record_contact_link_table_record_contact_link_id_seq OWNER TO postgres;
+
+--
+-- Name: record_contact_link_table_record_contact_link_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE record_contact_link_table_record_contact_link_id_seq OWNED BY record_contact_link_table.record_contact_link_id;
+
+
+--
 -- Name: record_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE record_table (
-    record_id serial NOT NULL,
-    public_id integer DEFAULT currval('record_table_record_id_seq'::text) NOT NULL,
-    ancestry text DEFAULT currval('record_table_record_id_seq'::text) NOT NULL,
+    record_id integer NOT NULL,
+    public_id integer DEFAULT currval(('record_table_record_id_seq'::text)::regclass) NOT NULL,
+    ancestry text DEFAULT currval(('record_table_record_id_seq'::text)::regclass) NOT NULL,
     ancestry_level smallint DEFAULT 0 NOT NULL,
     group_id integer,
     creator_contact_id integer,
@@ -785,17 +1119,57 @@ CREATE TABLE record_table (
 ALTER TABLE public.record_table OWNER TO postgres;
 
 --
+-- Name: record_table_record_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE record_table_record_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.record_table_record_id_seq OWNER TO postgres;
+
+--
+-- Name: record_table_record_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE record_table_record_id_seq OWNED BY record_table.record_id;
+
+
+--
 -- Name: record_type_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE record_type_table (
-    record_type_id serial NOT NULL,
+    record_type_id integer NOT NULL,
     name text NOT NULL,
     module text NOT NULL
 );
 
 
 ALTER TABLE public.record_type_table OWNER TO postgres;
+
+--
+-- Name: record_type_table_record_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE record_type_table_record_type_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.record_type_table_record_type_id_seq OWNER TO postgres;
+
+--
+-- Name: record_type_table_record_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE record_type_table_record_type_id_seq OWNED BY record_type_table.record_type_id;
+
 
 --
 -- Name: session_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -844,7 +1218,7 @@ ALTER TABLE public.special__project_public_id_seq OWNER TO postgres;
 --
 
 CREATE TABLE status_table (
-    status_id serial NOT NULL,
+    status_id integer NOT NULL,
     name character varying(50) NOT NULL,
     description text NOT NULL
 );
@@ -853,11 +1227,31 @@ CREATE TABLE status_table (
 ALTER TABLE public.status_table OWNER TO postgres;
 
 --
+-- Name: status_table_status_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE status_table_status_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.status_table_status_id_seq OWNER TO postgres;
+
+--
+-- Name: status_table_status_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE status_table_status_id_seq OWNED BY status_table.status_id;
+
+
+--
 -- Name: tag_name_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE tag_name_table (
-    tag_name_id serial NOT NULL,
+    tag_name_id integer NOT NULL,
     name text NOT NULL
 );
 
@@ -865,11 +1259,31 @@ CREATE TABLE tag_name_table (
 ALTER TABLE public.tag_name_table OWNER TO postgres;
 
 --
+-- Name: tag_name_table_tag_name_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE tag_name_table_tag_name_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tag_name_table_tag_name_id_seq OWNER TO postgres;
+
+--
+-- Name: tag_name_table_tag_name_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE tag_name_table_tag_name_id_seq OWNED BY tag_name_table.tag_name_id;
+
+
+--
 -- Name: tag_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE tag_table (
-    tag_id serial NOT NULL,
+    tag_id integer NOT NULL,
     tag_name_id integer NOT NULL,
     record_id integer NOT NULL,
     "position" smallint DEFAULT 1 NOT NULL
@@ -879,11 +1293,31 @@ CREATE TABLE tag_table (
 ALTER TABLE public.tag_table OWNER TO postgres;
 
 --
+-- Name: tag_table_tag_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE tag_table_tag_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tag_table_tag_id_seq OWNER TO postgres;
+
+--
+-- Name: tag_table_tag_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE tag_table_tag_id_seq OWNED BY tag_table.tag_id;
+
+
+--
 -- Name: todo_comment_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE todo_comment_table (
-    todo_comment_id serial NOT NULL,
+    todo_comment_id integer NOT NULL,
     todo_id integer NOT NULL,
     creator_contact_id integer NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
@@ -896,11 +1330,31 @@ CREATE TABLE todo_comment_table (
 ALTER TABLE public.todo_comment_table OWNER TO postgres;
 
 --
+-- Name: todo_comment_table_todo_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE todo_comment_table_todo_comment_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.todo_comment_table_todo_comment_id_seq OWNER TO postgres;
+
+--
+-- Name: todo_comment_table_todo_comment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE todo_comment_table_todo_comment_id_seq OWNED BY todo_comment_table.todo_comment_id;
+
+
+--
 -- Name: todo_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE todo_table (
-    todo_id serial NOT NULL,
+    todo_id integer NOT NULL,
     creator_contact_id integer NOT NULL,
     name text NOT NULL,
     body text NOT NULL,
@@ -922,11 +1376,31 @@ CREATE TABLE todo_table (
 ALTER TABLE public.todo_table OWNER TO postgres;
 
 --
+-- Name: todo_table_todo_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE todo_table_todo_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.todo_table_todo_id_seq OWNER TO postgres;
+
+--
+-- Name: todo_table_todo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE todo_table_todo_id_seq OWNED BY todo_table.todo_id;
+
+
+--
 -- Name: user_group_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE user_group_table (
-    user_group_id serial NOT NULL,
+    user_group_id integer NOT NULL,
     uid integer NOT NULL,
     group_id integer NOT NULL
 );
@@ -935,11 +1409,31 @@ CREATE TABLE user_group_table (
 ALTER TABLE public.user_group_table OWNER TO postgres;
 
 --
+-- Name: user_group_table_user_group_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE user_group_table_user_group_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_group_table_user_group_id_seq OWNER TO postgres;
+
+--
+-- Name: user_group_table_user_group_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE user_group_table_user_group_id_seq OWNED BY user_group_table.user_group_id;
+
+
+--
 -- Name: user_pref_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE user_pref_table (
-    user_pref_id serial NOT NULL,
+    user_pref_id integer NOT NULL,
     uid integer NOT NULL,
     pref_option_id integer NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
@@ -950,21 +1444,229 @@ CREATE TABLE user_pref_table (
 ALTER TABLE public.user_pref_table OWNER TO postgres;
 
 --
+-- Name: user_pref_table_user_pref_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE user_pref_table_user_pref_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_pref_table_user_pref_id_seq OWNER TO postgres;
+
+--
+-- Name: user_pref_table_user_pref_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE user_pref_table_user_pref_id_seq OWNED BY user_pref_table.user_pref_id;
+
+
+--
 -- Name: user_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE user_table (
-    uid serial NOT NULL,
+    uid integer NOT NULL,
     username character varying(40) NOT NULL,
     "password" character varying(32),
     is_admin boolean DEFAULT false NOT NULL,
     is_active boolean DEFAULT true NOT NULL,
-    group_id integer NOT NULL,
+    group_id integer DEFAULT 1 NOT NULL,
     contact_id integer NOT NULL
 );
 
 
 ALTER TABLE public.user_table OWNER TO postgres;
+
+--
+-- Name: user_table_uid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE user_table_uid_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_table_uid_seq OWNER TO postgres;
+
+--
+-- Name: user_table_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE user_table_uid_seq OWNED BY user_table.uid;
+
+
+--
+-- Name: attribute_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE attribute_table ALTER COLUMN attribute_id SET DEFAULT nextval('attribute_table_attribute_id_seq'::regclass);
+
+
+--
+-- Name: contact_attribute_link_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE contact_attribute_link_table ALTER COLUMN contact_attribute_link_id SET DEFAULT nextval('contact_attribute_link_table_contact_attribute_link_id_seq'::regclass);
+
+
+--
+-- Name: contact_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE contact_table ALTER COLUMN contact_id SET DEFAULT nextval('contact_table_contact_id_seq'::regclass);
+
+
+--
+-- Name: group_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE group_table ALTER COLUMN group_id SET DEFAULT nextval('group_table_group_id_seq'::regclass);
+
+
+--
+-- Name: internal_data_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE internal_data_table ALTER COLUMN internal_data_id SET DEFAULT nextval('internal_data_table_internal_data_id_seq'::regclass);
+
+
+--
+-- Name: log_category_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE log_category_table ALTER COLUMN log_category_id SET DEFAULT nextval('log_category_table_log_category_id_seq'::regclass);
+
+
+--
+-- Name: log_class_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE log_class_table ALTER COLUMN log_class_id SET DEFAULT nextval('log_class_table_log_class_id_seq'::regclass);
+
+
+--
+-- Name: log_estimate_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE log_estimate_table ALTER COLUMN log_estimate_id SET DEFAULT nextval('log_estimate_table_log_estimate_id_seq'::regclass);
+
+
+--
+-- Name: log_event_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE log_event_table ALTER COLUMN log_event_id SET DEFAULT nextval('log_event_table_log_event_id_seq'::regclass);
+
+
+--
+-- Name: log_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE log_table ALTER COLUMN log_id SET DEFAULT nextval('log_table_log_id_seq'::regclass);
+
+
+--
+-- Name: note_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE note_table ALTER COLUMN note_id SET DEFAULT nextval('note_table_note_id_seq'::regclass);
+
+
+--
+-- Name: pref_option_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE pref_option_table ALTER COLUMN pref_option_id SET DEFAULT nextval('pref_option_table_pref_option_id_seq'::regclass);
+
+
+--
+-- Name: pref_type_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE pref_type_table ALTER COLUMN pref_type_id SET DEFAULT nextval('pref_type_table_pref_type_id_seq'::regclass);
+
+
+--
+-- Name: record_contact_link_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE record_contact_link_table ALTER COLUMN record_contact_link_id SET DEFAULT nextval('record_contact_link_table_record_contact_link_id_seq'::regclass);
+
+
+--
+-- Name: record_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE record_table ALTER COLUMN record_id SET DEFAULT nextval('record_table_record_id_seq'::regclass);
+
+
+--
+-- Name: record_type_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE record_type_table ALTER COLUMN record_type_id SET DEFAULT nextval('record_type_table_record_type_id_seq'::regclass);
+
+
+--
+-- Name: status_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE status_table ALTER COLUMN status_id SET DEFAULT nextval('status_table_status_id_seq'::regclass);
+
+
+--
+-- Name: tag_name_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE tag_name_table ALTER COLUMN tag_name_id SET DEFAULT nextval('tag_name_table_tag_name_id_seq'::regclass);
+
+
+--
+-- Name: tag_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE tag_table ALTER COLUMN tag_id SET DEFAULT nextval('tag_table_tag_id_seq'::regclass);
+
+
+--
+-- Name: todo_comment_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE todo_comment_table ALTER COLUMN todo_comment_id SET DEFAULT nextval('todo_comment_table_todo_comment_id_seq'::regclass);
+
+
+--
+-- Name: todo_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE todo_table ALTER COLUMN todo_id SET DEFAULT nextval('todo_table_todo_id_seq'::regclass);
+
+
+--
+-- Name: user_group_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE user_group_table ALTER COLUMN user_group_id SET DEFAULT nextval('user_group_table_user_group_id_seq'::regclass);
+
+
+--
+-- Name: user_pref_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE user_pref_table ALTER COLUMN user_pref_id SET DEFAULT nextval('user_pref_table_user_pref_id_seq'::regclass);
+
+
+--
+-- Name: uid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE user_table ALTER COLUMN uid SET DEFAULT nextval('user_table_uid_seq'::regclass);
+
 
 --
 -- Name: attribute_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -974,8 +1676,6 @@ ALTER TABLE ONLY attribute_table
     ADD CONSTRAINT attribute_table_pkey PRIMARY KEY (attribute_id);
 
 
-ALTER INDEX public.attribute_table_pkey OWNER TO postgres;
-
 --
 -- Name: contact_attribute_link_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -983,8 +1683,6 @@ ALTER INDEX public.attribute_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY contact_attribute_link_table
     ADD CONSTRAINT contact_attribute_link_table_pkey PRIMARY KEY (contact_attribute_link_id);
 
-
-ALTER INDEX public.contact_attribute_link_table_pkey OWNER TO postgres;
 
 --
 -- Name: contact_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -994,8 +1692,6 @@ ALTER TABLE ONLY contact_table
     ADD CONSTRAINT contact_table_pkey PRIMARY KEY (contact_id);
 
 
-ALTER INDEX public.contact_table_pkey OWNER TO postgres;
-
 --
 -- Name: group_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1003,8 +1699,6 @@ ALTER INDEX public.contact_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY group_table
     ADD CONSTRAINT group_table_pkey PRIMARY KEY (group_id);
 
-
-ALTER INDEX public.group_table_pkey OWNER TO postgres;
 
 --
 -- Name: internal_data_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1014,8 +1708,6 @@ ALTER TABLE ONLY internal_data_table
     ADD CONSTRAINT internal_data_table_pkey PRIMARY KEY (internal_data_id);
 
 
-ALTER INDEX public.internal_data_table_pkey OWNER TO postgres;
-
 --
 -- Name: log_category_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1023,8 +1715,6 @@ ALTER INDEX public.internal_data_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY log_category_table
     ADD CONSTRAINT log_category_table_pkey PRIMARY KEY (log_category_id);
 
-
-ALTER INDEX public.log_category_table_pkey OWNER TO postgres;
 
 --
 -- Name: log_class_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1034,8 +1724,6 @@ ALTER TABLE ONLY log_class_table
     ADD CONSTRAINT log_class_table_pkey PRIMARY KEY (log_class_id);
 
 
-ALTER INDEX public.log_class_table_pkey OWNER TO postgres;
-
 --
 -- Name: log_estimate_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1043,8 +1731,6 @@ ALTER INDEX public.log_class_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY log_estimate_table
     ADD CONSTRAINT log_estimate_table_pkey PRIMARY KEY (log_estimate_id);
 
-
-ALTER INDEX public.log_estimate_table_pkey OWNER TO postgres;
 
 --
 -- Name: log_event_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1054,8 +1740,6 @@ ALTER TABLE ONLY log_event_table
     ADD CONSTRAINT log_event_table_pkey PRIMARY KEY (log_event_id);
 
 
-ALTER INDEX public.log_event_table_pkey OWNER TO postgres;
-
 --
 -- Name: log_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1063,8 +1747,6 @@ ALTER INDEX public.log_event_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY log_table
     ADD CONSTRAINT log_table_pkey PRIMARY KEY (log_id);
 
-
-ALTER INDEX public.log_table_pkey OWNER TO postgres;
 
 --
 -- Name: note_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1074,8 +1756,6 @@ ALTER TABLE ONLY note_table
     ADD CONSTRAINT note_table_pkey PRIMARY KEY (note_id);
 
 
-ALTER INDEX public.note_table_pkey OWNER TO postgres;
-
 --
 -- Name: pref_option_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1083,8 +1763,6 @@ ALTER INDEX public.note_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY pref_option_table
     ADD CONSTRAINT pref_option_table_pkey PRIMARY KEY (pref_option_id);
 
-
-ALTER INDEX public.pref_option_table_pkey OWNER TO postgres;
 
 --
 -- Name: pref_type_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1094,8 +1772,6 @@ ALTER TABLE ONLY pref_type_table
     ADD CONSTRAINT pref_type_table_pkey PRIMARY KEY (pref_type_id);
 
 
-ALTER INDEX public.pref_type_table_pkey OWNER TO postgres;
-
 --
 -- Name: record_contact_link_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1103,8 +1779,6 @@ ALTER INDEX public.pref_type_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY record_contact_link_table
     ADD CONSTRAINT record_contact_link_table_pkey PRIMARY KEY (record_contact_link_id);
 
-
-ALTER INDEX public.record_contact_link_table_pkey OWNER TO postgres;
 
 --
 -- Name: record_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1114,8 +1788,6 @@ ALTER TABLE ONLY record_table
     ADD CONSTRAINT record_table_pkey PRIMARY KEY (record_id);
 
 
-ALTER INDEX public.record_table_pkey OWNER TO postgres;
-
 --
 -- Name: record_type_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1123,8 +1795,6 @@ ALTER INDEX public.record_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY record_type_table
     ADD CONSTRAINT record_type_table_pkey PRIMARY KEY (record_type_id);
 
-
-ALTER INDEX public.record_type_table_pkey OWNER TO postgres;
 
 --
 -- Name: session_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1134,8 +1804,6 @@ ALTER TABLE ONLY session_table
     ADD CONSTRAINT session_table_pkey PRIMARY KEY (session_id);
 
 
-ALTER INDEX public.session_table_pkey OWNER TO postgres;
-
 --
 -- Name: status_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1143,8 +1811,6 @@ ALTER INDEX public.session_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY status_table
     ADD CONSTRAINT status_table_pkey PRIMARY KEY (status_id);
 
-
-ALTER INDEX public.status_table_pkey OWNER TO postgres;
 
 --
 -- Name: tag_name_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1154,8 +1820,6 @@ ALTER TABLE ONLY tag_name_table
     ADD CONSTRAINT tag_name_table_pkey PRIMARY KEY (tag_name_id);
 
 
-ALTER INDEX public.tag_name_table_pkey OWNER TO postgres;
-
 --
 -- Name: tag_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1163,8 +1827,6 @@ ALTER INDEX public.tag_name_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY tag_table
     ADD CONSTRAINT tag_table_pkey PRIMARY KEY (tag_id);
 
-
-ALTER INDEX public.tag_table_pkey OWNER TO postgres;
 
 --
 -- Name: todo_comment_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1174,8 +1836,6 @@ ALTER TABLE ONLY todo_comment_table
     ADD CONSTRAINT todo_comment_table_pkey PRIMARY KEY (todo_comment_id);
 
 
-ALTER INDEX public.todo_comment_table_pkey OWNER TO postgres;
-
 --
 -- Name: todo_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1183,8 +1843,6 @@ ALTER INDEX public.todo_comment_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY todo_table
     ADD CONSTRAINT todo_table_pkey PRIMARY KEY (todo_id);
 
-
-ALTER INDEX public.todo_table_pkey OWNER TO postgres;
 
 --
 -- Name: user_group_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1194,8 +1852,6 @@ ALTER TABLE ONLY user_group_table
     ADD CONSTRAINT user_group_table_pkey PRIMARY KEY (user_group_id);
 
 
-ALTER INDEX public.user_group_table_pkey OWNER TO postgres;
-
 --
 -- Name: user_pref_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1203,8 +1859,6 @@ ALTER INDEX public.user_group_table_pkey OWNER TO postgres;
 ALTER TABLE ONLY user_pref_table
     ADD CONSTRAINT user_pref_table_pkey PRIMARY KEY (user_pref_id);
 
-
-ALTER INDEX public.user_pref_table_pkey OWNER TO postgres;
 
 --
 -- Name: user_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
@@ -1214,16 +1868,12 @@ ALTER TABLE ONLY user_table
     ADD CONSTRAINT user_table_pkey PRIMARY KEY (uid);
 
 
-ALTER INDEX public.user_table_pkey OWNER TO postgres;
-
 --
 -- Name: contact_attrbute_link_table_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE UNIQUE INDEX contact_attrbute_link_table_uidx ON contact_attribute_link_table USING btree (contact_id, attribute_id);
 
-
-ALTER INDEX public.contact_attrbute_link_table_uidx OWNER TO postgres;
 
 --
 -- Name: internal_data_table_internal_name_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
@@ -1232,16 +1882,12 @@ ALTER INDEX public.contact_attrbute_link_table_uidx OWNER TO postgres;
 CREATE UNIQUE INDEX internal_data_table_internal_name_uidx ON internal_data_table USING btree (internal_name);
 
 
-ALTER INDEX public.internal_data_table_internal_name_uidx OWNER TO postgres;
-
 --
 -- Name: log_class_name_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE UNIQUE INDEX log_class_name_uidx ON log_class_table USING btree (lower(name));
 
-
-ALTER INDEX public.log_class_name_uidx OWNER TO postgres;
 
 --
 -- Name: log_event__class_category__uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
@@ -1250,8 +1896,6 @@ ALTER INDEX public.log_class_name_uidx OWNER TO postgres;
 CREATE UNIQUE INDEX log_event__class_category__uidx ON log_event_table USING btree (log_class_id, log_category_id);
 
 
-ALTER INDEX public.log_event__class_category__uidx OWNER TO postgres;
-
 --
 -- Name: tag_name__uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -1259,16 +1903,12 @@ ALTER INDEX public.log_event__class_category__uidx OWNER TO postgres;
 CREATE UNIQUE INDEX tag_name__uidx ON tag_name_table USING btree (name);
 
 
-ALTER INDEX public.tag_name__uidx OWNER TO postgres;
-
 --
 -- Name: user_table_username_uidx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE UNIQUE INDEX user_table_username_uidx ON user_table USING btree (lower((username)::text));
 
-
-ALTER INDEX public.user_table_username_uidx OWNER TO postgres;
 
 --
 -- Name: contact_attribute_link_table_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -1291,7 +1931,7 @@ ALTER TABLE ONLY contact_attribute_link_table
 --
 
 ALTER TABLE ONLY group_table
-    ADD CONSTRAINT group_table_leader_uid_fkey FOREIGN KEY (leader_uid) REFERENCES user_table(uid);
+    ADD CONSTRAINT group_table_leader_uid_fkey FOREIGN KEY (leader_uid) REFERENCES user_table(uid) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -1539,7 +2179,7 @@ ALTER TABLE ONLY user_pref_table
 --
 
 ALTER TABLE ONLY user_table
-    ADD CONSTRAINT user_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
+    ADD CONSTRAINT user_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
