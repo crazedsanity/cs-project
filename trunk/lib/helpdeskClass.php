@@ -197,7 +197,8 @@ class helpdeskClass extends mainRecord {
 			
 			//okay, now send the email.  The function "send_email()" should be ensuring that all values in
 			//	the recipients array are valid, and there's no dups.
-			$sendEmailRes = send_email($recipientsArr, "Update to Helpdesk Issue #$helpdeskId", $emailTemplate, $parseArr);
+			$subject = "Update to Helpdesk Issue #". $helpdeskId ." -- ". $tmp['name'];
+			$sendEmailRes = send_email($recipientsArr, $subject, $emailTemplate, $parseArr);
 			
 			//log who we sent the emails to.
 			$details = 'Sent notification(s) of remark to: '. $sendEmailRes;
@@ -208,6 +209,7 @@ class helpdeskClass extends mainRecord {
 				if(strlen($_SESSION['login_username'])) {
 					$subject .= ' by '. $_SESSION['login_username'];
 				}
+				$subject .= " -- ". $tmp['name'];
 				$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
 				$details = 'Sent notifications of SOLUTION to: '. $sendEmailRes;
 				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
