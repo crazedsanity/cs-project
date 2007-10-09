@@ -709,6 +709,7 @@ class Session extends upgrade {
 					$userObj = new userClass($this->db, $this->logUid);
 					$userObj->bypassAuthCheck = TRUE;
 					$retval = $userObj->change_password($password, $password, $password);
+					$this->authInfo = $resultSet;
 				}
 				else {
 					$retval = 0;

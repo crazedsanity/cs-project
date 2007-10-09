@@ -21,7 +21,7 @@ function check_external_lib_versions() {
 	$retval = 0;
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'0.9.0'),
+		'contentSystem'		=> array('cs-content',		'0.9.1'),
 		'XMLParser'			=> array('cs-phpxml',		'0.5.3'),
 		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
 	);
