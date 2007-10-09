@@ -590,8 +590,16 @@ class mainRecord {
 			//now retrieve that record (make sure not to go through the parent class, 
 			//	as that might accidentally set the "is_helpdesk_issue" flag which would
 			//	not help as much as one might think).
+			$oldIsHelpdesk = $this->isHelpdeskIssue;
+			$this->isHelpdeskIssue = NULL;
 			$data = self::get_records(array('record_id' => $recordId));
-			$retval = $data[$this->lastRecordId];
+			if(is_array($data) && isset($data[$this->lastRecordId])) {
+				$retval = $data[$this->lastRecordId];
+			}
+			else {
+				throw new exception(__METHOD__ .": no data for ancestry (". $ancestryString .") with recordId=(". $recordId ."), or couldn't find lastRecordId (". $this->lastRecordId .")::: ". debug_print($data));
+			}
+			$this->isHelpdeskIssue = $oldIsHelpdesk;
 		}
 		else {
 			throw new exception(__METHOD__ .": invalid ancestry string (". $ancestryString .")");

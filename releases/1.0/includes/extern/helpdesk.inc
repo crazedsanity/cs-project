@@ -113,24 +113,19 @@ else
 		$htmlTitle = "View Issue #$helpdeskId";
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 		
+		$bbCodeParser = new bbCodeParser($proj, $proj->helpdeskObj);
+		
 		//show it's "access" properly..
 		$page->add_template_var("select_acc_". $helpdeskData['acc'], "selected");
 		
 		//convert the returned data into htmlentities so brackets show properly.
-		$helpdeskData['note'] = cleanString($helpdeskData['note'], "htmlspecial");
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlspecial");
-		$helpdeskData['remark'] = cleanString($helpdeskData['remark'], "htmlspecial");
 		$myNotes = $helpdeskData['notes'];
 		unset($helpdeskData['notes']);
 		
 		//make the wrapping SANE.
 		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);
-		$helpdeskData['note'] = wordwrap($helpdeskData['note'], FORMAT_WORDWRAP);	
-		$rowsToUse = count(explode("\n", $helpdeskData['note']));
-		if($rowsToUse < 5) {
-			$rowsToUse = 5;
-		}
-		$page->add_template_var("note_rows", $rowsToUse);
+		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject'],FALSE);
 		
 		//add everything to the page as a template var...
 		foreach($helpdeskData as $field=>$value) {
@@ -148,8 +143,8 @@ else
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = wordwrap($repArr['body'], FORMAT_WORDWRAP);
 				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
+				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], FALSE);
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
 				
 				$repArr['solutionIndicator'] = "";

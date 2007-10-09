@@ -271,6 +271,8 @@ if($_POST) {
 			}
 			$doNotRipRows[] = "remark_row";
 			$doNotRipRows[] = "buttons_row";
+			$doNotRipRows[] = 'accessBlock__modifyButton';
+			$doNotRipRows[] = 'linkToIssue';
 			
 			if($helpdeskData['status_id'] == 6) {
 				//yeah, it's dirty... but it highlights the fact that it's been re-opened.
@@ -284,7 +286,6 @@ if($_POST) {
 			#$page->add_template_var("select_project_list", $proj->create_project_option_list($helpdeskData['ancestry'], NULL));
 		}
 		$doNotRipRows[] = 'update_button';
-		$doNotRipRows[] = 'accessBlock__modifyButton';
 		
 		//TODO: get ancestry data for this!
 		if($helpdeskData['ancestry_level'] > 1) {

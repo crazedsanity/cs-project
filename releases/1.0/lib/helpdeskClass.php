@@ -174,33 +174,42 @@ class helpdeskClass extends mainRecord {
 			$newRemarks = $remark;
 			$emailTemplate = html_file_to_string("email/helpdesk-remark.tmpl");
 			$linkAction = "view";
-			if(!$isSolution) {
-				if($useRespondLink) {
-					$linkAction = "respond";
-				}
-				$parseArr = array(
-					"newRemark"		=> $newRemarks,
-					"linkAction"	=> $linkAction,
-					"linkExtra"		=> "&check=". $this->create_md5($helpdeskId)
-				);
-				$parseArr = array_merge($tmp, $parseArr);
-				
-				//set the list of recipients.
-				$recipientsArr = array();
-				$myUserClass = new userClass($this->db,NULL);
-				$assignedUserData = $myUserClass->get_user_info($tmp['assigned']);
-				$recipientsArr[] = $assignedUserData['email'];
-				if(strlen($_SESSION['login_email']) && $_SESSION['login_email'] != $tmp['email']) {
-					$recipientsArr[] = $_SESSION['login_email'];
-				}
-				$recipientsArr[] = $tmp['email'];
 			
-				//okay, now send the email.  The function "send_email()" should be ensuring that all values in
-				//	the recipients array are valid, and there's no dups.
-				$sendEmailRes = send_email($recipientsArr, "Update to Helpdesk Issue #$helpdeskId", $emailTemplate, $parseArr);
-				
-				//log who we sent the emails to.
-				$details = 'Sent notification(s) of remark to: '. $sendEmailRes;
+			if($useRespondLink) {
+				$linkAction = "respond";
+			}
+			$parseArr = array(
+				"newRemark"		=> $newRemarks,
+				"linkAction"	=> $linkAction,
+				"linkExtra"		=> "&check=". $this->create_md5($helpdeskId)
+			);
+			$parseArr = array_merge($tmp, $parseArr);
+			
+			//set the list of recipients.
+			$recipientsArr = array();
+			$myUserClass = new userClass($this->db,NULL);
+			$assignedUserData = $myUserClass->get_user_info($tmp['assigned']);
+			$recipientsArr[] = $assignedUserData['email'];
+			if(strlen($_SESSION['login_email']) && $_SESSION['login_email'] != $tmp['email']) {
+				$recipientsArr[] = $_SESSION['login_email'];
+			}
+			$recipientsArr[] = $tmp['email'];
+			
+			//okay, now send the email.  The function "send_email()" should be ensuring that all values in
+			//	the recipients array are valid, and there's no dups.
+			$sendEmailRes = send_email($recipientsArr, "Update to Helpdesk Issue #$helpdeskId", $emailTemplate, $parseArr);
+			
+			//log who we sent the emails to.
+			$details = 'Sent notification(s) of remark to: '. $sendEmailRes;
+			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
+			
+			if($isSolution) {
+				$subject = '[ALERT] Issue #'. $helpdeskId .' was SOLVED';
+				if(strlen($_SESSION['login_username'])) {
+					$subject .= ' by '. $_SESSION['login_username'];
+				}
+				$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
+				$details = 'Sent notifications of SOLUTION to: '. $sendEmailRes;
 				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			}
 		}
