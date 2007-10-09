@@ -395,7 +395,8 @@ class upgrade {
 			"internal_data_get_value('version_string') AS version_string, " .
 			"internal_data_get_value('version_major') AS version_major, " .
 			"internal_data_get_value('version_minor') AS version_minor, " .
-			"internal_data_get_value('version_maintenance') AS version_maintenance";
+			"internal_data_get_value('version_maintenance') AS version_maintenance, " .
+			"internal_data_get_value('version_suffix') AS version_suffix";
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
@@ -404,16 +405,9 @@ class upgrade {
 			throw new exception(__METHOD__ .": failed to retrieve version... numrows=(". $numrows ."), DBERROR::: ". $dberror);
 		}
 		else {
-			$retval = $this->db->farray_fieldnames();
-			if(preg_match('/-/', $retval['version_major'])) {
-				$tmp = explode('-', $retval['version_major']);
-				$retval['version_major'] = $tmp[1];
-				$retval['prefix'] = $tmp[0];
-			}
-			else {
-				$retval['prefix'] = "";
-			}
-			$this->databaseVersion = $retval['version_string'];
+			$data = $this->db->farray_fieldnames();
+			$this->databaseVersion = $data['version_string'];
+			$retval = $this->parse_version_string($data['version_string']);
 		}
 		
 		return($retval);
