@@ -1,4 +1,4 @@
-<table border="0">
+<table border="0" cellpadding="2" cellspacing="0">
 	<tr>
 		<td><!-- first cell of main table -->
 			<form action="{PHP_SELF}" method="POST" name=frm>
@@ -69,7 +69,7 @@
 									[<a href="javascript:void(enableInput('deadline'));">Edit</a>] {deadline}
 								</div>
 								<div id="deadline_inputDiv" style="display:none">
-									<input id="deadline_input" type='text' name='data[deadline]' size='10' maxlength='10' value="{deadline}" disabled> [yyyy-mm-dd]</u>
+									<input id="deadline_input" type='text' name='data[deadline]' size='10' maxlength='10' value="{deadline}" disabled> [yyyy-mm-dd]
 								</div>
 							</td>
 						</tr>
@@ -95,18 +95,14 @@
 							<input type="hidden" name="ID" value="{public_id}">
 				</td>
 			</tr>
-			<!-- BEGIN show_ancestry_data -->
 			<tr>
-				<td align="left" colspan="3" style="border-top:solid #999 1px;">
-					<div style="height:30px;overflow:auto">
+				<td align="left" style="border-top:solid #000 1px;border-bottom:solid #000 1px;padding-right:0px;">
+					<div style="height:40px;overflow:auto;background-color:#fff;">
 						<b>Parent Projects:</b> {ancestry_string}<BR>
 						<b>Child Projects:</b> <div style="display:inline;width:100%; height:{children_string_height}px; overflow:auto;">{children_string}</div>
 					</div>
 				</td>
-			</tr>
-			<!-- END show_ancestry_data -->
-			<tr>
-				<td colspan="2" align="center" style="border-top:solid #000 1px;border-bottom:solid #000 1px;">
+				<td align="center" style="border-top:solid #000 1px;border-bottom:solid #000 1px;padding-left:0px;">
 						<!-- BEGIN modify_button --><input type="submit" value="{submit_name}"><BR>
 						<!-- END modify_button -->
 							<a href='/content/project/'>Back</a> || 

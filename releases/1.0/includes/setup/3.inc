@@ -817,7 +817,7 @@ class __setupDefaultValues {
 		//format: {pref_type_id} => array({name}, {default_value}, {display_name}, {description})
 		$prefTypes = array(
 			1	=> array('startModule',	'helpdesk',	'Starting on Module',	'Defines which section will be loaded upon login if nothing was selected.'),
-			5	=> array('sorting_rts', 'public_id|DESC', 'Helpdesk Sorting', 'Define the type of sorting for the helpdesk page.'),
+			5	=> array('sorting_helpdesk', 'public_id|DESC', 'Helpdesk Sorting', 'Define the type of sorting for the helpdesk page.'),
 			6	=> array('sorting_project', 'priority|ASC', 'Project Sorting', 'Define the type of sorting for the helpdesk page.'),
 			7	=> array('projectDetails_todoDisplayOnlyMine', 'all', 'Project Details: Todo display', 'Define what todos are displayed on a project\'s details page.'),
 			8	=> array('projectDetails_showCompletedIssues', '1', 'Project Details: Display completed issues', 'Should completed issues display in the details of a project?')

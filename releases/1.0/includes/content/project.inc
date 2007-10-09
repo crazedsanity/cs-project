@@ -218,7 +218,7 @@ if($_POST) {
 		
 		$titleSub = "Edit Project #". $_GET['ID'];
 		$page->add_template_var("note_readonly", "readonly");
-		$page->set_all_block_rows("content", array("related", "new_subproject_link", "status_section", "note_show", "show_ancestry_data"));
+		$page->set_all_block_rows("content", array("related", "new_subproject_link", "status_section", "note_show"));
 		$page->set_all_block_rows("related_todo");
 		$page->set_all_block_rows("related_note");
 		$page->set_all_block_rows("related_issue");
