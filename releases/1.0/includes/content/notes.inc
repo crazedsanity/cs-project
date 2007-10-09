@@ -98,14 +98,22 @@ if($_POST) {
 					conditional_header($_SESSION['goBackLink']);
 					exit;
 				} else {
-					//got everything we need, I guess.
-					$titleSub =  "Create New Note...";
-					$page->add_template_var("record_id", $projectId);
+					$page->rip_all_block_rows('content', array('owner_options'));
+					$projectData = $proj->get_details($projectId, FALSE);
 					
-					//change the submit button's name & value.
-					$page->add_template_var("submit_name", "create_note");
-					$page->add_template_var("submit_value", "Create Note");
-					$page->add_template_var("note_id", "new");
+					if(is_array($projectData)) { 
+						//got everything we need, I guess.
+						$titleSub =  "Create New Note...";
+						$page->add_template_var("record_id", $projectData['record_id']);
+						
+						//change the submit button's name & value.
+						$page->add_template_var("submit_name", "create_note");
+						$page->add_template_var("submit_value", "Create Note");
+						$page->add_template_var("note_id", "new");
+					}
+					else {
+						throw new exception(__METHOD__ .": failed to get project details.");
+					}
 				}
 			} else {
 				//invalid note, seems like.  :D 
@@ -150,48 +158,12 @@ if($_POST) {
 			exit;
 		}
 	} else {
-		$page->set_all_block_rows("content");
-		unset($proj->noteObj->projectId);
-		
-		$notesArray = $proj->noteObj->get_notes(array("gruppe"=>$_SESSION['user_group']), $currentSortArr);
-		
-		//if there's an array, show it...
-		if(is_array($notesArray) && count($notesArray) > 0) {
-			//got good data.
-			$baseRow = $page->templateRows['notes_row'];
-			$baseDeleteLink = $page->templateRows['deleteLink'];
-			$deleteLink = NULL;
-			foreach($notesArray as $noteId=>$subData) {
-				unset($deleteLink);
-				if($subData['von'] == $_SESSION['uid']) {
-					$deleteLink = mini_parser($baseDeleteLink, $subData, "%%", "%%");
-				}
-				
-				
-				swapValue($bgColor, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
-				swapValue($bgColor2, "#d5d5d5", "#c2c2c2");
-				
-				$subData['bgColor'] = $bgColor;
-				$subData['bgColor2']= $bgColor2;
-				
-				$subData['deleteLink'] = $deleteLink;
-				$subData['note_id'] = $noteId;
-				unset($subData['id']);
-				
-				//show the "created" and "updated" strings properly...
-				$subData['created'] = parse_date_string($subData['div1'],TRUE);
-				$subData['updated'] = parse_date_string($subData['div2'],TRUE);
-				$finalRow .= mini_parser($baseRow, $subData, "%%", "%%");
-			}
-			$page->add_template_var("notes_row", $finalRow);
-		} else {
-			//something bad happened...
-			set_message_wrapper(array(
-				"title"		=> "Notes Unavailable",
-				"message"	=> "There are no notes to display... sorry.",
-				"type"		=> "notice"
-			));
-		}
+		$page->set_message_wrapper(array(
+			'title'		=> "Notes View Unavailable",
+			'message'	=> "Notes can only be viewed by looking at the project or issue they are attached to.",
+			'type'		=> "error"
+		));
+		$page->conditional_header('/content', TRUE);
 	}
 }
 
