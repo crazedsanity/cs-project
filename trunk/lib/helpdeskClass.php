@@ -204,7 +204,7 @@ class helpdeskClass extends mainRecord {
 			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			
 			if($isSolution) {
-				$subject = '[ALERT] Issue #'. $helpdeskId .' was SOLVED';
+				$subject = '[ALERT] Helpdesk Issue #'. $helpdeskId .' was SOLVED';
 				if(strlen($_SESSION['login_username'])) {
 					$subject .= ' by '. $_SESSION['login_username'];
 				}

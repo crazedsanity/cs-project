@@ -1463,6 +1463,8 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		if(is_array($parseArr)) {
 			//make sure that "project_url" is set.
 			$parseArr["project_url"] = PROJECT_URL;
+			$parseArr["VERSION_STRING"] = VERSION_STRING;
+			$parseArr["PROJ_NAME"] = PROJ_NAME;
 	
 			foreach($parseArr as $index=>$value) {
 				$parseArr[$index] = cleanString($value, "htmlentity_plus_brackets");
@@ -1504,7 +1506,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 				$mail->FromName = PROJ_NAME ." Notice";
 				$mail->AddAddress($emailAddr);
 				$mail->ContentType = "text/html";
-				$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
+				$mail->Subject = $subject;
 				$mail->WordWrap = 75;
 				$mail->Body = $bbCodeParser->parseString($body);
 				if(!$mail->Send()) {
@@ -1520,7 +1522,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$mail->FromName = PROJ_NAME ." Notice";
 			$mail->AddAddress($toAddr);
 			$mail->ContentType = "text/html";
-			$mail->Subject = $subject ." -- ". PROJ_NAME ." [". VERSION_STRING ."]";
+			$mail->Subject = $subject;
 			$mail->WordWrap = 75;
 			$mail->Body = $bbCodeParser->parseString($body);
 			if(!$mail->Send()) {
@@ -1725,13 +1727,6 @@ function get_config_db_params() {
 			throw new exception(__FUNCTION__ .": missing setting for (". $constantName ."): have you gone through setup?");
 		}
 	}
-	$params = array(
-		'dbname'		=> DATABASE__DBNAME,
-		'host'			=> DATABASE__HOST,
-		'port'			=> DATABASE__PORT,
-		'user'			=> DATABASE__USER,
-		'password'		=> DATABASE__PASSWORD
-	);
 	
 	return($params);
 }//end get_config_db_params()
