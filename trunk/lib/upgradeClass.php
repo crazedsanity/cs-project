@@ -420,7 +420,12 @@ class upgrade {
 	private function do_single_upgrade() {
 		//Use the "matching_syntax" data in the upgrade.xml file to determine the filename.
 		$versionIndex = "V". $this->databaseVersion;
-		if(isset($this->config['MATCHING'][$versionIndex])) {
+		if(!isset($this->config['MATCHING'][$versionIndex])) {
+			//version-only upgrade.
+			$this->update_database_version($this->versionFileVersion);
+			$this->newVersion = $this->versionFileVersion;
+		}
+		else {
 			$scriptIndex = $versionIndex;
 			
 			$upgradeData = $this->config['MATCHING'][$versionIndex];
@@ -443,15 +448,12 @@ class upgrade {
 					//version-only upgrade.
 					$this->update_database_version($upgradeData['TARGET_VERSION']);
 				}
-				$this->update_config_file();
 			}
 			else {
 				throw new exception(__METHOD__ .": target version not specified, unable to proceed with upgrade for ". $versionIndex);
 			}
 		}
-		else {
-			throw new exception(__METHOD__ .": could not retrieve syntax to determine upgrade filename from (". $this->databaseVersion .")");
-		}
+		$this->update_config_file();
 	}//end do_single_upgrade()
 	//=========================================================================
 	
@@ -613,8 +615,12 @@ class upgrade {
 		$xmlCreator->load_xmlparser_data($xmlParser);
 		
 		//define items that should be added to the config.
+		$newVersion = $this->newVersion;
+		if(!strlen($newVersion)) {
+			$newVersion = $this->versionFileVersion;
+		}
 		$newElements = array(
-			'version_string'				=> $this->newVersion
+			'version_string'				=> $newVersion
 		);
 		
 		$gf->debug_print(__METHOD__ .": running... ");

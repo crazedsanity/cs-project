@@ -16,15 +16,5 @@
 	of the class must be UNIQUE to all the other classes.  For this reason, the 
 	class name should be something like "v1_0_0_ALPHA1__to__v1_0_0_ALPHA2".</system_note>
 	
-	<matching>
-		<v1.0.0>
-			<target_version>1.0.1</target_version>
-		</v1.0.0>
-		<v1.0.1>
-			<target_version>1.0.2</target_version>
-		</v1.0.1>
-		<v1.0.2>
-			<target_version>1.0.3</target_version>
-		</v1.0.2>
-	</matching>
+	<matching />
 </upgrade>
