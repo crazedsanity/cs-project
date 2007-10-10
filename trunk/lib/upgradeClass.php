@@ -26,6 +26,14 @@ class upgrade {
 	private $configVersion = NULL;
 	private $databaseVersion = NULL;
 	
+	/** List of acceptable suffixes; example "1.0.0-BETA3" -- NOTE: these MUST be in 
+	 * an order that reflects newest -> oldest; "ALPHA happens before BETA, etc. */
+	private $suffixList = array(
+		'ALPHA', 	//very unstable
+		'BETA', 	//kinda unstable, but probably useable
+		'RC'		//all known bugs fixed, searching for unknown ones
+	);
+	
 	//=========================================================================
 	public function __construct() {
 		$this->fsObj =  new cs_fileSystemClass(dirname(__FILE__) .'/../');
@@ -679,45 +687,110 @@ class upgrade {
 	
 	//=========================================================================
 	protected function is_higher_version($version, $checkIfHigher) {
+		$retval = FALSE;
 		if(!is_string($version) || !is_string($checkIfHigher)) {
 			throw new exception(__METHOD__ .": didn't get strings... ". debug_print(func_get_args(),0));
 		}
-		$curVersionArr = $this->parse_version_string($version);
-		$checkVersionArr = $this->parse_version_string($checkIfHigher);
-		
-		unset($curVersionArr['version_string'], $checkVersionArr['version_string']);
-		
-		
-		$curVersionSuffix = $curVersionArr['version_suffix'];
-		$checkVersionSuffix = $checkVersionArr['version_suffix'];
-		
-		
-		unset($curVersionArr['version_suffix']);
-		
-		$retval = FALSE;
-		foreach($curVersionArr as $index=>$versionNumber) {
-			$checkThis = $checkVersionArr[$index];
+		elseif($version == $checkIfHigher) {
+			$retval = FALSE;
+		}
+		else {
+			$curVersionArr = $this->parse_version_string($version);
+			$checkVersionArr = $this->parse_version_string($checkIfHigher);
 			
-			if(is_numeric($checkThis) && is_numeric($versionNumber)) {
-				//set them as integers.
-				settype($versionNumber, 'int');
-				settype($checkThis, 'int');
+			unset($curVersionArr['version_string'], $checkVersionArr['version_string']);
+			
+			
+			$curVersionSuffix = $curVersionArr['version_suffix'];
+			$checkVersionSuffix = $checkVersionArr['version_suffix'];
+			
+			
+			unset($curVersionArr['version_suffix']);
+			
+			foreach($curVersionArr as $index=>$versionNumber) {
+				$checkThis = $checkVersionArr[$index];
 				
-				if($checkThis > $versionNumber) {
-					$retval = TRUE;
-					break;
-				}
-				elseif($checkThis == $versionNumber) {
-					//they're equal...
+				if(is_numeric($checkThis) && is_numeric($versionNumber)) {
+					//set them as integers.
+					settype($versionNumber, 'int');
+					settype($checkThis, 'int');
+					
+					if($checkThis > $versionNumber) {
+						$retval = TRUE;
+						break;
+					}
+					elseif($checkThis == $versionNumber) {
+						//they're equal...
+					}
+					else {
+						//TODO: should there maybe be an option to throw an exception (freak out) here?
+						debug_print(__METHOD__ .": while checking ". $index .", realized the new version (". $checkIfHigher .") is LOWER than current (". $version .")",1);
+					}
 				}
 				else {
-					//TODO: should there maybe be an option to throw an exception (freak out) here?
-					debug_print(__METHOD__ .": while checking ". $index .", realized the new version (". $checkIfHigher .") is LOWER than current (". $version .")",1);
+					throw new exception(__METHOD__ .": ". $index ." is not numeric in one of the strings " .
+						"(versionNumber=". $versionNumber .", checkThis=". $checkThis .")");
 				}
 			}
-			else {
-				throw new exception(__METHOD__ .": ". $index ." is not numeric in one of the strings " .
-					"(versionNumber=". $versionNumber .", checkThis=". $checkThis .")");
+			
+			//now deal with those damnable suffixes, but only if the versions are so far identical: if 
+			//	the "$checkIfHigher" is actually higher, don't bother (i.e. suffixes don't matter when
+			//	we already know there's a major, minor, or maintenance version that's also higher.
+			$this->gfObj->debug_print(__METHOD__ .": retval before checking suffix is (". $retval .")");
+			var_dump($retval);
+			if($retval === FALSE) {
+				$this->gfObj->debug_print(__METHOD__ .": checking suffixes... ");
+				//EXAMPLE: $version="1.0.0-BETA3", $checkIfHigher="1.1.0"
+				// Moving from a non-suffixed version to a suffixed version isn't supported, but the inverse is:
+				//		i.e. (1.0.0-BETA3 to 1.0.0) is okay, but (1.0.0 to 1.0.0-BETA3) is NOT.
+				//		Also: (1.0.0-BETA3 to 1.0.0-BETA4) is okay, but (1.0.0-BETA4 to 1.0.0-BETA3) is NOT.
+				if(strlen($curVersionSuffix) && strlen($checkVersionSuffix) && $curVersionSuffix == $checkVersionSuffix) {
+					//matching suffixes.
+					$this->gfObj->debug_print(__METHOD__ .": suffixes match");
+				}
+				elseif(strlen($curVersionSuffix) || strlen($checkVersionSuffix)) {
+					//we know the suffixes are there and DO match.
+					if(strlen($curVersionSuffix) && strlen($checkVersionSuffix)) {
+						//okay, here's where we do some crazy things...
+						$curVersionData = $this->parse_suffix($curVersionSuffix);
+						$checkVersionData = $this->parse_suffix($checkVersionSuffix);
+						
+						if($curVersionData['type'] == $checkVersionData['type']) {
+							$this->gfObj->debug_print(__METHOD__ .": got the same type...");
+							//got the same suffix type (like "BETA"), check the number.
+							if($checkVersionData['number'] > $curVersionData['number']) {
+								$this->gfObj->debug_print(__METHOD__ .": new version's suffix number higher than current... ");
+								$retval = TRUE;
+							}
+							else {
+								//umm... they're identical???  LOGIC HAS FAILED ME ALTOGETHER!!!
+								throw new exception(__METHOD__ .": seems like versions are identical (". $version ." === .". $checkIfHigher .")");
+							}
+						}
+						else {
+							//not the same suffix... see if the new one is higher.
+							$suffixValues = array_flip($this->suffixList);
+							if($suffixValues[$checkVersionData['type']] > $suffixValues[$curVersionData['type']]) {
+								$retval = TRUE;
+							}
+							else {
+								$this->gfObj->debug_print(__METHOD__ .": current suffix type is higher... ");
+							}
+						}
+						
+						$this->gfObj->debug_print(__METHOD__ .": retval=(". $retval .")");
+						exit;
+					}
+					elseif(strlen($curVersionSuffix) && !strlen($checkVersionSuffix)) {
+						//i.e. "1.0.0-BETA1" to "1.0.0" --->>> OKAY!
+					}
+					elseif(!strlen($curVersionSuffix) && strlen($checkVersionSuffix)) {
+						//i.e. "1.0.0" to "1.0.0-BETA1" --->>> NOT ACCEPTABLE!
+					}
+				}
+				else {
+					$this->gfObj->debug_print(__METHOD__ .": no suffix to care about");
+				}
 			}
 		}
 		
@@ -743,7 +816,10 @@ class upgrade {
 		$newVersion = $this->versionFileVersion;
 		
 		$retval = array();
-		if(is_array($this->config['MATCHING'])) {
+		if(!$this->is_higher_version($dbVersion, $newVersion)) {
+			throw new exception(__METHOD__ .": version (". $newVersion .") isn't higher than (". $dbVersion .")... something is broken");
+		}
+		elseif(is_array($this->config['MATCHING'])) {
 			//okay, we've got some stuff to deal with.
 			//NOTE: this assumes the MATCHING array has been ordered lowest to highest...
 			$lastVersion = $dbVersion;
@@ -772,6 +848,38 @@ class upgrade {
 		return($retval);
 		
 	}//end get_upgrade_list()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	protected function parse_suffix($suffix) {
+		$retval = NULL;
+		if(strlen($suffix)) {
+			//determine what kind it is.
+			foreach($this->suffixList as $type) {
+				if(preg_match('/^'. $type .'/', $suffix)) {
+					$checkThis = preg_replace('/^'. $type .'/', '', $suffix);
+					if(strlen($checkThis) && is_numeric($checkThis)) {
+						//oooh... it's something like "BETA3"
+						$retval = array(
+							'type'		=> $type,
+							'number'	=> $checkThis
+						);
+					}
+					else {
+						throw new exception(__METHOD__ .": invalid suffix (". $suffix .")");
+					}
+					break;
+				}
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid suffix (". $suffix .")");
+		}
+		
+		return($retval);
+	}//end parse_suffix()
 	//=========================================================================
 	
 	
