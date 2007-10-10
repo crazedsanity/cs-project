@@ -744,7 +744,6 @@ class upgrade {
 			//	the "$checkIfHigher" is actually higher, don't bother (i.e. suffixes don't matter when
 			//	we already know there's a major, minor, or maintenance version that's also higher.
 			$this->gfObj->debug_print(__METHOD__ .": retval before checking suffix is (". $retval .")");
-			var_dump($retval);
 			if($retval === FALSE) {
 				$this->gfObj->debug_print(__METHOD__ .": checking suffixes... ");
 				//EXAMPLE: $version="1.0.0-BETA3", $checkIfHigher="1.1.0"

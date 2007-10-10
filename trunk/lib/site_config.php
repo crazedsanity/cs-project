@@ -34,7 +34,6 @@ function exception_handler($exception)
 
 //-------------------------------------------------------------------
 function read_config_file($setVersionString=TRUE) {
-	$GLOBALS['DEBUGPRINTOPT'] = 1;
 	if(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
 		$gf = new cs_globalFunctions;
 		$gf->conditional_header("/setup?from=". urlencode($_SERVER['REQUEST_URI']));
