@@ -15,16 +15,43 @@ include_once (dirname(__FILE__) ."/site_config.php");
 
 //##########################################################################
 /**
+ * Return a list of required libraries & versions.
+ */
+function get_required_external_lib_versions($projectName=NULL) {
+	//format: {className} => array({projectName} => {exactVersion})
+	$requirements = array(
+		'contentSystem'		=> array('cs-content',		'0.9.1'),
+		'XMLParser'			=> array('cs-phpxml',		'0.5.4'),
+		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
+	);
+	
+	if(!is_null($projectName)) {
+		$newArr = array();
+		foreach($requirements as $index=>$subArr) {
+			if($subArr[0] == $projectName) {
+				$retval = $requirements[$index];
+				break;
+			}
+		}
+	}
+	else {
+		$retval = $requirements;
+	}
+	return($retval);
+	
+}//end get_required_external_lib_versions()
+//##########################################################################
+
+
+
+//##########################################################################
+/**
  * Check to make sure we've got the versions required to run.
  */
 function check_external_lib_versions() {
 	$retval = 0;
 	//format: {className} => array({projectName} => {exactVersion})
-	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'0.9.1'),
-		'XMLParser'			=> array('cs-phpxml',		'0.5.3'),
-		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
-	);
+	$requirements = get_required_external_lib_versions();
 	
 	foreach($requirements as $className => $more) {
 		$matchProject = $more[0];

@@ -6,7 +6,7 @@
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
  * Current Revision:::: $Revision: 34 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5.3/xmlBuilderClass.php $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5.4/xmlBuilderClass.php $ 
  * Last Updated:::::::: $Date: 2007-09-12 13:31:19 -0500 (Wed, 12 Sep 2007) $
  * 
  */

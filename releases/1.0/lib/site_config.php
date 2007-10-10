@@ -33,8 +33,7 @@ function exception_handler($exception)
 
 
 //-------------------------------------------------------------------
-function read_config_file() {
-	$GLOBALS['DEBUGPRINTOPT'] = 1;
+function read_config_file($setVersionString=TRUE) {
 	if(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
 		$gf = new cs_globalFunctions;
 		$gf->conditional_header("/setup?from=". urlencode($_SERVER['REQUEST_URI']));
@@ -55,7 +54,15 @@ function read_config_file() {
 	
 	foreach($config as $index=>$subArray) {
 		$value = $subArray['value'];
-		define($index, $value);
+		if($index == 'VERSION_STRING') {
+			//only set the version string if we're told to.
+			if($setVersionString) {
+				define($index, $value);
+			}
+		}
+		else {
+			define($index, $value);
+		}
 	}
 	
 }//end read_config_file()
@@ -65,7 +72,7 @@ check_external_lib_versions();
 
 	
 if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
-	read_config_file();
+	read_config_file(FALSE);
 	
 	//don't panic: we're going to check for upgrades, but this doesn't
 	//	necessarily mean anything will ACTUALLY be upgraded.
@@ -75,8 +82,8 @@ if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
 	}
 	else {
 		$upgrade->check_versions();
-		read_config_file();
 	}
+	read_config_file(TRUE);
 }
 
 if($_SERVER['DOCUMENT_ROOT']) {

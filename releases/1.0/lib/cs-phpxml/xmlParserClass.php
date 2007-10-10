@@ -5,9 +5,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 35 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5.3/xmlParserClass.php $ 
- * Last Updated:::::::: $Date: 2007-09-12 14:30:08 -0500 (Wed, 12 Sep 2007) $
+ * Current Revision:::: $Revision: 38 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5.4/xmlParserClass.php $ 
+ * Last Updated:::::::: $Date: 2007-10-10 12:25:07 -0500 (Wed, 10 Oct 2007) $
  * 
  * 
  * Built for PHP to programatically parse & understand data within an XML document.
@@ -159,13 +159,14 @@ class XMLParser extends cs_xmlAbstract {
 
 		if($type === 'complete') {
 			// complete tag, just return it for storage in array.
-			if(isset($thisvals['attributes'])) {
-				$tag['attributes'] = $thisvals['attributes'];
+			if($this->makeSimpleTree) {
+				$tag = $thisvals['value'];
 			}
-			if(isset($thisvals['value'])) {
-				if($this->makeSimpleTree) {
-					$tag = $thisvals['value'];
-				} else {
+			else {
+				if(isset($thisvals['attributes'])) {
+					$tag['attributes'] = $thisvals['attributes'];
+				}
+				if(isset($thisvals['value'])) {
 					$tag['value'] = $thisvals['value'];
 				}
 			}
