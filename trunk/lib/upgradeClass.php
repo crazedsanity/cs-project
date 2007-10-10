@@ -207,15 +207,27 @@ class upgrade {
 				//check for version conflicts.
 				$this->check_for_version_conflict();
 				
-				$maxIterations = 50;
-				$i = 0;
-				while($i < $maxIterations && $this->databaseVersion != $this->versionFileVersion) {
-					$this->db->beginTrans();
-					$this->do_single_upgrade();
+				$upgradeList = $this->get_upgrade_list();
+				
+				$i=0;
+				$this->db->beginTrans();
+				foreach($upgradeList as $fromVersion=>$toVersion) {
+					$this->gfObj->debug_print(__METHOD__ .": upgrading from ". $fromVersion ." to ". $toVersion ."... ");
+					$this->do_single_upgrade($toVersion);
 					$this->get_database_version();
 					$i++;
-					$this->db->commitTrans();
 				}
+				
+				if($this->databaseVersion == $this->versionFileVersion) {
+					$this->gfObj->debug_print(__METHOD__ .": finished upgrading after performing (". $i .") upgrades!!!");
+					$this->newVersion = $this->databaseVersion;
+				}
+				else {
+					throw new exception(__METHOD__ .": finished upgrade, but version wasn't updated (expecting '". $this->versionFileVersion ."', got '". $this->databaseVersion ."')!!!");
+				}
+				$this->update_config_file();
+				
+				$this->db->commitTrans();
 			}
 		}
 	}//end perform_upgrade()
@@ -257,6 +269,8 @@ class upgrade {
 			throw new exception(__METHOD__ .": invalid version string ($versionString)");
 		}
 		$tmp = explode('.', $versionString);
+		
+		//NOTE: the order of the array MUST be major, then minor, then maintenance, so is_higher_version() can check it easily.
 		$retval = array(
 			'version_string'	=> $versionString,
 			'version_major'		=> $tmp[0],
@@ -347,12 +361,10 @@ class upgrade {
 							throw new exception(__METHOD__ .": no version upgrade detected, but version strings don't match (versionFile=". $versionFileData['version_string'] .", dbVersion=". $dbVersion['version_string'] .")");
 						}
 						else {
-							$this->gfObj->debug_print(__METHOD__ .": upgrading suffix");
 							$retval = "suffix";
 						}
 					}
 					elseif($versionFileData['version_maintenance'] > $dbVersion['version_maintenance']) {
-						$this->gfObj->debug_print(__METHOD__ .": upgrading maintenance versions");
 						$retval = "maintenance";
 					}
 					else {
@@ -360,7 +372,6 @@ class upgrade {
 					}
 				}
 				elseif($versionFileData['version_minor'] > $dbVersion['version_minor']) {
-					$this->gfObj->debug_print(__METHOD__ .": upgrading minor versions");
 					$retval = "minor";
 				}
 				else {
@@ -368,12 +379,15 @@ class upgrade {
 				}
 			}
 			elseif($versionFileData['version_major'] > $dbVersion['version_major']) {
-				$this->gfObj->debug_print(__METHOD__ .": upgrading major versions");
 				$retval = "major";
 			}
 			else {
 				throw new exception(__METHOD__ .": downgrading major versions is unsupported");
 			}
+		}
+		
+		if(!is_null($retval) && $retval !== 0) {
+			$this->gfObj->debug_print(__METHOD__ .": upgrading ". $retval ." versions, from (". $this->databaseVersion .") to (". $this->versionFileVersion .")");
 		}
 		
 		return($retval);
@@ -417,9 +431,9 @@ class upgrade {
 	
 	
 	//=========================================================================
-	private function do_single_upgrade() {
+	private function do_single_upgrade($targetVersion) {
 		//Use the "matching_syntax" data in the upgrade.xml file to determine the filename.
-		$versionIndex = "V". $this->databaseVersion;
+		$versionIndex = "V". $targetVersion;
 		if(!isset($this->config['MATCHING'][$versionIndex])) {
 			//version-only upgrade.
 			$this->update_database_version($this->versionFileVersion);
@@ -453,7 +467,6 @@ class upgrade {
 				throw new exception(__METHOD__ .": target version not specified, unable to proceed with upgrade for ". $versionIndex);
 			}
 		}
-		$this->update_config_file();
 	}//end do_single_upgrade()
 	//=========================================================================
 	
@@ -541,14 +554,12 @@ class upgrade {
 	//=========================================================================
 	private function do_scripted_upgrade(array $upgradeData) {
 		$myConfigFile = $upgradeData['SCRIPT_NAME'];
-		$this->gfObj->debug_print("myConfigFile=($myConfigFile)");
 		
 		//we've got the filename, see if it exists.
 		$fileName = UPGRADE_DIR .'/'. $myConfigFile;
 		if(file_exists($fileName)) {
 			$createClassName = $upgradeData['CLASS_NAME'];
 			$classUpgradeMethod = $upgradeData['CALL_METHOD'];
-			$this->gfObj->debug_print(__METHOD__ .": classname: ". $createClassName);
 			require_once($fileName);
 			
 			//now check to see that the class we need actually exists.
@@ -556,12 +567,12 @@ class upgrade {
 				$upgradeObj = new $createClassName($this->db);
 				if(method_exists($upgradeObj, $classUpgradeMethod)) {
 					$upgradeResult = $upgradeObj->$classUpgradeMethod();
+					$this->gfObj->debug_print(__METHOD__ .": finished running ". $createClassName ."::". $classUpgradeMethod ."(), result was (". $upgradeResult .")");
 				}
 				else {
 					throw new exception(__METHOD__ .": upgrade method doesn't exist (". $createClassName ."::". $classUpgradeMethod 
 						."), unable to perform upgrade ");
 				}
-				$this->gfObj->debug_print($upgradeObj);
 			}
 			else {
 				throw new exception(__METHOD__ .": unable to locate upgrade class name (". $createClassName .")");
@@ -662,6 +673,105 @@ class upgrade {
 		$retval = $this->run_sql("SELECT internal_data_set_value('users_to_convert', (select count(*) FROM user_table WHERE length(password) != 32))");
 		return($retval);
 	}//end update_num_users_to_convert()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	protected function is_higher_version($version, $checkIfHigher) {
+		if(!is_string($version) || !is_string($checkIfHigher)) {
+			throw new exception(__METHOD__ .": didn't get strings... ". debug_print(func_get_args(),0));
+		}
+		$curVersionArr = $this->parse_version_string($version);
+		$checkVersionArr = $this->parse_version_string($checkIfHigher);
+		
+		unset($curVersionArr['version_string'], $checkVersionArr['version_string']);
+		
+		
+		$curVersionSuffix = $curVersionArr['version_suffix'];
+		$checkVersionSuffix = $checkVersionArr['version_suffix'];
+		
+		
+		unset($curVersionArr['version_suffix']);
+		
+		$retval = FALSE;
+		foreach($curVersionArr as $index=>$versionNumber) {
+			$checkThis = $checkVersionArr[$index];
+			
+			if(is_numeric($checkThis) && is_numeric($versionNumber)) {
+				//set them as integers.
+				settype($versionNumber, 'int');
+				settype($checkThis, 'int');
+				
+				if($checkThis > $versionNumber) {
+					$retval = TRUE;
+					break;
+				}
+				elseif($checkThis == $versionNumber) {
+					//they're equal...
+				}
+				else {
+					//TODO: should there maybe be an option to throw an exception (freak out) here?
+					debug_print(__METHOD__ .": while checking ". $index .", realized the new version (". $checkIfHigher .") is LOWER than current (". $version .")",1);
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": ". $index ." is not numeric in one of the strings " .
+					"(versionNumber=". $versionNumber .", checkThis=". $checkThis .")");
+			}
+		}
+		
+		return($retval);
+		
+	}//end is_higher_version()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Determines list of upgrades to perform.
+	 * 
+	 * If the current version is 1.0.1, the version file is 1.0.5, and there's a 
+	 * scripted upgrade at 1.0.4, this will update the database version to 1.0.3, 
+	 * run the scripted upgrade at 1.0.4, then update the database version to 
+	 * 1.0.5 (keeps from skipping the upgrade at 1.0.4)
+	 */
+	private function get_upgrade_list() {
+		$this->get_database_version();
+		$dbVersion = $this->databaseVersion;
+		$newVersion = $this->versionFileVersion;
+		
+		$retval = array();
+		if(is_array($this->config['MATCHING'])) {
+			//okay, we've got some stuff to deal with.
+			//NOTE: this assumes the MATCHING array has been ordered lowest to highest...
+			$lastVersion = $dbVersion;
+			foreach($this->config['MATCHING'] as $matchVersion=>$data) {
+				$matchVersion = preg_replace('/^V/', '', $matchVersion);
+				if($newVersion == $matchVersion) {
+					throw new exception(__METHOD__ .": there's a config to upgrade this version to a higher one...? ". $this->gfObj->debug_print($data,0));
+				}
+				elseif(!$this->is_higher_version($newVersion, $matchVersion)) {
+					$retval[$lastVersion] = $matchVersion;
+					$lastVersion = $matchVersion;
+				}
+			}
+			
+			if($matchVersion !== $newVersion) {
+				$retval[$lastVersion] = $newVersion;
+			}
+		}
+		else {
+			//no intermediary upgrades: just pass back the latest version.
+			$this->gfObj->debug_print(__METHOD__ .": no intermediary upgrades");
+			$retval[$dbVersion] = $this->versionFileVersion;
+		}
+		
+		$this->gfObj->debug_print(__METHOD__ .": returning::: ". $this->gfObj->debug_print($retval,0));
+		return($retval);
+		
+	}//end get_upgrade_list()
 	//=========================================================================
 	
 	

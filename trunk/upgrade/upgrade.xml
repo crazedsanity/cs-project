@@ -14,7 +14,12 @@
 	
 	IMPORTANT: in order to facilitate doing multiple version upgrades, the name 
 	of the class must be UNIQUE to all the other classes.  For this reason, the 
-	class name should be something like "v1_0_0_ALPHA1__to__v1_0_0_ALPHA2".</system_note>
+	class name should be something like "v1_0_0_ALPHA1__to__v1_0_0_ALPHA2".
+	
+	REMEMBER: the "target_version" should NEVER be higher than the next item 
+	beneath matching; this will cause horrible logic errors, causing an uprade 
+	to get skipped, or an exception to be thrown, potentially leaving the system 
+	in an unstable state.  Unstable is bad, m'kay?</system_note>
 	
 	<matching />
 </upgrade>
