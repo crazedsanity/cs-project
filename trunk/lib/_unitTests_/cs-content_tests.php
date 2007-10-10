@@ -4,6 +4,8 @@
  * 
  */
 
+require_once(dirname(__FILE__) ."/../globalFunctions.php");
+
 class Test_cscontent extends UnitTestCase {
 	
 	function setUp() {
@@ -13,8 +15,9 @@ class Test_cscontent extends UnitTestCase {
 	}//end setUp()
 	
 	function testVersionAndProject() {
-		$expectedVersion = '0.9.0';
-		$expectedProject = 'cs-content';
+		$versionData = get_required_external_lib_versions();
+		$expectedVersion = $versionData['contentSystem'][1];
+		$expectedProject = $versionData['contentSystem'][0];
 		
 		$this->assertEqual($this->gfObj->get_version(), $expectedVersion);
 		$this->assertEqual($this->gfObj->get_project(), $expectedProject);

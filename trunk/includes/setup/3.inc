@@ -269,13 +269,17 @@ class __setupDefaultValues {
 		if($retval == count($sqlData)) {
 			//okay, the final test: run a query that straps everything together, to ensure it all has the same version.
 			$sql = "SELECT internal_data_get_value('version_major') || '.' || internal_data_get_value('version_minor') " .
-				" || '.' || internal_data_get_value('version_maintenance') || '-' || internal_data_get_value('version_suffix') as text;";
+				" || '.' || internal_data_get_value('version_maintenance') as text, " .
+				"internal_data_get_value('version_suffix') as version_suffix;";
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				$data = $this->db->farray();
-				$dbVersionString = $data[0];
+				$dbVersionString = $data['text'];
+				if(strlen($data['version_suffix'])) {
+					$dbVersion .= "-". $data['version_suffix'];
+				}
 				
 				if($dbVersionString === $fullVersionString) {
 					//okay, one final test: check that the "version_string" in the database matches ours.
