@@ -649,6 +649,13 @@ class upgrade {
 		}
 		
 		$xmlString = $xmlCreator->create_xml_string();
+		
+		//truncate the file, to avoid problems with extra data at the end...
+		$fs->closeFile();
+		$fs->create_file($myConfigFile,TRUE);
+		$fs->openFile($myConfigFile);
+		
+		//now write the new configuration.
 		$fs->write($xmlString, $myConfigFile);
 	}//end update_config_file()
 	//=========================================================================
