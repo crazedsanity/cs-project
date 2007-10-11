@@ -592,7 +592,7 @@ class mainRecord {
 			//	not help as much as one might think).
 			$oldIsHelpdesk = $this->isHelpdeskIssue;
 			$this->isHelpdeskIssue = NULL;
-			$data = self::get_records(array('record_id' => $recordId));
+			$data = self::get_records(array('record_id' => $recordId, 'status_id' => 'all'));
 			if(is_array($data) && isset($data[$this->lastRecordId])) {
 				$retval = $data[$this->lastRecordId];
 			}
