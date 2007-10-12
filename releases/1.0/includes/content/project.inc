@@ -116,7 +116,7 @@ if($_POST) {
 		$showAllProjects = FALSE;
 		
 		//now set the proper content.
-		$titleSub = "Create New Project";
+		create_page_title($page, array('title' => "Create New Project"));
 		$page->add_template_var("parent", $parent);
 		$page->add_template_var("submit_name", "Create Project");
 	
@@ -216,7 +216,7 @@ if($_POST) {
 		//TODO: Create a link or something for moving it to a new parent (something like the main list, where clicking will change the parent).
 		$page->add_template_var("submit_name", "Modify");
 		
-		$titleSub = "Edit Project #". $_GET['ID'];
+		create_page_title($page, array('title' => "Project #". $_GET['ID'] .": \"". $detailsArr['name'] ."\""));
 		$page->add_template_var("note_readonly", "readonly");
 		$page->set_all_block_rows("content", array("related", "new_subproject_link", "status_section", "note_show"));
 		$page->set_all_block_rows("related_todo");

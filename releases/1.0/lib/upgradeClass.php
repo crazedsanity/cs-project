@@ -26,6 +26,8 @@ class upgrade {
 	private $configVersion = NULL;
 	private $databaseVersion = NULL;
 	
+	private $mainConfig = NULL;
+	
 	/** List of acceptable suffixes; example "1.0.0-BETA3" -- NOTE: these MUST be in 
 	 * an order that reflects newest -> oldest; "ALPHA happens before BETA, etc. */
 	private $suffixList = array(
@@ -59,7 +61,7 @@ class upgrade {
 		$retval = NULL;
 		
 		//check to see if the lock files for upgrading exist.
-		if($this->lock_file_exists()) {
+		if($this->upgrade_in_progress()) {
 			throw new exception(__METHOD__ .": upgrade in progress");
 		}
 		elseif(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
@@ -135,25 +137,20 @@ class upgrade {
 	
 	//=========================================================================
 	private function read_config_version() {
-		
+		$config = read_config_file(FALSE);
+		$this->mainConfig = $config;
 		$retval = NULL;
-		if(!defined("CONFIG_FILENAME")) {
+		
+		if(!is_array($config) || !count($config)) {
 			throw new exception("upgrade::read_config_version(): constant CONFIG_FILENAME not present, can't locate config xml file");
 		}
 		else {
-			$xmlString = $this->fsObj->read("lib/". CONFIG_FILENAME);
-			
-			//parse the file.
-			$xmlParser = new xmlParser($xmlString);
-			$config = $xmlParser->get_tree();
-			$config = $config['CONFIG'];
-			
 			//now, let's see if there's a "version_string" index.
-			if(isset($config['VERSION_STRING'])) {
-				$retval = $config['VERSION_STRING']['value'];
+			if(isset($config['VERSION_STRING']) && strlen($config['VERSION_STRING'])) {
+				$retval = $config['VERSION_STRING'];
 			}
 			else {
-				$retval = "";
+				throw new exception(__METHOD__ .": invalid version string found (". $config['VERSION_STRING'] .")");
 			}
 		}
 		
@@ -184,11 +181,12 @@ class upgrade {
 	//=========================================================================
 	private function perform_upgrade() {
 		//make sure there's not already a lockfile.
-		if($this->lock_file_exists()) {
+		if($this->upgrade_in_progress()) {
 			//ew.  Can't upgrade.
-			throw new exception(__METHOD__ .": found lockfile");
+			throw new exception(__METHOD__ .": upgrade already in progress...????");
 		}
 		else {
+			$this->upgrade_in_progress(TRUE);
 			//attempt to create the lockfile.
 			//TODO: to overcome filesystem permission issues, consider adding something to the config.xml to indicate it's locked.
 			//TODO: stop lying about creating the lockfile.
@@ -233,7 +231,8 @@ class upgrade {
 				else {
 					throw new exception(__METHOD__ .": finished upgrade, but version wasn't updated (expecting '". $this->versionFileVersion ."', got '". $this->databaseVersion ."')!!!");
 				}
-				$this->update_config_file();
+				$this->update_config_file('version_string', $this->newVersion);
+				$this->update_config_file('workingonit', "0");
 				
 				$this->db->commitTrans();
 			}
@@ -244,29 +243,19 @@ class upgrade {
 	
 	
 	//=========================================================================
-	public function upgrade_in_progress() {
-		$retval = $this->lock_file_exists();
-		return($retval);
-	}//end upgrade_in_progress()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	/**
-	 * Check for the existence of the lockfile: if it's there, that means there 
-	 * is an upgrade process that's already been spawned.
-	 */
-	private function lock_file_exists() {
-		if(file_exists(UPGRADE_LOCKFILE)) {
+	public function upgrade_in_progress($makeItSo=FALSE) {
+		$retval = FALSE;
+		if($makeItSo === TRUE) {
+			$details = 'Upgrade from '. $this->databaseVersion .' started at '. date('Y-m-d H:i:s');
+			$this->update_config_file('WORKINGONIT', $details);
 			$retval = TRUE;
 		}
-		else {
-			$retval = FALSE;
+		elseif(preg_match('/^upgrade/i', $this->mainConfig['WORKINGONIT'])) {
+			$retval = TRUE;
 		}
 		
 		return($retval);
-	}//end lock_file_exists()
+	}//end upgrade_in_progress()
 	//=========================================================================
 	
 	
@@ -625,7 +614,7 @@ class upgrade {
 	
 	
 	//=========================================================================
-	private function update_config_file() {
+	private function update_config_file($index, $value) {
 		$gf = new cs_globalFunctions;
 		$myConfigFile = 'lib/'. CONFIG_FILENAME;
 		$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
@@ -633,20 +622,9 @@ class upgrade {
 		$xmlCreator = new XMLCreator;
 		$xmlCreator->load_xmlparser_data($xmlParser);
 		
-		//define items that should be added to the config.
-		$newVersion = $this->newVersion;
-		if(!strlen($newVersion)) {
-			$newVersion = $this->versionFileVersion;
-		}
-		$newElements = array(
-			'version_string'				=> $newVersion
-		);
-		
-		$gf->debug_print(__METHOD__ .": running... ");
-		
-		foreach($newElements as $name=>$value) {
-			$xmlCreator->add_tag($name, $value);
-		}
+		//update the given index.
+		$xmlCreator->add_tag($index, $value);
+		$this->mainConfig[strtoupper($index)] = $value;
 		
 		$xmlString = $xmlCreator->create_xml_string();
 		

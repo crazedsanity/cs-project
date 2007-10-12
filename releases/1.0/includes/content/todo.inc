@@ -108,7 +108,7 @@ if($_POST) {
 		}
 		
 		//update the title.
-		$titleSub = "Create New Todo";
+		create_page_title($page, array('title' => "Create New Todo"));
 		
 		//show the proper drop-downs.
 		$page->add_template_var("user_assign_list", $proj->create_user_option_list());
@@ -127,10 +127,11 @@ if($_POST) {
 	
 		if($action == "view")
 		{
-			//set the page's title.
-			$titleSub = "Edit Todo #$todoId";
 			
 			$todoDetails = $proj->todoObj->get_todo($todoId);
+			
+			//set the page's title.
+			create_page_title($page, array('title' => "Todo #". $todoId .": \"". $todoDetails['name'] ."\""));
 			
 			
 			//format the body, so long sentences fit properly.

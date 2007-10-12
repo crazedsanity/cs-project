@@ -33,7 +33,7 @@ function exception_handler($exception)
 
 
 //-------------------------------------------------------------------
-function read_config_file($setVersionString=TRUE) {
+function read_config_file($setEverything=TRUE) {
 	if(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
 		$gf = new cs_globalFunctions;
 		$gf->conditional_header("/setup?from=". urlencode($_SERVER['REQUEST_URI']));
@@ -48,15 +48,15 @@ function read_config_file($setVersionString=TRUE) {
 	//parse the file.
 	$xmlParser = new xmlParser($xmlString);
 	
-	$config = $xmlParser->get_tree();
+	$config = $xmlParser->get_tree(TRUE);
 	$config = $config['CONFIG'];
 	unset($config['type'], $config['attributes']);
 	
-	foreach($config as $index=>$subArray) {
-		$value = $subArray['value'];
-		if($index == 'VERSION_STRING') {
-			//only set the version string if we're told to.
-			if($setVersionString) {
+	$conditionallySet = array('VERSION_STRING', 'WORKINGONIT');
+	foreach($config as $index=>$value) {
+		if(in_array($index, $conditionallySet)) {
+			//only set this part if we're told to.
+			if($setEverything) {
 				define($index, $value);
 			}
 		}
@@ -65,6 +65,8 @@ function read_config_file($setVersionString=TRUE) {
 		}
 	}
 	
+	return($config);
+	
 }//end read_config_file()
 //-------------------------------------------------------------------
 
@@ -72,18 +74,31 @@ check_external_lib_versions();
 
 	
 if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
-	read_config_file(FALSE);
+	$config = read_config_file(FALSE);
 	
-	//don't panic: we're going to check for upgrades, but this doesn't
-	//	necessarily mean anything will ACTUALLY be upgraded.
-	$upgrade = new upgrade;
-	if($upgrade->upgrade_in_progress()) {
-		throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
+	if(($config['WORKINGONIT'] != "0" && strlen($config['WORKINGONIT'])) || strlen($config['WORKINGONIT']) > 1) {
+		//TODO: consider making this look prettier...
+		$details = "The website/database is under construction... try back in a bit.";
+		if(preg_match('/upgrade/i', $config['WORKINGONIT'])) {
+			$details = "<b>Upgrade in progress</b>: ". $config['WORKINGONIT'];
+		}
+		elseif(strlen($config['WORKINGONIT']) > 1) {
+			$details .= "MORE INFORMATION::: ". $config['WORKINGONIT'];
+		}
+		throw new exception($details);
 	}
 	else {
-		$upgrade->check_versions();
+		//don't panic: we're going to check for upgrades, but this doesn't
+		//	necessarily mean anything will ACTUALLY be upgraded.
+		$upgrade = new upgrade;
+		if($upgrade->upgrade_in_progress()) {
+			throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
+		}
+		else {
+			$upgrade->check_versions();
+		}
+		read_config_file(TRUE);
 	}
-	read_config_file(TRUE);
 }
 
 if($_SERVER['DOCUMENT_ROOT']) {

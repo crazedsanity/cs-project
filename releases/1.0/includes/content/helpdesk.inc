@@ -198,7 +198,7 @@ if($_POST) {
 	}
 	
 	if($action == "create") {
-		$titleSub = "Create a Helpdesk Issue";
+		create_page_title($page, array('title' => "Create a Helpdesk Issue"));
 		$page->set_all_block_rows("content");
 		
 		//show the "category" selection.
@@ -221,9 +221,9 @@ if($_POST) {
 		conditional_header("/". $page->ftsSections[0] ."/". $page->ftsSections[1]);
 		exit;
 	} elseif($action == "view" && is_numeric($helpdeskId)) {
-		$titleSub = "Edit Issue #$helpdeskId";
 		$doNotRipRows = array("edit_form", "info_block", "access_block");
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
+		create_page_title($page, array('title' => "Issue #". $helpdeskId .": \"". $helpdeskData['name'] ."\""));
 		
 		//TODO: handle this better, somehow... AJAX comes to mind. ;) 
 		if($_GET['newTag'] && !$_SESSION['addTag_cache'][$helpdeskData['record_id']][$_GET['newTag']]) {

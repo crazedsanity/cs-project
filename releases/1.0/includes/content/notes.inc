@@ -103,7 +103,7 @@ if($_POST) {
 					
 					if(is_array($projectData)) { 
 						//got everything we need, I guess.
-						$titleSub =  "Create New Note...";
+						create_page_title($page, array('title' => "Create New Note..."));
 						$page->add_template_var("record_id", $projectData['record_id']);
 						
 						//change the submit button's name & value.
@@ -125,7 +125,7 @@ if($_POST) {
 			$noteInfo = $proj->noteObj->get_note($_GET['ID']);
 			
 			//fill in some info about the page.
-			$titleSub = "Edit Note #". $_GET['ID'];
+			create_page_title($page, array('title' => "Note #". $_GET['ID'] .": \"". $noteInfo['subject'] ."\""));
 			$page->add_template_var("goBackLink", $_SESSION['goBackLink'] ."#note_". $_GET['ID']);
 			
 			foreach($noteInfo as $index=>$value) {
