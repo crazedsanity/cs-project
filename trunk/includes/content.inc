@@ -166,14 +166,66 @@ $currentSortArr = store_and_return_sorting($page, $_GET['sort'], $_GET['sortType
 
 
 
+//=============================================================================
+function create_page_title(cs_genericPage &$page, array $parts) {
+	$titleCacheURL = '/pageData/title';
+	$argCacheURL = '/pageData/pieces';
+	
+	$cachedParts = $page->ui->get_cache($argCacheURL);
+	if(!strlen($parts['module']) || !strlen($parts['title'])) {
+		if(!is_array($cachedParts) || !count($cachedParts)) {
+			throw new exception(__METHOD__ .": missing module or title name, can't create page title");
+		}
+		elseif(!strlen($parts['module']) && !strlen($cachedParts['module'])) {
+			throw new exception(__METHOD__ .": found cache, but module missing");
+		}
+	}
 
-if(!$moduleTitle) {
-	$moduleTitle = ucfirst($module);
+	if(!strlen($parts['module'])) {
+		$parts['module'] = $cachedParts['module'];
+	}
+	$retval = ucfirst($parts['module']) ."" . " [". PROJ_NAME ."]";
+	if(strlen($parts['title'])) {
+		$retval = ucwords($parts['title']) ." -- ". $retval;
+	}
+	
+	$page->ui->set_cache($argCacheURL, $parts);
+	$page->ui->set_cache($titleCacheURL, $retval);
+	
+	$page->add_template_var('html_title', $retval);
+	
+	return($retval);
+}//end create_page_title();
+//=============================================================================
+
+
+
+//=============================================================================
+function get_page_title(cs_genericPage &$page) {
+	$cacheURL = '/pageData/title';
+	return($page->ui->get_cache($cacheURL));
+}//end get_page_title()
+//=============================================================================
+
+
+
+$titlePart = NULL;
+if(isset($sectionArr[2])) {
+	$titlePart = $sectionArr[2];
+	if(strlen($_GET['ID'])) {
+		$titlePart .= " #". $_GET['ID'];
+	}
 }
-$htmlTitle = "$moduleTitle [". PROJ_NAME ."]";
-if($titleSub) {
-	$htmlTitle .= " -- ". $titleSub;
+
+if(ISDEVSITE) {
+	$titlePart = "**DEV** ". $titlePart;
 }
-$page->add_template_var("html_title", $htmlTitle);
+
+$titleParts = array(
+	'module'	=> $module,
+	'title'		=> $titlePart
+);
+create_page_title($page, $titleParts);
+
 
 ?>
