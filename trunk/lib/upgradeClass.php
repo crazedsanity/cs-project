@@ -232,6 +232,7 @@ class upgrade {
 					throw new exception(__METHOD__ .": finished upgrade, but version wasn't updated (expecting '". $this->versionFileVersion ."', got '". $this->databaseVersion ."')!!!");
 				}
 				$this->update_config_file('version_string', $this->newVersion);
+				$this->update_config_file('workingonit', "0");
 				
 				$this->db->commitTrans();
 			}
