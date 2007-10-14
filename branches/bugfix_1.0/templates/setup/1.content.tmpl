@@ -1,0 +1,57 @@
+
+{stepData}
+
+<p>
+	In this step, we need to determine some basic information about the database.
+	The database should NOT exist yet: it will be created later.  
+</p>
+
+
+<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<th>Database Name (cs_project)</th>
+		
+		<td><input type="text" name="fields[database__dbname]" value="{database__dbname}"></td>
+		
+		<td>Name of the database within PostgreSQL (i.e. "cs_project")</td>
+	</tr>
+	<tr>
+
+		<th>Hostname (localhost)</th>
+		
+		<td><input type="text" name="fields[database__host]" value="{database__host}"></td>
+		
+		<td>Fully qualified host name (like "taz.google.com" or "localhost").</td>
+	</tr>
+	<tr>
+		<th>Port (5432)</th>
+		
+		<td><input type="text" name="fields[database__port]" value="{database__port}"></td>
+
+		
+		<td>Port to connect to PostgreSQL on (default is 5432).</td>
+	</tr>
+	<tr>
+		<th>Database Username (postgres)</th>
+		
+		<td><input type="text" name="fields[database__user]" value="{database__user}"></td>
+		
+		<td>Username for connecting to PostgreSQL (if you don't know, it's probably "postgres", though connecting as a SUPERUSER is generally accepted as a BAD THING).</td>
+	</tr>
+
+	<tr>
+		<th>Database Password</th>
+		
+		<td><input type="text" name="fields[database__password]" value="{database__password}"></td>
+		
+		<td>Password for connecting to PostgreSQL (for a trusted connection, this can be blank).</td>
+	</tr>
+	<tr>
+		<td colspan="3" align="center"><input id="submitButton" type="submit" value="Go to next step"></td>
+
+	</tr>
+</table>
+</form>
+
+
