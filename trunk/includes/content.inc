@@ -177,20 +177,19 @@ function create_page_title(cs_genericPage &$page, array $parts) {
 			throw new exception(__METHOD__ .": found cache, but module missing");
 		}
 	}
-	else {
-		if(!strlen($parts['module'])) {
-			$parts['module'] = $cachedParts['module'];
-		}
-		$retval = ucfirst($parts['module']) ."" . " [". PROJ_NAME ."]";
-		if(strlen($parts['title'])) {
-			$retval = ucwords($parts['title']) ." -- ". $retval;
-		}
-		
-		$page->ui->set_cache($argCacheURL, $parts);
-		$page->ui->set_cache($titleCacheURL, $retval);
-		
-		$page->add_template_var('html_title', $retval);
+
+	if(!strlen($parts['module'])) {
+		$parts['module'] = $cachedParts['module'];
 	}
+	$retval = ucfirst($parts['module']) ."" . " [". PROJ_NAME ."]";
+	if(strlen($parts['title'])) {
+		$retval = ucwords($parts['title']) ." -- ". $retval;
+	}
+	
+	$page->ui->set_cache($argCacheURL, $parts);
+	$page->ui->set_cache($titleCacheURL, $retval);
+	
+	$page->add_template_var('html_title', $retval);
 	
 	return($retval);
 }//end create_page_title();
@@ -207,7 +206,7 @@ function get_page_title(cs_genericPage &$page) {
 
 
 
-$titlePart = $sectionArr[1];
+$titlePart = NULL;
 if(isset($sectionArr[2])) {
 	$titlePart = $sectionArr[2];
 	if(strlen($_GET['ID'])) {
