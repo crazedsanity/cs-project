@@ -68,7 +68,8 @@ class sessionCache {
 			foreach($myIndexList as $indexName) {
 				if(isset($retval[$indexName])) {
 					$retval = $retval[$indexName];
-				} else {
+				}
+				else {
 					$retval = NULL;
 					break;
 				}
@@ -105,7 +106,8 @@ class sessionCache {
 		//should we add our prefix?
 		if(preg_match('/^\//', $path)) {
 			$retval = $path;
-		} else {
+		}
+		else {
 			$retval = $this->prefix ."/". $path;
 		}
 		
@@ -181,7 +183,8 @@ class sessionCache {
 				$array = &$array[$myIndex];
 				array_shift($indexList);
 				$this->internal_iterator($array, $indexList, $data);
-		} elseif(is_array($indexList) && count($indexList) == 1) {
+		}
+		elseif(is_array($indexList) && count($indexList) == 1) {
 			$array[$indexList[0]] = $data;
 		}
 		

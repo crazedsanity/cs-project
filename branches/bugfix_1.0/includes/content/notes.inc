@@ -21,7 +21,8 @@ if($_POST) {
 				"message"	=> "Note ID #$noteId was modified successfully.",
 				"type"		=> "notice"
 			));
-		} else {
+		}
+		else {
 			set_message_wrapper(array(
 				"title"		=> "Update Failure",
 				"message"	=> "Something went wrong, and the note failed to get updated. " .
@@ -29,7 +30,8 @@ if($_POST) {
 				"type"		=> "error"
 			));
 		}
-	} elseif($_POST['create_note']) {
+	}
+	elseif($_POST['create_note']) {
 		$result = $proj->noteObj->create_note($_POST['updates']);
 		
 		//tell 'em what happened.
@@ -40,14 +42,16 @@ if($_POST) {
 				"message"	=> "Something bad happened, and the note couldn't be created....<BR>ERROR=[$dberror]",
 				"type"		=> "error"
 			));
-		} elseif($result > 0) {
+		}
+		elseif($result > 0) {
 			//seemed to work.
 			set_message_wrapper(array(
 				"title"		=> "Successfully Created Note",
 				"message"	=> "The new note ID is: $result.",
 				"type"		=> "notice"
 			));
-		} else {
+		}
+		else {
 			//insert worked, but couldn't get the note_id...
 			set_message_wrapper(array(
 				"title"		=> "Partial Failure...",
@@ -66,7 +70,8 @@ if($_POST) {
 	conditional_header($url);
 	exit;
 	
-} else {
+}
+else {
 	//TODO: start using "$_GET['noteId']"... makes me SANE.
 	$action = $page->ftsSections[2];
 	$noteId = $_GET['ID'];
@@ -82,7 +87,8 @@ if($_POST) {
 				if(is_numeric($_GET['projectId'])) {
 					//they sent one in the URL.  Nice peoples.
 					$projectId = $_GET['projectId'];
-				} else {
+				}
+				else {
 					//get the one we've stored in the session.
 					$projectId = $page->ui->get_cache("project/ID");
 				}
@@ -97,7 +103,8 @@ if($_POST) {
 					));
 					conditional_header($_SESSION['goBackLink']);
 					exit;
-				} else {
+				}
+				else {
 					$page->rip_all_block_rows('content', array('owner_options'));
 					$projectData = $proj->get_details($projectId, FALSE);
 					
@@ -115,7 +122,8 @@ if($_POST) {
 						throw new exception(__METHOD__ .": failed to get project details.");
 					}
 				}
-			} else {
+			}
+			else {
 				//invalid note, seems like.  :D 
 				$showBadNoteError = TRUE;
 			}
@@ -135,7 +143,8 @@ if($_POST) {
 			if($noteInfo['von'] == $_SESSION['uid']) {
 				//they're the owner..
 				$doNotRipRows[] = "owner_options";
-			} else {
+			}
+			else {
 				$doNotRipRows[] = "nonowner_options";
 				$page->add_template_var("note_name_readonly", "readonly");
 			}
@@ -157,7 +166,8 @@ if($_POST) {
 			conditional_header("/content/notes?error=badNote");
 			exit;
 		}
-	} else {
+	}
+	else {
 		$page->set_message_wrapper(array(
 			'title'		=> "Notes View Unavailable",
 			'message'	=> "Notes can only be viewed by looking at the project or issue they are attached to.",

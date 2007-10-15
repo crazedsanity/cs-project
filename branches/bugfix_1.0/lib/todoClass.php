@@ -135,13 +135,13 @@ class todoClass {
 		
 		if($dberror || $numrows < 1) {
 			//something bad happened, or no rows.
-			if($dberror)
-			{
+			if($dberror) {
 				//log the problem.
 				$this->logsObj->log_dberror("get_todos(): dberror encountered::: $dberror\n$query");
 			}
 			$retval = 0;
-		} else {
+		}
+		else {
 			//good data.
 			$retval = $this->db->farray_fieldnames("todo_id",NULL,0);
 			
@@ -157,8 +157,7 @@ class todoClass {
 				$retval[$id]['submit_date'] = parse_date_string($subData['submit_date'],TRUE);
 				
 				//round-out some numbers.
-				foreach($precisionRound as $roundThisField)
-				{
+				foreach($precisionRound as $roundThisField) {
 					$number = $retval[$id][$roundThisField];
 					$retval[$id][$roundThisField] = number_format($number,2);
 				}
@@ -183,12 +182,10 @@ class todoClass {
 	 * @return <SPECIAL: returns the requested record using get_todos()>
 	 */
 	function get_todo($todoId=NULL) {
-		if(!is_numeric($todoId))
-		{
+		if(!is_numeric($todoId)) {
 			$retval = 0;
 		}
-		else
-		{
+		else {
 			
 			$retval = $this->get_todos(array("todo_id"=>$todoId));
 			$retval = $retval[$todoId];
@@ -258,12 +255,12 @@ class todoClass {
 		
 		if($this->lastError || $numrows != 1) {
 			//bad things...
-			if($this->lastError)
-			{
+			if($this->lastError) {
 				$this->logsObj->log_dberror("update_todo(): database error::: ". $this->lastError);
 			}
 			$retval = 0;
-		} else {
+		}
+		else {
 			$retval = $numrows;
 			
 			//log the changes.
@@ -276,15 +273,12 @@ class todoClass {
 				'anfang'	=> 'begin_date',
 				'datum'		=> 'submit_date'
 			);
-			foreach($updatesArr as $field=>$newValue)
-			{
-				if(isset($translationArr[$field]))
-				{
+			foreach($updatesArr as $field=>$newValue) {
+				if(isset($translationArr[$field])) {
 					//translate it into the fields that get_todos() uses (see it's query)
 					$field = $translationArr[$field];
 				}
-				if((!in_array($field, $doNotLog)) && ($newValue != $oldData[$field]))
-				{
+				if((!in_array($field, $doNotLog)) && ($newValue != $oldData[$field])) {
 					//create the details.
 					$thisDetail = $field .": [". $oldData[$field] ."] => [". $newValue ."]";
 					$details = create_list($details, $thisDetail, "\n");
@@ -427,7 +421,8 @@ class todoClass {
 		if($this->lastError || $numrows != 1) {
 			$this->logsObj->log_dberror("create_todo(): invalid numrows ($numrows) or dberror::: ". $this->lastError);
 			$retval = 0;
-		} else {
+		}
+		else {
 			//got good data... get the note_id.
 			$numrows = $this->db->exec("SELECT currval('todo_table_todo_id_seq')");
 			$this->lastError = $this->db->errorMsg();
@@ -436,7 +431,8 @@ class todoClass {
 			if($this->lastError || $numrows != 1) {
 				$this->logsObj->log_dberror("create_todo(): invalid numrows($numrows) or dberror::: ". $this->lastError);
 				$retval = -1;
-			} else {
+			}
+			else {
 				$tmp = $this->db->farray();
 				$retval = $tmp[0];
 			}

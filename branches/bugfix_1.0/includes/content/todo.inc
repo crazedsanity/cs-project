@@ -32,13 +32,16 @@ if($_POST) {
 			"assigned_contact_id"	=> $_SESSION['contact_id']
 		);
 		$retval = $proj->todoObj->update_todo($todoId, $updateArr);
-	} elseif($action == "create") {
+	}
+	elseif($action == "create") {
 		unset($_POST['updates']['add_elapsed']);
 		$retval = $proj->todoObj->create_todo($_POST['updates']);
 		$todoId = $retval;
-	} elseif($action == "comment") {
+	}
+	elseif($action == "comment") {
 		$retval = $proj->todoObj->add_comment($todoId, $_POST['comment']);
-	} elseif($action == "modify") {
+	}
+	elseif($action == "modify") {
 		$currentData = $proj->todoObj->get_todo($todoId);
 		
 		//reset status if needs-be.
@@ -61,7 +64,8 @@ if($_POST) {
 		}
 		
 		$retval = $proj->todoObj->update_todo($todoId, $_POST['updates']);
-	} else {
+	}
+	else {
 		#$retval = $proj->todoObj->update_todo($todoId, $_POST['updates']);
 		$retval = 0;
 	}
@@ -72,13 +76,15 @@ if($_POST) {
 			"message"	=> "Todo #$retval was created successfully.",
 			"type"		=> "notice"
 		));
-	} elseif($retval == 1) {
+	}
+	elseif($retval == 1) {
 		set_message_wrapper(array(
 			"title"		=> "Update Successful",
 			"message"	=> "Todo was updated successfully.",
 			"type"		=> "notice"
 		));
-	} else {
+	}
+	else {
 		set_message_wrapper(array(
 			"title"		=> "Update FAILED!",
 			"message"	=> "Something happened, and the sh*t hit the fan.  Sorry.<BR>\n" .
@@ -92,7 +98,8 @@ if($_POST) {
 	$url = "/content/todo/view?ID=$todoId&updateResult=$retval";
 	conditional_header($url);
 	exit;
-} else {
+}
+else {
 	$action = $page->ftsSections[2];
 	$todoId = $_GET['ID'];
 	if($action == "create") {
@@ -123,10 +130,10 @@ if($_POST) {
 		$page->add_template_var("modify_or_create_button", "Create");
 		$page->set_all_block_rows("content", $doNotRipRows);
 		
-	} elseif(is_numeric($todoId)) { 
+	}
+	elseif(is_numeric($todoId)) { 
 	
-		if($action == "view")
-		{
+		if($action == "view") {
 			
 			$todoDetails = $proj->todoObj->get_todo($todoId);
 			
@@ -172,7 +179,8 @@ if($_POST) {
 						$doNotRipRows[] = "modifiable_priority";
 						$doNotRipRows[] = "edit_title_link";
 					}
-				} else {
+				}
+				else {
 					$doNotRipRows[] = "undertake_button";
 					$doNotRipRows[] = "assign_list";
 					$doNotRipRows[] = "readonly_started";
@@ -189,7 +197,8 @@ if($_POST) {
 				$doNotRipRows[] = 'addElapsed';
 				
 				
-			} else {
+			}
+			else {
 				//probably "Ended/Solved" (4).
 				$displaySection = "readonly";
 				$doNotRipRows[] = "reopen_button";
@@ -242,7 +251,8 @@ if($_POST) {
 			}
 			
 		}
-	} else {
+	}
+	else {
 		//list everything...
 		$todoArr = $proj->todoObj->get_todos(array("gruppe"=>$_SESSION['user_group']), $currentSortArr);
 		$page->set_all_block_rows("content");

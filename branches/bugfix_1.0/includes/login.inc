@@ -21,12 +21,14 @@ if(!$_GET['logout'] && !$_POST && $page->session->sid_check == 1) {
 	//they came here & need to be redirected.
 	conditional_header("/content?from=login&reason=alreadyLoggedIn");
 	exit;
-} elseif($_GET['logout']) {
+}
+elseif($_GET['logout']) {
 	//call the logout function.
 	$res = $page->session->logout();
 	conditional_header("/login.php?redirFrom=logout");
 	exit;
-} elseif($_POST['username'] && $_POST['password']) {
+}
+elseif($_POST['username'] && $_POST['password']) {
 
 
 	$loginRes = $page->session->login($_POST['username'],$_POST['password']);
@@ -34,8 +36,7 @@ if(!$_GET['logout'] && !$_POST && $page->session->sid_check == 1) {
 	if($loginRes == 1) {
 		//TODO: use their "startmodule" (or whatever it's called) is if nothing specific is requested.
 		$goHere = "/content?from=login";
-		if(strlen($_SESSION['loginDestination']) && urldecode($_SESSION['loginDestination']) !== '/')
-		{
+		if(strlen($_SESSION['loginDestination']) && urldecode($_SESSION['loginDestination']) !== '/') {
 			//go where they asked.
 			$goHere = urldecode($_SESSION['loginDestination']);
 			unset($_SESSION['loginDestination']);
@@ -51,14 +52,10 @@ if(!$_GET['logout'] && !$_POST && $page->session->sid_check == 1) {
 	}
 }
 
-if($_GET['destination'])
-{
+if($_GET['destination']) {
 	$_SESSION['loginDestination'] = urlencode($_GET['destination']);
 }
 //show the default page.
 $page->change_content(html_file_to_string("login.tmpl"));
-$page->add_template_var("css_style", "/css/common.css");
-$page->print_page();
-exit;
 
 ?>

@@ -35,8 +35,7 @@ class tagClass
 	 * 
 	 * @param $db		(phpDB object) instance of phpDB class.
 	 */
-	public function __construct(cs_phpDB $db)
-	{
+	public function __construct(cs_phpDB $db) {
 		
 		if(is_numeric(LOGCAT__TAGS)) {
 			$this->logCategoryId = LOGCAT__TAGS;
@@ -64,22 +63,19 @@ class tagClass
 	 * @return (array)		PASS: contains tag_name_id=>name array.
 	 * @return (exception)	database error or no rows.
 	 */
-	public function get_tag_list()
-	{
+	public function get_tag_list() {
 		$sql = "SELECT * FROM tag_name_table ORDER BY lower(name)";
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(strlen($dberror) || $numrows < 1)
-		{
+		if(strlen($dberror) || $numrows < 1) {
 			//tell 'em terrible things happened.
 			//NOTE: if *ALL* tags are removed, this will *ALWAYS* get thrown.
 			$details = "get_tag_list(): unable to retrieve list of tag names";
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
-		else
-		{
+		else {
 			//good to go!
 			$data = $this->db->farray_nvp("tag_name_id", "name");
 			return($data);
@@ -98,8 +94,7 @@ class tagClass
 	 * @return (array)		PASS: indexed off "record_id".
 	 * @return (exception)	FAIL: database error somewhere.
 	 */
-	public function get_records_for_tag($tagNameId)
-	{
+	public function get_records_for_tag($tagNameId) {
 		$sql = "SELECT r.record_id, r.public_id, r.is_helpdesk_issue, r.name, r.priority, r.progress, r.ancestry, r.ancestry_level " .
 			"FROM tag_table AS t " .
 			"INNER JOIN tag_name_table AS tn ON (t.tag_name_id=tn.tag_name_id) " .
@@ -110,20 +105,17 @@ class tagClass
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(strlen($dberror) || $numrows < 0)
-		{
+		if(strlen($dberror) || $numrows < 0) {
 			//no data!
 			$details = "get_records_for_tag(): no records ($numrows) or database error:::\n". $dberror;
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
-		elseif($numrows < 1)
-		{
+		elseif($numrows < 1) {
 			//no data.  Just return a blank array.
 			$retval = array();
 		}
-		else
-		{
+		else {
 			//good to go: retrieve the data.
 			$retval = $this->db->farray_fieldnames("record_id", NULL, 0);
 			
@@ -152,11 +144,9 @@ class tagClass
 	 * @return NULL			FAIL: no records
 	 * @return (exception)	FAIL: database error
 	 */
-	public function get_tags_for_record($recordId)
-	{
+	public function get_tags_for_record($recordId) {
 		//
-		$sqlArr = array
-		(
+		$sqlArr = array (
 			'record_id'			=> cleanString($recordId, 'numeric')
 		);
 		$sql = "SELECT tag_name_id, name FROM tag_name_table INNER JOIN tag_table USING (tag_name_id) WHERE ". string_from_array($sqlArr, 'select');
@@ -164,8 +154,7 @@ class tagClass
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
-		if(strlen($dberror) || $numrows < 0)
-		{
+		if(strlen($dberror) || $numrows < 0) {
 			//database error.
 			if(strlen($dberror)) {
 				$details = "get_tags_for_record(): invalid rows ($numrows) or database error:::\n$dberror";
@@ -173,13 +162,11 @@ class tagClass
 			}
 			$retval = NULL;
 		}
-		elseif($numrows == 0)
-		{
+		elseif($numrows == 0) {
 			//no data.
 			$retval = NULL;
 		}
-		else
-		{
+		else {
 			//retrieve the data for returning.
 			$retval = $this->db->farray_nvp('tag_name_id', 'name');
 		}
@@ -211,8 +198,7 @@ class tagClass
 		//set default return.
 		$retval = $allTagsList;
 		
-		if(is_array($associatedTags))
-		{
+		if(is_array($associatedTags)) {
 			//got some tags associated?  Cool: show only those that are NOT 
 			//	associated with this record.
 			$retval = array_diff($allTagsList, $associatedTags);
@@ -225,11 +211,9 @@ class tagClass
 	
 	
 	//=========================================================================
-	public function add_tag($recId, $tagNameId)
-	{
+	public function add_tag($recId, $tagNameId) {
 		//create the insert statement.
-		$sqlArr = array
-		(
+		$sqlArr = array (
 			'record_id'			=> cleanString($recId, 'number'),
 			'tag_name_id'		=> cleanString($tagNameId, 'number')
 		);
@@ -240,15 +224,13 @@ class tagClass
 		$this->lastError = $this->db->errorMsg();
 		
 		//check for errors & set the return value.
-		if(strlen($this->lastError) || $numrows !== 1)
-		{
+		if(strlen($this->lastError) || $numrows !== 1) {
 			//something bad happened.
 			$details = "add_tag(): ". $this->lastError;
 			$this->logsObj->log_dberror($details);
 			$retval = 0;
 		}
-		else
-		{
+		else {
 			//good to go.
 			$retval = 1;
 		}
@@ -274,8 +256,7 @@ class tagClass
 	 */
 	public function remove_tag($recId, $tagNameId) {
 		//create the delete statement.
-		$sqlArr = array
-		(
+		$sqlArr = array(
 			'record_id'			=> cleanString($recId, 'number'),
 			'tag_name_id'		=> cleanString($tagNameId, 'number')
 		);
@@ -286,19 +267,16 @@ class tagClass
 		$numrows = $this->db->exec($sql);
 		$this->lastError = $this->db->errorMsg();
 		
-		if(strlen($this->lastError) || $numrows !== 1)
-		{
+		if(strlen($this->lastError) || $numrows !== 1) {
 			//database error.
 			$this->db->rollbackTrans();
-			if(strlen($this->lastError))
-			{
+			if(strlen($this->lastError)) {
 				//make sure it's apparent that something bad happened.
 				$this->logsObj->log_dberror("remove_tag(): unable to delete ($numrows) or dberror::: ". $this->lastError);
 				$retval = NULL;
 			}
 		}
-		else
-		{
+		else {
 			//good to go.
 			$this->db->commitTrans();
 		}
@@ -310,8 +288,7 @@ class tagClass
 	
 	
 	//=========================================================================
-	private function update_tag_record($critArr, array $changes)
-	{
+	private function update_tag_record($critArr, array $changes) {
 		$sql = "UPDATE tag_table SET ". string_from_array($changes, 'update') ."" .
 				"WHERE ". string_from_array($critArr, 'select', NULL, 'numeric');
 		
@@ -319,19 +296,16 @@ class tagClass
 		$numrows = $this->db->exec($sql);
 		$this->lastError = $this->db->errorMsg();
 		
-		if(strlen($this->lastError) || $numrows !== 1)
-		{
+		if(strlen($this->lastError) || $numrows !== 1) {
 			//something bad happened.
 			$retval = 0;
-			if(strlen($this->lastError))
-			{
+			if(strlen($this->lastError)) {
 				//make it apparent that something went wrong.
 				$this->logsObj->log_dberror("update_tag_record(): unable to update ($numrows) or dberror::: ". $this->lastError);
 				$retval = NULL;
 			}
 		}
-		else
-		{
+		else {
 			//good to go.
 			$retval = $numrows;
 		}
@@ -350,11 +324,9 @@ class tagClass
 	 * the given tag_name_id scope.
 	 * NOTE2: yes, this is horribly complex... but it works.
 	 */
-	public function update_record_position_for_tag($tagId, $tagNameId, $upOrDown='up')
-	{
+	public function update_record_position_for_tag($tagId, $tagNameId, $upOrDown='up') {
 		$upOrDown = strtolower($upOrDown);
-		if(is_null($upOrDown) || ($upOrDown !== 'up' && $upOrDown !== 'down'))
-		{
+		if(is_null($upOrDown) || ($upOrDown !== 'up' && $upOrDown !== 'down')) {
 			//set a default
 			$upOrDown = 'up';
 		}
@@ -366,38 +338,31 @@ class tagClass
 		$position = 0;
 		$positionToId = array();
 		$currentPosition = NULL;
-		foreach($allRecords as $index=>$subData)
-		{
+		foreach($allRecords as $index=>$subData) {
 			$position++;
 			$myTagId = $subData['tag_id'];
 			$positionToId[$position] = $myTagId;
 			//set current position.
-			if($myTagId == $tagId)
-			
-			{
+			if($myTagId == $tagId) {
 				$currentPosition = $position;
 			}
 		}
 		
 		//make sure we didn't encounter a nasty internal error...
-		if(is_null($currentPosition) || !is_numeric($currentPosition))
-		{
+		if(is_null($currentPosition) || !is_numeric($currentPosition)) {
 			//what can we do?
 			$details = "update_record_position_for_tag(): couldn't find current position for tagId=($tagId)";
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
-		else
-		{
+		else {
 			
 			//we're still good.  Figure out what position it should be in.
 			//REMEMBER: this is sorted ASCENDING, so moving up means the number is less, & vice-versa.
-			if($upOrDown == 'down')
-			{
+			if($upOrDown == 'down') {
 				$newPosition = $currentPosition +1;
 			}
-			else
-			{
+			else {
 				$newPosition = $currentPosition -1;
 			}
 			$idToSwap = $positionToId[$newPosition];
@@ -409,19 +374,15 @@ class tagClass
 			
 			//do the appropriate updates.
 			$totalUpdates = 0;
-			foreach($newPositionArr as $myPosition => $myId)
-			{
+			foreach($newPositionArr as $myPosition => $myId) {
 				//only do an update if the proposed position does NOT match the current one.
 				$originalPosition = $allRecords[$myId]['position'];
-				if($myPosition != $originalPosition)
-				{
+				if($myPosition != $originalPosition) {
 					//set the criteria & what's being updated.
-					$criteria = array
-					(
+					$criteria = array(
 						'tag_id'	=> $myId
 					);
-					$changes = array
-					(
+					$changes = array(
 						'position'	=> $myPosition
 					);
 					$totalUpdates += $this->update_tag_record($criteria, $changes);
@@ -437,27 +398,23 @@ class tagClass
 	
 	
 	//=========================================================================
-	public function create_new_tag_name($tagName)
-	{
+	public function create_new_tag_name($tagName) {
 		//set a default return value.
 		$retval = FALSE;
-		if(strlen($tagName) && is_string($tagName))
-		{
+		if(strlen($tagName) && is_string($tagName)) {
 			//okay, insert it.
 			$tagName = cleanString($tagName, 'sql');
 			$sql = "INSERT INTO tag_name_table (name) VALUES ('". $tagName ."')";
 			$numrows = $this->db->exec($sql);
 			$this->lastError = $this->db->errorMsg();
 			
-			if(strlen($this->lastError) || $numrows !== 1)
-			{
+			if(strlen($this->lastError) || $numrows !== 1) {
 				//something failed.
 				$details = "create_new_tag_name(): failed to insert record:::<BR>\n". $this->lastError;
 				$this->logsObj->log_dberror($details);
 				throw new exception($details);
 			}
-			else
-			{
+			else {
 				//inserted.  Set the return value, then try to get the id.
 				$retval = TRUE;
 				
@@ -466,14 +423,12 @@ class tagClass
 				$this->lastError = $this->db->errorMsg();
 				
 				//only care if we found the value.
-				if(!strlen($this->lastError) && $numrows == 1)
-				{
+				if(!strlen($this->lastError) && $numrows == 1) {
 					//good.  return the value.
 					$data = $this->db->farray();
 					$retval = $data[0];
 				}
-				else
-				{
+				else {
 					//log the problem.
 					$this->logsObj->log_dberror("create_new_tag_name(): unable to retrieve currval " .
 							"($numrows) or dberror::: ". $this->lastError);
