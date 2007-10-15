@@ -19,6 +19,8 @@ abstract class dbAbstract {
 	public $lastError=NULL;
 	public $lastNumrows = NULL;
 	
+	protected $db;
+	
 	abstract public function __construct(cs_phpDB &$db);
 	
 	
@@ -26,8 +28,8 @@ abstract class dbAbstract {
 	final public function run_sql($sql) {
 		
 		if(strlen($sql)) {
-			$this->lastError = $this->db->exec($sql);
-			$this->lastNumrows = $this->db->errorMsg();
+			$this->lastNumrows = $this->db->exec($sql);
+			$this->lastError = $this->db->errorMsg();
 			
 			if(!strlen($this->lastError) && $this->lastNumrows > 0) {
 				$retval = TRUE;

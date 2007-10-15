@@ -117,13 +117,12 @@ $tabNames = array(
 	'summary'		=> "Summary",
 	'project'		=> "Projects",
 	'helpdesk'		=> "Helpdesk",
+	'contacts'		=> "Contacts",
+	'settings'		=> "Settings",
 );
 
 if($user->is_admin()) {
 	$tabNames['settings']	= "Settings<BR>\n<b>[Admin]</b>";
-}
-else {
-	$tabNames['settings']	= "Settings";
 }
 
 #$page->add_template_var('tabs', $page->file_to_string('tabs.shared.tmpl'));
