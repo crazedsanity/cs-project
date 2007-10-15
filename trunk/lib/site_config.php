@@ -24,8 +24,7 @@ define(CONFIG_FILENAME, 'config.xml');
 set_exception_handler('exception_handler');
 
 //##########################################################################
-function exception_handler($exception)
-{
+function exception_handler($exception) {
 	$exceptionMessage = $exception->getMessage();
 	print "<pre><h2>FATAL EXCEPTION ENCOUNTERED</h2> ". $exceptionMessage ."\n\n";
 }//exception_handler()
@@ -105,7 +104,8 @@ if($_SERVER['DOCUMENT_ROOT']) {
 	//it was called from the web...
 	$GLOBALS['SITE_ROOT'] = $_SERVER['DOCUMENT_ROOT'];
 	$GLOBALS['SITE_ROOT'] = str_replace("/public_html", "", $GLOBALS['SITE_ROOT']);
-} else {
+}
+else {
 	//called from the command line.
 	$GLOBALS['SITE_ROOT'] = $_SERVER['HOME'] ."/partslogistics2002";
 }

@@ -90,9 +90,7 @@ class projectClass extends mainRecord {
 				$info = $userObj->get_user_info($_SESSION['uid']);
 				$_SESSION['group_id'] = $info['group_id'];
 				$this->groupId = $info['group_id'];
-			}
-			else {
-				throw new exception(__METHOD__ .": unable to determine group_id... session probably invalid... newId=(". $newId ."), sessionGroupId=(". $_SESSION['group_id'] .")");
+				$retval = $this->groupId;
 			}
 		}
 		
@@ -129,8 +127,7 @@ class projectClass extends mainRecord {
 	
 	
 	//================================================================================================
-	function set_category_text()
-	{
+	function set_category_text() {
 		print "<pre>";
 		$this->logsObj->log_by_class("called set_category_text()!");
 		throw new exception("called set_category_text()");
@@ -583,8 +580,7 @@ class projectClass extends mainRecord {
 	/**
 	 * Get the array of children projects (array of id=>name)
 	 */
-	function get_children($projectId, $filter=NULL)
-	{
+	function get_children($projectId, $filter=NULL) {
 		//get the project's lineage.
 		$myAncestry = $this->get_details($projectId);
 		
@@ -623,8 +619,7 @@ class projectClass extends mainRecord {
 	
 	
 	//================================================================================================
-	function get_children_string($projectId, $filter=NULL)
-	{
+	function get_children_string($projectId, $filter=NULL) {
 		//retrieve the array of data.
 		$childrenList = $this->get_children($projectId, $filter);
 		

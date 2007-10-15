@@ -107,7 +107,8 @@ class userClass {
 			$retval = 0;
 			
 			//okay, so, they don't have anything: create it automatically.
-		} else {
+		}
+		else {
 			$tmp = $this->db->farray();
 			$retval = unserialize($tmp[0]);
 		}
@@ -172,7 +173,8 @@ class userClass {
 			
 			if(is_numeric($findThis)) {
 				$criteria = "uid = $findThis";
-			} else {
+			}
+			else {
 				$criteria = "lower(username) = '$findThis'";
 			}
 			
@@ -188,7 +190,8 @@ class userClass {
 					throw new exception(__METHOD__ .": failed to get user data... ");
 				}
 				$retval = 0;
-			} else {
+			}
+			else {
 				//retrieve the data.
 				$retval = $this->db->farray_fieldnames();
 			}
@@ -214,7 +217,8 @@ class userClass {
 		if($newPass != $newPassCheck) {
 			$this->lastError = "Passwords do not match";
 			$retval = 0;
-		} else {
+		}
+		else {
 			$retval = 0;
 			//now check to see authentication.
 			$tSessClass = new Session($this->db,0);
@@ -252,7 +256,8 @@ class userClass {
 					//got it!
 					$retval = $numrows;
 				}
-			} else {
+			}
+			else {
 				//more explanation of what happened.
 				$this->lastError = "Old password was invalid";
 			}

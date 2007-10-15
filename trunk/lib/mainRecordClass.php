@@ -194,14 +194,14 @@ class mainRecord {
 		if($dberror || $numrows < 1) {
 			//no data.
 			$retval = 0;
-			if($dberror)
-			{
+			if($dberror) {
 				//log the problem.
 				cs_debug_backtrace(1);
-				throw new exception(__METHOD__ .": no data ($numrows) or dberror::: $dberror\nSQL::$query\n\n");
 				$this->logsObj->log_dberror(__METHOD__ .": no data ($numrows) or dberror::: $dberror");
+				throw new exception(__METHOD__ .": no data ($numrows) or dberror::: $dberror\nSQL::$query\n\n");
 			}
-		} else {
+		}
+		else {
 			//get the data.
 			$retval = $this->db->farray_fieldnames("public_id",NULL,0);
 			

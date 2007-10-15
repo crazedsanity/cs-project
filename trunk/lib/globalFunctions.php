@@ -103,7 +103,8 @@ function html_file_to_string($file){
 	if($filename !== 0) {
 		$htmlString = file_get_contents($filename);
 		return $htmlString;
-	} else {
+	}
+	else {
 		//Could not find the file requested to stringify.
 		//Sending warning to user and logging it.
 
@@ -143,15 +144,15 @@ function page_get_env($showReferer = true, $showRequest = true, $returnArray=FAL
 	//determine if it's "http" or "https".
 	if($_SERVER['SERVER_PORT'] == 80) {
 		$pre = "http://";
-	} else {
+	}
+	else {
 		$pre = "https://";
 	}
 
 	//start constructing the stuff.
 	$info = $pre . $_SERVER['HTTP_HOST']; // Ex. http://www.partslogistics.com
 
-	if ($showRequest)
-	{
+	if ($showRequest) {
 		$info .= $_SERVER['REQUEST_URI']; // Ex. /index.php
 	}
 	$currentPageUri = $info;
@@ -159,8 +160,7 @@ function page_get_env($showReferer = true, $showRequest = true, $returnArray=FAL
 	$info .= " -- ". $_SERVER['REMOTE_ADDR']; // Ex. 192.160.10.100
 	
 	//SHOW THE PAGE THEY'RE VIEWING, ALONG WITH THE REFERER (FOR FUTURE STATS)...
-	if (isset($_SERVER['HTTP_REFERER']))
-	{
+	if (isset($_SERVER['HTTP_REFERER'])) {
 		$referer = $_SERVER['HTTP_REFERER'];
 	}
 
@@ -171,7 +171,8 @@ function page_get_env($showReferer = true, $showRequest = true, $returnArray=FAL
 	
 	if(!$returnArray) {
 		$retval = $info ." [$referer] -- [". $_SERVER['HTTP_USER_AGENT'] ."]";
-	} else {
+	}
+	else {
 		//
 		$retval = array(
 			"referer" 		=> $referer,
@@ -193,8 +194,7 @@ function page_get_env($showReferer = true, $showRequest = true, $returnArray=FAL
 function log_activity(cs_phpDB &$db, $eventId, $affectedUid, $details) {
 	
 	//create an array to create the insert string.
-	$sqlArr = array
-	(
+	$sqlArr = array (
 		'log_event_id'		=> cleanString($eventId, 'numeric'),
 		'group_id'			=> cleanString($_SESSION['group_id'], 'numeric'),
 		'uid'				=> cleanString($_SESSION['uid'], 'numeric'),
@@ -209,15 +209,13 @@ function log_activity(cs_phpDB &$db, $eventId, $affectedUid, $details) {
 	$numrows = $db->exec($sql);
 	$dberror = $db->errorMsg();
 	
-	if(strlen($dberror) || $numrows !== 1)
-	{
+	if(strlen($dberror) || $numrows !== 1) {
 		//terrible, terrible things.
 		print "<pre>";
 		debug_print_backtrace();
 		throw new exception("log_activity(): failed to create record... numrows=($numrows), dberror:::\n$dberror\nSQL::: $sql");
 	}
-	else
-	{
+	else {
 		//set a return value, in case the query for the inserted id fails.
 		$retval = $numrows;
 		
@@ -227,8 +225,7 @@ function log_activity(cs_phpDB &$db, $eventId, $affectedUid, $details) {
 		$dberror = $db->errorMsg();
 		
 		//it's okay if it doesn't work.
-		if(!strlen($dberror) && $numrows == 1)
-		{
+		if(!strlen($dberror) && $numrows == 1) {
 			//got it!
 			$data = $db->farray();
 			$retval = $data[0];
@@ -277,10 +274,12 @@ function set_message($title=NULL, $message=NULL, $redirect=NULL, $type=NULL, $li
 		if((!$overwriteSame) AND ($priorityArr[$_SESSION['message']['type']] == $priorityArr[$type])) {
 			//all indications point to mostly cloudy with a hint of "LEAVE MY MESSAGE ALONE, BEOTCH".
 			return(0);
-		} elseif($priorityArr[$_SESSION['message']['type']] <= $priorityArr[$type]) {
+		}
+		elseif($priorityArr[$_SESSION['message']['type']] <= $priorityArr[$type]) {
 			// the existing message is less important.  Overwrite it.
 			unset($_SESSION['message']);
-		} else {
+		}
+		else {
 			//we've got a more important message waiting.  No pudding for you.
 			return(0);
 		}
@@ -331,8 +330,7 @@ function set_message($title=NULL, $message=NULL, $redirect=NULL, $type=NULL, $li
 
 
 //##########################################################################
-function set_message_wrapper($array)
-{
+function set_message_wrapper($array) {
 	//$array should look like this:
 	//	"title" 	=> "<title value>",
 	//	"message"	=> "<message value>",
@@ -346,8 +344,7 @@ function set_message_wrapper($array)
 
 
 //##########################################################################
-function swapValue(&$value, $c1, $c2)
-{
+function swapValue(&$value, $c1, $c2) {
 	if(!$value) {
 		$value = $c1;
 	}
@@ -356,7 +353,8 @@ function swapValue(&$value, $c1, $c2)
 	/* choose the next color */
 	if($value == "$c1") {
 		$value = "$c2";
-	} else {
+	}
+	else {
 		$value = "$c1";
 	}
 
@@ -437,7 +435,8 @@ function get_block_row_defs($templateContents) {
 		//reverse the order of the array, so when the ordered array
 		// is looped through, all block rows can be pulled.
 		$retArr['ordered'] = array_reverse($beginArr);
-	} else {
+	}
+	else {
 		//nothin' doin'.  Return a blank array.
 		$retArr = array();
 	}
@@ -449,8 +448,7 @@ function get_block_row_defs($templateContents) {
 
 
 //##########################################################################
-function array_as_option_list(array $data, $checkedValue=NULL, $type="select", $useTemplateString=NULL, array $repArr=NULL)
-{
+function array_as_option_list(array $data, $checkedValue=NULL, $type="select", $useTemplateString=NULL, array $repArr=NULL) {
 	$typeArr = array (
 		"select"	=> "selected",
 		"radio"		=> "checked",
@@ -458,32 +456,27 @@ function array_as_option_list(array $data, $checkedValue=NULL, $type="select", $
 	);
 	
 	$myType = $typeArr[$type];
-	if(is_null($useTemplateString))
-	{
+	if(is_null($useTemplateString)) {
 		//
 		$useTemplateString = "\t\t<option value='%%value%%'%%selectedString%%>%%display%%</option>";
 	}
 	
 	$retval = "";
-	foreach($data as $value=>$display)
-	{
+	foreach($data as $value=>$display) {
 		//see if it's the value that's been selected.
 		$selectedString = "";
-		if($value == $checkedValue)
-		{
+		if($value == $checkedValue) {
 			//yep, it's selected.
 			$selectedString = " ". $myType;
 		}
 		
 		//create the string.
-		$myRepArr = array
-		(
+		$myRepArr = array(
 			'value'				=> $value,
 			'display'			=> $display,
 			'selectedString'	=> $selectedString
 		);
-		if(is_array($repArr) && is_array($repArr[$value]))
-		{
+		if(is_array($repArr) && is_array($repArr[$value])) {
 			//merge the arrays.
 			$myRepArr = array_merge($repArr[$value], $myRepArr);
 		}
@@ -513,20 +506,20 @@ function query_as_option_list(&$db, $selFields, $table, $critSent, $selectVal=NU
 	$crit="";
 
 	if($critSent) {
-		if (eregi("order by",$critSent))
-		{
+		if (eregi("order by",$critSent)) {
 			//We are ordering, split the goods
 			//Only take criteria before order by
-	      $crit = strtolower($critSent);
-   	   $tempVar = split("order by", $crit);
-   	   if (strlen($tempVar[0]) > 2)
-			{	$crit = "WHERE ".$tempVar[0];}
-			else
-			{ $crit=""; } 
+			$crit = strtolower($critSent);
+	    	$tempVar = split("order by", $crit);
+			if (strlen($tempVar[0]) > 2) {
+   		   		$crit = "WHERE ".$tempVar[0];
+   	   		}
+			else {
+				$crit="";
+			}
 			$order = "ORDER BY ".$tempVar[1];
 		}
-		else
-		{
+		else {
 			//No order, can use crit as is and order by generic.
 			$crit = "WHERE $critSent";
 		}
@@ -539,26 +532,26 @@ function query_as_option_list(&$db, $selFields, $table, $critSent, $selectVal=NU
 	if((!$dberror) AND ($numRows > 0)) {
 		$mainArr = $db->farray_fieldnames(NULL,1);
 		foreach($mainArr as $row=>$tArr) {
-			if ($useCapitals)
-			{
+			if ($useCapitals) {
 				//Don't do the regular capitalization
 				$dataValue=$tArr[$fields[1]];
 			}
-			else
-			{	
+			else {	
 				$dataValue = ucwords(strtolower($tArr[$fields[1]]));
 			}
 			
 			$dataName = $tArr[$fields[0]];
 			if($dataName == $selectVal && ($selectVal !== TRUE)) {
 				$checked = $selectStr;
-			} else {
+			}
+			else {
 				$checked = NULL;
 			}
 			$returnStr = "<option value=\"$dataName\" $checked>$dataValue</option>";
 			$retVal = create_list($retVal, $returnStr, "\n");
 		}
-	} else {
+	}
+	else {
 		$retVal = $numRows;
 	}
 	return($retVal);
@@ -593,7 +586,8 @@ function create_list($string=NULL, $addThis=NULL, $delimiter=", ") {
 
 	if(isset($string)) {
 		$retVal = $string . $delimiter . $addThis;
-	} else {
+	}
+	else {
 		$retVal = $addThis;
 	}
 
@@ -776,20 +770,21 @@ function string_from_array($array,$style=NULL,$separator=NULL, $cleanString=NULL
 				if(is_array($value)) {
 					//doing tricksie things!!!
 					$retval = create_list($retval, $field ." IN (". string_from_array($value) .")", " $delimiter ");
-				} else {
+				}
+				else {
 					//if there's already an operator ($separator), don't specify one.
 					if(preg_match('/ like$/', $field)) {
 						$field = preg_replace('/ like$/', '', $field);
 						$separator = " like ";
-					} elseif(preg_match('/^[\(<=>]/', $value)) {
+					}
+					elseif(preg_match('/^[\(<=>]/', $value)) {
 						$separator = NULL;
 					}
 					if($cleanString) {
 						//make sure it doesn't have crap in it...
 						$value = cleanString($value, "sql");	
 					}
-					elseif(!is_numeric($value) && isset($separator))
-					{
+					elseif(!is_numeric($value) && isset($separator)) {
 						$value = "'". $value ."'";	
 					}
 					$retval = create_list($retval, $field . $separator . $value, " $delimiter ");
@@ -819,8 +814,7 @@ function string_from_array($array,$style=NULL,$separator=NULL, $cleanString=NULL
 			//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			case "report":{
 				//turn array('first'=>1,'second'=>2) into "first: 1\nsecond: 2"
-				foreach($array as $field=>$value)
-				{
+				foreach($array as $field=>$value) {
 					$value = cleanString($value, 'sql');
 					$retval = create_list($retval, "$field: $value", "\n");
 				}
@@ -868,7 +862,8 @@ function string_from_array($array,$style=NULL,$separator=NULL, $cleanString=NULL
 			}
 			//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		}
-	} else {
+	}
+	else {
 		//not an array.
 		$retval = 0;
 	}
@@ -912,7 +907,8 @@ if(!function_exists("debug_print_backtrace")) {
 			foreach($tempArr as $num=>$func) {
 				$backTraceData = create_list($backTraceData, $func, "<-");
 			}
-		} else {
+		}
+		else {
 			//nothing available...
 			#$backTraceData = "No backtrace available.";
 			$backTraceData = $stuff;
@@ -952,7 +948,8 @@ function debug_print($input=NULL, $printItForMe=NULL, $removeHR=NULL) {
 	if(!$_SERVER['SERVER_PROTOCOL']) {
 		$output = strip_tags($output);
 		$hrString = "\n***************************************************************\n";
-	} else {
+	}
+	else {
 		$hrString = "<hr>";
 	}
 	if($removeHR) {
@@ -971,15 +968,12 @@ function debug_print($input=NULL, $printItForMe=NULL, $removeHR=NULL) {
 
 
 //##############################################################################################
-function valid_email($email_address)
-{
+function valid_email($email_address) {
 	//Tell whether or not an email is valid
-	if (eregi("^([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,4})$",$email_address))
-	{
+	if (eregi("^([_a-z0-9-]+)(\.[_a-z0-9-]+)*@([a-z0-9-]+)(\.[a-z0-9-]+)*(\.[a-z]{2,4})$",$email_address)) {
 		return 1;
 	}
-	else
-	{
+	else {
 		return 0;
 	}
 }//end valid_email()
@@ -1155,8 +1149,7 @@ function cleanString($cleanThis=NULL, $cleanType="all",$sqlQuotes=NULL) {
 			case "varchar":
 				$cleanThis=cleanString($cleanThis,"query");
 				$cleanThis="'" . $cleanThis . "'";
-				if($cleanThis == "''")
-				{
+				if($cleanThis == "''") {
 					$cleanThis="NULL";	
 				}
 			break;
@@ -1215,12 +1208,14 @@ function interpret_bool($inputVal, $interpretArr,$checkArrayKeys=FALSE) {
 		
 		$valueToUse = array_search($inputVal, $arrayKeys);
 		$retval = $arrayVals[$valueToUse];
-	} else {
+	}
+	else {
 		//straight-up check.
 		if($inputVal) {
 			//true.
 			$retval = $interpretArr[1];
-		} else {
+		}
+		else {
 			//false.
 			$retval = $interpretArr[0];
 		}
@@ -1332,11 +1327,13 @@ function truncate_string($string,$maxLength,$endString="...",$strict=FALSE) {
 	if($strLength <= $maxLength) {
 		//no need to truncate.
 		$retval = $string;
-	} else {
+	}
+	else {
 		//actually needs to be truncated...
 		if($strict) {
 			$trueMaxLength = $maxLength - strlen($endString);
-		} else {
+		}
+		else {
 			$trueMaxLength = $maxLength;
 		}
 		
@@ -1355,8 +1352,7 @@ function truncate_string($string,$maxLength,$endString="...",$strict=FALSE) {
 function template_file_exists($file) {
 	$retval = 0;
 	//If the string doesn't start with a /, add one
-	if (strncmp("/",$file,1))
-	{
+	if(strncmp("/",$file,1)) {
 		//strncmp returns 0 if they match, so we're putting a / on if they don't
 		$file="/".$file;
 	}
@@ -1419,35 +1415,12 @@ function create_date_string() {
 }//end create_date_string()
 //================================================================================================================
 
-//================================================================================================================
-/**
- * Use this function to return the standard separator text in comments, to show who created the current comment...
- */
-function create_standard_comment_separator($overrideKurz=NULL) {
-	$dateString = parse_date_string(create_date_string(), TRUE);
-	$name = $_SESSION['kurz'];
-	if($overrideKurz) {
-		$name = "[". $overrideKurz ."] ";
-	} elseif(!isset($_SESSION['kurz'])) {
-		$name = "ANONYMOUS";
-	}
-	$uidString = " [uid=". $_SESSION['uid'] ."]";
-	if(!is_numeric($_SESSION['uid'])) {
-		$uidString = " [ip=". $_SERVER['REMOTE_ADDR'] ."]";
-	}
-	$separator = "==== ". $name ."@$dateString". $uidString ." ==== \n";
-	
-	return($separator);
-}//end create_standard_comment_separator()
-//================================================================================================================
-	
 	
 //================================================================================================
 /**
  */
 function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
-	if(!ISDEVSITE)
-	{
+	if(!ISDEVSITE) {
 		//pre-check on the $toAddr.
 		$precheck = FALSE;
 		$failureString = "";
@@ -1464,7 +1437,8 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			else {
 				$failureString = "toAddr not set properly (". $toAddr .")";
 			}
-		} else {
+		}
+		else {
 			if(valid_email($toAddr)) {
 				$precheck = TRUE;
 			}
@@ -1541,7 +1515,8 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 				}
 				unset($mail);
 			}
-		} else {
+		}
+		else {
 			$mail = new PHPMailer();
 			$mail->IsSMTP();
 			$mail->Host = CONFIG_EMAIL_SERVER_IP;
@@ -1561,8 +1536,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		//give 'em the list we sent the message to.
 		$retval = string_from_array($toAddr);
 	}
-	else
-	{
+	else {
 		//tell 'em what happened.
 		$retval = "no emails sent (ISDEVSITE=". ISDEVSITE .")";
 	}
@@ -1608,7 +1582,8 @@ function store_and_return_sorting(&$page, $sortField, $sortType=NULL) {
 					$sortCache = array(
 						$sortField => $sortType
 					);
-				} else {
+				}
+				else {
 					//we've got cache.
 					$sortCache[$sortField] = $sortType;
 				}
@@ -1627,7 +1602,8 @@ function store_and_return_sorting(&$page, $sortField, $sortType=NULL) {
 			$currentSortData = array(
 				$sortField	=> $sortType
 			);
-		} else {
+		}
+		else {
 			$currentSortData = $page->ui->get_cache("$module/currentSort");
 		}
 		
@@ -1688,7 +1664,8 @@ function cs_debug_backtrace($printItForMe=NULL,$removeHR=NULL) {
 		
 		$myData = ob_get_contents();
 		ob_end_clean();
-	} else {
+	}
+	else {
 		//create our own backtrace data.
 		$stuff = debug_backtrace();
 		if(is_array($stuff)) {
@@ -1706,7 +1683,8 @@ function cs_debug_backtrace($printItForMe=NULL,$removeHR=NULL) {
 			foreach($tempArr as $num=>$func) {
 				$myData = create_list($myData, $func, "<-");
 			}
-		} else {
+		}
+		else {
 			//nothing available...
 			$myData = $stuff;
 		}

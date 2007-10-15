@@ -612,8 +612,7 @@ class Session extends upgrade {
 
 
 	//##########################################################################
-	function sudden_death($message=NULL)
-	{
+	function sudden_death($message=NULL) {
 		//////////////////////////////////////////////////////////////////
 		// USED TO SET A MESSAGE IF THE SESSION SUDDENLY DIED, BUT A 	//
 		//	MESSAGE MUST BE DISPLAYED (the old session should be	//

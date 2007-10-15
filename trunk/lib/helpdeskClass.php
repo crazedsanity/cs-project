@@ -45,8 +45,9 @@ class helpdeskClass extends mainRecord {
 		//check to see if the database object is valid.
 		if(is_object($db) && $db->is_connected()) {
 			$this->db = $db;
-		} else {
-			exit("no database!!!");
+		}
+		else {
+			throw new exception(__METHOD__ .": no database!!!");
 		}
 		
 		//create the logging object.
@@ -244,7 +245,8 @@ class helpdeskClass extends mainRecord {
 				$this->logsObj->log_by_class("solve(): not enough information to solve::: $solution", 'error', NULL, $this->recordTypeId, $helpdeskId);
 				$retval = -1;
 			}
-		} else {
+		}
+		else {
 			//okay, everything checked out.  Do your thing.
 			//NOTE::: projects using the original helpdesk code had the "minute" part of the time as "daylight savings time"...
 			$updatesArr = array(
