@@ -71,7 +71,7 @@ class contactClass extends dbAbstract {
 			
 		if($this->run_sql($sql)) {
 			$retval = array();
-			$data = $this->db->farray_fieldnames('contact_id', NULL, 1);
+			$data = $this->db->farray_fieldnames('contact_id', NULL, 0);
 			
 			foreach($data as $conId=>$subData) {
 				$attribArr = $this->get_contact_attributes($conId);
