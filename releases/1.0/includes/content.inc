@@ -75,24 +75,6 @@ $page->ui->set_cache("lastModule", $page->ftsSections[1]);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //before going on, let's see if the URL is set properly, so we load the correct section.
 //NOTE: "ftsSections" is a special array from the "fast_templating" engine.
 if(!isset($page->ftsSections[1])) {
@@ -121,7 +103,8 @@ $module = $page->ftsSections[1];
 if($module && strlen($module) > 1) {
 	//got something from the call above...
 	$page->ui->set_cache("module", $module);
-} else {
+}
+else {
 	//use the default module...
 	$module = $defaultModule;
 	$page->ui->set_cache("module", $module);

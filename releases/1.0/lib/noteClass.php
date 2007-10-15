@@ -91,7 +91,8 @@ class noteClass {
 				throw new exception(__METHOD__ .": ". $this->lastError);
 			}
 			$retval = 0;
-		} else {
+		}
+		else {
 			//good data.
 			$retval = $this->db->farray_fieldnames("note_id",NULL,0);
 			
@@ -171,7 +172,8 @@ class noteClass {
 		foreach($updatesArr as $key=>$value) {
 			if(isset($allowedFieldsArr[$key])) {
 				$finalUpdatesArr[$key] = $value;
-			} else {
+			}
+			else {
 				debug_print("excluding $key [$value]...");
 			}
 		}

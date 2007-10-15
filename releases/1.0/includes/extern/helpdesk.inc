@@ -32,14 +32,16 @@ if($_POST) {
 						"message"	=> "Your remark has been added to the database.  Thank you for your feedback.",
 						"type"		=> "status"
 					));
-				} else {
+				}
+				else {
 					set_message_wrapper(array(
 						"title"		=> "Remark Failed",
 						"message"	=> "Seems like the issue may have been updated in the interim: check your email for a new link to be used for remarking.",
 						"type"		=> "error"
 					));
 				}
-			} else {
+			}
+			else {
 				//not an array.  Something screwed up in the session?
 				set_message_wrapper(array(
 					"title"		=> "Unable to retrieve issue data",
@@ -49,7 +51,8 @@ if($_POST) {
 			}
 			conditional_header("/extern/helpdesk/view?ID=$helpdeskId");
 			exit;
-		} else {
+		}
+		else {
 			//hmmm... invalid ID.
 			set_message_wrapper(array(
 				"title"		=> "Data Error",
@@ -60,7 +63,8 @@ if($_POST) {
 			conditional_header("/extern/helpdesk/");
 			exit;
 		}
-	} elseif($_POST && strtolower($_POST['submit']) == "go" && !isset($_POST['action'])) {
+	}
+	elseif($_POST && strtolower($_POST['submit']) == "go" && !isset($_POST['action'])) {
 		//they're CREATING an issue.
 		$result = $proj->helpdeskObj->create_record($_POST['data']);
 		
@@ -72,7 +76,8 @@ if($_POST) {
 				"message"	=> "Your issue has been added to the helpdesk.  You should receive an email shortly with confirmation.",
 				"type"		=> "notice"
 			));
-		} else {
+		}
+		else {
 			//something failed.
 			set_message_wrapper(array(
 				"title"		=> "Unable to Create Issue",
@@ -84,10 +89,12 @@ if($_POST) {
 		//send 'em packing.
 		conditional_header("/extern/helpdesk/view?ID=$result");
 		exit;
-	} elseif($_POST['action'] == "filter") {
+	}
+	elseif($_POST['action'] == "filter") {
 		if($_POST['reset_filter']) {
 			$page->ui->unset_cache("filter");
-		} else {
+		}
+		else {
 			//store the filter.
 			$page->ui->set_cache("filter", $_POST['filter']);
 		}
@@ -97,19 +104,16 @@ if($_POST) {
 		exit;
 	}
 }
-else
-{
+else {
 	$action = $page->ftsSections[2];
 	$helpdeskId = $_GET['ID'];
 	$page->add_template_var("id", $helpdeskId);
-	if(isset($_GET['sort']))
-	{
+	if(isset($_GET['sort'])) {
 		store_and_return_sorting($page, $_GET['sort'], $_GET['sortType']);
 		conditional_header($GLOBALS['PHP_SELF'] ."?from=re-sort&sortFieldWas=". $_GET['sort']);
 		exit;
 	}
-	elseif(($action == "view" || $action == "respond") && is_numeric($helpdeskId))
-	{
+	elseif(($action == "view" || $action == "respond") && is_numeric($helpdeskId)) {
 		$htmlTitle = "View Issue #$helpdeskId";
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 		
@@ -157,8 +161,7 @@ else
 		}
 		
 	}
-	elseif($action == "create")
-	{
+	elseif($action == "create") {
 		//set the html title.
 		$page->add_template_var("html_title", "Create a Helpdesk Issue");
 		$page->add_template_var("email", $_SESSION['email']);
@@ -172,8 +175,7 @@ else
 		$page->add_template_var("select_tags", $categoryList);
 		$page->add_template_var("id", $helpdeskId);
 	}
-	else
-	{
+	else {
 		
 		//================================================================================================================
 		$titleSub = "Show All";
@@ -186,7 +188,8 @@ else
 		if(is_array($filterData)) {
 			$page->add_template_var("filter_keyword", $filterData['keyword']);
 			$page->add_template_var("filter_field_". $filterData['field'] ."_selected", "selected");
-		} else {
+		}
+		else {
 			//no filter array... set one.
 			$filterData = array();
 			$page->ui->set_cache("filter", $filterData);

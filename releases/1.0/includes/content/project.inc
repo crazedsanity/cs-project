@@ -18,17 +18,20 @@ if($_POST) {
 		if($_POST['reset_filter']) {
 			$page->ui->unset_cache("$module/filter");
 			$result = "unset";
-		} else {
+		}
+		else {
 			//store the filter.
 			$page->ui->set_cache("$module/filter", $_POST['filter']);
 			$result = "set";
 		}
-	} elseif($_POST['ID'] == "new") {
+	}
+	elseif($_POST['ID'] == "new") {
 		unset($_POST['ID']);
 		$result = $proj->create_project($_POST['data']);
 		$extra = "/view?ID=". $result;
 		#exit;
-	} else {
+	}
+	else {
 		//TODO: check to see if somebody else has updated the project since this user viewed the page...
 		$updateRes = $proj->update_project($_POST['data']);
 		if($updateRes) {
@@ -38,7 +41,8 @@ if($_POST) {
 				"type"		=> "status"
 			));
 			$extra = "/view?ID=". $projectId;
-		} else {
+		}
+		else {
 			set_message_wrapper(array(
 				"title"		=> "Unable to Update",
 				"message"	=> "Something happened, and the update failed.  Sorry, dude.",
@@ -50,7 +54,8 @@ if($_POST) {
 	//okay, now send 'em to the right page.
 	conditional_header("/content/project". $extra);
 	exit;
-} else {
+}
+else {
 	
 	// +++ SETUP FILTERING +++ 
 	$filterData = $page->ui->get_cache("$module/filter");
@@ -77,13 +82,11 @@ if($_POST) {
 		
 	//the data will already show only items with the given status, so don't add that to the filter again.
 	$primaryFilterArr = array("status_id" => $filterData['status_id']);
-	if($filterData['status_id'] == "all")
-	{
+	if($filterData['status_id'] == "all") {
 		//no filter: we're showing everything.
 		unset($filterData['status_id']);
 	}
-	elseif(!isset($filterData['status_id']))
-	{
+	elseif(!isset($filterData['status_id'])) {
 		//this shows everything EXCEPT the "ended" items.
 		$filterData['status_id'] = $GLOBALS['STATUS_NOTENDED'];
 	}
@@ -94,7 +97,8 @@ if($_POST) {
 	if($_GET['action']) {
 		//it's a get var... use it.
 		$action = $_GET['action'];
-	} else {
+	}
+	else {
 		//get the action from our handy URL.
 		$action = $page->ftsSections[2];
 		
@@ -139,7 +143,8 @@ if($_POST) {
 
 
 	//attempting to view the details of a project, but had an invalid ID.
-	} elseif($action == "view" && !is_numeric($_GET['ID'])) {
+	}
+	elseif($action == "view" && !is_numeric($_GET['ID'])) {
 		set_message_wrapper(array(
 			"title"		=> "Invalid ID",
 			"message"	=> "An invalid ID was specified [". $_GET['ID'] ."].<BR>\n" .
@@ -151,7 +156,8 @@ if($_POST) {
 		
 		
 	//VIEW THE DETAILS OF A PROJECT!!!
-	} elseif($action == "view" && is_numeric($_GET['ID'])) {
+	}
+	elseif($action == "view" && is_numeric($_GET['ID'])) {
 		
 		$showAllProjects = FALSE;
 		$projectId = $page->ui->magic_cache("ID", NULL, "project","_GET,_SESSION");
@@ -225,48 +231,19 @@ if($_POST) {
 		
 		
 		//TODO: re-implement tags for projects.
-		/*/Display tags that can be added.
-		$availableTagsList = $proj->tagObj->get_available_tags_for_record($_GET['ID'], 1); 
-		debug_print($availableTagsList);
-		if(is_array($availableTagsList) && count($availableTagsList) > 0)
-		{
-			$myTagsList = array_as_option_list($availableTagsList,NULL,'select',$page->templateRows['addTag_option']);
-			$page->add_template_var("addTag_option", $myTagsList);
-		}
-		
-		//create the list of attached tags.
-		$associatedTags = $proj->tagObj->get_tags_for_record($_GET['ID'], 1);
-		if(is_array($associatedTags))
-		{
-			$assocTagsBaseRow = $page->templateRows['project_tag'];
-			foreach($associatedTags as $tagId=>$tagName)
-			{
-				$tagsRepArr = array
-				(
-					'tagId'		=> $tagId,
-					'tagName'	=> $tagName
-				);
-				$myRow .= mini_parser($assocTagsBaseRow, $tagsRepArr, '%%', '%%');
-			}
-			$page->add_template_var('project_tag', $myRow);
-			unset($associatedTags, $tagId, $tagName, $tagsRepArr);
-		}
-		#*/
 		
 		//re-add the "modify" button.
 		$page->add_template_var("modify_button", $page->templateRows['modify_button']);
 		
 		//format the "note" area.
-		if(strlen($detailsArr['subject']) > 0)
-		{
+		if(strlen($detailsArr['subject']) > 0) {
 			$detailsArr['subject'] = cleanString($detailsArr['subject'], "htmlspecial_nq");
 			$detailsArr['subject'] = cleanString($detailsArr['subject'], "htmlentity_plus_brackets");
 			$detailsArr['subject'] = $bbCodeParser->parseString($detailsArr['subject']);
 			$detailsArr['subject'] = preg_replace("/\n/", "<BR>\n", $detailsArr['subject']);
 			$detailsArr['subject'] = preg_replace("/\s\s/", "&nbsp;&nbsp;", $detailsArr['subject']);
 		}
-		else
-		{
+		else {
 			//no data.
 			$detailsArr['subject'] = '<font color="red"><b>[NO DATA]</b></font>';
 		}
@@ -284,8 +261,7 @@ if($_POST) {
 		$childFilter['ancestry_level'] = count(explode(':', $detailsArr['ancestry'])) +1;
 		$childrenString = $proj->get_children_string($projectId, $childFilter);
 		$childAncestryBoxSize = 100;
-		if(is_null($childrenString))
-		{
+		if(is_null($childrenString)) {
 			//set something.
 			$childrenString = '<font color="red"><b>[N/A]</b></font>';
 			$childAncestryBoxSize = 20;
@@ -359,7 +335,8 @@ if($_POST) {
 							unset($strikeThroughArr);
 						}
 						$repArr['font_weight'] = 'normal';
-					} elseif($type == "todo") {
+					}
+					elseif($type == "todo") {
 						$changeFontColor=TRUE;
 						//Making TODO stuff look purdy.  Boy.
 						if(!preg_match('/accepted/', strtolower($arr['status_text']))) {
@@ -402,16 +379,19 @@ if($_POST) {
 							
 							if(!$changeFontColor) {
 								//do nothing.
-							} elseif($myDeadline <= $today) {
+							}
+							elseif($myDeadline <= $today) {
 								$arr['deadline'] = '<font color="red"><b>'. $arr['deadline'] .'</b></font>';
-							} else {
+							}
+							else {
 								$arr['deadline'] = '<font color="green">'. $arr['deadline'] .'</font>';
 							}
 						}
 					
 						if($arr['status_id'] == 2) {
 							$repArr['font_weight'] = "bold";
-						} else {
+						}
+						else {
 							$repArr['font_weight'] = "normal";
 						}
 					}
@@ -444,7 +424,8 @@ if($_POST) {
 			if($expandAction == "open" && !isset($expandArr[$expandId])) {
 				//add it to the array!!!
 				$expandArr[$expandId] = $_GET['level'];
-			} elseif($expandAction == "close"  && isset($expandArr[$expandId])) {
+			}
+			elseif($expandAction == "close"  && isset($expandArr[$expandId])) {
 				//remove it, so it's not expanded anymore.
 				unset($expandArr[$expandId]);
 			}
@@ -498,7 +479,8 @@ function process_row(&$page, $projectArr, $expandArr, $baseRow, $level=0) {
 				if(isset($expandArr[$id])) {
 					$expand = "open";
 					$expand2= "close";
-				} else {
+				}
+				else {
 					$expand = "close";
 					$expand2="open";
 				}
@@ -538,7 +520,8 @@ function process_subProjects(&$page, &$proj, $filter) {
 		if(is_array($projectArr)) {
 			$myRow = process_row($page, $projectArr, $expandArr, $page->templateRows['project_row'], $level);
 			$page->add_template_var("subproject_". $id, $myRow);
-		} else {
+		}
+		else {
 			debug_print("process_subProjects(): id #$id disappeared...");
 			unset($expandArr[$id]);
 			$page->ui->set_cache("expandArr", $expandArr);

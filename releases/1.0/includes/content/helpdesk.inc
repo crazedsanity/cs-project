@@ -37,7 +37,8 @@ if($_POST) {
 					"message"	=> "Your issue was updated successfully.",
 					"type"		=> "status"
 				));
-			} else {
+			}
+			else {
 				set_message_wrapper(array(
 					"title"		=> "Update FAILURE",
 					"message"	=> "Update returned [$result].  Last error was [". $proj->helpdeskObj->lastError ."]",
@@ -46,8 +47,7 @@ if($_POST) {
 			}
 			$urlSection = "view";
 		}
-		elseif($action == "remark")
-		{
+		elseif($action == "remark") {
 			$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 			//only care about the remark data... if they changed something, well... they're stupid.
 			$useRespondLink = FALSE;
@@ -62,7 +62,8 @@ if($_POST) {
 					"message"	=> "Your thoughts have been dually noted in the database... or at least singly.  :D",
 					"type"		=> "status"
 				));
-			} else {
+			}
+			else {
 				set_message_wrapper(array(
 					"title"		=> "Unable to Add Remark",
 					"message"	=> "Dually noted, summarily denied.  Beotch.",
@@ -70,8 +71,7 @@ if($_POST) {
 				));
 			}
 		}
-		elseif($action == "solve")
-		{
+		elseif($action == "solve") {
 			//solve it & make sure they know if it was good or not.
 			$result = $proj->helpdeskObj->solve($helpdeskId, $_POST['solution']);
 			$extra = NULL;
@@ -83,7 +83,8 @@ if($_POST) {
 							"have been sent.",
 					"type"		=> "status"
 				));
-			} else {
+			}
+			else {
 				set_message_wrapper(array(
 					"title"		=> "Unable to Solve",
 					"message"	=> "Try using a longer explanation... or check the error log.",
@@ -91,12 +92,12 @@ if($_POST) {
 				));
 			}
 		}
-		elseif($action == "filter")
-		{
+		elseif($action == "filter") {
 			if($_POST['reset_filter']) {
 				$page->ui->unset_cache("helpdesk/filter");
 				$result = "unset";
-			} else {
+			}
+			else {
 				//store the filter.
 				$page->ui->set_cache("helpdesk/filter", $_POST['filter']);
 				$result = "set";
@@ -104,8 +105,7 @@ if($_POST) {
 			$byPassUrlExtras = TRUE;
 			unset($extra);
 		}
-		elseif($action == "re-open")
-		{
+		elseif($action == "re-open") {
 			//we'll update some fields, then remark the old solution.
 			$oldData = $proj->helpdeskObj->get_record($helpdeskId);
 			$oldSolution = $oldData['solution'];
@@ -120,8 +120,7 @@ if($_POST) {
 			$remarkRes = $proj->helpdeskObj->remark($helpdeskId, $oldSolution);
 			
 		}
-		else
-		{
+		else {
 			exit("invalid action: [$action]");
 		}
 	} elseif($_POST['submit'] == "go" && count($_POST['data']) > 1) {
@@ -141,11 +140,13 @@ if($_POST) {
 			if($_SESSION['goBackLink']) {
 				$byPassUrlExtras = TRUE;
 				$baseUrl = $_SESSION['goBackLink'];
-			} else {
+			}
+			else {
 				$helpdeskId = $result;
 				$urlExtrasArr['ID'] = $result;
 			}
-		} else {
+		}
+		else {
 			//something bad happened.
 			set_message_wrapper(array(
 				"title"		=> "",
@@ -153,7 +154,8 @@ if($_POST) {
 				"type"		=> "error"
 			));
 		}
-	} else {
+	}
+	else {
 		//the didn't post enough...
 		set_message_wrapper(array(
 			"title"		=> "FAILED TO CREATE ISSUE!",
@@ -183,7 +185,8 @@ if($_POST) {
 	}
 	conditional_header($url);
 	exit;
-} else {
+}
+else {
 	$helpdeskId = $_GET['ID'];
 	$action = $page->ftsSections[2];
 	
@@ -209,7 +212,8 @@ if($_POST) {
 		$page->add_template_var("email", $_SESSION['email']);
 		$page->add_template_var("linked_proj", cleanString($_GET['proj']),"numeric");
 		
-	} elseif($action == "view" && !is_numeric($helpdeskId)) {
+	}
+	elseif($action == "view" && !is_numeric($helpdeskId)) {
 		//missing ID: throw a message & send 'em packin'.
 		set_message_wrapper(array(
 			"title"		=> "Invalid ID Specified",
@@ -220,7 +224,8 @@ if($_POST) {
 		));
 		conditional_header("/". $page->ftsSections[0] ."/". $page->ftsSections[1]);
 		exit;
-	} elseif($action == "view" && is_numeric($helpdeskId)) {
+	}
+	elseif($action == "view" && is_numeric($helpdeskId)) {
 		$doNotRipRows = array("edit_form", "info_block", "access_block");
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 		create_page_title($page, array('title' => "Issue #". $helpdeskId .": \"". $helpdeskData['name'] ."\""));
@@ -255,7 +260,8 @@ if($_POST) {
 		if($helpdeskData['status_id'] == 4) {
 			//allow the current user to re-open this issue.
 			$doNotRipRows[] = "reopen_button";
-		} else {
+		}
+		else {
 			if(($assignedStr == $_SESSION['contact_id']) || ($assignedStr == "" || is_null($assignedStr))) {
 				//well, we can show 'em the update/modify button.
 				$doNotRipRows[] = "update_button";
@@ -265,7 +271,8 @@ if($_POST) {
 					$doNotRipRows[] = "owner_options";
 				}
 			//if they're the owner, show 'em more options...
-			} elseif($_SESSION['isGroupOwner']) {
+			}
+			elseif($_SESSION['isGroupOwner']) {
 				//we got an OWNER!!!
 				$doNotRipRows[] = "owner_options";
 			}
@@ -349,8 +356,7 @@ if($_POST) {
 		
 		//Display tags that can be added.
 		$availableTagsList = $proj->tagObj->get_available_tags_for_record($helpdeskData['record_id'], 3);
-		if(is_array($availableTagsList) && count($availableTagsList) > 0)
-		{
+		if(is_array($availableTagsList) && count($availableTagsList) > 0) {
 			$myTagsList = array_as_option_list($availableTagsList,NULL,'select',$page->templateRows['addTag_option']);
 			$page->add_template_var("add_tag_list", $myTagsList);
 		}
@@ -371,7 +377,8 @@ if($_POST) {
 			$page->add_template_var('issueNotes', $issueNotesRow);
 		}
 		
-	} else {
+	}
+	else {
 		//change the content of the page properly.
 		$page->set_all_block_rows("content", array("helpdesk_search"));
 		
@@ -379,24 +386,22 @@ if($_POST) {
 		if(is_array($filterData)) {
 			$page->add_template_var("filter_keyword", $filterData['keyword']);
 			$page->add_template_var("filter_field_". $filterData['field'] ."_selected", "selected");
-		} else {
+		}
+		else {
 			//no filter array... set one.
 			$filterData = array();
 			$page->ui->set_cache("helpdesk/filter", $filterData);
 		}
 		$page->add_template_var("filter_status_id_". $filterData['status_id'] ."_selected", "selected");
 		
-		if($filterData['status_id'] == 'all')
-		{
+		if($filterData['status_id'] == 'all') {
 			$primaryFilterArr = NULL;
 		}
-		elseif(is_numeric($filterData['status_id']))
-		{
+		elseif(is_numeric($filterData['status_id'])) {
 			//the data will already show only items with the given status, so don't add that to the filter again.
 			$primaryFilterArr = array("status_id" => $filterData['status_id']);
 		}
-		else
-		{
+		else {
 			$primaryFilterArr = array();
 		}
 		$filter = $filterData;

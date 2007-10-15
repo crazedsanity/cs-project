@@ -430,8 +430,7 @@ class logsClass {
 	
 	
 	//=========================================================================
-	public function get_reports($startPeriod, $endPeriod, array $extraCrit=NULL)
-	{
+	public function get_reports($startPeriod, $endPeriod, array $extraCrit=NULL) {
 		//build the query.
 		$timePeriod = array(
 			'start' => $startPeriod,
