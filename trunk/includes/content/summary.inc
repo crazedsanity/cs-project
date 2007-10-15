@@ -95,8 +95,7 @@ if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 	$baseRow = $page->templateRows['helpdesk_row'];
 	foreach($helpdeskArr as $helpdeskId=>$subData) {
 		unset($deleteLink);
-		if($subData['von'] == $_SESSION['uid'])
-		{
+		if($subData['von'] == $_SESSION['uid']) {
 			$deleteLink = mini_parser($baseDeleteLink, $subData, "%%", "%%");
 		}
 	
@@ -164,7 +163,8 @@ function process_row(&$page, $projectArr, $expandArr, $baseRow, $level=0) {
 				if(isset($expandArr[$id])) {
 					$expand = "open";
 					$expand2= "close";
-				} else {
+				}
+				else {
 					$expand = "close";
 					$expand2="open";
 				}

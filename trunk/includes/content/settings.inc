@@ -61,7 +61,8 @@ if($_POST) {
 					"message"	=> "Your password was changed successfully [$changePassResult].",
 					"type"		=> "status"
 				));
-			} else {
+			}
+			else {
 				//FAILED!
 				set_message_wrapper(array(
 					"title"		=> "Error Changing Password",

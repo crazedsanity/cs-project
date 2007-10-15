@@ -60,7 +60,8 @@ if($_SERVER['PHP_SELF'] == "/extern/helpdesk_cust.php") {
 	}
 	conditional_header($url);
 	exit;
-} elseif(!isset($page->ftsSections[1])) {
+}
+elseif(!isset($page->ftsSections[1])) {
 	//they went to a url like "/extern/".  
 	set_message_wrapper(array(
 		"title"		=> "Automatic Redirection",

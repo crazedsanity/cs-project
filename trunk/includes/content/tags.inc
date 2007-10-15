@@ -106,8 +106,7 @@ elseif($_POST) {
 	debug_print($_POST);
 	$goHere = $_SERVER['PHP_SELF'];
 	
-	if($_POST['new_tag'])
-	{
+	if($_POST['new_tag']) {
 		//check for pre-existing tags of that name.
 		$myTagList = $proj->tagObj->get_tag_list();
 		$existingTagNameId = array_search($_POST['new_tag'], $myTagList);
@@ -132,8 +131,7 @@ elseif($_POST) {
 			);
 		}
 		elseif(is_numeric($newTagNameId)) {
-			$messageArr = array
-			(
+			$messageArr = array(
 				'title'		=> 'New Tag Created Successfully',
 				'message'	=> "Your tag, \"". $_POST['new_tag'] ."\" (". $newTagNameId ."), was " .
 						"created successfully.",
@@ -141,8 +139,7 @@ elseif($_POST) {
 			);
 		}
 		else {
-			$messageArr = array
-			(
+			$messageArr = array(
 				'title'		=> 'Unable to Create Tag',
 				'message'	=> "Error reported: ". $proj->tagObj->lastError,
 				'type'		=> 'error'
@@ -167,15 +164,13 @@ $showData = TRUE;
 $showTagNameId = $sessionCache->get_cache('tagNameId');
 
 
-if($_GET['move'])
-{
+if($_GET['move']) {
 	//move the tag, & then redirect.
 	
 	$result = $proj->tagObj->update_record_position_for_tag($_GET['tagId'], $showTagNameId, $_GET['move']);
 	
 	//set a message & redirect.
-	$messageArr = array
-	(
+	$messageArr = array(
 		'title'		=> 'Record Moved',
 		'message'	=> "Moving the record appears to have been successful ($result).",
 		'type'		=> 'notice'
@@ -185,16 +180,13 @@ if($_GET['move'])
 	conditional_header($goHere);
 	exit;
 }
-elseif(isset($_GET['showTag']) && is_numeric($_GET['showTag']))
-{
+elseif(isset($_GET['showTag']) && is_numeric($_GET['showTag'])) {
 	//Store it.
 	$sessionCache->set_cache('tagNameId', $_GET['showTag']);
 }
-elseif(!is_array($myTagList) || !count($myTagList))
-{
+elseif(!is_array($myTagList) || !count($myTagList)) {
 	//no tags.
-	$messageArr = array
-	(
+	$messageArr = array(
 		'title'		=> 'No Tags Available',
 		'message'	=> "No tags have been created, or they've all been deleted. " .
 					"Please create some, or stop viewing this page. ;) ",
@@ -203,17 +195,14 @@ elseif(!is_array($myTagList) || !count($myTagList))
 	set_message_wrapper($messageArr);
 	$showData = FALSE;
 }
-elseif(!is_numeric($showTagNameId) || is_null($showTagNameId))
-{
+elseif(!is_numeric($showTagNameId) || is_null($showTagNameId)) {
 	$userSawNotice = $sessionCache->get_cache("no_tag_specified");
 	
 	$tagList = array_keys($myTagList);
 	$showTagNameId = $tagList[0];
 	
-	if(!$userSawNotice)
-	{
-		$messageArr = array
-		(
+	if(!$userSawNotice) {
+		$messageArr = array(
 			'title'		=> 'No Tag Specified',
 			'message'	=> "For your convenience, records for the first available tag, " .
 							"\"". $myTagList[$showTagNameId] ."\" ($showTagNameId) are currently displayed.  " .
@@ -229,15 +218,13 @@ elseif(!is_numeric($showTagNameId) || is_null($showTagNameId))
 	//store the id into the session.
 	$sessionCache->set_cache("tagNameId", $showTagNameId);
 }
-elseif(is_numeric($showTagNameId) && !isset($myTagList[$showTagNameId]))
-{
+elseif(is_numeric($showTagNameId) && !isset($myTagList[$showTagNameId])) {
 	//pick the first item in the list.
 	$tagList = array_keys($myTagList);
 	$showTagNameId = $tagList[0];
 	
 	//tell 'em why they're probably not seeing what they expect to.
-	$messageArr = array
-	(
+	$messageArr = array(
 		'title'		=> 'Invalid Tag',
 		'message'	=> "You've specified a tag that is either invalid or no longer exists.  For your " .
 						"convenience, the first available tag, \"". $myTagList[$showTagNameId] ."\" " .
@@ -254,8 +241,7 @@ elseif(is_numeric($showTagNameId) && !isset($myTagList[$showTagNameId]))
 //retrieve the (possibly updated) setting
 $showTagNameId = $sessionCache->get_cache('tagNameId');
 
-if($showData)
-{
+if($showData) {
 	//get data for this tag.
 	$data = $proj->tagObj->get_records_for_tag($showTagNameId);
 	
@@ -269,13 +255,11 @@ if($showData)
 	
 	//now list all records for this tag (assign the "no records" row, then check).
 	$tagRow = $page->templateRows['tag_row__noRecords'];
-	if(count($data))
-	{
+	if(count($data)) {
 		//got data.
 		$tagRow = "";
 		$baseRow = $page->templateRows['tag_row'];
-		foreach($data as $index=>$subData)
-		{
+		foreach($data as $index=>$subData) {
 			//add some things for alternating row colors.
 			$subData['rowColor'] = swapValue($rowColor1, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
 			$subData['rowColor2'] = swapValue($rowColor2,"#D5D5D5", "#C2C2C2");
@@ -289,16 +273,13 @@ if($showData)
 	//display the list of available tags.
 	$tagListBaseRow = $page->templateRows['availableTagsList'];
 	$myRow = "";
-	foreach($myTagList as $tagNameId=>$tagName)
-	{
+	foreach($myTagList as $tagNameId=>$tagName) {
 		$tagListBaseRow = $page->templateRows['availableTagsList'];
-		if($tagNameId == $showTagNameId)
-		{
+		if($tagNameId == $showTagNameId) {
 			//switch to a row without the link, so it's more apparent what's selected.
 			$tagListBaseRow = $page->templateRows['availableTagsList_noLink'];
 		}
-		$repArr = array
-		(
+		$repArr = array(
 			'tagNameId'	=> $tagNameId,
 			'tagName'	=> $tagName
 		);
