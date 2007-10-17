@@ -35,6 +35,9 @@ abstract class dbAbstract {
 				$retval = TRUE;
 			}
 			else {
+				if(strlen($this->lastError)) {
+					throw new exception(__METHOD__ .": ". $this->lastError ."<BR>\nSQL::: ". $sql);
+				}
 				$retval = FALSE;
 			}
 			
