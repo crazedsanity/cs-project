@@ -105,3 +105,17 @@ function cs_addAttribute(myName) {
 }
 
 
+function cs_contactDelAttrib(attribName) {
+	var inputObj = document.getElementById('contactData_' + attribName);
+	var checkObj = document.getElementById('contactData_del_' + attribName);
+	
+	if(checkObj.checked == true) {
+		inputObj.disabled = true;
+	}
+	else {
+		inputObj.disabled = false;
+	}
+	
+}//end cs_contactDelAttrib()
+
+

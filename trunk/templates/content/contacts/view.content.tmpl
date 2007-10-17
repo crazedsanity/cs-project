@@ -3,25 +3,44 @@
 <input type="HIDDEN" name="contact_id" value="{contact_id}">
 <table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
 	<tr>
-		<td colspan="2">
+		<td colspan="3">
 			<h1 style="display:inline">{company}</h1><BR>
 			<center><div style="display:inline;text-align:center;">{fname} {lname} (<i>{email}</i>)</div></center>
 		</td>
 	</tr>
 	
 	<tr>
-		<th style="border:solid #000 1px;" colspan="2">Contact Attributes</th>
+		<th style="border:solid #000 1px;" colspan="3">Contact Attributes</th>
+	</tr>
+	
+	<tr>
+		<th style="border-left:solid #000 1px;border-bottom:dashed #999 1px;">Name</th>
+		
+		<th style="border-bottom:dashed #999 1px;border-left:dotted #999 1px; border-right:dotted #999 1px;">Value</th>
+		
+		<th style="border-right:solid #000 1px;border-bottom:dashed #999 1px;">[DELETE]</th>
 	</tr>
 	
 <!-- BEGIN attributeRow -->
 	<tr>
 		<th style="border-left:solid #000 1px;">{name}</th>
 		
-		<td style="border-right:solid #000 1px;"><input name="contactData[{name}]" value="{value}"></td>
+		<td><input id="contactData_{name}" name="contactData[{name}]" value="{value}"></td>
+		
+		<td style="border-right:solid #000 1px;">
+			&nbsp;{deletable}
+<!-- BEGIN delAttrib -->
+			<div style="display:inline;" id="contactData_div_{name}">
+			<input id="contactData_del_{name}" name="delAttrib[]" value="{name}" type="checkbox" onChange="cs_contactDelAttrib('{name}');">
+			</div>
+<!-- END delAttrib -->
+<!-- BEGIN noDelAttrib --><font color="red">Cannot delete</font>
+<!-- END noDelAttrib -->
+		</td>
 	</tr>
 <!-- END attributeRow -->
 	<tr>
-		<td colspan="2" align="center" style="border-top:solid #000 1px;">
+		<td colspan="3" align="center" style="border-top:solid #000 1px;">
 			<input type="HIDDEN" name="action" value="update">
 			&nbsp;<input id="submitButton" type="submit" value="Update Contact">&nbsp;
 		</td>
