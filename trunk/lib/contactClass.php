@@ -86,6 +86,7 @@ class contactClass extends dbAbstract {
 			$data = $this->db->farray_fieldnames('contact_id', NULL, 0);
 			
 			foreach($data as $conId=>$subData) {
+				$this->set_contact_id($conId);
 				$attribArr = $this->get_contact_attributes($conId);
 				if(is_array($attribArr)) {
 					$value = array_merge($attribArr, $subData);
@@ -136,9 +137,6 @@ class contactClass extends dbAbstract {
 			throw new exception(__METHOD__ .": contactId is not valid (". $this->contactId .")");
 		}
 		
-		debug_print($retval,1);
-		exit;
-		
 		return($retval);
 	}//end get_contact()
 	//=========================================================================
@@ -164,8 +162,12 @@ class contactClass extends dbAbstract {
 				$this->gfObj->string_from_array($update, 'update') ." WHERE " .
 				$this->gfObj->string_from_array($criteria, 'select');
 				
-debug_print($sql);
-exit;
+			if($this->run_sql($sql)) {
+				$retval = TRUE;
+			}
+			else {
+				$retval = FALSE;
+			}
 		}
 		else {
 			throw new exception(__METHOD__ .": failed to update attribute...?");
@@ -218,6 +220,8 @@ exit;
 			$this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 		
 		if($this->run_sql($sql)) {
+			//now retrieve data about this attribute...
+			$retval = $this->get_attribute_data($attribName);
 		}
 		else {
 			//didn't insert...?
@@ -241,6 +245,13 @@ exit;
 		
 		return($retval);
 	}//end clean_attribute_name()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function mass_update_contact() {
+	}//end mass_update_contact()
 	//=========================================================================
 	
 	
