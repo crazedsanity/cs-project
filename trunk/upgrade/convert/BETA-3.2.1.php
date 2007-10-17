@@ -411,6 +411,7 @@ class convertDatabase {
 	private function fix_stuff() {
 		$this->run_sql("UPDATE record_type_table SET module='helpdesk' WHERE module='rts'");
 		$this->run_sql("UPDATE pref_option_table SET effective_value='helpdesk' WHERE effective_value='rts'");
+		$this->run_sql("UPDATE pref_type_table SET name='sorting_helpdesk' WHERE name='sorting_rts'");
 		
 		$sequenceList = array(
 			'attribute_table_attribute_id_seq',
