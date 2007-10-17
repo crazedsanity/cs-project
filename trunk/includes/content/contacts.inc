@@ -21,12 +21,11 @@ if($_POST) {
 	exit;
 	
 	if(strlen($_POST['action']) && is_numeric($_POST['contact_id'])) {
+		$contactObj->set_contact_id($_POST['contact_id']);
 		switch($_POST['action']) {
 			
 			case 'update': {
-				foreach($_POST['contactData'] as $name=>$value) {
-					
-				}
+				$contactObj->mass_update_contact($_POST['contactData']);
 			}
 			break;
 			
@@ -58,7 +57,6 @@ else {
 		try{
 			$contactObj->set_contact_id($contactId);
 			$contactDetails = $contactObj->get_contact();
-			$page->gfObj->debug_print($contactDetails);
 			$page->rip_all_block_rows();
 			
 			//set the main details.
@@ -68,7 +66,8 @@ else {
 			}
 			
 			$editableAttributes = $contactDetails;
-			unset($editableAttributes['contact_id']);
+			$deletableAttributes = $contactDetails;
+			unset($editableAttributes['contact_id'], $deletableAttributes['fname'], $deletableAttributes['lname']);
 			
 			$attributeFormRows = "";
 			$baseRow = $page->templateRows['attributeRow'];
@@ -77,6 +76,15 @@ else {
 					'name'	=> $name,
 					'value'	=> $value
 				);
+				
+				#if(in_array($name, $deletableAttributes)) {
+				if($name == 'fname' || $name == 'lname') {
+					$repArr['deletable'] = $page->templateRows['noDelAttrib'];
+				}
+				else {
+					$repArr['deletable'] = $page->gfObj->mini_parser($page->templateRows['delAttrib'], $repArr, '{', '}');
+				}
+				
 				$attributeFormRows .= $page->gfObj->mini_parser($baseRow, $repArr, '{', '}');
 			}
 			$page->add_template_var('attributeRow', $attributeFormRows);
