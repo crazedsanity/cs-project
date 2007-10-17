@@ -187,9 +187,6 @@ class upgrade {
 		}
 		else {
 			$this->upgrade_in_progress(TRUE);
-			//attempt to create the lockfile.
-			//TODO: to overcome filesystem permission issues, consider adding something to the config.xml to indicate it's locked.
-			//TODO: stop lying about creating the lockfile.
 			$this->fsObj->cd("/");
 			$createFileRes = 1;
 			
@@ -216,10 +213,11 @@ class upgrade {
 				$upgradeList = $this->get_upgrade_list();
 				
 				$i=0;
+				$this->gfObj->debug_print(__METHOD__ .": starting to run through the upgrade list...");
 				$this->db->beginTrans();
 				foreach($upgradeList as $fromVersion=>$toVersion) {
 					$this->gfObj->debug_print(__METHOD__ .": upgrading from ". $fromVersion ." to ". $toVersion ."... ");
-					$this->do_single_upgrade($toVersion);
+					$this->do_single_upgrade($fromVersion);
 					$this->get_database_version();
 					$i++;
 				}
@@ -246,6 +244,7 @@ class upgrade {
 	public function upgrade_in_progress($makeItSo=FALSE) {
 		$retval = FALSE;
 		if($makeItSo === TRUE) {
+			$this->get_database_version();
 			$details = 'Upgrade from '. $this->databaseVersion .' started at '. date('Y-m-d H:i:s');
 			$this->update_config_file('WORKINGONIT', $details);
 			$retval = TRUE;
@@ -431,6 +430,7 @@ class upgrade {
 	private function do_single_upgrade($targetVersion) {
 		//Use the "matching_syntax" data in the upgrade.xml file to determine the filename.
 		$versionIndex = "V". $targetVersion;
+		$this->gfObj->debug_print(__METHOD__ .": versionIndex=(". $versionIndex ."), config MATCHING::: ". $this->gfObj->debug_print($this->config['MATCHING'],0));
 		if(!isset($this->config['MATCHING'][$versionIndex])) {
 			//version-only upgrade.
 			$this->update_database_version($this->versionFileVersion);
@@ -441,23 +441,15 @@ class upgrade {
 			
 			$upgradeData = $this->config['MATCHING'][$versionIndex];
 			
-			if(isset($upgradeData['TARGET_VERSION'])) {
+			if(isset($upgradeData['TARGET_VERSION']) && count($upgradeData) > 1) {
 				$this->newVersion = $upgradeData['TARGET_VERSION'];
-				//now, figure out if it's a simple version upgrade, or if it requires
-				//	a script to do the deed.
-				if(count($upgradeData) > 1) {
-					if(isset($upgradeData['SCRIPT_NAME']) && isset($upgradeData['CLASS_NAME']) && isset($upgradeData['CALL_METHOD'])) {
-						//good to go; it's a scripted upgrade.
-						$this->do_scripted_upgrade($upgradeData);
-						$this->update_database_version($upgradeData['TARGET_VERSION']);
-					}
-					else {
-						throw new exception(__METHOD__ .": not enough information to run scripted upgrade for ". $versionIndex);
-					}
+				if(isset($upgradeData['SCRIPT_NAME']) && isset($upgradeData['CLASS_NAME']) && isset($upgradeData['CALL_METHOD'])) {
+					//good to go; it's a scripted upgrade.
+					$this->do_scripted_upgrade($upgradeData);
+					$this->update_database_version($upgradeData['TARGET_VERSION']);
 				}
 				else {
-					//version-only upgrade.
-					$this->update_database_version($upgradeData['TARGET_VERSION']);
+					throw new exception(__METHOD__ .": not enough information to run scripted upgrade for ". $versionIndex);
 				}
 			}
 			else {
@@ -475,6 +467,7 @@ class upgrade {
 	 * so the version there is consistent with all the others.
 	 */
 	protected function update_database_version($newVersionString) {
+		$this->gfObj->debug_print(__METHOD__ .": setting (". $newVersionString .")");
 		$versionArr = $this->parse_version_string($newVersionString);
 		
 		$queryArr = array();
@@ -551,6 +544,8 @@ class upgrade {
 	//=========================================================================
 	private function do_scripted_upgrade(array $upgradeData) {
 		$myConfigFile = $upgradeData['SCRIPT_NAME'];
+		
+		$this->gfObj->debug_print(__METHOD__ .": script name=(". $myConfigFile .")");
 		
 		//we've got the filename, see if it exists.
 		$fileName = UPGRADE_DIR .'/'. $myConfigFile;
@@ -748,7 +743,7 @@ class upgrade {
 							}
 							else {
 								//umm... they're identical???  LOGIC HAS FAILED ME ALTOGETHER!!!
-								throw new exception(__METHOD__ .": seems like versions are identical (". $version ." === .". $checkIfHigher .")");
+								throw new exception(__METHOD__ .": seems like versions are identical (". $version ." === ". $checkIfHigher .")");
 							}
 						}
 						else {
@@ -763,13 +758,14 @@ class upgrade {
 						}
 						
 						$this->gfObj->debug_print(__METHOD__ .": retval=(". $retval .")");
-						exit;
 					}
 					elseif(strlen($curVersionSuffix) && !strlen($checkVersionSuffix)) {
 						//i.e. "1.0.0-BETA1" to "1.0.0" --->>> OKAY!
+						$retval = TRUE;
 					}
 					elseif(!strlen($curVersionSuffix) && strlen($checkVersionSuffix)) {
 						//i.e. "1.0.0" to "1.0.0-BETA1" --->>> NOT ACCEPTABLE!
+						$this->gfObj->debug_print(__METHOD__ .": from (". $version .") to (". $checkIfHigher .") isn't acceptable...?");
 					}
 				}
 				else {
@@ -812,7 +808,7 @@ class upgrade {
 				if($newVersion == $matchVersion) {
 					throw new exception(__METHOD__ .": there's a config to upgrade this version to a higher one...? ". $this->gfObj->debug_print($data,0));
 				}
-				elseif(!$this->is_higher_version($newVersion, $matchVersion)) {
+				elseif(!$this->is_higher_version($matchVersion, $newVersion)) {
 					$retval[$lastVersion] = $matchVersion;
 					$lastVersion = $matchVersion;
 				}

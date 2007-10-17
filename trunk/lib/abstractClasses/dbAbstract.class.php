@@ -20,12 +20,13 @@ abstract class dbAbstract {
 	public $lastNumrows = NULL;
 	
 	protected $db;
+	protected $fsObj;
 	
 	abstract public function __construct(cs_phpDB &$db);
 	
 	
 	//=========================================================================
-	final public function run_sql($sql) {
+	public function run_sql($sql) {
 		
 		if(strlen($sql)) {
 			$this->lastNumrows = $this->db->exec($sql);
@@ -48,6 +49,30 @@ abstract class dbAbstract {
 		
 		return($retval);
 	}//end run_sql()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	final public function run_sql_file($filename) {
+		if(!is_object($this->fsObj)) {
+			$this->fsObj = new cs_fileSystemClass;
+		}
+		
+		$fileContents = $this->fsObj->read($filename);
+		$this->db->beginTrans();
+		try {
+			$this->run_sql($fileContents);
+			$this->db->commitTrans();
+			$retval = TRUE;
+		}
+		catch(exception $e) {
+			$this->db->rollbackTrans();
+			$retval = FALSE;
+		}
+		
+		return($retval);
+	}//end run_sql_file()
 	//=========================================================================
 	
 }
