@@ -72,3 +72,36 @@ function setup__enableInput(prefixName, selectedOption) {
 	var submitButton = document.getElementById(submitButtonName);
 	submitButton.style.display = 'inline';
 }
+
+
+function cs_addAttribute(myName) {
+	var attribValObj	= document.getElementById('addAttribute_value');
+	var attribNameObj	= document.getElementById('addAttribute_name');
+	var newAttribObj	= document.getElementByName('addAttribute_new');
+	
+	alert(newAttribObj);
+	
+	if(myName.length > 0) {
+		if(myName == '**new**') {
+			attribNameObj.type = 'text';
+			
+			newAttribObj.type='text';
+		}
+		else {
+			attribNameObj.innerHTML = myName;
+			newAttribObj.type='HIDDEN';
+			newAttribObj.value=null;
+		}
+		attribValObj.disabled = false;
+	}
+	else {
+		attribValObj.disabled = true;
+		attribNameObj.innerHTML = '<b>Choose one...</b>';
+		newAttribObj.type="HIDDEN";
+		newAttribObj.value=null;
+	}
+	//document.getElementById('addAttribute_value').disabled = false;
+	//document.getElementById('addAttribute_name').innerHTML = myName;
+}
+
+

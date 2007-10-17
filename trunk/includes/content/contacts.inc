@@ -17,18 +17,80 @@ $contactObj = new contactClass($page->db);
 
 if($_POST) {
 	//TODO: handle changes.
+	debug_print($_POST);
+	exit;
+	
+	if(strlen($_POST['action']) && is_numeric($_POST['contact_id'])) {
+		switch($_POST['action']) {
+			
+			case 'update': {
+				foreach($_POST['contactData'] as $name=>$value) {
+					
+				}
+			}
+			break;
+			
+			default: {
+				$page->set_message_wrapper(array(
+					'title'		=> "Invalid Action",
+					'message'	=> "The requested action, [". $_POST['action'] ."], is invalid.",
+					'type'		=> "error"
+				));
+			}
+		}
+	}
+	else {
+		$page->set_message_wrapper(array(
+			'title'		=> "Insufficient Information",
+			'message'	=> "The requested update could not be handled due to insufficient information.",
+			'type'		=> "error"
+		));
+	}
+	
+	$page->conditional_header('/content/contacts/view/'. $_POST['contact_id']);
 }
 else {
 	if(count($sectionArr) == 4 && $sectionArr[2] == 'view') {
 		$contactId = $sectionArr[3];
 	}
 	
-	if(is_numeric($_GET['contactId'])) {
-		
-		//TODO: parse contact details.
+	if(is_numeric($contactId)) {
+		try{
+			$contactObj->set_contact_id($contactId);
+			$contactDetails = $contactObj->get_contact();
+			$page->gfObj->debug_print($contactDetails);
+			$page->rip_all_block_rows();
+			
+			//set the main details.
+			$mainDetails = array('contact_id', 'fname', 'lname', 'company', 'email');
+			foreach($mainDetails as $name) {
+				$page->add_template_var($name, $contactDetails[$name]);
+			}
+			
+			$editableAttributes = $contactDetails;
+			unset($editableAttributes['contact_id']);
+			
+			$attributeFormRows = "";
+			$baseRow = $page->templateRows['attributeRow'];
+			foreach($editableAttributes as $name=>$value) {
+				$repArr=array(
+					'name'	=> $name,
+					'value'	=> $value
+				);
+				$attributeFormRows .= $page->gfObj->mini_parser($baseRow, $repArr, '{', '}');
+			}
+			$page->add_template_var('attributeRow', $attributeFormRows);
+		}
+		catch(exception $e) {
+			$page->set_message_wrapper(array(
+				'title'		=> "Error Encountered",
+				'message'	=> "Failed to retrieve data: ". $e->getMessage(),
+				'type'		=> "fatal"
+			));
+		}
 	}
 	else {
-		$page->rip_all_block_rows('content');
+		$page->rip_all_block_rows();
 		$contactListing = $contactObj->get_all_contacts();
 		
 		$baseRow = $page->templateRows['dataRow'];

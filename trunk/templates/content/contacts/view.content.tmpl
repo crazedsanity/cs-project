@@ -1,0 +1,30 @@
+
+<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
+<input type="HIDDEN" name="contact_id" value="{contact_id}">
+<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
+	<tr>
+		<td colspan="2">
+			<h1 style="display:inline">{company}</h1><BR>
+			<center><div style="display:inline;text-align:center;">{fname} {lname} (<i>{email}</i>)</div></center>
+		</td>
+	</tr>
+	
+	<tr>
+		<th style="border:solid #000 1px;" colspan="2">Contact Attributes</th>
+	</tr>
+	
+<!-- BEGIN attributeRow -->
+	<tr>
+		<th style="border-left:solid #000 1px;">{name}</th>
+		
+		<td style="border-right:solid #000 1px;"><input name="contactData[{name}]" value="{value}"></td>
+	</tr>
+<!-- END attributeRow -->
+	<tr>
+		<td colspan="2" align="center" style="border-top:solid #000 1px;">
+			<input type="HIDDEN" name="action" value="update">
+			&nbsp;<input id="submitButton" type="submit" value="Update Contact">&nbsp;
+		</td>
+	</tr>
+</table>
+</form>

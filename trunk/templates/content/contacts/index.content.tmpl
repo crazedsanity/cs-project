@@ -13,8 +13,7 @@
 	
 <!-- BEGIN dataRow -->
 	<tr style="background-color: {rowColor};" onmouseover="this.style.backgroundColor = '#ffffff'" 
-	onmouseout="this.style.backgroundColor ='{rowColor2}'" 
-	onclick="location.href = '/content/{module}/view/{contact_id}'">
+	onmouseout="this.style.backgroundColor ='{rowColor2}'">
 	
 		<td align="right" style="padding-right:5px;">
 			<a href="/content/{module}/view/{contact_id}">
@@ -22,11 +21,11 @@
 			<img border="0" src="/images/icon_link_new_window.gif"></a>
 		</td>
 		
-		<td>{company}</td>
+		<td onclick="location.href = '/content/{module}/view/{contact_id}'"><b>{company}</b></td>
 		
-		<td>{fname} {lname}</td>
+		<td onclick="location.href = '/content/{module}/view/{contact_id}'">{fname} {lname}</td>
 		
-		<td>{email}</td>
+		<td onclick="location.href = '/content/{module}/view/{contact_id}'">{email}</td>
 	</tr>
 <!-- END dataRow -->
 
