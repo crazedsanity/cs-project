@@ -1,5 +1,16 @@
 
-<form method="POST" onSubmit="new Effect.DropOut('submitButton');">
+<form method="POST" onSubmit="new Effect.DropOut(submitButton_main);">
+<input type="HIDDEN" name="contact_id" value="{contact_id}">
+<table border="0" cellspacing="0" cellpadding="3">
+	<tr>
+		<th></th>
+	</tr>
+</table>
+</form>
+
+
+
+<form method="POST" onSubmit="new Effect.DropOut('submitButton_attributes');">
 <input type="HIDDEN" name="contact_id" value="{contact_id}">
 <table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
 	<tr>
@@ -42,7 +53,7 @@
 	<tr>
 		<td colspan="3" align="center" style="border-top:solid #000 1px;">
 			<input type="HIDDEN" name="action" value="update">
-			&nbsp;<input id="submitButton" type="submit" value="Update Contact">&nbsp;
+			&nbsp;<input id="submitButton_attributes" type="submit" value="Update Contact">&nbsp;
 		</td>
 	</tr>
 </table>

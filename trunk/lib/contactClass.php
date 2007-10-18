@@ -78,8 +78,10 @@ class contactClass extends dbAbstract {
 	
 	//=========================================================================
 	public function get_all_contacts(array $critArr=NULL, array $primaryOrder=NULL, array $filterArr=NULL) {
-		$sql = "SELECT contact_id, fname, lname FROM contact_table ". 
-			$this->gfObj->string_from_array($primaryOrder, 'order');
+		$sql = "SELECT c.contact_id, c.company, c.fname, c.lname, ce.email " .
+			"FROM contact_table AS c INNER JOIN contact_email_table AS ce " .
+			"USING (contact_email_id) ". 
+		$this->gfObj->string_from_array($primaryOrder, 'order');
 			
 		if($this->run_sql($sql)) {
 			$retval = array();
@@ -113,7 +115,9 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	public function get_contact() {
 		if(is_numeric($this->contactId)) {
-			$sql = "SELECT contact_id, fname, lname FROM contact_table WHERE contact_id=". $this->contactId;
+			$sql = "SELECT c.contact_id, c.company, c.fname, c.lname, ce.email " .
+				"FROM contact_table AS c INNER JOIN contact_email_table AS ce USING (contact_email_id) " .
+				"WHERE c.contact_id=". $this->contactId;
 			
 			if($this->run_sql($sql)) {
 				$retval = $this->db->farray_fieldnames();
