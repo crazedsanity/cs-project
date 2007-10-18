@@ -77,14 +77,6 @@ else {
 					'value'	=> $value
 				);
 				
-				#if(in_array($name, $deletableAttributes)) {
-				if($name == 'fname' || $name == 'lname') {
-					$repArr['deletable'] = $page->templateRows['noDelAttrib'];
-				}
-				else {
-					$repArr['deletable'] = $page->gfObj->mini_parser($page->templateRows['delAttrib'], $repArr, '{', '}');
-				}
-				
 				$attributeFormRows .= $page->gfObj->mini_parser($baseRow, $repArr, '{', '}');
 			}
 			$page->add_template_var('attributeRow', $attributeFormRows);

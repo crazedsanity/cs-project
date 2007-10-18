@@ -1,24 +1,56 @@
 
-<form method="POST" onSubmit="new Effect.DropOut(submitButton_main);">
+<form method="POST" onSubmit="new Effect.DropOut(submitButton);">
 <input type="HIDDEN" name="contact_id" value="{contact_id}">
-<table border="0" cellspacing="0" cellpadding="3">
-	<tr>
-		<th></th>
-	</tr>
-</table>
-</form>
-
-
-
-<form method="POST" onSubmit="new Effect.DropOut('submitButton_attributes');">
-<input type="HIDDEN" name="contact_id" value="{contact_id}">
-<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
-	<tr>
-		<td colspan="3">
+<div id="mainContact_static" style="display:inline;">
+	<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
+		<tr>
+			<td>
 			<h1 style="display:inline">{company}</h1><BR>
 			<center><div style="display:inline;text-align:center;">{fname} {lname} (<i>{email}</i>)</div></center>
-		</td>
-	</tr>
+			</td>
+		</tr>
+		
+		<tr>
+			<td align="center"><a href="#NULL" onClick="cs_contactEdit();">Edit Details</a></td>
+		</tr>
+	</table>
+</div>
+
+<div id="mainContact_form" style="display:none;">
+	<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
+		<tr>
+			<th align="center">Company Name:</th>
+			
+			<td colspan="3">
+				<input size="60" id="contactData_company" type="text" name="contactData['company']" value="{company}" disabled>
+			</td>
+		</tr>
+		
+		<tr>
+			<th align="right">First Name:</th>
+			
+			<td><input id="contactData_fname" type="text" size="22" name="contactData['fname']" value="{fname}" disabled></td>
+			
+			<th align="right">Last Name:</th>
+			
+			<td><input id="contactData_lname" type="text" size="22" name="contactData['lname']" value="{lname}" disabled></td>
+		</tr>
+		
+		<tr>
+			<th align="right">	Email:</th>
+			
+			<td colspan="3" align="center">
+				<input id="contactData_email" type="text" size="60" name="contactData['email']" value="{email}" disabled>
+			</td>
+		</tr>
+	</table>
+</div>
+<BR>
+
+
+
+
+<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
 	
 	<tr>
 		<th style="border:solid #000 1px;" colspan="3">Contact Attributes</th>
@@ -29,24 +61,20 @@
 		
 		<th style="border-bottom:dashed #999 1px;border-left:dotted #999 1px; border-right:dotted #999 1px;">Value</th>
 		
-		<th style="border-right:solid #000 1px;border-bottom:dashed #999 1px;">[DELETE]</th>
+		<th style="border-right:solid #000 1px;border-bottom:dashed #999 1px;">DEL</th>
 	</tr>
 	
 <!-- BEGIN attributeRow -->
 	<tr>
 		<th style="border-left:solid #000 1px;">{name}</th>
 		
-		<td><input id="contactData_{name}" name="contactData[{name}]" value="{value}"></td>
+		<td><input id="contactData_{name}" size="40" name="contactData[{name}]" value="{value}"></td>
 		
 		<td style="border-right:solid #000 1px;">
-			&nbsp;{deletable}
-<!-- BEGIN delAttrib -->
+			&nbsp;
 			<div style="display:inline;" id="contactData_div_{name}">
 			<input id="contactData_del_{name}" name="delAttrib[]" value="{name}" type="checkbox" onChange="cs_contactDelAttrib('{name}');">
 			</div>
-<!-- END delAttrib -->
-<!-- BEGIN noDelAttrib --><font color="red">Cannot delete</font>
-<!-- END noDelAttrib -->
 		</td>
 	</tr>
 <!-- END attributeRow -->
