@@ -60,7 +60,7 @@ abstract class dbAbstract {
 		}
 		
 		$fileContents = $this->fsObj->read($filename);
-		$this->db->beginTrans();
+		$this->db->beginTrans(__METHOD__);
 		try {
 			$this->run_sql($fileContents);
 			$this->db->commitTrans();
