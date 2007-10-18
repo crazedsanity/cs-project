@@ -119,3 +119,16 @@ function cs_contactDelAttrib(attribName) {
 }//end cs_contactDelAttrib()
 
 
+function cs_contactEdit() {
+	//form appears, static data disappears.
+	toggleDisplay('mainContact_static', 'inline');
+	toggleDisplay('mainContact_form', 'inline');
+	
+	//now enable some elements.
+	document.getElementById('contactData_company').disabled=false;
+	document.getElementById('contactData_fname').disabled=false;
+	document.getElementById('contactData_lname').disabled=false;
+	document.getElementById('contactData_email').disabled=false;
+}//end cs_contactEdit()
+
+
