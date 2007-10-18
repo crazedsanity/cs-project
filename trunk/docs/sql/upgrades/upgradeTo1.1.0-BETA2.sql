@@ -14,4 +14,4 @@ CREATE TABLE contact_email_table (
 
 
 ALTER TABLE contact_table ADD COLUMN company text;
-ALTER TABLE contact_table ADD COLUMN email NOT NULL CHECK (email NOT LIKE lower(email));
+ALTER TABLE contact_table ADD COLUMN contact_email_id int REFERENCES contact_email_table(contact_email_id);

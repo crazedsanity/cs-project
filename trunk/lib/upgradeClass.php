@@ -40,6 +40,7 @@ class upgrade {
 	public function __construct() {
 		$this->fsObj =  new cs_fileSystemClass(dirname(__FILE__) .'/../');
 		$this->gfObj = new cs_globalFunctions;
+		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
 		clearstatcache();
 		
 		//define some things for upgrades.
@@ -214,7 +215,7 @@ class upgrade {
 				
 				$i=0;
 				$this->gfObj->debug_print(__METHOD__ .": starting to run through the upgrade list...");
-				$this->db->beginTrans();
+				$this->db->beginTrans(__METHOD__);
 				foreach($upgradeList as $fromVersion=>$toVersion) {
 					$this->gfObj->debug_print(__METHOD__ .": upgrading from ". $fromVersion ." to ". $toVersion ."... ");
 					$this->do_single_upgrade($fromVersion);
@@ -808,7 +809,7 @@ class upgrade {
 				if($newVersion == $matchVersion) {
 					throw new exception(__METHOD__ .": there's a config to upgrade this version to a higher one...? ". $this->gfObj->debug_print($data,0));
 				}
-				elseif(!$this->is_higher_version($matchVersion, $newVersion)) {
+				elseif($this->is_higher_version($matchVersion, $newVersion)) {
 					$retval[$lastVersion] = $matchVersion;
 					$lastVersion = $matchVersion;
 				}
