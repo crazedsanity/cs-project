@@ -44,11 +44,21 @@
 		</tr>
 		
 		<tr>
-			<th align="right">	Email:</th>
+			<th align="right">	Email Addresses:</th>
 			
 			<td colspan="3" align="center">
-				<input id="contactData_email" type="text" size="60" name="contactData[email]" 
-				value="{email}" disabled>
+				<input id="contactData_email" type="HIDDEN" name="contactData[contact_email_id]" 
+				value="{contact_email_id}" disabled>
+				
+				<table border="1" cellpadding="3" cellspacing="0">
+<!-- BEGIN contactEmailAddress -->
+					<tr>
+						<td><input type="radio" value="%%contact_email_id%%"></td>
+						
+						<td>%%email%%</td>
+					</tr>
+<!-- END contactEmailAddress -->
+				</table>
 			</td>
 		</tr>
 	</table>

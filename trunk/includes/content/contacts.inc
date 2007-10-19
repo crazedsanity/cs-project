@@ -130,6 +130,8 @@ else {
 				$attributeFormRows .= $page->gfObj->mini_parser($baseRow, $repArr, '{', '}');
 			}
 			$page->add_template_var('attributeRow', $attributeFormRows);
+			
+			$emailList = $contactObj->get_contact_email_list();
 		}
 		catch(exception $e) {
 			$page->set_message_wrapper(array(
