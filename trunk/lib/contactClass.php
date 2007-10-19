@@ -151,7 +151,7 @@ class contactClass extends dbAbstract {
 	/**
 	 * Update the given attribute for the current user with the given value.
 	 */
-	public function update_attribute($attribName, $value) {
+	public function update_contact_attribute($attribName, $value) {
 		if(strlen($attribName)) {
 			$attribData = $this->get_attribute_data($attribName);
 			
@@ -160,7 +160,7 @@ class contactClass extends dbAbstract {
 				'attribute_id'	=> $attribData['attribute_id']
 			);
 			$update = array(
-				'attribute_value'	=> $this->cleanString($value, $attribData['clean_as'])
+				'attribute_value'	=> $this->gfObj->cleanString($value, 'sql',1)
 			);
 			$sql = "UPDATE contact_attribute_link_table SET ". 
 				$this->gfObj->string_from_array($update, 'update') ." WHERE " .
@@ -178,32 +178,42 @@ class contactClass extends dbAbstract {
 		}
 		
 		return($retval);
-	}//end update_attribute()
+	}//end update_contact_attribute()
 	//=========================================================================
 	
 	
 	
 	//=========================================================================
 	private function get_attribute_data($attribName) {
-		$attribName = $this->clean_attribute_name($attribName);
-		
-		$sql = "SELECT * FROM attribute_table WHERE attribute_name='". $attribName ."'";
-		if($this->run_sql($sql)) {
-			$retval = $this->db->farray_fieldnames('attribute_id', NULL, 0);
-		}
-		else {
-			//okay, so try creating, then retrieving it.
-			if($this->create_attribute($attribName)) {
-				if($this->run_sql($sql)) {
-					$retval = $this->db->farray_fieldnames('attribute_id', NULL, 0);
-				}
-				else {
-					throw new exception(__METHOD__ .": created attribute, but failed to retrieve it...??");
-				}
+		if(strlen($attribName) && strlen($this->clean_attribute_name($attribName))) {
+			$attribName = $this->clean_attribute_name($attribName);
+			
+			if(is_numeric($attribName)) {
+				$sql = "SELECT * FROM attribute_table WHERE attribute_id=". $attribName;
 			}
 			else {
-				throw new exception(__METHOD__ .": failed to create attribute...?");
+				$sql = "SELECT * FROM attribute_table WHERE name='". $attribName ."'";
 			}
+			if($this->run_sql($sql)) {
+				$retval = $this->db->farray_fieldnames();
+			}
+			else {
+				//okay, so try creating, then retrieving it.
+				if($this->create_attribute($attribName)) {
+					if($this->run_sql($sql)) {
+						$retval = $this->db->farray_fieldnames();
+					}
+					else {
+						throw new exception(__METHOD__ .": created attribute, but failed to retrieve it...??");
+					}
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to create attribute...?");
+				}
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": attribute name has no length (". $attribName .")");
 		}
 		
 		return($retval);
@@ -217,7 +227,7 @@ class contactClass extends dbAbstract {
 		$attribName = $this->clean_attribute_name($attribName);
 		
 		$insertArr = array(
-			'attribute_name'	=> $attribName,
+			'name'	=> $attribName,
 			'clean_as'			=> $cleanAs
 		);
 		$sql = "INSERT INTO attribute_table ". 
@@ -254,14 +264,14 @@ class contactClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function mass_update_contact(array $nameToValue) {
+	public function mass_update_contact_attributes(array $nameToValue) {
 		$retval = 0;
 		foreach($nameToValue as $name => $value) {
-			$retval += $this->update_attribute($name, $value);
+			$retval += $this->update_contact_attribute($name, $value);
 		}
 		
 		return($retval);
-	}//end mass_update_contact()
+	}//end mass_update_contact_attributes()
 	//=========================================================================
 	
 	
@@ -272,8 +282,8 @@ class contactClass extends dbAbstract {
 	 * 
 	 * TYPES: 
 	 * NULL = all
-	 * 1	= attributes for current contact
-	 * 2	= attributes NOT for current contact
+	 * 1	= attributes associated w/current contact
+	 * 2	= attributes NOT associated w/current contact
 	 */
 	public function get_attribute_list($type=NULL) {
 		if(!is_null($type)) {
@@ -306,6 +316,95 @@ class contactClass extends dbAbstract {
 		
 		return($retval);
 	}//end get_attribute_list()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function create_contact_attribute($name, $value) {
+		$retval = FALSE;
+		if(is_numeric($this->contactId) && strlen($name)) {
+			$attributeData = $this->get_attribute_data($name);
+			if(is_array($attributeData) && count($attributeData) > 0) {
+				$insertArr = array(
+					'contact_id'		=> $this->contactId,
+					'attribute_id'		=> $attributeData['attribute_id'],
+					'attribute_value'	=> $this->gfObj->cleanString($value, 'sql')
+				);
+				
+				$sql = "INSERT INTO contact_attribute_link_table ". 
+					$this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
+				if($this->run_sql($sql)) {
+					$retval = TRUE;
+				}
+				else {
+					throw new exception(__METHOD__ .': failed to create new attribute');
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .': failed to retreive attribute data for ('. $name .')');
+			}
+		}
+		else {
+			cs_debug_backtrace();
+			throw new exception(__METHOD__ .": insufficient information");
+		}
+		
+		return($retval);
+	}//end create_contact_attribute()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function delete_contact_attribute($name) {
+		$retval = FALSE;
+		if(strlen($name)) {
+			$attribData = $this->get_attribute_data($name);
+			$crit = array(
+				'contact_id'	=> $this->contactId,
+				'attribute_id'	=> $attribData['attribute_id']
+			);
+			$sql = "DELETE FROM contact_attribute_link_table WHERE ". 
+				$this->gfObj->string_from_array($crit, 'select', NULL, 'int');
+				
+			if($this->run_sql($sql)) {
+				$retval = TRUE;
+			}
+			else {
+				throw new exception(__METHOD__ .': failed to run delete SQL...');
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to delete contact attribute (". $name .")");
+		}
+		
+		return($retval);
+	}//end delete_contact_attribute()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function update_contact_data(array $updates) {
+		$retval = FALSE;
+		if(is_numeric($this->contactId)) {
+			$sql = "UPDATE contact_table SET ". $this->gfObj->string_from_array($updates, 'update', NULL, 'sql') .
+				" WHERE contact_id=". $this->contactId;
+			
+			if($this->run_sql($sql)) {
+				$retval = TRUE;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to update contact");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid contact_id");
+		}
+		
+		return($retval);
+	}//end update_contact_data();
 	//=========================================================================
 	
 	
