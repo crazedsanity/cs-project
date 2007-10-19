@@ -18,8 +18,8 @@ abstract class dbAbstract {
 	
 	public $lastError=NULL;
 	public $lastNumrows = NULL;
+	public $db;
 	
-	protected $db;
 	protected $fsObj;
 	
 	abstract public function __construct(cs_phpDB &$db);

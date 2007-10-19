@@ -16,16 +16,67 @@ $contactObj = new contactClass($page->db);
 
 
 if($_POST) {
-	//TODO: handle changes.
-	debug_print($_POST);
-	exit;
-	
 	if(strlen($_POST['action']) && is_numeric($_POST['contact_id'])) {
 		$contactObj->set_contact_id($_POST['contact_id']);
+		
+		$messageArr = array(
+			'title'		=> "Update Results",
+			'message'	=> "",
+			'type'		=> 'status'
+		);
+		
 		switch($_POST['action']) {
 			
 			case 'update': {
-				$contactObj->mass_update_contact($_POST['contactData']);
+				$contactObj->db->beginTrans("_POST_updateAction");
+				
+				$totalUpdates = 0;
+				$totalFailures = 0;
+				
+				if(is_array($_POST['contactData'])) {
+					if($contactObj->update_contact_data($_POST['contactData'])) {
+						$totalUpdates++;
+					}
+					else {
+						$totalFailures++;
+					}
+				}
+				
+				if(is_array($_POST['attributes'])) {
+					if($contactObj->mass_update_contact_attributes($_POST['attributes'])) {
+						$totalUpdates++;
+					}
+					else {
+						$totalFailures++;
+					}
+				}
+				
+				if(is_array($_POST['delAttrib'])) {
+					foreach($_POST['delAttrib'] as $name) {
+						if($contactObj->delete_contact_attribute($name)) {
+							$totalUpdates++;
+						}
+						else {
+							$totalFailures++;
+							break;
+						}
+					}
+				}
+				
+				if(is_array($_POST['addAttribute']) && count($_POST['addAttribute']) == 2) {
+					if($contactObj->create_contact_attribute($_POST['addAttribute']['name'], $_POST['addAttribute']['value'])) {
+						$totalUpdates++;
+					}
+					else {
+						$totalFailures++;
+					}
+				}
+				
+				$messageArr['message'] = "Done, total updates=(". $totalUpdates ."), totalFailures=(". $totalFailures .")";
+				$page->set_message_wrapper($messageArr);
+				
+				$contactObj->db->commitTrans();
+				
 			}
 			break;
 			
@@ -63,6 +114,9 @@ else {
 			foreach($contactDetails as $name=>$value) {
 				$page->add_template_var($name, $value);
 			}
+			
+			$addableAttribs = $contactObj->get_attribute_list(2);
+			$page->add_template_var('attributeOptionList', $page->gfObj->array_as_option_list($addableAttribs));
 			
 			$contactAttributes = $contactObj->get_contact_attributes();
 			$attributeFormRows = "";
