@@ -22,7 +22,7 @@
 			<th align="center">Company Name:</th>
 			
 			<td colspan="3">
-				<input size="60" id="contactData_company" type="text" name="contactData['company']" 
+				<input size="60" id="contactData_company" type="text" name="contactData[company]" 
 				value="{company}" disabled>
 			</td>
 		</tr>
@@ -31,14 +31,14 @@
 			<th align="right">First Name:</th>
 			
 			<td>
-				<input id="contactData_fname" type="text" size="22" name="contactData['fname']" 
+				<input id="contactData_fname" type="text" size="22" name="contactData[fname]" 
 				value="{fname}" disabled>
 			</td>
 			
 			<th align="right">Last Name:</th>
 			
 			<td>
-				<input id="contactData_lname" type="text" size="22" name="contactData['lname']" 
+				<input id="contactData_lname" type="text" size="22" name="contactData[lname]" 
 				value="{lname}" disabled>
 			</td>
 		</tr>
@@ -47,7 +47,7 @@
 			<th align="right">	Email:</th>
 			
 			<td colspan="3" align="center">
-				<input id="contactData_email" type="text" size="60" name="contactData['email']" 
+				<input id="contactData_email" type="text" size="60" name="contactData[email]" 
 				value="{email}" disabled>
 			</td>
 		</tr>
@@ -80,8 +80,13 @@
 		<th style="border-left:solid #000 1px;">{name}</th>
 		
 		<td>
-			<input id="contactData_{name}" size="40" name="contactData[{name}]" 
-			value="{value}" onClick="cs_attributeEdit" disabled>
+			<div id="link_editAttribute_{name}" style="display:inline">
+				<a href="#NULL" onClick="cs_attributeEdit('{name}');">{value}</a>
+			</div>
+			<div id="input_editAttribute_{name}" style="display:none;">
+				<input id="editAttribute_{name}" size="40" name="attributes[{name}]" 
+				value="{value}" disabled>
+			</div>
 		</td>
 		
 		<td style="border-right:solid #000 1px;">
@@ -96,7 +101,7 @@
 		
 		<td colspan="2" style="border-right:solid #000 1px;" valign="top">
 			<div id="addAttribute_select" style="display:inline">
-				<SELECT id="addAttribute_list" name="addAttribute" onChange="cs_addAttribute(this);">
+				<SELECT id="addAttribute_list" onChange="cs_addAttribute(this);">
 					<option value="">--- SELECT ONE ---</option>
 					<option value="**new**">* NEW *</option>
 					{attributeOptionList}
@@ -104,11 +109,11 @@
 			</div>
 			
 			<div id="addAttribute_new" style="display:none;">
-				<b>Name: </b><input id="addAttribute_new_input" name="addAttribute" type="text" disabled><BR>
+				<b>Name: </b><input id="addAttribute_new_input" name="addAttribute[name]" type="text" disabled><BR>
 				<b>Value:</b>
 			</div>
 			
-			<input id="addAttribute_value" type="text" disabled>
+			<input id="addAttribute_value" name="addAttribute[value] type="text" disabled>
 		</td>
 	</tr>
 	

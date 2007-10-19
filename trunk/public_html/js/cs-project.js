@@ -87,9 +87,13 @@ function cs_addAttribute(selectObj) {
 				toggleDisplay('addAttribute_new', 'inline');
 				document.getElementById('addAttribute_list').disabled=true;
 				document.getElementById('addAttribute_new_input').disabled=false;
-				cs_enableSubmitButton();
+			}
+			else {
+				document.getElementById('addAttribute_new_input').value = myValue;
+				document.getElementById('addAttribute_new_input').disabled=false;
 			}
 			valueInputObj.disabled = false;
+			cs_enableSubmitButton();
 		}
 		else {
 			valueInputObj.disabled = true;
@@ -101,19 +105,12 @@ function cs_addAttribute(selectObj) {
 function cs_contactDelAttrib(checkBoxObj) {
 	if(checkBoxObj != null) {
 		var myName = checkBoxObj.value;
-		var inputName = 'contactData_' + myName;
+		var inputName = 'editAttribute_' + myName;
 		var enableInputObj = document.getElementById(inputName);
 		
 		if(enableInputObj != null) {
-			var disabledValue = enableInputObj.disabled;
-			if(disabledValue == true) {
-				enableInputObj.disabled = false;
-				cs_enableSubmitButton();
-			}
-			else {
-				enableInputObj.disabled = true;
-				//TODO: disable the submit button, but only if no inputs are enabled... (how to determine?)
-			}
+			cs_enableSubmitButton();
+			enableInputObj.disabled = true;
 		}
 		else {
 			alert("Cannot find input with id=(" + inputName + ")");
@@ -152,5 +149,20 @@ function cs_enableSubmitButton(buttonName, disVal) {
 		buttonObj.disabled = disVal;
 	}
 }//end cs_enableSubmitButton()
+
+
+function cs_attributeEdit(myName) {
+	var linkDivObj		= document.getElementById('link_editAttribute_' + myName);
+	var inputDivObj		= document.getElementById('input_editAttribute_' + myName);
+	var inputObj		= document.getElementById('editAttribute_' + myName);
+	
+	if(linkDivObj != null && inputDivObj != null && inputObj != null) {
+		linkDivObj.style.display = 'none';
+		inputDivObj.style.display = 'inline';
+		inputObj.disabled = false;
+		cs_enableSubmitButton();
+	}
+	
+}//end cs_attributeEdit()
 
 
