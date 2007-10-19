@@ -115,7 +115,7 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	public function get_contact() {
 		if(is_numeric($this->contactId)) {
-			$sql = "SELECT c.contact_id, c.company, c.fname, c.lname, ce.email " .
+			$sql = "SELECT c.contact_id, c.company, c.fname, c.lname, c.contact_email_id, ce.email " .
 				"FROM contact_table AS c INNER JOIN contact_email_table AS ce USING (contact_email_id) " .
 				"WHERE c.contact_id=". $this->contactId;
 			
@@ -405,6 +405,29 @@ class contactClass extends dbAbstract {
 		
 		return($retval);
 	}//end update_contact_data();
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function get_contact_email_list() {
+		$retval = array();
+		if(is_numeric($this->contactId)) {
+			$sql = "SELECT contact_email_id, email FROM contact_email_table " .
+				"WHERE contact_id=". $this->contactId;
+			if($this->run_sql($sql) && $this->lastNumrows > 0) {
+				$retval = $this->db->farray_nvp('contact_email_id', 'email');
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to retrieve list of contacts email addresses");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid contact_id");
+		}
+		
+		return($retval);
+	}//end get_contact_email_list()
 	//=========================================================================
 	
 	
