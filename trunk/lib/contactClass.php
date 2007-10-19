@@ -56,7 +56,7 @@ class contactClass extends dbAbstract {
 	
 	//=========================================================================
 	public function get_contact_attributes() {
-		$retval = NULL;
+		$retval = array();
 		if(is_numeric($this->contactId)) {
 			$sql = "select a.name, cal.attribute_value FROM contact_attribute_link_table " .
 				"AS cal INNER JOIN attribute_table AS a USING (attribute_id) WHERE  " .
@@ -254,8 +254,58 @@ class contactClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function mass_update_contact() {
+	public function mass_update_contact(array $nameToValue) {
+		$retval = 0;
+		foreach($nameToValue as $name => $value) {
+			$retval += $this->update_attribute($name, $value);
+		}
+		
+		return($retval);
 	}//end mass_update_contact()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Get list of attribute_id => name
+	 * 
+	 * TYPES: 
+	 * NULL = all
+	 * 1	= attributes for current contact
+	 * 2	= attributes NOT for current contact
+	 */
+	public function get_attribute_list($type=NULL) {
+		if(!is_null($type)) {
+			if(!is_numeric($this->contactId)) {
+				throw new exception(__METHOD__ .": contactId required for type (". $type .")");
+			}
+			settype($type, 'int');
+		}
+		
+		$retval = array();
+		$sql = "SELECT attribute_id, name FROM attribute_table ";
+		switch($type) {
+			case 1: {
+				$sql .= "WHERE attribute_id IN (SELECT distinct attribute_id FROM contact_attribute_link_table)";
+			}
+			break;
+			
+			case 2: {
+				$sql .= "WHERE attribute_id NOT IN (SELECT distinct attribute_id FROM contact_attribute_link_table)";
+			}
+			break;
+			
+			default:
+				$sql .= " ORDER BY name";
+		}
+		
+		if($this->run_sql($sql)) {
+			$retval = $this->db->farray_nvp('attribute_id', 'name');
+		}
+		
+		return($retval);
+	}//end get_attribute_list()
 	//=========================================================================
 	
 	
