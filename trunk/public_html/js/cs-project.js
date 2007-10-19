@@ -74,48 +74,51 @@ function setup__enableInput(prefixName, selectedOption) {
 }
 
 
-function cs_addAttribute(myName) {
-	var attribValObj	= document.getElementById('addAttribute_value');
-	var attribNameObj	= document.getElementById('addAttribute_name');
-	var newAttribObj	= document.getElementByName('addAttribute_new');
-	
-	alert(newAttribObj);
-	
-	if(myName.length > 0) {
-		if(myName == '**new**') {
-			attribNameObj.type = 'text';
-			
-			newAttribObj.type='text';
+function cs_addAttribute(selectObj) {
+	if(selectObj != null && selectObj.selectedIndex > 0) {
+		//okay, get the value...
+		var myValue = selectObj.options[selectObj.selectedIndex].value;
+		var valueInputObj = document.getElementById('addAttribute_value');
+		
+		if(myValue.length > 0) {
+			//okay...
+			if(myValue == '**new**') {
+				toggleDisplay('addAttribute_select', 'inline');
+				toggleDisplay('addAttribute_new', 'inline');
+				document.getElementById('addAttribute_list').disabled=true;
+				document.getElementById('addAttribute_new_input').disabled=false;
+				cs_enableSubmitButton();
+			}
+			valueInputObj.disabled = false;
 		}
 		else {
-			attribNameObj.innerHTML = myName;
-			newAttribObj.type='HIDDEN';
-			newAttribObj.value=null;
+			valueInputObj.disabled = true;
 		}
-		attribValObj.disabled = false;
 	}
-	else {
-		attribValObj.disabled = true;
-		attribNameObj.innerHTML = '<b>Choose one...</b>';
-		newAttribObj.type="HIDDEN";
-		newAttribObj.value=null;
-	}
-	//document.getElementById('addAttribute_value').disabled = false;
-	//document.getElementById('addAttribute_name').innerHTML = myName;
-}
+}//end cs_addAttribute()
 
 
-function cs_contactDelAttrib(attribName) {
-	var inputObj = document.getElementById('contactData_' + attribName);
-	var checkObj = document.getElementById('contactData_del_' + attribName);
-	
-	if(checkObj.checked == true) {
-		inputObj.disabled = true;
+function cs_contactDelAttrib(checkBoxObj) {
+	if(checkBoxObj != null) {
+		var myName = checkBoxObj.value;
+		var inputName = 'contactData_' + myName;
+		var enableInputObj = document.getElementById(inputName);
+		
+		if(enableInputObj != null) {
+			var disabledValue = enableInputObj.disabled;
+			if(disabledValue == true) {
+				enableInputObj.disabled = false;
+				cs_enableSubmitButton();
+			}
+			else {
+				enableInputObj.disabled = true;
+				//TODO: disable the submit button, but only if no inputs are enabled... (how to determine?)
+			}
+		}
+		else {
+			alert("Cannot find input with id=(" + inputName + ")");
+		}
 	}
-	else {
-		inputObj.disabled = false;
-	}
-	
 }//end cs_contactDelAttrib()
 
 
@@ -129,6 +132,25 @@ function cs_contactEdit() {
 	document.getElementById('contactData_fname').disabled=false;
 	document.getElementById('contactData_lname').disabled=false;
 	document.getElementById('contactData_email').disabled=false;
+	cs_enableSubmitButton();
 }//end cs_contactEdit()
+
+
+function cs_enableSubmitButton(buttonName, disVal) {
+	if(buttonName != null) {
+		var buttonObj = document.getElementById(buttonName);
+	}
+	else {
+		var buttonObj = document.getElementById('submitButton');
+	}
+	
+	if(disVal == null || (disVal != true && disVal != false)) {
+		disVal = false;
+	}
+	
+	if(buttonObj != null && buttonObj.type == 'submit') {
+		buttonObj.disabled = disVal;
+	}
+}//end cs_enableSubmitButton()
 
 

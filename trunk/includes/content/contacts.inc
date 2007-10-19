@@ -60,18 +60,14 @@ else {
 			$page->rip_all_block_rows();
 			
 			//set the main details.
-			$mainDetails = array('contact_id', 'fname', 'lname', 'company', 'email');
-			foreach($mainDetails as $name) {
-				$page->add_template_var($name, $contactDetails[$name]);
+			foreach($contactDetails as $name=>$value) {
+				$page->add_template_var($name, $value);
 			}
 			
-			$editableAttributes = $contactDetails;
-			$deletableAttributes = $contactDetails;
-			unset($editableAttributes['contact_id'], $deletableAttributes['fname'], $deletableAttributes['lname']);
-			
+			$contactAttributes = $contactObj->get_contact_attributes();
 			$attributeFormRows = "";
 			$baseRow = $page->templateRows['attributeRow'];
-			foreach($editableAttributes as $name=>$value) {
+			foreach($contactAttributes as $name=>$value) {
 				$repArr=array(
 					'name'	=> $name,
 					'value'	=> $value

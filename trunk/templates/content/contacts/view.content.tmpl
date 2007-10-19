@@ -4,7 +4,7 @@
 <div id="mainContact_static" style="display:inline;">
 	<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
 		<tr>
-			<td>
+			<td style="border:solid #000 1px;																																																																">
 			<h1 style="display:inline">{company}</h1><BR>
 			<center><div style="display:inline;text-align:center;">{fname} {lname} (<i>{email}</i>)</div></center>
 			</td>
@@ -22,25 +22,33 @@
 			<th align="center">Company Name:</th>
 			
 			<td colspan="3">
-				<input size="60" id="contactData_company" type="text" name="contactData['company']" value="{company}" disabled>
+				<input size="60" id="contactData_company" type="text" name="contactData['company']" 
+				value="{company}" disabled>
 			</td>
 		</tr>
 		
 		<tr>
 			<th align="right">First Name:</th>
 			
-			<td><input id="contactData_fname" type="text" size="22" name="contactData['fname']" value="{fname}" disabled></td>
+			<td>
+				<input id="contactData_fname" type="text" size="22" name="contactData['fname']" 
+				value="{fname}" disabled>
+			</td>
 			
 			<th align="right">Last Name:</th>
 			
-			<td><input id="contactData_lname" type="text" size="22" name="contactData['lname']" value="{lname}" disabled></td>
+			<td>
+				<input id="contactData_lname" type="text" size="22" name="contactData['lname']" 
+				value="{lname}" disabled>
+			</td>
 		</tr>
 		
 		<tr>
 			<th align="right">	Email:</th>
 			
 			<td colspan="3" align="center">
-				<input id="contactData_email" type="text" size="60" name="contactData['email']" value="{email}" disabled>
+				<input id="contactData_email" type="text" size="60" name="contactData['email']" 
+				value="{email}" disabled>
 			</td>
 		</tr>
 	</table>
@@ -53,7 +61,10 @@
 <table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
 	
 	<tr>
-		<th style="border:solid #000 1px;" colspan="3">Contact Attributes</th>
+		<td style="border:solid #000 1px;" colspan="3" align="center" >
+			<h2 style="display:inline;">Contact Attributes</h2><BR>
+			<font color="red" size="-4">Click on the form field to enable and edit it.</font>
+		</td>
 	</tr>
 	
 	<tr>
@@ -68,20 +79,43 @@
 	<tr>
 		<th style="border-left:solid #000 1px;">{name}</th>
 		
-		<td><input id="contactData_{name}" size="40" name="contactData[{name}]" value="{value}"></td>
+		<td>
+			<input id="contactData_{name}" size="40" name="contactData[{name}]" 
+			value="{value}" onClick="cs_attributeEdit" disabled>
+		</td>
 		
 		<td style="border-right:solid #000 1px;">
 			&nbsp;
-			<div style="display:inline;" id="contactData_div_{name}">
-			<input id="contactData_del_{name}" name="delAttrib[]" value="{name}" type="checkbox" onChange="cs_contactDelAttrib('{name}');">
-			</div>
+			<input name="delAttrib[]" value="{name}" type="checkbox" onChange="cs_contactDelAttrib(this);">
 		</td>
 	</tr>
 <!-- END attributeRow -->
+	
+	<tr>
+		<td style="border-left:solid #000 1px;">Add an attribute:</td>
+		
+		<td colspan="2" style="border-right:solid #000 1px;" valign="top">
+			<div id="addAttribute_select" style="display:inline">
+				<SELECT id="addAttribute_list" name="addAttribute" onChange="cs_addAttribute(this);">
+					<option value="">--- SELECT ONE ---</option>
+					<option value="**new**">* NEW *</option>
+					{attributeOptionList}
+				</SELECT>
+			</div>
+			
+			<div id="addAttribute_new" style="display:none;">
+				<b>Name: </b><input id="addAttribute_new_input" name="addAttribute" type="text" disabled><BR>
+				<b>Value:</b>
+			</div>
+			
+			<input id="addAttribute_value" type="text" disabled>
+		</td>
+	</tr>
+	
 	<tr>
 		<td colspan="3" align="center" style="border-top:solid #000 1px;">
 			<input type="HIDDEN" name="action" value="update">
-			&nbsp;<input id="submitButton_attributes" type="submit" value="Update Contact">&nbsp;
+			&nbsp;<input id="submitButton" type="submit" value="Update Contact" disabled>&nbsp;
 		</td>
 	</tr>
 </table>
