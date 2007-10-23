@@ -435,5 +435,39 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	
 	
+	
+	//=========================================================================
+	public function create_contact_email($newEmail, $isPrimary=FALSE) {
+		if(is_numeric($this->contactId)) {
+			$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $this->contactId ."," .
+				" '". $this->gfObj->cleanString($newEmail, 'email') ."');";
+			
+			if($this->run_sql($sql)) {
+				//sweet: get the newly inserted id.
+				$sql = "SELECT currval('contact_email_table_contact_email_id_seq'::text)";
+				if($this->run_sql($sql)) {
+					$data = $this->db->farray();
+					$retval = $data[0];
+					if($isPrimary) {
+						$this->update_contact_data(array('contact_email_id' => $retval));
+					}
+				}
+				else {
+					throw new exception(__METHOD__ .": failed to retrieve newly inserted contact_email_id");
+				}
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to create new contact email address");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid contact_id");
+		}
+		
+		return($retval);
+	}//end create_contact_email()
+	//=========================================================================
+	
+	
 }//end contactClass{}
 ?>	
