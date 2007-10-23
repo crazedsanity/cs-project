@@ -132,6 +132,19 @@ else {
 			$page->add_template_var('attributeRow', $attributeFormRows);
 			
 			$emailList = $contactObj->get_contact_email_list();
+			$emailRow = "";
+			foreach($emailList as $id=>$value) {
+				$repArr = array(
+					'contact_email_id'	=> $id,
+					'email'				=> $value,
+					'isPrimary'			=> ""
+				);
+				if($id == $contactDetails['contact_email_id']) {
+					$repArr['isPrimary'] = 'checked';
+				}
+				$emailRow .= $page->mini_parser($page->templateRows['contactEmailAddress'], $repArr, '%%', '%%');
+			}
+			$page->add_template_var('contactEmailAddress', $emailRow);
 		}
 		catch(exception $e) {
 			$page->set_message_wrapper(array(

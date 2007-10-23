@@ -166,3 +166,12 @@ function cs_attributeEdit(myName) {
 }//end cs_attributeEdit()
 
 
+function cs_setContactEmailId(newValue) {
+	var inputObj = document.getElementById('contactData_email');
+	
+	if(inputObj != null && newValue != null) {
+		inputObj.value = newValue;
+	}
+}//end cs_setContactEmailId()
+
+

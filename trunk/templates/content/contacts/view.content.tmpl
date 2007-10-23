@@ -53,8 +53,11 @@
 				<table border="1" cellpadding="3" cellspacing="0">
 <!-- BEGIN contactEmailAddress -->
 					<tr>
-						<td><input type="radio" value="%%contact_email_id%%"></td>
-						
+						<td>
+							<input type="radio" value="%%contact_email_id%%" %%isPrimary%% name="garbage_contactEmailId" 
+								onClick="cs_setContactEmailId('%%contact_email_id%%');">
+						</td>
+								
 						<td>%%email%%</td>
 					</tr>
 <!-- END contactEmailAddress -->
