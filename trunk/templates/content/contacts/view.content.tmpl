@@ -1,5 +1,5 @@
 
-<form method="POST" onSubmit="new Effect.DropOut(submitButton);">
+<form method="POST" onSubmit="new Effect.DropOut(submitButton);" name="updateContactForm">
 <input type="HIDDEN" name="contact_id" value="{contact_id}">
 <div id="mainContact_static" style="display:inline;">
 	<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
@@ -44,11 +44,13 @@
 		</tr>
 		
 		<tr>
-			<th align="right">	Email Addresses:</th>
+			<th align="right">Email Addresses:</th>
 			
-			<td colspan="3" align="center">
+			<td colspan="3" align="left">
 				<input id="contactData_email" type="HIDDEN" name="contactData[contact_email_id]" 
 				value="{contact_email_id}" disabled>
+				
+				<input id="contactData_newContactEmail" type="HIDDEN" name="new_contact_email" value="" disabled>
 				
 				<table border="1" cellpadding="3" cellspacing="0">
 <!-- BEGIN contactEmailAddress -->
@@ -58,9 +60,28 @@
 								onClick="cs_setContactEmailId('%%contact_email_id%%');">
 						</td>
 								
-						<td>%%email%%</td>
+						<td><div id="display_ceid_%%contact_email_id%%" style="display:inline;font-weight:normal;">%%email%%</div></td>
 					</tr>
 <!-- END contactEmailAddress -->
+					<tr>
+						<td>
+							<div id="contactAddEmail_link" style="display:inline">
+								<a href="{PHP_SELF}#NULL" onClick="cs_contactAddEmail();">Add Email</a>
+							</div>
+							
+							<div id="contactAddEmail_radioDiv" style="display:none;">
+								<input type="radio" id="contactAddEmail_radio" value="new" %%isPrimary%% 
+									name="garbage_contactEmailId" onClick="cs_setContactEmailId('new');">
+							</div>
+						</td>
+								
+						<td>&nbsp;
+							<div id="contactAddEmail_text" style="display:none">
+								<input id="contactAddEmail_input" type="text" size="22" name="garbage_contactEmailId" 
+									disabled onKeyUp="cs_contactAddEmail(this);" onChange="cs_setContactEmailId('new')">
+							</div>
+						</td>
+					</tr>
 				</table>
 			</td>
 		</tr>

@@ -167,11 +167,59 @@ function cs_attributeEdit(myName) {
 
 
 function cs_setContactEmailId(newValue) {
-	var inputObj = document.getElementById('contactData_email');
+	var inputObj	= document.getElementById('contactData_email');
 	
 	if(inputObj != null && newValue != null) {
 		inputObj.value = newValue;
+		
+		//reset the old fontWeight...
+		myObj = null;
+		var checkBoxes = updateContactForm.garbage_contactEmailId;
+		for(counter = 0; counter < checkBoxes.length; counter++) {
+			curValue = checkBoxes[counter].value;
+			myName = 'display_ceid_' + curValue;
+			myObj = document.getElementById(myName);
+			
+			if(myObj != null) {
+				if(curValue == newValue) {
+					myObj.style.fontWeight = 'bold';
+				}
+				else {
+					myObj.style.fontWeight = 'normal';
+				}
+			}
+			//alert("Value of "+ myName +" is "+ myObj.innerHTML);
+		}
 	}
 }//end cs_setContactEmailId()
+
+
+function cs_contactAddEmail(obj) {
+	var newEmailObj = document.getElementById('contactData_newContactEmail');
+	
+	newEmailObj.disabled = false;
+
+	if(obj != null) {
+		//passed the object: they want the value updated.
+		newEmailObj.value = obj.value;
+	}
+	else {
+		var linkDivObj		= document.getElementById('contactAddEmail_link');
+		var radioDivObj		= document.getElementById('contactAddEmail_radioDiv');
+		var radioInputObj	= document.getElementById('contactAddEmail_radio');
+		var textDivObj		= document.getElementById('contactAddEmail_text');
+		var textInputObj	= document.getElementById('contactAddEmail_input');
+		
+		linkDivObj.style.display = 'none';
+		radioDivObj.style.display = 'inline';
+		textDivObj.style.display = 'inline';
+		
+		textInputObj.disabled = false;
+		radioInputObj.disabled = false;
+		radioInputObj.checked = true;
+	}
+	
+	
+}//end cs_contactAddEmail()
 
 
