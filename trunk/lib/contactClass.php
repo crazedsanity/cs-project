@@ -311,10 +311,8 @@ class contactClass extends dbAbstract {
 					"WHERE contact_id=". $this->contactId .")";
 			}
 			break;
-			
-			default:
-				$sql .= " ORDER BY name";
 		}
+		$sql .= " ORDER BY name";
 		
 		if($this->run_sql($sql)) {
 			$retval = $this->db->farray_nvp('attribute_id', 'name');
