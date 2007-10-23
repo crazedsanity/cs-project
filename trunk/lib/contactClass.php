@@ -80,8 +80,12 @@ class contactClass extends dbAbstract {
 	public function get_all_contacts(array $critArr=NULL, array $primaryOrder=NULL, array $filterArr=NULL) {
 		$sql = "SELECT c.contact_id, c.company, c.fname, c.lname, ce.email " .
 			"FROM contact_table AS c INNER JOIN contact_email_table AS ce " .
-			"USING (contact_email_id) ". 
-		$this->gfObj->string_from_array($primaryOrder, 'order');
+			"USING (contact_email_id) ";
+		
+		if(is_null($primaryOrder)) {
+			$primaryOrder = array("company", "fname");
+		}
+		$sql .= $this->gfObj->string_from_array($primaryOrder, 'order');
 			
 		if($this->run_sql($sql)) {
 			$retval = array();
