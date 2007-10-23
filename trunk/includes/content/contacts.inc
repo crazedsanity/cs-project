@@ -33,6 +33,24 @@ if($_POST) {
 				$totalUpdates = 0;
 				$totalFailures = 0;
 				
+				if(!is_numeric($_POST['contactData']['contact_email_id']) || strlen($_POST['new_contact_email'])) {
+					$isPrimary = FALSE;
+					if(!is_numeric($_POST['contactData']['contact_email_id'])) {
+						$isPrimary = TRUE;
+						unset($_POST['contactData']['contact_email_id']);
+						if(!count($_POST['contactData'])) {
+							unset($_POST['contactData']);
+						}
+					}
+					
+					if($contactObj->create_contact_email($_POST['new_contact_email'], $isPrimary)) {
+						$totalUpdates++;
+					}
+					else {
+						$totalFailures++;
+					}
+				}
+				
 				if(is_array($_POST['contactData'])) {
 					if($contactObj->update_contact_data($_POST['contactData'])) {
 						$totalUpdates++;
