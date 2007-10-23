@@ -301,12 +301,14 @@ class contactClass extends dbAbstract {
 		$sql = "SELECT attribute_id, name FROM attribute_table ";
 		switch($type) {
 			case 1: {
-				$sql .= "WHERE attribute_id IN (SELECT distinct attribute_id FROM contact_attribute_link_table)";
+				$sql .= "WHERE attribute_id IN (SELECT distinct attribute_id FROM contact_attribute_link_table " .
+					"WHERE contact_id=". $this->contactId .")";
 			}
 			break;
 			
 			case 2: {
-				$sql .= "WHERE attribute_id NOT IN (SELECT distinct attribute_id FROM contact_attribute_link_table)";
+				$sql .= "WHERE attribute_id NOT IN (SELECT distinct attribute_id FROM contact_attribute_link_table " .
+					"WHERE contact_id=". $this->contactId .")";
 			}
 			break;
 			
@@ -439,25 +441,30 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	public function create_contact_email($newEmail, $isPrimary=FALSE) {
 		if(is_numeric($this->contactId)) {
-			$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $this->contactId ."," .
-				" '". $this->gfObj->cleanString($newEmail, 'email') ."');";
-			
-			if($this->run_sql($sql)) {
-				//sweet: get the newly inserted id.
-				$sql = "SELECT currval('contact_email_table_contact_email_id_seq'::text)";
+			if(strlen($newEmail)) {
+				$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $this->contactId ."," .
+					" '". $this->gfObj->cleanString($newEmail, 'email') ."');";
+				
 				if($this->run_sql($sql)) {
-					$data = $this->db->farray();
-					$retval = $data[0];
-					if($isPrimary) {
-						$this->update_contact_data(array('contact_email_id' => $retval));
+					//sweet: get the newly inserted id.
+					$sql = "SELECT currval('contact_email_table_contact_email_id_seq'::text)";
+					if($this->run_sql($sql)) {
+						$data = $this->db->farray();
+						$retval = $data[0];
+						if($isPrimary) {
+							$this->update_contact_data(array('contact_email_id' => $retval));
+						}
+					}
+					else {
+						throw new exception(__METHOD__ .": failed to retrieve newly inserted contact_email_id");
 					}
 				}
 				else {
-					throw new exception(__METHOD__ .": failed to retrieve newly inserted contact_email_id");
+					throw new exception(__METHOD__ .": failed to create new contact email address");
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .": failed to create new contact email address");
+				$retval = FALSE;
 			}
 		}
 		else {
