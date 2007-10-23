@@ -33,7 +33,9 @@ if($_POST) {
 				$totalUpdates = 0;
 				$totalFailures = 0;
 				
-				if(!is_numeric($_POST['contactData']['contact_email_id']) || strlen($_POST['new_contact_email'])) {
+				$updatesArr = array();
+				
+				if(!is_numeric($_POST['contactData']['contact_email_id'])) {
 					$isPrimary = FALSE;
 					if(!is_numeric($_POST['contactData']['contact_email_id'])) {
 						$isPrimary = TRUE;
@@ -43,29 +45,41 @@ if($_POST) {
 						}
 					}
 					
-					if($contactObj->create_contact_email($_POST['new_contact_email'], $isPrimary)) {
-						$totalUpdates++;
-					}
-					else {
-						$totalFailures++;
+					if(strlen($_POST['new_contact_email'])) {
+						if($contactObj->create_contact_email($_POST['new_contact_email'], $isPrimary)) {
+							$totalUpdates++;
+							$res = "Successfully added new email";
+							if($isPrimary) {
+								$res .= " and set as primary address";
+							}
+							add_update_result($updatesArr, $res);
+						}
+						else {
+							$totalFailures++;
+							add_update_result($updatesArr, "FAILED to create new email address...");
+						}
 					}
 				}
 				
 				if(is_array($_POST['contactData'])) {
 					if($contactObj->update_contact_data($_POST['contactData'])) {
 						$totalUpdates++;
+						add_update_result($updatesArr, "Successfully updated contact data");
 					}
 					else {
 						$totalFailures++;
+						add_update_result($updatesArr, "FAILED to update contact data");
 					}
 				}
 				
 				if(is_array($_POST['attributes'])) {
 					if($contactObj->mass_update_contact_attributes($_POST['attributes'])) {
 						$totalUpdates++;
+							add_update_result($updatesArr, "Successfully updated attributes");
 					}
 					else {
 						$totalFailures++;
+							add_update_result($updatesArr, "FAILED to update attributes");
 					}
 				}
 				
@@ -73,9 +87,11 @@ if($_POST) {
 					foreach($_POST['delAttrib'] as $name) {
 						if($contactObj->delete_contact_attribute($name)) {
 							$totalUpdates++;
+							add_update_result($updatesArr, "Successfully deleted: <b>". $name ."</b>");
 						}
 						else {
 							$totalFailures++;
+							add_update_result($updatesArr, "FAILED to delete attribute \"<b>". $name ."</b>\"");
 							break;
 						}
 					}
@@ -84,13 +100,15 @@ if($_POST) {
 				if(is_array($_POST['addAttribute']) && count($_POST['addAttribute']) == 2) {
 					if($contactObj->create_contact_attribute($_POST['addAttribute']['name'], $_POST['addAttribute']['value'])) {
 						$totalUpdates++;
+						add_update_result($updatesArr, "Successfully added attribute (". $_POST['addAttribute']['name'] .")");
 					}
 					else {
 						$totalFailures++;
+						add_update_result($updatesArr, "FAILED to add attribute (". $_POST['addAttribute']['name'] .")");
 					}
 				}
 				
-				$messageArr['message'] = "Done, total updates=(". $totalUpdates ."), totalFailures=(". $totalFailures .")";
+				$messageArr['message'] = create_update_result($updatesArr);
 				$page->set_message_wrapper($messageArr);
 				
 				$contactObj->db->commitTrans();
@@ -140,9 +158,14 @@ else {
 			$attributeFormRows = "";
 			$baseRow = $page->templateRows['attributeRow'];
 			foreach($contactAttributes as $name=>$value) {
+				$displayValue = $value;
+				if(!strlen($value) || !strlen(preg_replace('/ /', '', $value))) {
+					$displayValue = "<font color='red'><b>[EMPTY]</b></font>";
+				}
 				$repArr=array(
-					'name'	=> $name,
-					'value'	=> $value
+					'name'			=> $name,
+					'displayValue'	=> $displayValue,
+					'value'			=> $value
 				);
 				
 				$attributeFormRows .= $page->gfObj->mini_parser($baseRow, $repArr, '{', '}');
@@ -187,5 +210,25 @@ else {
 		$page->add_template_var('dataRow', $myRow);
 	}
 }
+
+
+function add_update_result(array &$updateResults, $newResult) {
+	$updateResults[] = $newResult;
+}//end add_update_result()
+
+
+function create_update_result(array $updateResults) {
+	#$retval = "Result of updates: <ul>";
+	$retval = "";
+	$gf = new cs_globalFunctions;
+	foreach($updateResults as $result) {
+		$retval = $gf->create_list($retval, "<li>". $result ."</li>", "\n");
+	}
+	$retval = "Result of updates: <ul>". $retval;
+	$retval .= "</ul>";
+	return($retval);
+}//end create_update_result()
+
+
 
 ?>
