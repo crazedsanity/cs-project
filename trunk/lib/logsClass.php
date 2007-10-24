@@ -27,9 +27,9 @@
  */
 
 
-class logsClass {
+class logsClass extends dbAbstract {
 	/** Database handle */
-	private $db;
+	public $db;
 	
 	/** Cache of all records in the log_class_table */
 	private $logClassCache = array();
@@ -47,16 +47,27 @@ class logsClass {
 	/**
 	 * The constructor.
 	 */
-	public function __construct(cs_phpDB &$db, $logCategoryId) {
+	public function __construct(cs_phpDB &$db, $logCategory) {
 		//assign the database object.
 		$this->db = $db;
 		
 		//assign the log_category_id.
-		if(!is_numeric($logCategoryId)) {
-			//oh, jeez.
-			throw new exception(__METHOD__ .": FATAL: unable to set logCategoryId");
+		if(strlen($logCategory)) {
+			if(!is_numeric($logCategory)) {
+				//oh, jeez.
+				#throw new exception(__METHOD__ .": FATAL: unable to set logCategoryId");
+				
+				//attempt to retreive the logCategoryId (assuming they passed a name).
+				$this->logCategoryId = $this->get_log_category_id($logCategory);
+			}
+			else {
+				//it was numeric: set it!
+				$this->logCategoryId = $logCategory;
+			}
 		}
-		$this->logCategoryId = $logCategoryId;
+		else {
+			throw new exception(__METHOD__ .": FATAL: no logCategoryId passed");
+		}
 		
 		//check for a uid in the session.
 		if(is_numeric($_SESSION['uid'])) {
@@ -143,7 +154,7 @@ class logsClass {
 	
 	
 	//=========================================================================
-	public function log_by_class($details, $className="error", $uid=NULL, $recTypeId=NULL, $recId=NULL) {
+	public function log_by_class($details, $className="error", $uid=NULL) {
 		//make sure we've got a uid to log under.
 		if(is_null($uid) || !is_numeric($uid)) {
 			//set it.
@@ -155,8 +166,8 @@ class logsClass {
 			$logEventId = $this->get_log_event_id($className);
 		}
 		catch(Exception $e) {
-			throw new exception(__METHOD__ .": while attempting to retrieve logEventId, encountered an exception:::\n". $e->getMessage()
-			."\n\nCLASS: $className\nDETAILS: $details");
+			throw new exception(__METHOD__ .": while attempting to retrieve logEventId, encountered an " .
+			"exception:::\n". $e->getMessage() ."\n\nCLASS: $className\nDETAILS: $details");
 		}
 		
 		//check to see what uid to use.
@@ -181,11 +192,6 @@ class logsClass {
 			'affected_uid'	=> $uid,
 			'details'		=> $details
 		);
-		
-		if(!is_null($recTypeId) && !is_null($recId)) {
-			$sqlArr['record_type_id'] = $recTypeId;
-			$sqlArr['record_id'] = $recId;
-		}
 		
 		//build, run, error-checking.
 		$sql = "INSERT INTO log_table ". string_from_array($sqlArr, 'insert', NULL, $cleanStringArr, TRUE);
@@ -329,7 +335,6 @@ class logsClass {
 			'log_category_id'	=> array('ca',	'numeric'),
 			'uid'				=> array('l',	'numeric'),
 			'affected_uid'		=> array('l',	'numeric'),
-			'record_type_id'	=> array('rt',	'numeric'),
 			'group_id'			=> array('l',	'numeric'),
 			'creation'			=> array('l',	'sql')
 		);
@@ -380,8 +385,6 @@ class logsClass {
 				"l.creation, " .
 				"l.log_id, " .
 				"l.uid, " .
-				"rt.name as record_type, " .
-				"l.record_id, " .
 				"cl.name AS class_name, " .
 				"ca.name AS category_name, " .
 				"ev.description, " .
@@ -390,7 +393,6 @@ class logsClass {
 				"INNER JOIN log_event_table AS ev ON (l.log_event_id=ev.log_event_id) " .
 				"INNER JOIN log_class_table AS cl ON (cl.log_class_id=ev.log_class_id) " .
 				"INNER JOIN log_category_table AS ca ON (ca.log_category_id=ev.log_category_id) " .
-				"LEFT OUTER JOIN record_type_table AS rt ON (l.record_type_id=rt.record_type_id) " .
 			"WHERE " . $critString . " " .
 			"ORDER BY " .
 				"log_id DESC " .
@@ -448,6 +450,56 @@ class logsClass {
 		
 		return($myLogs);
 	}//end get_reports()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function get_log_category_id($catName) {
+		if(strlen($catName) && is_string($catName)) {
+			$catName = trim($catName);
+			$sql = "SELECT log_category_id FROM log_category_table WHERE lower(name) = '". strtolower($catName) ."'";
+			if($this->run_sql($sql)) {
+				//got it!
+				$data = $this->db->farray();
+				$retval = $data[0];
+			}
+			else {
+				//create the category & return the newly-inserted id.
+				$retval = $this->create_log_category($catName);
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": log_category name (". $catName .") is invalid");
+		}
+		
+		return($retval);
+	}//end get_log_category_id()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function create_log_category($catName) {
+		$sql = "INSERT INTO log_category_table (name) VALUES ('". 
+			$this->gfObj->cleanString($catName, 'sql') ."')";
+		if($this->run_sql($sql)) {
+			//sweet.  Get the newly created record.
+			$sql = "select currval('log_category_table_log_category_id_seq'::text)";
+			if($this->run_sql($sql)) {
+				$data = $this->db->farray();
+				$retval = $data[0];
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to retriev log_category_id of new record");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to create new log_category");
+		}
+		
+		return($retval);
+	}//end create_log_category()
 	//=========================================================================
 	
 	
