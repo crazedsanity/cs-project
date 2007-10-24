@@ -9,9 +9,13 @@
  * Last Updated:::::::: $Date$
  */
 
-class userClass {
+require_once(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
+
+
+class userClass extends dbAbstract {
 	
-	protected $db;
+	public $db;
+	
 	protected $uid;
 	protected $isAdmin=NULL;
 	
@@ -21,7 +25,7 @@ class userClass {
 	public $bypassAuthCheck = FALSE;
 	
 	//================================================================================================
-	function userClass(cs_phpDB &$db, $uid=NULL) {
+	function __construct(cs_phpDB &$db, $uid=NULL) {
 		
 		if(is_numeric(LOGCAT__USERS)) {
 			$this->logCategoryId = LOGCAT__USERS;
@@ -39,7 +43,7 @@ class userClass {
 		
 		//create the object that can handle logging.
 		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
-	}//end userClass{}
+	}//end __construct{}
 	//================================================================================================
 	
 	

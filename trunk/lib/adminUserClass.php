@@ -13,7 +13,7 @@
 class adminUserClass extends userClass {
 	
 	/** The database object. */
-	protected $db;
+	public $db;
 	
 	/** Current uid. */
 	protected $uid;
@@ -34,7 +34,7 @@ class adminUserClass extends userClass {
 		}
 		
 		//call our parent's constructor.
-		$this->userClass($this->db);
+		parent::__construct($this->db);
 	}//end __construct();
 	//=========================================================================
 	
@@ -63,42 +63,31 @@ class adminUserClass extends userClass {
 		}
 		else {
 			//create the contact.
-			$contactId = $this->create_contact($data['fname'], $data['lname']);
+			$contactId = $this->create_contact($data['fname'], $data['lname'], $data['email'], $data['company']);
 			$data['contact_id'] = $contactId;
 			unset($data['fname'], $data['lname']);
 			
 			
 			//now, define how everything gets cleaned.
 			$cleanStringArr = array(
-				'username'	=> 'sql',
-				'password'	=> 'sql',
-				'group_id'	=> 'numeric',
+				'username'		=> 'sql',
+				'password'		=> 'sql',
+				'group_id'		=> 'numeric',
 				'contact_id'	=> 'numeric'
 			);
 			
 			//good to go: encrypt the password.
 			$data['password'] = $this->encrypt_pass($data['password']);
 			$sql = "INSERT INTO user_table ". string_from_array($data, 'insert', NULL, $cleanStringArr, TRUE, TRUE);
-			$numrows = $this->db->exec($sql);
-			$dberror = $this->db->errorMsg();
 			
-			$retval = NULL;
-			if(strlen($dberror)) {
+			if(!$this->run_sql($sql)) {
 				//something bad happened... 
 				//TODO: Log something.
-			}
-			elseif($numrows !== 1) {
-				//unable to insert? 
-				//TODO: log something.
 			}
 			else {
 				//got something: get the user's ID.
 				$sql = "SELECT currval('user_table_uid_seq'::text)";
-				$numrows = $this->db->exec($sql);
-				$dberror = $this->db->errorMsg();
-				
-				$retval = NULL;
-				if(!strlen($dberror) && $numrows == 1) {
+				if(!$this->run_sql($sql)) {
 					//got it.
 					$tempData = $this->db->farray();
 					$retval = $tempData[0];
@@ -109,14 +98,6 @@ class adminUserClass extends userClass {
 					
 					//now add the user to the specified group.
 					$this->add_user_to_group($uid, $data['group_id']);
-					
-					//now see if there's attributes to add (should be at least 1)
-					$addAttributeNames = array('company', 'email');
-					foreach($addAttributeNames as $attribName) {
-						if(isset($data[$attribName]) && strlen($data[$attribName])) {
-							$addedAttrib = $this->add_attribute($contactId, $attribName, $data[$attribName]);
-						}
-					}
 				}
 				else {
 					$details = "Created new user (". $data['loginname'] .") [NEW ID QUERY FAILED]";
@@ -218,13 +199,9 @@ class adminUserClass extends userClass {
 		);
 		
 		$sql = "INSERT INTO user_group_table ". string_from_array($sqlArr, 'insert', NULL, 'number');
-		
-		$numrows = $this->db->exec($sql);
-		$dberror = $this->db->errorMsg();
-		
-		if(strlen($dberror) || $numrows !== 1) {
+		if(!$this->run_sql($sql)) {
 			//indications are it failed.
-			if(strlen($dberror)) {
+			if(strlen($this->lastError)) {
 				//TODO: log an error.
 			}
 			$retval = FALSE;
@@ -328,41 +305,49 @@ class adminUserClass extends userClass {
 	
 	
 	//=========================================================================
-	public function create_contact($fname,$lname) {
-		//create the insert SQL.
-		$sqlArr = array(
-			'fname'	=> $fname,
-			'lname'	=> $lname
-		);
-		$cleanStringArr = array(
-			'fname'	=> 'sql',
-			'lname'	=> 'sql'
-		);
-		
-		$sql = 'INSERT INTO contact_table '. string_from_array($sqlArr, 'insert', NULL, $cleanStringArr);
-		$numrows = $this->db->exec($sql);
-		$dberror = $this->db->errorMsg();
-		
-		$retval = NULL;
-		if(strlen($dberror) || $numrows !== 1) {
-			//failure.
-			throw new exception("create_contact(): failed to insert data (". $numrows ."::: ". $dberror);
-		}
-		else {
-			//success: get the new contact_id.
-			$sql = "SELECT currval('contact_table_contact_id_seq'::text)";
-			$numrows = $this->db->exec($sql);
-			$dberror = $this->db->errorMsg();
+	public function create_contact($fname,$lname, $email, $company=NULL) {
+		if(strlen($fname) && strlen($lname) && strlen($email)) {
+			//create the insert SQL.
+			$sqlArr = array(
+				'fname'	=> $fname,
+				'lname'	=> $lname
+			);
+			$cleanStringArr = array(
+				'fname'	=> 'sql',
+				'lname'	=> 'sql'
+			);
 			
-			if(strlen($dberror) || $numrows !== 1) {
-				//failure!
-				throw new exception("create_contact(): insert was successful, but could not retrieve new contact_id (". $numrows .")::: ". $dberror);
+			//start a transaction...
+			$this->db->beginTrans(__METHOD__);
+			
+			$sql = 'INSERT INTO contact_table '. string_from_array($sqlArr, 'insert', NULL, $cleanStringArr);
+			if($this->run_sql($sql)) {
+				//failure.
+				$this->db->rollbackTrans();
+				throw new exception("create_contact(): failed to insert data (". $this->lastNumrows ."::: ". $this->lastError);
 			}
 			else {
-				//retrieve the data.
-				$data = $this->db->farray();
-				$retval = $data[0];
+				//success: get the new contact_id.
+				$sql = "SELECT currval('contact_table_contact_id_seq'::text)";
+				if($this->run_sql($sql)) {
+					//failure!
+					$this->db->rollbackTrans();
+					throw new exception("create_contact(): insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError);
+				}
+				else {
+					//retrieve the data.
+					$data = $this->db->farray();
+					$retval = $data[0];
+					
+					//before completing, let's create the primary email address.
+					$contactObj = new contactClass($this->db);
+					$contactObj->set_contact_id($retval);
+					$contactObj->create_contact_email($email, TRUE);
+				}
 			}
+		}
+		else {
+			throw new exception(__METHOD__ .": not enough information, be sure to include fname, lname, and email");
 		}
 		
 		return($retval);
