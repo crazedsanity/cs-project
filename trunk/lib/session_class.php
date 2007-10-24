@@ -662,8 +662,10 @@ class Session extends upgrade {
 		}
 		
 		//pre-check was okay; run a query...
-		$query = "SELECT uid AS ID, username, password, group_id, contact_get_attribute(contact_id,'email') AS email, " .
-				"contact_id FROM user_table WHERE username='". $username ."'";
+		$query = "SELECT uid AS ID, u.username, u.password, u.group_id, ce.email, " .
+				"u.contact_id FROM user_table AS u INNER JOIN contact_table AS c " .
+				"ON (u.contact_id=c.contact_id) INNER JOIN contact_email_table AS ce " .
+				"ON (ce.contact_email_id=c.contact_email_id) WHERE username='". $username ."'";
 		
 		$this->db->exec($query);
 		$numrows = $this->db->numRows();
