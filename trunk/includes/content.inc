@@ -140,8 +140,7 @@ $tabObj->display_tabs();
 
 
 $proj = new projectClass($page->db);
-$helpdeskObj = new helpdeskClass($page->db);
-$bbCodeParser = new bbCodeParser($proj, $helpdeskObj);
+$bbCodeParser = new bbCodeParser($proj, $proj->helpdeskObj);
 
 //before going on, determine how stuff should be sorted...
 $currentSortArr = store_and_return_sorting($page, $_GET['sort'], $_GET['sortType']);
