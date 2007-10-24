@@ -49,6 +49,7 @@ define('FORMAT_WORDWRAP',	90);
 
 require_once(dirname(__FILE__) ."/cs-content/contentSystemClass.php");
 require_once(dirname(__FILE__) ."/cs-content/cs_phpDB.php");
+require_once(dirname(__FILE__) ."/abstractClasses/dbAbstract.class.php");
 require_once(dirname(__FILE__) ."/logsClass.php");
 require_once(dirname(__FILE__) ."/session_class.php");
 require_once(dirname(__FILE__) ."/sessionCacheClass.php");
@@ -61,5 +62,4 @@ require_once(dirname(__FILE__) ."/phpmailer/class.phpmailer.php");
 require_once(dirname(__FILE__) ."/userClass.php");
 require_once(dirname(__FILE__) ."/tagClass.php");
 require_once(dirname(__FILE__) ."/prefClass.php");
-require_once(dirname(__FILE__) ."/abstractClasses/dbAbstract.class.php");
 ?>
