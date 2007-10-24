@@ -95,8 +95,9 @@ class adminUserClass extends userClass {
 					$retval = $tempData[0];
 					
 					//LOG IT!!!
-					$details = "Created new user #". $retval ." (". $data['loginname'] .")";
+					$details = "Created new user #". $retval ." (". $data['username'] .")";
 					$uid = $retval;
+					$this->logsObj->log_by_class($details, 'create', $uid);
 					
 					//now add the user to the specified group.
 					$this->add_user_to_group($uid, $data['group_id']);
@@ -104,8 +105,8 @@ class adminUserClass extends userClass {
 				else {
 					$details = "Created new user (". $data['username'] .") [NEW ID QUERY FAILED, numrows=(". $this->lastNumrows ."), DBERROR::: ". $this->lastError ."]";
 					$uid = NULL;
+					$this->logsObj->log_dberror($details, $uid);
 				}
-				$this->logsObj->log_by_class($details, 'create', $uid);
 			}
 		}
 		
