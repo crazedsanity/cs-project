@@ -19,8 +19,6 @@ class projectClass extends mainRecord {
 	var $order = array();	//array of how to order the projects that we get back.
 	public $tagObj;
 	public $prefObj;
-	private $recordTypeId;
-	private $logCategoryId;
 	public $logsObj;
 	protected $groupId = NULL;
 	
@@ -31,21 +29,6 @@ class projectClass extends mainRecord {
 	 * CONSTRUCTOR.
 	 */
 	function __construct(cs_phpDB &$db) {
-		
-		if(is_numeric(LOGCAT__PROJECT)) {
-			$this->logCategoryId = LOGCAT__PROJECT;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid log_category_id defined for project: did you complete setup?");
-		}
-		
-		if(is_numeric(RECTYPE__PROJECT)) {
-			$this->recordTypeId = RECTYPE__PROJECT;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid record_type_id defined for project: did you complete setup?");
-		}
-		
 		
 		//check to see if the database object is valid.
 		if(is_object($db) && $db->is_connected()) {
@@ -59,12 +42,12 @@ class projectClass extends mainRecord {
 		$this->set_group_id();
 		
 		//now create all those internal objects.
-		$this->noteObj = new noteClass($this->db);
-		$this->todoObj = new todoClass($this->db);
-		$this->helpdeskObj  = new helpdeskClass($this->db);
-		$this->tagObj  = new tagClass($this->db);
-		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
-		$this->prefObj = new pref($this->db, $_SESSION['uid']);
+		$this->noteObj		= new noteClass($this->db);
+		$this->todoObj		= new todoClass($this->db);
+		$this->helpdeskObj	= new helpdeskClass($this->db);
+		$this->tagObj		= new tagClass($this->db);
+		$this->logsObj		= new logsClass($this->db, "Project");
+		$this->prefObj		= new pref($this->db, $_SESSION['uid']);
 		
 		parent::__construct();
 	}//end __construct()
@@ -372,9 +355,9 @@ class projectClass extends mainRecord {
 				$noLogThese = array('personen');
 				if(($oldProjectDetails[$field] != $updatesArr[$field]) && (!in_array($field, $noLogThese))) {
 					//log the changes.
-					$details = "Changed settings for $field:::  OLD=(". $oldProjectDetails[$field] .") to " .
+					$details = "Changed settings on [project_id=". $this->projectId ."] for $field:::  OLD=(". $oldProjectDetails[$field] .") to " .
 							"NEW=(". $updatesArr[$field] .")";
-					$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $this->projectId);
+					$this->logsObj->log_by_class($details, 'information');
 				}
 			}
 			
@@ -385,14 +368,14 @@ class projectClass extends mainRecord {
 			}
 			if($updatesArr['status_id'] == 4) {
 				//they've ENDED the project: log it as such.
-				$details = "Ended project #". $this->projectId .": ". $useThisName;
-				$this->logsObj->log_by_class($details, 'report', NULL, $this->recordTypeId, $this->projectId);
+				$details = "Ended project #". $this->projectId ." ([project_id=". $this->projectId ."]) : ". $useThisName;
+				$this->logsObj->log_by_class($details, 'report');
 			}
 			elseif(($oldProjectDetails['status_id'] == 4) && (isset($updatesArr['status_id']))) {
 				//it's been re-opened.
 				$details = "Project re-opened (new status_id=". $updatesArr['status_id'] ."): #". $this->projectId
-					.": ". $useThisName;
-				$this->logsObj->log_by_class($details, 'report', NULL, $this->recordTypeId, $this->projectId);
+					." ([project_id=". $this->projectId ."]) : ". $useThisName;
+				$this->logsObj->log_by_class($details, 'report');
 			}
 		}
 		
@@ -432,7 +415,7 @@ class projectClass extends mainRecord {
 		//check for errors, & tell 'em what happened.
 		if(!is_numeric($newRecord) || $newRecord < 1) {
 			//something bad happened.
-			$this->logsObj->log_dberror("create_project(): failed to insert data ($numrows)... $dberror");
+			$this->logsObj->log_dberror("create_project(): failed to insert data (". $numrows .")... ". $dberror);
 			$retval = 0;
 		}
 		else {
@@ -460,9 +443,9 @@ class projectClass extends mainRecord {
 			}
 			
 			//okay, log the creation.
-			$details = "Created project #". $retval .": ". $dataArr['name'];
-			$this->logsObj->log_by_class($details, 'create', NULL, $this->recordTypeId, $retval);
-			$this->logsObj->log_by_class($details, 'report', NULL, $this->recordTypeId, $retval);
+			$details = "Created project #". $retval .": ". $dataArr['name'] ." PROJECT LINK::: [project_id=". $retval ."]";
+			$this->logsObj->log_by_class($details, 'create');
+			$this->logsObj->log_by_class($details, 'report');
 		}
 		
 		return($retval);

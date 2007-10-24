@@ -15,8 +15,6 @@ class helpdeskClass extends mainRecord {
 	
 	var $db;				//database handle.
 	var $helpdeskId	= NULL;		//bug/helpdesk
-	public $recordTypeId;
-	private $logCategoryId;
 	private $allowedFields;
 	
 	protected $logsObj;
@@ -27,21 +25,6 @@ class helpdeskClass extends mainRecord {
 	 */
 	function __construct(cs_phpDB $db) {
 		
-		if(is_numeric(LOGCAT__HELPDESK)) {
-			$this->logCategoryId = LOGCAT__HELPDESK;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid log_category_id defined for helpdesk: did you complete setup?");
-		}
-		
-		if(is_numeric(RECTYPE__HELPDESK)) {
-			$this->recordTypeId = RECTYPE__HELPDESK;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid record_type_id defined for helpdesk: did you complete setup?");
-		}
-		
-		
 		//check to see if the database object is valid.
 		if(is_object($db) && $db->is_connected()) {
 			$this->db = $db;
@@ -51,7 +34,7 @@ class helpdeskClass extends mainRecord {
 		}
 		
 		//create the logging object.
-		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
+		$this->logsObj = new logsClass($this->db, "Helpdesk");
 		
 		$this->allowedFields = array(
 			"name"				=> "sql",
@@ -153,11 +136,10 @@ class helpdeskClass extends mainRecord {
 	function remark($helpdeskId, $remark, $isSolution=FALSE, $useRespondLink=FALSE) {
 		//PRE-CHECK!!!
 		if(strlen($remark) < 10) {
-			$this->logsObj->log_by_class("remark(): not enough content::: $remark", 'error', NULL, $this->recordTypeId, $helpdeskId);
+			$this->logsObj->log_by_class("remark(): not enough content to remark on [helpdesk_id=". $helpdeskId."] ::: $remark", 'error');
 			return(-1);
 		}
 		
-		#$retval = $this->update_record($helpdeskId, $updateArr, $appendRemark);
 		$tmp = $this->get_record($helpdeskId);
 		$noteObj = new noteClass($this->db);
 		$noteData = array(
@@ -212,13 +194,13 @@ class helpdeskClass extends mainRecord {
 				}
 				$subject .= " -- ". $tmp['name'];
 				$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
-				$details = 'Sent notifications of SOLUTION to: '. $sendEmailRes;
-				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
+				$details = 'Sent notifications of SOLUTION for [helpdesk_id='. $helpdeskId .'] to: '. $sendEmailRes;
+				$this->logsObj->log_by_class($details, 'information');
 			}
 		}
 		else {
 			//something went wrong.
-			$this->logsObj->log_by_class("remark(): failed to update record ($retval)", 'error', NULL, $this->recordTypeId, $helpdeskId);
+			$this->logsObj->log_by_class("remark(): failed to remark on [helpdesk_id=". $helpdeskId ."] ($retval)", 'error');
 		}
 		
 		return($retval);
@@ -242,7 +224,8 @@ class helpdeskClass extends mainRecord {
 		if(!is_numeric($helpdeskId) || !is_string($solution) || strlen($solution) < 10) {
 			$retval = 0;
 			if(strlen($solution) < 10) {
-				$this->logsObj->log_by_class("solve(): not enough information to solve::: $solution", 'error', NULL, $this->recordTypeId, $helpdeskId);
+				$this->logsObj->log_by_class("solve(): not enough information to solve [helpdesk_id=" .
+					$helpdeskId ."]::: $solution", 'error');
 				$retval = -1;
 			}
 		}
@@ -264,16 +247,18 @@ class helpdeskClass extends mainRecord {
 				//only send an email if the update succeeded.
 				if($retval == 1) {
 					//send the submitter a notification.
-					$this->logsObj->log_by_class("Solved issue #". $helpdeskId, 'report', NULL, $this->recordTypeId, $helpdeskId);
+					$this->logsObj->log_by_class("Solved issue #". $helpdeskId .": [helpdesk_id=". $helpdeskId ."]", 'report');
 				}
 				else {
 					//log the problem.
-					$this->logsObj->log_by_class("solve(): failed to update record ($retval)", 'report', NULL, $this->recordTypeId, $helpdeskId);
+					$this->logsObj->log_by_class("solve(): failed to update [helpdesk_id=". 
+						$helpdeskId ."]: (". $retval .")", 'report');
 				}
 			}
 			else {
 				//failed to create the solution remark.
-				$this->logsObj->log_dberror("Unable to create solution note: (". $createSolution .")");
+				$this->logsObj->log_dberror("Unable to create solution note for issue [helpdesk_id=" .
+					$helpdeskId ."] : (". $createSolution .")");
 			}
 		}
 		return($retval);
@@ -329,9 +314,9 @@ class helpdeskClass extends mainRecord {
 			send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $alehelpdeskubject, $emailTemplate, $parseArr);
 			
 			//log that it was created.
-			$details = "Helpdesk Issue #$retval Created by (". $dataArr['email'] ."): ". $dataArr['name'];
-			$this->logsObj->log_by_class($details, 'create', NULL, $this->recordTypeId, $retval);
-			$this->logsObj->log_by_class($details, 'report', NULL, $this->recordTypeId, $retval);
+			$details = "Helpdesk Issue #". $retval ." ([helpdesk_id=". $retval ."]) Created by (". $dataArr['email'] ."): ". $dataArr['name'];
+			$this->logsObj->log_by_class($details, 'create');
+			$this->logsObj->log_by_class($details, 'report');
 		}
 		else {
 			//log the internal failure.
