@@ -10,6 +10,7 @@
  */
 
 require_once(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
+require_once(dirname(__FILE__) .'/contactClass.php');
 
 
 class userClass extends dbAbstract {
@@ -21,6 +22,7 @@ class userClass extends dbAbstract {
 	
 	protected $logCategoryId;
 	protected $logsObj;
+	protected $gfObj;
 	
 	public $bypassAuthCheck = FALSE;
 	
@@ -43,6 +45,8 @@ class userClass extends dbAbstract {
 		
 		//create the object that can handle logging.
 		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
+		
+		$this->gfObj = new cs_globalFunctions;
 	}//end __construct{}
 	//================================================================================================
 	

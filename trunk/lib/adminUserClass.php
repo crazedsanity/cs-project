@@ -59,6 +59,8 @@ class adminUserClass extends userClass {
 		//check if we've got missing fields.
 		if(count($missingFields)) {
 			//nothin' doin'.  Fail 'em.
+			$details = __METHOD__ .": there were fields missing::: ". $this->gfObj->string_from_array($missingFields);
+			$this->logObj->log_dberror($details);
 			$retval = NULL;
 		}
 		else {
@@ -87,7 +89,7 @@ class adminUserClass extends userClass {
 			else {
 				//got something: get the user's ID.
 				$sql = "SELECT currval('user_table_uid_seq'::text)";
-				if(!$this->run_sql($sql)) {
+				if($this->run_sql($sql)) {
 					//got it.
 					$tempData = $this->db->farray();
 					$retval = $tempData[0];
@@ -100,7 +102,7 @@ class adminUserClass extends userClass {
 					$this->add_user_to_group($uid, $data['group_id']);
 				}
 				else {
-					$details = "Created new user (". $data['loginname'] .") [NEW ID QUERY FAILED]";
+					$details = "Created new user (". $data['username'] .") [NEW ID QUERY FAILED, numrows=(". $this->lastNumrows ."), DBERROR::: ". $this->lastError ."]";
 					$uid = NULL;
 				}
 				$this->logsObj->log_by_class($details, 'create', $uid);
@@ -321,18 +323,18 @@ class adminUserClass extends userClass {
 			$this->db->beginTrans(__METHOD__);
 			
 			$sql = 'INSERT INTO contact_table '. string_from_array($sqlArr, 'insert', NULL, $cleanStringArr);
-			if($this->run_sql($sql)) {
+			if(!$this->run_sql($sql)) {
 				//failure.
 				$this->db->rollbackTrans();
-				throw new exception("create_contact(): failed to insert data (". $this->lastNumrows ."::: ". $this->lastError);
+				throw new exception(__METHOD__ .": failed to insert data (". $this->lastNumrows ."::: ". $this->lastError);
 			}
 			else {
 				//success: get the new contact_id.
 				$sql = "SELECT currval('contact_table_contact_id_seq'::text)";
-				if($this->run_sql($sql)) {
+				if(!$this->run_sql($sql)) {
 					//failure!
 					$this->db->rollbackTrans();
-					throw new exception("create_contact(): insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError);
+					throw new exception(__METHOD__ .": insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError);
 				}
 				else {
 					//retrieve the data.
@@ -343,6 +345,7 @@ class adminUserClass extends userClass {
 					$contactObj = new contactClass($this->db);
 					$contactObj->set_contact_id($retval);
 					$contactObj->create_contact_email($email, TRUE);
+					$this->db->commitTrans();
 				}
 			}
 		}
