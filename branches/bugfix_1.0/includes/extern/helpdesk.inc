@@ -165,13 +165,11 @@ else {
 		//set the html title.
 		$page->add_template_var("html_title", "Create a Helpdesk Issue");
 		$page->add_template_var("email", $_SESSION['email']);
-		#$page->change_content(html_file_to_string("modules/helpdesk/helpdesk_edit.tmpl"));
 		$page->set_all_block_rows("content", array("create_form"));
 		
 		//show the "category" properly.
 		$categoryList = $proj->helpdeskObj->get_category_list($helpdeskData['helpdesk_cat_id']);
 		$page->add_template_var("select_category_list", $categoryList);
-		$categoryList = $proj->rtsObj->get_category_list();
 		$page->add_template_var("select_tags", $categoryList);
 		$page->add_template_var("id", $helpdeskId);
 	}
