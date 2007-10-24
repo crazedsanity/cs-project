@@ -61,4 +61,5 @@ require_once(dirname(__FILE__) ."/phpmailer/class.phpmailer.php");
 require_once(dirname(__FILE__) ."/userClass.php");
 require_once(dirname(__FILE__) ."/tagClass.php");
 require_once(dirname(__FILE__) ."/prefClass.php");
+require_once(dirname(__FILE__) ."/abstractClasses/dbAbstract.class.php");
 ?>
