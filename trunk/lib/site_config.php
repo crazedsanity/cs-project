@@ -26,7 +26,32 @@ set_exception_handler('exception_handler');
 //##########################################################################
 function exception_handler($exception) {
 	$exceptionMessage = $exception->getMessage();
-	print "<pre><h2>FATAL EXCEPTION ENCOUNTERED</h2> ". $exceptionMessage ."\n\n";
+	
+	
+	//attempt to log the problem; if it happens too early, we can't do much about it.
+	try {
+		include(dirname(__FILE__) ."/includes.php");
+		include_once(dirname(__FILE__) ."/globalFunctions.php");
+		if(function_exists('get_config_db_params') && class_exists('cs_phpDB') && class_exists('logsClass')) {
+			$db = new cs_phpDB;
+			$db->connect(get_config_db_params());
+			$logs = new logsClass($db, "EXCEPTION");
+			
+			$details = "Uncaught exception: ". $exceptionMessage;
+			if(function_exists('cs_debug_backtrace')) {
+				$details .= "\n\n: BACKTRACE FOLLOWS: ". cs_debug_backtrace(0);
+			}
+			$logs->log_by_class($details, 'error');
+		}
+		else {
+			//that's right.  
+			throw new exception(__FUNCTION__ .": unable to log error, class or function not available");
+		}
+	}
+	catch(exception $e) {
+		//do something here...
+		print "<pre><h3>SECOND FATAL ENCOUNTER OCCURRED (while handling first error)</h3> ". $e->getMessage() ."</pre>\n";
+	}
 }//exception_handler()
 //##########################################################################
 
