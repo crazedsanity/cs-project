@@ -21,6 +21,7 @@ abstract class dbAbstract {
 	public $db;
 	
 	protected $fsObj;
+	protected $lastSQLFile;
 	
 	abstract public function __construct(cs_phpDB &$db);
 	
@@ -58,6 +59,8 @@ abstract class dbAbstract {
 		if(!is_object($this->fsObj)) {
 			$this->fsObj = new cs_fileSystemClass;
 		}
+		
+		$this->lastSQLFile = $filename;
 		
 		$fileContents = $this->fsObj->read($filename);
 		$this->db->beginTrans(__METHOD__);
