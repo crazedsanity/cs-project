@@ -18,7 +18,7 @@ require_once(dirname(__FILE__) ."/globalFunctions.php");
 require_once(dirname(__FILE__) ."/upgradeClass.php");
 
 
-class Session extends upgrade {
+class Session {
 
 	var $db;
 	var $uid;
@@ -29,7 +29,6 @@ class Session extends upgrade {
 	var $last_action;
 	var $last_activity;
 	var $sid_check = 0;
-	private $logCategoryId = LOGCAT__SESSION;
 	private $logsObj;
 	private $dbTable = 'session_table';	//name of table used to store session information.
 	private $sessionTimeLeft = 0;
@@ -38,17 +37,10 @@ class Session extends upgrade {
 	//##########################################################################
 	function __construct(&$db, $create_session=1) 	{
 		
-		if(is_numeric(LOGCAT__AUTHENTICATION)) {
-			$this->logCategoryId = LOGCAT__AUTHENTICATION;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid log_category_id defined for authentication: did you complete setup?");
-		}
-		
 		if(!defined("CONFIG_SESSION_NAME")) {
 			$gf = new cs_globalFunctions;
 			$gf->debug_print(get_defined_vars(),1);
-			throw new exception("Session{}: the constant, CONFIG_SESSION_NAME, is not defined");
+			throw new exception(__METHOD__ .": the constant, CONFIG_SESSION_NAME, is not defined");
 		}
 		else {
 			ini_set('session.name', CONFIG_SESSION_NAME);
@@ -66,7 +58,7 @@ class Session extends upgrade {
 		}
 		
 		//create our logging object.
-		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
+		$this->logsObj = new logsClass($this->db, 'Authentication');
 		
 		//create a session, if needs be.
 		if($create_session) {
