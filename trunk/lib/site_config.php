@@ -10,6 +10,10 @@
  * Last Updated:::::::: $Date$
  */
 
+//set some PHP settings.
+ini_set('session.auto_start', 1);				//automatically start a session
+ini_set('session.hash_bits_per_character', 4);	//ensure the session id is 32 characters long.
+
 require_once(dirname(__FILE__) .'/cs-content/contentSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
