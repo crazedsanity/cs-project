@@ -66,7 +66,7 @@ class upgrade_to_1_1_0_BETA3 extends dbAbstract {
 			
 			foreach($logRecords as $logId => $data) {
 				//update each log with a link to the issue/project, then log the change.
-				$addThis = " ". strtoupper($data['module_name']) ."Link: [". $data['module'] .
+				$addThis = "\n". strtoupper($data['module_name']) ." Link: [". $data['module'] .
 					"_id=". $data['record_id'] ."]";
 				$sql = "UPDATE log_table SET details=details || '". $addThis ."' WHERE log_id=". $logId;
 				$this->run_sql($sql);
