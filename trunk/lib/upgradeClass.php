@@ -12,6 +12,7 @@
  * 
  */
 
+require(dirname(__FILE__) .'/includes.php');
 require_once(dirname(__FILE__) .'/globalFunctions.php');
 require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.php');
 
@@ -21,6 +22,7 @@ class upgrade {
 	private $gfObj;
 	private $config = NULL;
 	protected $db;
+	protected $logsObj;
 	
 	private $versionFileVersion = NULL;
 	private $configVersion = NULL;
@@ -42,6 +44,11 @@ class upgrade {
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
 		clearstatcache();
+		
+		$this->db = new cs_phpDB;
+		$this->db->connect(get_config_db_params());
+		
+		$this->logsObj = new logsClass($this->db, "Upgrade");
 		
 		//define some things for upgrades.
 		define("UPGRADE_LOCKFILE",	dirname(__FILE__) ."/../UPGRADING_VERSION"); //relative to the directory beneath lib.
@@ -217,10 +224,17 @@ class upgrade {
 				$this->gfObj->debug_print(__METHOD__ .": starting to run through the upgrade list...");
 				$this->db->beginTrans(__METHOD__);
 				foreach($upgradeList as $fromVersion=>$toVersion) {
-					$this->gfObj->debug_print(__METHOD__ .": upgrading from ". $fromVersion ." to ". $toVersion ."... ");
+					
+					$details = __METHOD__ .": upgrading from ". $fromVersion ." to ". $toVersion ."... ";
+					$this->gfObj->debug_print($details);
+					$this->logsObj->log_by_class($details, 'system');
 					$this->do_single_upgrade($fromVersion);
 					$this->get_database_version();
 					$i++;
+					
+					$details = __METHOD__ .": finished upgrade #". $i .", now at version (". $this->databaseVersion .")";
+					$this->gfObj->debug_print($details);
+					$this->logsObj->log_by_class($details, 'system');
 				}
 				
 				if($this->databaseVersion == $this->versionFileVersion) {
@@ -717,7 +731,6 @@ class upgrade {
 			//now deal with those damnable suffixes, but only if the versions are so far identical: if 
 			//	the "$checkIfHigher" is actually higher, don't bother (i.e. suffixes don't matter when
 			//	we already know there's a major, minor, or maintenance version that's also higher.
-			$this->gfObj->debug_print(__METHOD__ .": retval before checking suffix is (". $retval .")");
 			if($retval === FALSE) {
 				$this->gfObj->debug_print(__METHOD__ .": checking suffixes... ");
 				//EXAMPLE: $version="1.0.0-BETA3", $checkIfHigher="1.1.0"
@@ -758,7 +771,6 @@ class upgrade {
 							}
 						}
 						
-						$this->gfObj->debug_print(__METHOD__ .": retval=(". $retval .")");
 					}
 					elseif(strlen($curVersionSuffix) && !strlen($checkVersionSuffix)) {
 						//i.e. "1.0.0-BETA1" to "1.0.0" --->>> OKAY!
@@ -774,6 +786,8 @@ class upgrade {
 				}
 			}
 		}
+		
+		$this->gfObj->debug_print(__METHOD__ .": ('". $version ."',  '". $checkIfHigher ."') retval=(". $retval .")");
 		
 		return($retval);
 		
@@ -810,12 +824,14 @@ class upgrade {
 					throw new exception(__METHOD__ .": there's a config to upgrade this version to a higher one...? ". $this->gfObj->debug_print($data,0));
 				}
 				elseif($this->is_higher_version($matchVersion, $newVersion)) {
-					$retval[$lastVersion] = $matchVersion;
+					$this->gfObj->debug_print(__METHOD__ .": <b>adding (". $matchVersion .") => (". $data['TARGET_VERSION'] .")</b>");
+					$retval[$matchVersion] = $data['TARGET_VERSION'];
 					$lastVersion = $matchVersion;
 				}
 			}
 			
-			if($matchVersion !== $newVersion) {
+			if($lastVersion !== $newVersion && (!isset($retval[$lastVersion]) || $retval[$lastVersion] != $newVersion)) {
+				$this->gfObj->debug_print(__METHOD__ .": <b>ALSO (". $lastVersion .") => (". $newVersion .")</b>");
 				$retval[$lastVersion] = $newVersion;
 			}
 		}
@@ -825,7 +841,6 @@ class upgrade {
 			$retval[$dbVersion] = $this->versionFileVersion;
 		}
 		
-		$this->gfObj->debug_print(__METHOD__ .": returning::: ". $this->gfObj->debug_print($retval,0));
 		return($retval);
 		
 	}//end get_upgrade_list()
