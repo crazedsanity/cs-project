@@ -43,6 +43,9 @@ class logsClass extends dbAbstract {
 	/** Category to use when logging a database error */
 	private $databaseCategory = 1;
 	
+	/** cs_globalFunctions{} for string & array handling stuff. */
+	private $gfObj;
+	
 	//=========================================================================
 	/**
 	 * The constructor.
@@ -50,6 +53,8 @@ class logsClass extends dbAbstract {
 	public function __construct(cs_phpDB &$db, $logCategory) {
 		//assign the database object.
 		$this->db = $db;
+		
+		$this->gfObj = new cs_globalFunctions;
 		
 		//assign the log_category_id.
 		if(strlen($logCategory)) {
@@ -112,8 +117,9 @@ class logsClass extends dbAbstract {
 			$retval = $this->logClassCache[$name];
 		}
 		else {
-			//ick.
-			throw new exception(__METHOD__ .": unable to get log_class_id for ($name)". debug_print($this->logClassCache,0));
+			//not available.  Try to create a new one & refresh the cache.
+			$retval = $this->create_log_class($name);
+			$this->build_cache();
 		}
 		
 		return($retval);
@@ -491,7 +497,7 @@ class logsClass extends dbAbstract {
 				$retval = $data[0];
 			}
 			else {
-				throw new exception(__METHOD__ .": failed to retriev log_category_id of new record");
+				throw new exception(__METHOD__ .": failed to retrieve log_category_id of new record");
 			}
 		}
 		else {
@@ -500,6 +506,34 @@ class logsClass extends dbAbstract {
 		
 		return($retval);
 	}//end create_log_category()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function create_log_class($className) {
+		cs_debug_backtrace();
+		$sql = "INSERT INTO log_class_table (name) VALUES ('". 
+			$this->gfObj->cleanString($className, 'sql') ."')";
+		if($this->run_sql($sql)) {
+			//sweet.  Get the newly created record.
+			$sql = "select currval('log_class_table_log_class_id_seq'::text)";
+			if($this->run_sql($sql)) {
+				$data = $this->db->farray();
+				$retval = $data[0];
+				
+				$this->run_sql("SELECT * FROM log_class_table WHERE log_class_id=". $retval);
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to retrieve log_class_id of new record");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to create new log_class");
+		}
+		
+		return($retval);
+	}//end create_log_class()
 	//=========================================================================
 	
 	
