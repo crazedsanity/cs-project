@@ -452,7 +452,7 @@ class logsClass extends dbAbstract {
 		$criteria['timeperiod'] = $timePeriod;
 		$criteria['log_class_id'] = 6;
 		
-		$myLogs = $this->get_logs($criteria,NULL,50);
+		$myLogs = $this->get_logs($criteria,NULL,10);
 		
 		return($myLogs);
 	}//end get_reports()
