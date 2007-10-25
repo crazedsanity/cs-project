@@ -415,7 +415,7 @@ class projectClass extends mainRecord {
 		//check for errors, & tell 'em what happened.
 		if(!is_numeric($newRecord) || $newRecord < 1) {
 			//something bad happened.
-			$this->logsObj->log_dberror("create_project(): failed to insert data (". $numrows .")... ". $dberror);
+			$this->logsObj->log_dberror("create_project(): failed to insert data");
 			$retval = 0;
 		}
 		else {
@@ -495,7 +495,7 @@ class projectClass extends mainRecord {
 			
 			$retval = NULL;
 			if(count($ancestorList) > 1) {
-				$projects = parent::get_records(array('record_id' => $ancestorList, 'status_id' => 'all'));
+				$projects = parent::get_records(array('record_id' => $ancestorList, 'status_id' => 'all', 'group_id'=>'all'));
 				
 				//if we've got a proper array, loop through it.
 				if(is_array($projects) && count($projects) > 0) {
@@ -531,7 +531,7 @@ class projectClass extends mainRecord {
 				}
 			}
 			elseif($showSingleAncestry === TRUE && is_array($ancestorList) && count($ancestorList) == 1) {
-				$allData = array_values($this->get_records(array('record_id' => $ancestorList[0])));
+				$allData = array_values($this->get_records(array('record_id' => $ancestorList[0], 'status_id' => 'all', 'group_id'=>'all')));
 				$data = $allData[0];
 				$id = $data['public_id'];
 				$name = $data['name'];
