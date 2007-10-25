@@ -20,7 +20,6 @@ class userClass extends dbAbstract {
 	protected $uid;
 	protected $isAdmin=NULL;
 	
-	protected $logCategoryId;
 	protected $logsObj;
 	protected $gfObj;
 	
@@ -28,13 +27,6 @@ class userClass extends dbAbstract {
 	
 	//================================================================================================
 	function __construct(cs_phpDB &$db, $uid=NULL) {
-		
-		if(is_numeric(LOGCAT__USERS)) {
-			$this->logCategoryId = LOGCAT__USERS;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid log_category_id defined for users: did you complete setup?");
-		}
 		
 		$this->db = $db;
 		if(is_numeric($uid)) {
@@ -44,7 +36,7 @@ class userClass extends dbAbstract {
 		}
 		
 		//create the object that can handle logging.
-		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
+		$this->logsObj = new logsClass($this->db, "Users");
 		
 		$this->gfObj = new cs_globalFunctions;
 	}//end __construct{}

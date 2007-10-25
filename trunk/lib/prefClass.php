@@ -18,7 +18,6 @@ class pref {
 	private $uid;
 	private $lastError = NULL;
 	
-	private $logCategoryId;
 	private $logsObj;
 	
 	//=========================================================================
@@ -26,14 +25,7 @@ class pref {
 		$this->db = $db;
 		$this->uid = $uid;
 		
-		if(is_numeric(LOGCAT__PREFERENCES)) {
-			$this->logCategoryId = LOGCAT__PREFERENCES;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid log_category_id defined for preferences: did you complete setup?");
-		}
-		
-		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
+		$this->logsObj = new logsClass($this->db, "Preferences");
 	}//end __construct()
 	//=========================================================================
 	

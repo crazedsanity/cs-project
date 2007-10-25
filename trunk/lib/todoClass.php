@@ -17,9 +17,6 @@ class todoClass {
 	var $lastError			= NULL;
 	private $recordTypeId;
 	
-	/** Category for logging. */
-	private $logCategoryId;
-	
 	/** Object for logging stuff */
 	private $logsObj;
 	
@@ -29,20 +26,6 @@ class todoClass {
 	 * The constructor. Duh.
 	 */
 	 function todoClass(&$db,$projectId=NULL,$todoId=NULL) {
-		
-		if(is_numeric(LOGCAT__TODO)) {
-			$this->logCategoryId = LOGCAT__TODO;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid log_category_id defined for todo: did you complete setup?");
-		}
-		
-		if(is_numeric(RECTYPE__TODO)) {
-			$this->recordTypeId = RECTYPE__TODO;
-		}
-		else {
-			throw new exception(__METHOD__ .": no valid record_type_id defined for todo: did you complete setup?");
-		}
 		
 		if(!is_object($db)) {
 			exit("todoClass(): invalid database handle!");
@@ -55,7 +38,7 @@ class todoClass {
 		}
 		
 		//create the logging object.
-		$this->logsObj = new logsClass($this->db, $this->logCategoryId);
+		$this->logsObj = new logsClass($this->db, 'Todo');
 	 }//end todoClass()
 	//================================================================================================
 	
