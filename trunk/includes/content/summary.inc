@@ -42,7 +42,6 @@ $page->add_template_var('project_row', $projectRows);
 		
 		//got data: loop through it.
 		$baseRow = $page->templateRows['report_row'];
-		$baseRow_noLink = $page->templateRows['report_row-noLink'];
 		foreach($myReportsList as $index=>$dataArr) {
 			
 			$myBaseRow = $baseRow;
@@ -51,23 +50,12 @@ $page->add_template_var('project_row', $projectRows);
 			swapValue($reportBg1, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
 			swapValue($reportBg2, "#d5d5d5", "#c2c2c2");
 			$dataArr['reportBg1'] = $reportBg1;
-			$dataArr['reportBg2'] = $reportBg2;
-			
-			if(is_numeric($dataArr['record_id'])) {
-				//setup the "module".
-				$myModule = strtolower($dataArr['category_name']);
-				$dataArr['myModule'] = $myModule;
-			}
-			else {
-				//no record, no link.
-				$myBaseRow = $baseRow_noLink;
-			}
 			
 			//make the details pretty.
-			$dataArr['details'] = str_replace("\n", "<BR>\n", $dataArr['details']);
+			$dataArr['details'] = $bbCodeParser->parseString($dataArr['details'], TRUE);
 			
 			//parse the data.
-			$myReportRow .= mini_parser($myBaseRow, $dataArr, '%%', '%%');
+			$myReportRow .= mini_parser($baseRow, $dataArr, '%%', '%%');
 		}
 	}
 	$page->add_template_var('reportCount', $reportCount);
