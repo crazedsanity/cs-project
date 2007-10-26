@@ -12,14 +12,13 @@
  * 
  */
 
-require_once(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
+require_once(dirname(__FILE__) .'/attributeClass.php');
 
-class contactClass extends dbAbstract {
+class contactClass extends attributeClass {
 	
-	private $contactId;
+	protected $contactId;
 	
-	private $gfObj;
-	
+	private $logsObj;
 	
 	//=========================================================================
 	public function __construct(cs_phpDB &$db) {
@@ -28,11 +27,12 @@ class contactClass extends dbAbstract {
 			$this->db = $db;
 		}
 		else {
-			throw new exception(__METHOD__ .": database object not connected");
+			$details = __METHOD__ .": database object not connected";
 		}
 		
-		$this->gfObj = new cs_globalFunctions;
-		$this->gfObj->debugPrintOpt = 1;
+		$this->logsObj = new logsClass($this->db, 'Contact');
+		
+		parent::__construct($db);
 		
 	}//end __construct()
 	//=========================================================================
@@ -67,7 +67,9 @@ class contactClass extends dbAbstract {
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": contactId isn't set (". $this->contactId .")");
+			$details = __METHOD__ .": contactId isn't set (". $this->contactId .")";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -106,7 +108,9 @@ class contactClass extends dbAbstract {
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": failed to run SQL, numrows=(". $this->lastNumrows ."), dberror::: ". $this->lastError);
+			$details = __METHOD__ .": failed to run SQL, numrows=(". $this->lastNumrows ."), dberror::: ". $this->lastError;
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);			
@@ -118,6 +122,7 @@ class contactClass extends dbAbstract {
 	
 	//=========================================================================
 	public function get_contact() {
+		$myError = NULL;
 		if(is_numeric($this->contactId)) {
 			$sql = "SELECT c.contact_id, c.company, c.fname, c.lname, c.contact_email_id, ce.email " .
 				"FROM contact_table AS c INNER JOIN contact_email_table AS ce USING (contact_email_id) " .
@@ -134,15 +139,19 @@ class contactClass extends dbAbstract {
 					ksort($retval);
 				}
 				else {
-					throw new exception(__METHOD__ .": array is invalidly formatted::: ". $this->gfObj->debug_print($retval,0));
+					$myError = __METHOD__ .": array is invalidly formatted::: ". $this->gfObj->debug_print($retval,0);
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .": no contact found for contact_id=(". $this->contactId .")");
+				$myError = __METHOD__ .": no contact found for contact_id=(". $this->contactId .")";
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": contactId is not valid (". $this->contactId .")");
+			$myError = __METHOD__ .": contactId is not valid (". $this->contactId .")";
+		}
+		
+		if(!is_null($myError)) {
+			$this->logsObj->log_by_class($myError, 'error');
 		}
 		
 		return($retval);
@@ -155,7 +164,7 @@ class contactClass extends dbAbstract {
 	/**
 	 * Update the given attribute for the current user with the given value.
 	 */
-	public function update_contact_attribute($attribName, $value) {
+	public function update_contact_attribute($attribName, $value, $logIt=TRUE) {
 		if(strlen($attribName)) {
 			$attribData = $this->get_attribute_data($attribName);
 			
@@ -172,13 +181,19 @@ class contactClass extends dbAbstract {
 				
 			if($this->run_sql($sql)) {
 				$retval = TRUE;
+				if($logIt) {
+					$this->logsObj->log_by_class("Updated attribute ". $attribData['name'] ." with new value (". $value .")", 'update');
+				}
 			}
 			else {
+				$this->logsObj->log_dberror(__METHOD__ .": run SQL...");
 				$retval = FALSE;
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": failed to update attribute...?");
+			$details = __METHOD__ .": failed to update attribute...?";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -188,91 +203,16 @@ class contactClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	private function get_attribute_data($attribName) {
-		if(strlen($attribName) && strlen($this->clean_attribute_name($attribName))) {
-			$attribName = $this->clean_attribute_name($attribName);
-			
-			if(is_numeric($attribName)) {
-				$sql = "SELECT * FROM attribute_table WHERE attribute_id=". $attribName;
-			}
-			else {
-				$sql = "SELECT * FROM attribute_table WHERE name='". $attribName ."'";
-			}
-			if($this->run_sql($sql)) {
-				$retval = $this->db->farray_fieldnames();
-			}
-			else {
-				//okay, so try creating, then retrieving it.
-				if($this->create_attribute($attribName)) {
-					if($this->run_sql($sql)) {
-						$retval = $this->db->farray_fieldnames();
-					}
-					else {
-						throw new exception(__METHOD__ .": created attribute, but failed to retrieve it...??");
-					}
-				}
-				else {
-					throw new exception(__METHOD__ .": failed to create attribute...?");
-				}
-			}
-		}
-		else {
-			throw new exception(__METHOD__ .": attribute name has no length (". $attribName .")");
-		}
-		
-		return($retval);
-	}//end get_attribute_data()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function create_attribute($attribName, $cleanAs='sql') {
-		$attribName = $this->clean_attribute_name($attribName);
-		
-		$insertArr = array(
-			'name'	=> $attribName,
-			'clean_as'			=> $cleanAs
-		);
-		$sql = "INSERT INTO attribute_table ". 
-			$this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
-		
-		if($this->run_sql($sql)) {
-			//now retrieve data about this attribute...
-			$retval = $this->get_attribute_data($attribName);
-		}
-		else {
-			//didn't insert...?
-			throw new exception(__METHOD__ .": failed to create attribute (". $attribName .")");
-		}
-		
-		return($retval);
-	}//end create_attribute()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function clean_attribute_name($name) {
-		if(strlen($name)) {
-			$retval = $this->gfObj->cleanString(strtolower($name), 'email_plus_spaces');
-		}
-		else {
-			throw new exception(__METHOD__ .": invalid attribute name given (". $name .")");
-		}
-		
-		return($retval);
-	}//end clean_attribute_name()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
 	public function mass_update_contact_attributes(array $nameToValue) {
 		$retval = 0;
+		$details = "Updated contact attributes: ";
 		foreach($nameToValue as $name => $value) {
-			$retval += $this->update_contact_attribute($name, $value);
+			$retval += $this->update_contact_attribute($name, $value, FALSE);
+			$details .= "\nSet ". $name ." with value (". $value .")";
 		}
+		$details .= "\n\nFinal result: (". $retval .")";
+		
+		$this->logsObj->log_by_class($details, 'update');
 		
 		return($retval);
 	}//end mass_update_contact_attributes()
@@ -281,52 +221,9 @@ class contactClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	/**
-	 * Get list of attribute_id => name
-	 * 
-	 * TYPES: 
-	 * NULL = all
-	 * 1	= attributes associated w/current contact
-	 * 2	= attributes NOT associated w/current contact
-	 */
-	public function get_attribute_list($type=NULL) {
-		if(!is_null($type)) {
-			if(!is_numeric($this->contactId)) {
-				throw new exception(__METHOD__ .": contactId required for type (". $type .")");
-			}
-			settype($type, 'int');
-		}
-		
-		$retval = array();
-		$sql = "SELECT attribute_id, name FROM attribute_table ";
-		switch($type) {
-			case 1: {
-				$sql .= "WHERE attribute_id IN (SELECT distinct attribute_id FROM contact_attribute_link_table " .
-					"WHERE contact_id=". $this->contactId .")";
-			}
-			break;
-			
-			case 2: {
-				$sql .= "WHERE attribute_id NOT IN (SELECT distinct attribute_id FROM contact_attribute_link_table " .
-					"WHERE contact_id=". $this->contactId .")";
-			}
-			break;
-		}
-		$sql .= " ORDER BY name";
-		
-		if($this->run_sql($sql)) {
-			$retval = $this->db->farray_nvp('attribute_id', 'name');
-		}
-		
-		return($retval);
-	}//end get_attribute_list()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
 	public function create_contact_attribute($name, $value) {
 		$retval = FALSE;
+		$myError = NULL;
 		if(is_numeric($this->contactId) && strlen($name)) {
 			$attributeData = $this->get_attribute_data($name);
 			if(is_array($attributeData) && count($attributeData) > 0) {
@@ -342,16 +239,21 @@ class contactClass extends dbAbstract {
 					$retval = TRUE;
 				}
 				else {
-					throw new exception(__METHOD__ .': failed to create new attribute');
+					$myError = __METHOD__ .': failed to create new attribute';
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .': failed to retreive attribute data for ('. $name .')');
+				$myError = __METHOD__ .': failed to retreive attribute data for ('. $name .')';
 			}
 		}
 		else {
 			cs_debug_backtrace();
-			throw new exception(__METHOD__ .": insufficient information");
+			$myError = __METHOD__ .": insufficient information";
+		}
+		
+		if(!is_null($myError)) {
+			$this->logsObj->log_by_class($myError, 'error');
+			throw new exception($myError);
 		}
 		
 		return($retval);
@@ -363,6 +265,7 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	public function delete_contact_attribute($name) {
 		$retval = FALSE;
+		$myError = NULL;
 		if(strlen($name)) {
 			$attribData = $this->get_attribute_data($name);
 			$crit = array(
@@ -376,11 +279,16 @@ class contactClass extends dbAbstract {
 				$retval = TRUE;
 			}
 			else {
-				throw new exception(__METHOD__ .': failed to run delete SQL...');
+				$myError = __METHOD__ .': failed to run delete SQL...';
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": failed to delete contact attribute (". $name .")");
+			$myError = __METHOD__ .": failed to delete contact attribute (". $name .")";
+		}
+		
+		if(!is_null($myError)) {
+			$this->logsObj->log_by_class($myError, 'error');
+			throw new exception($myError);
 		}
 		
 		return($retval);
@@ -392,6 +300,7 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	public function update_contact_data(array $updates) {
 		$retval = FALSE;
+		$myError = NULL;
 		if(is_numeric($this->contactId)) {
 			$sql = "UPDATE contact_table SET ". $this->gfObj->string_from_array($updates, 'update', NULL, 'sql') .
 				" WHERE contact_id=". $this->contactId;
@@ -400,11 +309,16 @@ class contactClass extends dbAbstract {
 				$retval = TRUE;
 			}
 			else {
-				throw new exception(__METHOD__ .": failed to update contact");
+				$myError = __METHOD__ .": failed to update contact";
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": invalid contact_id");
+			$myError = __METHOD__ .": invalid contact_id";
+		}
+		
+		if(!is_null($myError)) {
+			$this->logsObj->log_by_class($myError, 'error');
+			throw new exception($myError);
 		}
 		
 		return($retval);
@@ -416,6 +330,7 @@ class contactClass extends dbAbstract {
 	//=========================================================================
 	public function get_contact_email_list() {
 		$retval = array();
+		$myError = NULL;
 		if(is_numeric($this->contactId)) {
 			$sql = "SELECT contact_email_id, email FROM contact_email_table " .
 				"WHERE contact_id=". $this->contactId;
@@ -423,11 +338,11 @@ class contactClass extends dbAbstract {
 				$retval = $this->db->farray_nvp('contact_email_id', 'email');
 			}
 			else {
-				throw new exception(__METHOD__ .": failed to retrieve list of contacts email addresses");
+				$myError = __METHOD__ .": failed to retrieve list of contacts email addresses";
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": invalid contact_id");
+			$myError = __METHOD__ .": invalid contact_id";
 		}
 		
 		return($retval);
@@ -438,12 +353,14 @@ class contactClass extends dbAbstract {
 	
 	//=========================================================================
 	public function create_contact_email($newEmail, $isPrimary=FALSE) {
+		$myError = NULL;
 		if(is_numeric($this->contactId)) {
-			if(strlen($newEmail)) {
+			if(strlen($newEmail) > 5 && preg_match('/@/', $newEmail)) {
 				$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $this->contactId ."," .
 					" '". $this->gfObj->cleanString($newEmail, 'email') ."');";
 				
 				if($this->run_sql($sql)) {
+					$logDetails = "Successfully created new email address (". $newEmail .")";
 					//sweet: get the newly inserted id.
 					$sql = "SELECT currval('contact_email_table_contact_email_id_seq'::text)";
 					if($this->run_sql($sql)) {
@@ -451,22 +368,31 @@ class contactClass extends dbAbstract {
 						$retval = $data[0];
 						if($isPrimary) {
 							$this->update_contact_data(array('contact_email_id' => $retval));
+							$logDetails .= " and set as primary";
 						}
+						$this->logsObj->log_by_class($logDetails, 'update');
 					}
 					else {
-						throw new exception(__METHOD__ .": failed to retrieve newly inserted contact_email_id");
+						$myError = __METHOD__ .": failed to retrieve newly inserted contact_email_id";
 					}
 				}
 				else {
-					throw new exception(__METHOD__ .": failed to create new contact email address");
+					$myError = __METHOD__ .": failed to create new contact email address";
 				}
 			}
 			else {
+				//don't set $myError (no need to throw an exception), but log it.
+				$this->logsObj->log_by_class(__METHOD__ .": zero-length or invalid email (". $newEmail .")", 'error');
 				$retval = FALSE;
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": invalid contact_id");
+			$myError = __METHOD__ .": invalid contact_id";
+		}
+		
+		if(!is_null($myError)) {
+			$this->logsObj->log_by_class($myError, 'error');
+			throw new exception($myError);
 		}
 		
 		return($retval);
