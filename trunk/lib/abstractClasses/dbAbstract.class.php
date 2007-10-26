@@ -22,8 +22,25 @@ abstract class dbAbstract {
 	
 	protected $fsObj;
 	protected $lastSQLFile;
+	protected $fsObj;
 	
+	
+	
+	//=========================================================================
+	/**
+	 * PHP5 Classes ONLY! ;) 
+	 */
 	abstract public function __construct(cs_phpDB &$db);
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Method that should call logsClass::log_by_class($message, $type).
+	 */
+	abstract protected function log($message, $type='error');
+	//=========================================================================
 	
 	
 	//=========================================================================
