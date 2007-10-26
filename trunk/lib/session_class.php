@@ -132,7 +132,8 @@ class Session {
 			}
 		}
 		else {
-			$debugInfo  = "_SESSION uid: ". $_SESSION['uid'] ." || this->uid: ". $this->uid ." || this->sid: ". $this->sid;
+			$debugInfo  = "_SESSION uid: ". $_SESSION['uid'] ." || this->uid: ". $this->uid ." || " .
+				"this->sid: ". $this->sid ." || sid length (". strlen($this->sid) .")";
 			$debugInfo .= " || Referer list: ". print_r($_SESSION['referrers']);
 			$debugInfo .= " || LAST QUERY: ". $this->db->last_query;
 			
