@@ -53,7 +53,7 @@ class userClass extends dbAbstract {
 		$retval = array();
 		if(strlen($dberror) || $numrows < 1) {
 			//something bad happened...
-			//TODO: log something.
+			$this->logsObj->log_dberror(__METHOD__ .": invalid numrows (". $numrows .") or dberror::: ". $dberror);
 		}
 		else {
 			//get the data.
@@ -149,14 +149,6 @@ class userClass extends dbAbstract {
 	
 	
 	//================================================================================================
-	function update_settings($settingsArr, $testFilter=FALSE) {
-		//TODO: make it more than just a stub.
-	}//end update_settings()
-	//================================================================================================
-	
-	
-	
-	//================================================================================================
 	/**
 	 * Retrieves information from the "users" table about the given user.
 	 * 
@@ -217,6 +209,7 @@ class userClass extends dbAbstract {
 		if($newPass != $newPassCheck) {
 			$this->lastError = "Passwords do not match";
 			$retval = 0;
+			$this->logsObj->log_by_class("Failed to update password: ". $this->lastError, 'error');
 		}
 		else {
 			$retval = 0;
@@ -243,23 +236,25 @@ class userClass extends dbAbstract {
 				if($numrows != 1 || $this->lastError) {
 					//FAILED!
 					if($this->lastError) {
-						$this->logsObj->log_dberror("change_password(): ". $this->lastError);
-						$this->lastError = "Database error";
+						$this->lastError = "Database error: ". $this->lastError;
 					}
 					elseif($numrows == 0) {
 						//no rows affected... invalid user!
 						$this->lastError = "Invalid user!";
 					}
+					$this->logsObj->log_dberror(__METHOD__ .": ". $this->lastError);
 					$retval = 0;
 					throw new exception(__METHOD__ .": failed to update password... ");
 				} else {
 					//got it!
 					$retval = $numrows;
+					$this->logsObj->log_by_class("Updated password successfully", 'update');
 				}
 			}
 			else {
 				//more explanation of what happened.
 				$this->lastError = "Old password was invalid";
+				$this->logsObj->log_by_class("Failed to update password: ". $this->lastError, 'update');
 			}
 		}
 		
@@ -309,7 +304,9 @@ class userClass extends dbAbstract {
 			$retval = md5($pass .'_'. $myInfo['contact_id']);
 		}
 		else {
-			throw new exception(__METHOD__ .": failed to get a useable contact_id for uid=(". $this->uid .")");
+			$details = __METHOD__ .": failed to get a useable contact_id for uid=(". $this->uid .")";
+			$this->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		return($retval);
 	}//end encrypt_pass()
