@@ -250,7 +250,9 @@ class mainRecord {
 		}
 		elseif(isset($recordId['record_id']) && !is_numeric($recordId['record_id'])) {
 			//invalid record: don't bother looking it up, just fail.
-			throw new exception(__METHOD__ .": invalid record_id (". $recordId .")");
+			$details = __METHOD__ .": invalid record_id (". $recordId .")";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		else {
 			//get the old data.
@@ -258,12 +260,10 @@ class mainRecord {
 			if(!is_array($dataBeforeUpdate)) {
 				//couldn't find that record... sorry.
 				debug_print($recordId);
-				throw new exception(__METHOD__ .": unable to retrieve record for criteria: ". debug_print($recordId,0));
+				$details = __METHOD__ .": unable to retrieve record for criteria: ". debug_print($recordId,0);
+				$this->logsObj->log_by_class($details, 'error');
+				throw new exception($details);
 			}
-			
-			//Good to go: define all fields that can be updated.
-			$updateableFields = array(
-			);
 			
 			//now build the update string.
 			$updateStr = $this->build_sql_string($updateArr, 'update');
@@ -290,6 +290,11 @@ class mainRecord {
 				else {
 					//good to go!!
 					$this->db->commitTrans();
+					
+					//log the result.
+					$details = "Updates to [record_id=". $recordId ."]::: ". $this->gfObj->string_from_array($updateArr, 'text_list', ' = ');
+					$this->logsObj->log_by_class($details, 'update');
+					
 					$retval = $numrows;
 				}
 			}
@@ -360,19 +365,25 @@ class mainRecord {
 				//something bad happened.
 				debug_print($sqlArr);
 				debug_print($definitionArr);
-				throw new exception(__METHOD__ .": no data left for (". $type .")!");
+				$details = __METHOD__ .": no data left for (". $type .")!";
+				$this->log_by_class($details, 'error');
+				throw new exception($details);
 			}
 			
 			//now, let's create the actual SQL string.
 			$retval = string_from_array($sqlArr, $type, NULL, $definitionArr);
 			if(($retval === 0) || (strlen($retval) < 3)) {
 				//something went wrong (didn't even get "x=y")
-				throw new exception(__METHOD__ .": failed to build SQL, or string too short (". $retval .")");
+				$details = __METHOD__ .": failed to build SQL, or string too short (". $retval .")";
+				$this->log_by_class($details);
+				throw new exception($details);
 			}
 		}
 		else {
 			//invalid type!!!
-			throw new exception(__METHOD__ .": invalid type defined (". $type .")");
+			$details = __METHOD__ .": invalid type defined (". $type .")";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -493,6 +504,9 @@ class mainRecord {
 					//log the problem.
 					$this->logsObj->log_dberror(__METHOD__ .": database error::: ". $dberror);
 				}
+				else {
+					$this->logsObj->log_by_class(__METHOD__ .": unable to verify ancestry for (". $ancestryString .")");
+				}
 				$retval = FALSE;
 			}
 			else {
@@ -524,10 +538,13 @@ class mainRecord {
 		
 		if(strlen($dberror) || $numrows !== 1) {
 			//something went wrong.
-			//TODO: add error-logging.
 			if(strlen($dberror)) {
-				throw new exception(__METHOD__ .": failed (". $numrows .") with error::: ". $dberror);
+				$details = __METHOD__ .": failed (". $numrows .") with error::: ". $dberror;
+				$this->logsObj->log_by_class($details, 'error');
+				throw new exception($details);
 			}
+			$this->logsObj->log_by_class(__METHOD__ .": failed to retrieve data for projectId=(". $projectId .") " .
+				", isHelpdeskIssue=(". $isHelpdeskIssue .")", 'error');
 		}
 		else {
 			$data = $this->db->farray();
@@ -566,7 +583,9 @@ class mainRecord {
 					}
 					else {
 						//no data left!
-						throw new exception(__METHOD__ .": while going back (". $goBackLevels .") in (". $ancestryString ."), ran out of data!");
+						$details = __METHOD__ .": while going back (". $goBackLevels .") in (". $ancestryString ."), ran out of data!";
+						$this->logsObj->log_by_class($details, 'error');
+						throw new exception($details);
 					}
 				}
 			}
@@ -597,12 +616,16 @@ class mainRecord {
 				$retval = $data[$this->lastRecordId];
 			}
 			else {
-				throw new exception(__METHOD__ .": no data for ancestry (". $ancestryString .") with recordId=(". $recordId ."), or couldn't find lastRecordId (". $this->lastRecordId .")::: ". debug_print($data));
+				$details = __METHOD__ .": no data for ancestry (". $ancestryString .") with recordId=(". $recordId ."), or couldn't find lastRecordId (". $this->lastRecordId .")::: ". debug_print($data);
+				$this->log_by_class($details, 'error');
+				throw new exception($details);
 			}
 			$this->isHelpdeskIssue = $oldIsHelpdesk;
 		}
 		else {
-			throw new exception(__METHOD__ .": invalid ancestry string (". $ancestryString .")");
+			$details = __METHOD__ .": invalid ancestry string (". $ancestryString .")";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -616,7 +639,9 @@ class mainRecord {
 		//alright, let's make sure we've got some data.
 		if(!strlen($data['name']) || !strlen($data['subject'])) {
 			//not enough information.
-			throw new exception(__METHOD__ .": not enough information!");
+			$details = __METHOD__ .": not enough information!";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		else {
 			#$this->db->beginTrans();
@@ -658,6 +683,7 @@ class mainRecord {
 					//okay so far.
 					$data = $this->db->farray();
 					$retval = $data[0];
+					$this->logsObj->log_by_class(__METHOD__ .": created new record, [record_id=". $retval ."]");
 				}
 			}
 		}
@@ -675,7 +701,9 @@ class mainRecord {
 	protected function get_child_records($parentRecordId, $isHelpdeskIssue=FALSE, array $extraCrit=NULL) {
 		if(is_null($parentRecordId) || !is_numeric($parentRecordId)) {
 			//failure.
-			throw new exception(__METHOD__ .": invalid parentRecordId ($parentRecordId)!");
+			$details = __METHOD__ .": invalid parentRecordId ($parentRecordId)!";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		else {
 			//first, get the ancestry string for the given record.
