@@ -94,7 +94,9 @@ class helpdeskClass extends mainRecord {
 			$retval['notes'] = $noteObj->get_notes(array('record_id' => $retval['record_id']));
 		}
 		else {
-			throw new exception(__METHOD__ .": invalid helpdeskId (". $helpdeskId .")");
+			$details = __METHOD__ .": invalid helpdeskId (". $helpdeskId .")";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -136,7 +138,7 @@ class helpdeskClass extends mainRecord {
 	function remark($helpdeskId, $remark, $isSolution=FALSE, $useRespondLink=FALSE) {
 		//PRE-CHECK!!!
 		if(strlen($remark) < 10) {
-			$this->logsObj->log_by_class("remark(): not enough content to remark on [helpdesk_id=". $helpdeskId."] ::: $remark", 'error');
+			$this->logsObj->log_by_class(__METHOD__ .": not enough content to remark on [helpdesk_id=". $helpdeskId."] ::: $remark", 'error');
 			return(-1);
 		}
 		
@@ -200,7 +202,7 @@ class helpdeskClass extends mainRecord {
 		}
 		else {
 			//something went wrong.
-			$this->logsObj->log_by_class("remark(): failed to remark on [helpdesk_id=". $helpdeskId ."] ($retval)", 'error');
+			$this->logsObj->log_by_class(__METHOD__ .": failed to remark on [helpdesk_id=". $helpdeskId ."] (". $retval .")", 'error');
 		}
 		
 		return($retval);
@@ -224,7 +226,7 @@ class helpdeskClass extends mainRecord {
 		if(!is_numeric($helpdeskId) || !is_string($solution) || strlen($solution) < 10) {
 			$retval = 0;
 			if(strlen($solution) < 10) {
-				$this->logsObj->log_by_class("solve(): not enough information to solve [helpdesk_id=" .
+				$this->logsObj->log_by_class(__METHOD__ .": not enough information to solve [helpdesk_id=" .
 					$helpdeskId ."]::: $solution", 'error');
 				$retval = -1;
 			}
@@ -251,8 +253,8 @@ class helpdeskClass extends mainRecord {
 				}
 				else {
 					//log the problem.
-					$this->logsObj->log_by_class("solve(): failed to update [helpdesk_id=". 
-						$helpdeskId ."]: (". $retval .")", 'report');
+					$this->logsObj->log_by_class(__METHOD__ .": failed to update [helpdesk_id=". 
+						$helpdeskId ."]: (". $retval .")", 'error');
 				}
 			}
 			else {
