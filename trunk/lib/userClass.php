@@ -20,7 +20,7 @@ class userClass extends dbAbstract {
 	protected $uid;
 	protected $isAdmin=NULL;
 	
-	protected $logsObj;
+	private $logsObj;
 	protected $gfObj;
 	
 	public $bypassAuthCheck = FALSE;

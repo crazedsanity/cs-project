@@ -21,15 +21,20 @@ class adminUserClass extends userClass {
 	/** Defines if the current user can do anything. */
 	protected $isAdmin = NULL;
 	
+	/** Logging object */
+	private $logsObj;
+	
 	//=========================================================================
 	public function __construct(cs_phpDb &$db) {
 		$this->db = $db;
 		$this->uid = $_SESSION['user_ID'];
+		$this->logsObj = new logsClass($this->db, "Admin User");
 		
 		//check that the user is an admin...
 		$this->is_admin();
 		if(!$this->isAdmin) {
 			//not an admin!!!
+			$this->logsObj->log_by_class("Current user (uid=". $this->uid .") is not an admin (isAdmin=". $this->isAdmin .")");
 			throw new exception("User attempted to access administrative library without proper permissions!!!");
 		}
 		
@@ -83,8 +88,8 @@ class adminUserClass extends userClass {
 			$sql = "INSERT INTO user_table ". string_from_array($data, 'insert', NULL, $cleanStringArr, TRUE, TRUE);
 			
 			if(!$this->run_sql($sql)) {
-				//something bad happened... 
-				//TODO: Log something.
+				//something bad happened... LOG IT!
+				$this->logsObj->log_dberror(__METHOD__ .": failed to insert user... ". $this->lastError); 
 			}
 			else {
 				//got something: get the user's ID.
@@ -141,7 +146,8 @@ class adminUserClass extends userClass {
 			//something went wrong.
 			if(strlen($dberror)) {
 				//TODO: log something here.
-				throw new exception("get_group_user(): ". $dberror);
+				$this->logsObj->log_dberror(__METHOD__ .": ENCOUNTERED A DB ERROR::: ". $dberror);
+				throw new exception(__METHOD__ .": ". $dberror);
 			}
 			$retval = array();
 		}
@@ -177,7 +183,7 @@ class adminUserClass extends userClass {
 		if(strlen($dberror) || $numrows < 1) {
 			//something went wrong.
 			if(strlen($dberror)) {
-				//TODO: log something.
+				$this->logsObj->log_dberror(__METHOD__ .": could not get user list: ". $dberror);
 			}
 			$retval = array();
 		}
@@ -205,7 +211,7 @@ class adminUserClass extends userClass {
 		if(!$this->run_sql($sql)) {
 			//indications are it failed.
 			if(strlen($this->lastError)) {
-				//TODO: log an error.
+				$this->logsObj->log_dberror(__METHOD__ .": failed to add user to group (". $groupId ."): ". $this->lastError);
 			}
 			$retval = FALSE;
 		}
@@ -240,7 +246,7 @@ class adminUserClass extends userClass {
 		if(strlen($dberror) || $numrows !== 1) {
 			//indications are it failed.
 			if(strlen($dberror)) {
-				//TODO: log an error.
+				$this->logsObj->log_dberror(__METHOD__ .": unable to delete user from group (". $groupId ."): ". $dberror);
 			}
 			$retval = FALSE;
 		}
@@ -292,11 +298,13 @@ class adminUserClass extends userClass {
 			$this->db->commitTrans();
 			
 			//log it.
+			$details = "Updated group #". $groupId  .": ";
 			foreach($updates as $field=>$newValue) {
 				//
-				$details = "Updated group #". $groupId .", field=(". $field ."): oldvalue=(". $oldGroupData[$field] . 
+				$details .= "\nfield=(". $field ."): oldvalue=(". $oldGroupData[$field] . 
 					"), newValue=(". $newValue .")";
 			}
+			$this->logsObj->log_by_class($details, 'update');
 			
 			$retval = $numrows;
 		}
@@ -327,7 +335,9 @@ class adminUserClass extends userClass {
 			if(!$this->run_sql($sql)) {
 				//failure.
 				$this->db->rollbackTrans();
-				throw new exception(__METHOD__ .": failed to insert data (". $this->lastNumrows ."::: ". $this->lastError);
+				$details = __METHOD__ .": failed to insert data (". $this->lastNumrows ."::: ". $this->lastError;
+				$this->log_dberror($details);
+				throw new exception($details);
 			}
 			else {
 				//success: get the new contact_id.
@@ -335,7 +345,9 @@ class adminUserClass extends userClass {
 				if(!$this->run_sql($sql)) {
 					//failure!
 					$this->db->rollbackTrans();
-					throw new exception(__METHOD__ .": insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError);
+					$details = __METHOD__ .": insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError;
+					$this->log_dberror($details);
+					throw new exception($details);
 				}
 				else {
 					//retrieve the data.
@@ -347,11 +359,15 @@ class adminUserClass extends userClass {
 					$contactObj->set_contact_id($retval);
 					$contactObj->create_contact_email($email, TRUE);
 					$this->db->commitTrans();
+					
+					$this->logsObj->log_by_class("Created new contact (". $retval .")");
 				}
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": not enough information, be sure to include fname, lname, and email");
+			$details = __METHOD__ .": not enough information, be sure to include fname, lname, and email";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -368,7 +384,9 @@ class adminUserClass extends userClass {
 		
 		if(strlen($dberror) || $numrows !== 1) {
 			//failed.
-			throw new exception("add_attribute(): failed (". $numrows .")::: ". $dberror);
+			$details = __METHOD__ .": failed (". $numrows .")::: ". $dberror;
+			$this->log_dberror($details);
+			throw new exception($details);
 		}
 		else {
 			//okay.
