@@ -58,12 +58,12 @@ class contactClass extends attributeClass {
 	public function get_contact_attributes() {
 		$retval = array();
 		if(is_numeric($this->contactId)) {
-			$sql = "select a.name, cal.attribute_value FROM contact_attribute_link_table " .
+			$sql = "select a.display_name, cal.attribute_value FROM contact_attribute_link_table " .
 				"AS cal INNER JOIN attribute_table AS a USING (attribute_id) WHERE  " .
 				"cal.contact_id=". $this->contactId ." ORDER BY name";
 			
 			if($this->run_sql($sql)) {
-				$retval = $this->db->farray_nvp('name', 'attribute_value');
+				$retval = $this->db->farray_nvp('display_name', 'attribute_value');
 			}
 		}
 		else {
