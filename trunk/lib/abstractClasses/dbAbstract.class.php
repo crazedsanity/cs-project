@@ -22,7 +22,6 @@ abstract class dbAbstract {
 	
 	protected $fsObj;
 	protected $lastSQLFile;
-	protected $fsObj;
 	
 	
 	
@@ -33,14 +32,6 @@ abstract class dbAbstract {
 	abstract public function __construct(cs_phpDB &$db);
 	//=========================================================================
 	
-	
-	
-	//=========================================================================
-	/**
-	 * Method that should call logsClass::log_by_class($message, $type).
-	 */
-	abstract protected function log($message, $type='error');
-	//=========================================================================
 	
 	
 	//=========================================================================
