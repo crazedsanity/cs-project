@@ -28,7 +28,7 @@ class todoClass {
 	 function todoClass(&$db,$projectId=NULL,$todoId=NULL) {
 		
 		if(!is_object($db)) {
-			exit("todoClass(): invalid database handle!");
+			throw new exception(__METHOD__ .": invalid database handle!");
 		}
 		$this->db = $db;
 		
@@ -78,7 +78,7 @@ class todoClass {
 		//TODO: change the database to have "project" or "projekt" or "projekte" or "project_id" be the column that indicates the project it's attached to.
 		//if we've got a projectId set, be sure to use it.
 		if(!is_array($critArr)) {
-			$details = "get_todos(): no criteria";
+			$details = __METHOD__ .": no criteria";
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
@@ -120,7 +120,7 @@ class todoClass {
 			//something bad happened, or no rows.
 			if($dberror) {
 				//log the problem.
-				$this->logsObj->log_dberror("get_todos(): dberror encountered::: $dberror\n$query");
+				$this->logsObj->log_dberror(__METHOD__ .": dberror encountered::: $dberror\n$query");
 			}
 			$retval = 0;
 		}
@@ -239,7 +239,7 @@ class todoClass {
 		if($this->lastError || $numrows != 1) {
 			//bad things...
 			if($this->lastError) {
-				$this->logsObj->log_dberror("update_todo(): database error::: ". $this->lastError);
+				$this->logsObj->log_dberror(__METHOD__ .": database error::: ". $this->lastError);
 			}
 			$retval = 0;
 		}
@@ -364,7 +364,7 @@ class todoClass {
 		$requiredFieldsCount = count($reqFieldsArr);
 		if(!is_array($dataArr) || (is_array($dataArr) && count($dataArr) < 1) || $matchingFieldsCount  != $requiredFieldsCount) {
 			$this->lastError = "Precheck failed.  Check what was entered and try again. [fields: $matchingFieldsCount/$requiredFieldsCount]";
-			$this->logsObj->log_by_class("create_todo(): ". $this->lastError);
+			$this->logsObj->log_by_class(__METHOD__ .": ". $this->lastError);
 			return(0);
 		}
 		
@@ -402,7 +402,7 @@ class todoClass {
 		
 		//determine what to do next...
 		if($this->lastError || $numrows != 1) {
-			$this->logsObj->log_dberror("create_todo(): invalid numrows ($numrows) or dberror::: ". $this->lastError);
+			$this->logsObj->log_dberror(__METHOD__ .": invalid numrows ($numrows) or dberror::: ". $this->lastError);
 			$retval = 0;
 		}
 		else {
@@ -412,12 +412,13 @@ class todoClass {
 			
 			//make sure we're still okay.
 			if($this->lastError || $numrows != 1) {
-				$this->logsObj->log_dberror("create_todo(): invalid numrows($numrows) or dberror::: ". $this->lastError);
+				$this->logsObj->log_dberror(__METHOD__ .": invalid numrows($numrows) or dberror::: ". $this->lastError);
 				$retval = -1;
 			}
 			else {
 				$tmp = $this->db->farray();
 				$retval = $tmp[0];
+				$this->logsObj->log_by_class("Created new todo [todo_id=". $retval ."]", 'create');
 			}
 		}
 		
@@ -513,7 +514,7 @@ class todoClass {
 		$retval = array();
 		if(strlen($this->lastError) || $numrows < 1) {
 			if(strlen($this->dberror)) {
-				$this->logsObj->log_dberror("get_comments(): ". $this->lastError);
+				$this->logsObj->log_dberror(__METHOD__ .": ". $this->lastError);
 			}
 		}
 		else {
@@ -555,7 +556,7 @@ class todoClass {
 			
 			if(strlen($this->lastError) || $numrows !== 1) {
 				//got a database error, or nothing was inserted...
-				$details = "add_elapsed(): unable to insert ($numrows) or database error:::\n". $this->lastError;
+				$details = __METHOD__ .": unable to insert (". $numrows .") or database error:::\n". $this->lastError;
 				$this->logsObj->log_dberror($details);
 			}
 			else {
@@ -583,7 +584,7 @@ class todoClass {
 		
 		if(strlen($this->lastError) || $numrows != 1) {
 			if(strlen($this->lastError)) {
-				$details = "log_elapsed(): encountered error while trying to retrieve new sum of estimate_elapsed::: ". $this->lastError;
+				$details = __METHOD__ .": encountered error while trying to retrieve new sum of estimate_elapsed::: ". $this->lastError;
 				$this->logsObj->log_dberror($details);
 			}
 			$retval = 0;
@@ -629,7 +630,7 @@ class todoClass {
 		
 		if($numrows < 1 || strlen($this->lastError)) {
 			if(strlen($this->lastError)) {
-				$details = "get_hours_logged(): ". $this->lastError;
+				$details = __METHOD__ .": ". $this->lastError;
 				$this->logsObj->log_dberror($details);
 			}
 			$retval = NULL;
