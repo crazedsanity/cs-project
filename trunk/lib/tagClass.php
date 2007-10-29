@@ -223,6 +223,7 @@ class tagClass
 		else {
 			//good to go.
 			$retval = 1;
+			$this->logsObj->log_by_class("Added [tag_name_id=". $tagNameId ."] to [record_id=". $recId ."]", 'create');
 		}
 		
 		return($retval);
@@ -269,6 +270,7 @@ class tagClass
 		else {
 			//good to go.
 			$this->db->commitTrans();
+			$this->logsObj->log_by_class("Removed [tag_name_id=". $tagNameId ."] from [record_id=". $recId ."]", 'delete');
 		}
 		
 		return($numrows);
@@ -279,8 +281,10 @@ class tagClass
 	
 	//=========================================================================
 	private function update_tag_record($critArr, array $changes) {
-		$sql = "UPDATE tag_table SET ". string_from_array($changes, 'update') ."" .
-				"WHERE ". string_from_array($critArr, 'select', NULL, 'numeric');
+		$updateStr = string_from_array($changes, 'update');
+		$criteria = string_from_array($critArr, 'select', NULL, 'numeric');
+		$sql = "UPDATE tag_table SET ". $updateStr ."" .
+				"WHERE ". $criteria;
 		
 		//start a transaction & run the update.
 		$numrows = $this->db->exec($sql);
@@ -298,6 +302,7 @@ class tagClass
 		else {
 			//good to go.
 			$retval = $numrows;
+			$this->logsObj->log_by_class("Updated tag record::: ". $updateStr ."\nCRITERIA::: ". $criteria, 'system');
 		}
 		
 		return($retval);
@@ -417,6 +422,7 @@ class tagClass
 					//good.  return the value.
 					$data = $this->db->farray();
 					$retval = $data[0];
+					$this->logsObj->log_by_class("Created new tag [tag_name_id=". $retval ."]", 'create');
 				}
 				else {
 					//log the problem.
