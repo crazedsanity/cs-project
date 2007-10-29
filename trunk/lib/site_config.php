@@ -34,6 +34,7 @@ function exception_handler($exception) {
 	
 	//attempt to log the problem; if it happens too early, we can't do much about it.
 	try {
+		print "<pre><h3>FATAL EXCEPTION ENCOUNTERED: </h3>". $exception ."</pre>";
 		include(dirname(__FILE__) ."/includes.php");
 		include_once(dirname(__FILE__) ."/globalFunctions.php");
 		if(function_exists('get_config_db_params') && class_exists('cs_phpDB') && class_exists('logsClass')) {
