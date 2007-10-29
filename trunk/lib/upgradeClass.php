@@ -150,7 +150,7 @@ class upgrade {
 		$retval = NULL;
 		
 		if(!is_array($config) || !count($config)) {
-			throw new exception("upgrade::read_config_version(): constant CONFIG_FILENAME not present, can't locate config xml file");
+			throw new exception(__METHOD__ .": constant CONFIG_FILENAME not present, can't locate config xml file");
 		}
 		else {
 			//now, let's see if there's a "version_string" index.

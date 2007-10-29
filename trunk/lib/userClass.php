@@ -102,11 +102,9 @@ class userClass extends dbAbstract {
 		
 		if($this->lastError || $numrows != 1) {
 			if(strlen($this->lastError)) {
-				$this->logsObj->log_dberror("get_settings(): ". $this->lastError);
+				$this->logsObj->log_dberror(__METHOD__ .": ". $this->lastError);
 			}
 			$retval = 0;
-			
-			//okay, so, they don't have anything: create it automatically.
 		}
 		else {
 			$tmp = $this->db->farray();
@@ -131,11 +129,11 @@ class userClass extends dbAbstract {
 		
 		$retval = array();
 		if(strlen($this->lastError) || $numrows < 0) {
-			$this->logsObj->log_dberror("get_default_settings(): invalid rows (". $numrows .") or database error::: ". $this->lastError);
+			$this->logsObj->log_dberror(__METHOD__ .": invalid rows (". $numrows .") or database error::: ". $this->lastError);
 		}
 		elseif($numrows == 0) {
 			//no data.
-			throw new exception("get_default_settings(): it appears there are no settings to retrieve!  Please create some.");
+			throw new exception(__METHOD__ .": it appears there are no settings to retrieve!  Please create some.");
 		}
 		else {
 			//got it.
@@ -178,7 +176,7 @@ class userClass extends dbAbstract {
 			if($dberror || $numrows != 1) {
 				//no dice, dude.
 				if($dberror) {
-					$this->logsObj->log_dberror("get_user_info(): error::: ". $dberror);
+					$this->logsObj->log_dberror(__METHOD__ .": error::: ". $dberror);
 					throw new exception(__METHOD__ .": failed to get user data... ");
 				}
 				$retval = 0;
