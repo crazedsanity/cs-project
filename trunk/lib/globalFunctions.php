@@ -213,7 +213,7 @@ function log_activity(cs_phpDB &$db, $eventId, $affectedUid, $details) {
 		//terrible, terrible things.
 		print "<pre>";
 		debug_print_backtrace();
-		throw new exception("log_activity(): failed to create record... numrows=($numrows), dberror:::\n$dberror\nSQL::: $sql");
+		throw new exception(__FUNCTION__ .": failed to create record... numrows=($numrows), dberror:::\n$dberror\nSQL::: $sql");
 	}
 	else {
 		//set a return value, in case the query for the inserted id fails.
@@ -527,7 +527,7 @@ function query_as_option_list(&$db, $selFields, $table, $critSent, $selectVal=NU
 	
 	$query = "SELECT $selFields FROM $table $crit $order";
 	$db->exec($query);
-	$dberror = $db->errorMsg(1,1,1,"query_as_option_list(): ", "QUERY: $query");
+	$dberror = $db->errorMsg(1,1,1, __FUNCTION__ .": ", "QUERY: $query");
 	$numRows = $db->numRows();
 	if((!$dberror) AND ($numRows > 0)) {
 		$mainArr = $db->farray_fieldnames(NULL,1);
@@ -1449,7 +1449,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		
 		if(!$precheck) {
 			#return;
-			throw new exception(__METHOD__ .": failed precheck: ". $failureString);
+			throw new exception(__FUNCTION__ .": failed precheck: ". $failureString);
 		}
 		
 		
@@ -1708,7 +1708,7 @@ function contact_id_from_email(cs_phpDB &$db, $email, $autoCreate=TRUE) {
 		//failed!
 		#$retval = NULL;
 		debug_print($sql);
-		throw new exception("contact_id_from_email(): failed to get data... numrows=($numrows), dberror::: ". $dberror);
+		throw new exception(__FUNCTION__ .": failed to get data... numrows=($numrows), dberror::: ". $dberror);
 	}
 	else {
 		//okay....
