@@ -39,7 +39,7 @@ function exception_handler($exception) {
 		include_once(dirname(__FILE__) ."/globalFunctions.php");
 		if(function_exists('get_config_db_params') && class_exists('cs_phpDB') && class_exists('logsClass')) {
 			$db = new cs_phpDB;
-			$db->connect(get_config_db_params());
+			$db->connect(get_config_db_params(), TRUE);
 			$logs = new logsClass($db, "EXCEPTION");
 			
 			$details = "Uncaught exception: ". $exceptionMessage;
