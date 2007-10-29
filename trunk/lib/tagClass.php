@@ -61,7 +61,7 @@ class tagClass
 		if(strlen($dberror) || $numrows < 1) {
 			//tell 'em terrible things happened.
 			//NOTE: if *ALL* tags are removed, this will *ALWAYS* get thrown.
-			$details = "get_tag_list(): unable to retrieve list of tag names";
+			$details = __METHOD__ .": unable to retrieve list of tag names";
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
@@ -97,7 +97,7 @@ class tagClass
 		
 		if(strlen($dberror) || $numrows < 0) {
 			//no data!
-			$details = "get_records_for_tag(): no records ($numrows) or database error:::\n". $dberror;
+			$details = __METHOD__ .": no records ($numrows) or database error:::\n". $dberror;
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
@@ -147,7 +147,7 @@ class tagClass
 		if(strlen($dberror) || $numrows < 0) {
 			//database error.
 			if(strlen($dberror)) {
-				$details = "get_tags_for_record(): invalid rows ($numrows) or database error:::\n$dberror";
+				$details = __METHOD__ .": invalid rows ($numrows) or database error:::\n$dberror";
 				$this->logsObj->log_dberror($details);
 			}
 			$retval = NULL;
@@ -216,7 +216,7 @@ class tagClass
 		//check for errors & set the return value.
 		if(strlen($this->lastError) || $numrows !== 1) {
 			//something bad happened.
-			$details = "add_tag(): ". $this->lastError;
+			$details = __METHOD__ .": ". $this->lastError;
 			$this->logsObj->log_dberror($details);
 			$retval = 0;
 		}
@@ -262,7 +262,7 @@ class tagClass
 			$this->db->rollbackTrans();
 			if(strlen($this->lastError)) {
 				//make sure it's apparent that something bad happened.
-				$this->logsObj->log_dberror("remove_tag(): unable to delete ($numrows) or dberror::: ". $this->lastError);
+				$this->logsObj->log_dberror(__METHOD__ .": unable to delete ($numrows) or dberror::: ". $this->lastError);
 				$retval = NULL;
 			}
 		}
@@ -291,7 +291,7 @@ class tagClass
 			$retval = 0;
 			if(strlen($this->lastError)) {
 				//make it apparent that something went wrong.
-				$this->logsObj->log_dberror("update_tag_record(): unable to update ($numrows) or dberror::: ". $this->lastError);
+				$this->logsObj->log_dberror(__METHOD__ .": unable to update ($numrows) or dberror::: ". $this->lastError);
 				$retval = NULL;
 			}
 		}
@@ -341,7 +341,7 @@ class tagClass
 		//make sure we didn't encounter a nasty internal error...
 		if(is_null($currentPosition) || !is_numeric($currentPosition)) {
 			//what can we do?
-			$details = "update_record_position_for_tag(): couldn't find current position for tagId=($tagId)";
+			$details = __METHOD__ .": couldn't find current position for tagId=(". $tagId .")";
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
@@ -400,7 +400,7 @@ class tagClass
 			
 			if(strlen($this->lastError) || $numrows !== 1) {
 				//something failed.
-				$details = "create_new_tag_name(): failed to insert record:::<BR>\n". $this->lastError;
+				$details = __METHOD__ .": failed to insert record:::<BR>\n". $this->lastError;
 				$this->logsObj->log_dberror($details);
 				throw new exception($details);
 			}
@@ -420,7 +420,7 @@ class tagClass
 				}
 				else {
 					//log the problem.
-					$this->logsObj->log_dberror("create_new_tag_name(): unable to retrieve currval " .
+					$this->logsObj->log_dberror(__METHOD__ .": unable to retrieve currval " .
 							"($numrows) or dberror::: ". $this->lastError);
 				}
 			}

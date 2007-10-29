@@ -286,7 +286,7 @@ class adminUserClass extends userClass {
 			$this->db->rollbackTrans();
 			
 			if(strlen($dberror)) {
-				$details = "update_group(): invalid rows updated ($numrows) or DBERROR:::\n$dberror\nSQL:::$sql";
+				$details = __METHOD__ .": invalid rows updated ($numrows) or DBERROR:::\n$dberror\nSQL:::$sql";
 				$this->logsObj->log_dberror($details);
 			}
 			
