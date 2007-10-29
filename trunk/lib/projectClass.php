@@ -340,7 +340,7 @@ class projectClass extends mainRecord {
 		$updateResult = parent::update_record($criteria, $updatesArr);
 
 		if($updateResult != 1) {
-			$this->logsObj->log_dberror("update_project(): failed to update... numrows=($numrows), dberror::: $dberror");
+			$this->logsObj->log_dberror(__METHOD__ .": failed to update... numrows=($numrows), dberror::: $dberror");
 			$retval = 0;
 		}
 		else {
@@ -352,7 +352,7 @@ class projectClass extends mainRecord {
 			//log each item that was changed.
 			foreach($updatesArr as $field=>$value) {
 				//
-				$noLogThese = array('personen');
+				$noLogThese = array('linked_users');
 				if(($oldProjectDetails[$field] != $updatesArr[$field]) && (!in_array($field, $noLogThese))) {
 					//log the changes.
 					$details = "Changed settings on [project_id=". $this->projectId ."] for $field:::  OLD=(". $oldProjectDetails[$field] .") to " .
@@ -415,7 +415,7 @@ class projectClass extends mainRecord {
 		//check for errors, & tell 'em what happened.
 		if(!is_numeric($newRecord) || $newRecord < 1) {
 			//something bad happened.
-			$this->logsObj->log_dberror("create_project(): failed to insert data");
+			$this->logsObj->log_dberror(__METHOD__ .": failed to insert data");
 			$retval = 0;
 		}
 		else {
@@ -584,7 +584,7 @@ class projectClass extends mainRecord {
 			if(strlen($dberror) || $numrows < 1) {
 				//TODO: log an error.
 				if(strlen($dberror)) {
-					$this->logsObj->log_dberror("get_children(): database error::: \n". $dberror ."\nSQL::: ". $sql);
+					$this->logsObj->log_dberror(__METHOD__ .": database error::: \n". $dberror ."\nSQL::: ". $sql);
 				}
 			}
 			else {
@@ -652,7 +652,7 @@ class projectClass extends mainRecord {
 				//something went wrong.
 				if(strlen($dberror)) {
 					//log the error.
-					$details = "get_project_user_associations(): numrows=(". $numrows ."), dberror:::\n". 
+					$details = __METHOD__ .": numrows=(". $numrows ."), dberror:::\n". 
 						$dberror ."\nSQL::: ". $sql;
 					$this->logsObj->log_dberror($details);
 				}
@@ -705,13 +705,16 @@ class projectClass extends mainRecord {
 		if(strlen($dberror) || $numrows != count($oldUserList)) {
 			//TODO: log the problem.
 			$this->db->rollbackTrans();
-			throw new exception("assign_users_to_project(): projectId=($projectId)... numrows=($numrows), dberror:::\n". $dberror);
+			$details = __METHOD__ .": projectId=(". $this->projectId .")... numrows=(". $numrows ."), dberror:::\n". $dberror;
+			$this->log_dberror($details);
+			throw new exception($details);
 		}
 		else {
 			//must've deleted properly.  Run the inserts.
 			if(!is_null($userList) && count($userList)) {
 				//run inserts.
 				$numInserted = 0;
+				$details = "";
 				foreach($userList as $index=>$uid) {
 					//create the SQL statement.
 					$sqlArr = array(
@@ -728,10 +731,13 @@ class projectClass extends mainRecord {
 						//fail it!
 						$retval = -1;
 						$this->db->rollbackTrans();
-						throw new exception("assign_users_to_project(): numrows=($numrows), dberror::: ". $dberror);
+						$details = __METHOD__ ."numrows=(". $numrows ."), dberror::: ". $dberror;
+						$this->log_dberror($details);
+						throw new exception($details);
 						break;
 					}
 					else {
+						$details = $this->gfObj->create_list($details, "[user_id=". $uid ."]", ', ');
 						$numInserted++;
 					}
 				}
@@ -739,11 +745,17 @@ class projectClass extends mainRecord {
 				if($numInserted) {
 					$retval = $numInserted;
 					$this->db->commitTrans();
+					$this->logsObj->log_by_class("Successfully attached ". $details ." to [project_id=". $this->projectId ."]", 'update');
+				}
+				else {
+					$this->log_by_class(__METHOD__ .": failed to attach new users to project [project_id=". $this->projectId ."]", 'error');
 				}
 			}
 			else {
 				//done.
 				$this->db->commitTrans();
+				$details = "Successfully removed all users from [project_id=". $this->projectId ."]";
+				$this->logsObj->log_by_class($details, 'update');
 				$retval = 0;
 			}
 		}
@@ -773,10 +785,11 @@ class projectClass extends mainRecord {
 		else {
 			//something is horribly broken.
 			cs_debug_backtrace();
-			throw new exception("build_ancestry_string(): invalid project (".$currentProjectId.") or newParent (".$newParent.")");
+			$details = __METHOD__ .": invalid project (".$currentProjectId.") or newParent (".$newParent.")";
+			$this->logsObj->lob_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
-		debug_print("build_ancestry_string(): from projectId=($currentProjectId) and newParent=($newParent) we get ($retval)");
 		return($retval);
 	}//end build_ancestry_string();
 	//================================================================================================
