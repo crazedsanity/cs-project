@@ -10,7 +10,7 @@
  */
  
 
-class noteClass {
+class noteClass extends dbAbstract {
 	
 	var $db			= NULL;	//database handle.
 	var $projectId	= NULL; //ProjectID we're currently associated with.
@@ -22,9 +22,9 @@ class noteClass {
 	/** 
 	 * The constructor. Duh.
 	 */
-	function noteClass(&$db, $projectId=NULL, $noteId=NULL) {
+	function __construct(&$db, $projectId=NULL, $noteId=NULL) {
 		if(!is_object($db)) {
-			exit("noteClass(): invalid database handle!");
+			throw new exception(__METHOD__ .": invalid database handle!");
 		}
 		$this->db = $db;
 		
@@ -33,7 +33,9 @@ class noteClass {
 			$this->projectId = $projectId;
 		}
 		
-	}//end noteClass()
+		$this->logsObj = new logsClass($this->db, "Notes");
+		
+	}//end __construct()
 	//================================================================================================
 	
 	
@@ -147,7 +149,9 @@ class noteClass {
 		if(!count($updatesArr) || (isset($updatesArr['record_id']) && !is_numeric($updatesArr['record_id']))) {
 			//failure.
 			//TODO: log an error here instead!!!
-			throw new exception("update_note(): no updates to process, or invalid record_id!");
+			$details = __METHOD__ .": no updates to process, or invalid record_id!";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		
 		if(!is_null($noteId)) {
@@ -155,6 +159,7 @@ class noteClass {
 		}
 		
 		if(!is_numeric($this->noteId) || !is_array($updatesArr)) {
+			$this->logsObj->log_by_class(__METHOD__ .": invalid noteId (". $this->noteId ."), or no updates (". count($updatesArr) .")", 'error');
 			return(0);
 		}
 		$updatesArr = array_change_key_case($updatesArr, CASE_LOWER);
@@ -187,9 +192,16 @@ class noteClass {
 		$this->lastError = $this->db->errorMsg();
 		
 		if($this->lastError || $numrows != 1) {
+			if(strlen($this->lastError)) {
+				$this->logsObj->log_dberror(__METHOD__ .": ". $this->lastError);
+			}
+			else {
+				$this->logsObj->log_by_class(__METHOD__ .": no records updated");
+			}
 			$retval = 0;
 		}
 		else {
+			$this->logsObj->log_by_class(__METHOD__ .": [note_id=". $this->noteId ."] UPDATES::: ". $updateStr);
 			$retval = 1;
 		}
 		
@@ -253,7 +265,9 @@ class noteClass {
 		if($this->lastError || $numrows != 1) {
 			if(strlen($this->lastError)) {
 				debug_print($sql);
-				throw new exception("create_note(): ". $this->lastError);
+				$details = __METHOD__ .": ". $this->lastError;
+				$this->logsObj->log_dberror($details);
+				throw new exception($details);
 			}
 			$retval = 0;
 		}
@@ -264,11 +278,13 @@ class noteClass {
 			
 			//make sure we're still okay.
 			if($this->lastError || $numrows != 1) {
+				$this->logsObj->log_dberror(__METHOD__ .": invalid numrows (". $numrows .") or dberror::: ". $this->lastError);
 				$retval = -1;
 			}
 			else {
 				$tmp = $this->db->farray();
 				$retval = $tmp[0];
+				$this->logsObj->log_by_class("Created [note_id=". $retval ."]", 'create');
 			}
 		}
 		
