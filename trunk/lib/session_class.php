@@ -119,7 +119,9 @@ class Session {
 				$this->uid = $_SESSION['uid'];
 			}
 			else {
-				throw new exception("Session(): FATAL: uid was NOT an integer! " . $_SESSION['uid'] . "<BR>\n\n");
+				$details = __METHOD__ .": FATAL: uid was NOT an integer! " . $_SESSION['uid'] . "<BR>\n\n";
+				$this->logsObj->log_by_class($details, 'error');
+				throw new exception($details);
 			}
 		}
 		elseif(strlen($this->sid) == 32) {
@@ -374,7 +376,7 @@ class Session {
 				$this->uid=0;
 				$moreInfo = ob_get_contents();
 				ob_end_clean();
-				$xInfo = create_list($xInfo, "logout(): KILLING COOKIE OUTPUT: ['$moreInfo']", " || ");
+				$xInfo = create_list($xInfo, __METHOD__ .": KILLING COOKIE OUTPUT: ['$moreInfo']", " || ");
 			}
 		}
 		
@@ -662,12 +664,14 @@ class Session {
 		
 		$this->db->exec($query);
 		$numrows = $this->db->numRows();
-		$dberror = $this->db->errorMsg(0,1,0,"authenticate_user(): ", " QUERY: $query");
+		$dberror = $this->db->errorMsg(0,1,0, __METHOD__ .": ", " QUERY: $query");
 		
 		//see what happened...
 		if($dberror) {
 			//database error...
-			throw new exception("authenticate_user(): DATABASE ERROR!!!\n$dberror\nSQL::: $query");
+			$details = __METHOD__ .": DATABASE ERROR!!!\n". $dberror ."\nSQL::: ". $query;
+			$this->logsObj->log_dberror($details);
+			throw new exception($details);
 		}
 		elseif($numrows == 0) {
 			//no user...
@@ -767,7 +771,7 @@ class Session {
  		
  		if(strlen($dberror)) {
  			//log the problem & set return val.
- 			$this->logsObj->log_dberror("delete_session_record(): failed to delete ($numrows), or dberror::: $dberror");
+ 			$this->logsObj->log_dberror(__METHOD__ .": failed to delete ($numrows), or dberror::: $dberror");
  			$retval = 0;
  		}
  		else {
@@ -801,7 +805,7 @@ class Session {
  		
  		if(strlen($dberror) || $numrows < 0) {
  			//failed.
- 			$this->logsObj->log_dberror("auto_logout(): query failed with error::: $dberror");
+ 			$this->logsObj->log_dberror(__METHOD__ .": query failed with error::: $dberror");
  			$retval = FALSE;
  		}
  		elseif($numrows == 0) {
