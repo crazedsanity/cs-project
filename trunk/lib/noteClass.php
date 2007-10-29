@@ -284,7 +284,8 @@ class noteClass extends dbAbstract {
 			else {
 				$tmp = $this->db->farray();
 				$retval = $tmp[0];
-				$this->logsObj->log_by_class("Created [note_id=". $retval ."]", 'create');
+				$this->logsObj->log_by_class("Created [note_id=". $retval ."], linked to " .
+					"[record_id=". $insertArr['record_id'] ."]", 'create');
 			}
 		}
 		
