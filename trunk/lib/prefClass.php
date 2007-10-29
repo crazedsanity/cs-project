@@ -12,11 +12,11 @@
  */
 
 
-class pref {
+class pref extends dbAbstract {
 	
 	public $db;
 	private $uid;
-	private $lastError = NULL;
+	public $lastError = NULL;
 	
 	private $logsObj;
 	
@@ -57,7 +57,7 @@ class pref {
 			}
 			elseif($numrows == 0 && is_null($criteria)) {
 				//that's bad.
-				$details = "list_all_prefs(): no preferences";
+				$details = __METHOD__ .": no preferences";
 				$this->logsObj->log_dberror($details);
 				throw new exception($details);
 			}
@@ -128,7 +128,7 @@ class pref {
 		
 		if(strlen($this->lastError) || $numrows < 1) {
 			if(strlen($this->lastError)) {
-				$details = "get_user_prefs(): ". $this->lastError;
+				$details = __METHOD__ .": ". $this->lastError;
 				$this->logsObj->log_dberror($details);
 			}
 			$retval = NULL;
@@ -155,7 +155,9 @@ class pref {
 	public function update_user_pref($prefTypeId, $prefOption) {
 		$retval = NULL;
 		if(!is_numeric($prefTypeId) || !is_numeric($prefOption)) {
-			throw new exception("update_user_pref(): can't set preference without any data");
+			$details = __METHOD__ .": can't set preference without any data";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		else {
 			$userPrefs = $this->get_user_prefs(TRUE);
@@ -172,13 +174,15 @@ class pref {
 			
 			if(strlen($this->lastError) || $numrows !== 1) {
 				if(strlen($this->lastError)) {
-					$details = "update_user_pref(): ". $this->lastError;
+					$details = __METHOD__ .": ". $this->lastError;
 					$this->logsObj->log_dberror($details);
 					throw new exception($details);
 				}
 				$retval = $numrows;
 			}
 			else {
+				$this->logsObj->log_by_class("Updated [pref_type_id=". $prefTypeId ."], set value as " .
+					"[pref_option_id=". $prefOption ."]", 'update');
 				$retval = $numrows;
 			}
 		}
@@ -197,7 +201,9 @@ class pref {
 	public function get_pref_value($prefTypeId) {
 		$retval = NULL;
 		if(!is_numeric($prefTypeId)) {
-			throw new exception('get_pref_value(): invalid prefTypeId passed');
+			$details = __METHOD__ .': invalid prefTypeId passed';
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		else {
 			//get the user's preferences first.
