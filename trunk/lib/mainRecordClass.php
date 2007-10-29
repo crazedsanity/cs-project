@@ -26,6 +26,8 @@ class mainRecord {
 	private $internalRecordId;
 	private $cache = array();
 	
+	protected $gfObj;
+	
 	//=========================================================================
 	function __construct() {
 		
@@ -59,6 +61,8 @@ class mainRecord {
 		//setup the fields for inserting... presently, not much different.
 		$this->insertFieldsArr = $this->cleanStringArr;
 		$this->insertFieldsArr['public_id'] = 'none';
+		
+		$this->gfObj = new cs_globalFunctions;
 	}//end __construct()
 	//=========================================================================
 	
@@ -245,8 +249,10 @@ class mainRecord {
 		
 		if(isset($recordId['public_id']) && (!is_numeric($recordId['public_id']) || !isset($recordId['is_helpdesk_issue']))) {
 			//not enough information.
-			throw new exception(__METHOD__ .": public_id is invalid (". $recordId['public_id'] ."), " .
-					"or required field is_helpdesk_issue is not set (". $recordId['is_helpdesk_issue'] .")");
+			$details = __METHOD__ .": public_id is invalid (". $recordId['public_id'] ."), " .
+					"or required field is_helpdesk_issue is not set (". $recordId['is_helpdesk_issue'] .")";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		elseif(isset($recordId['record_id']) && !is_numeric($recordId['record_id'])) {
 			//invalid record: don't bother looking it up, just fail.
@@ -259,7 +265,6 @@ class mainRecord {
 			$dataBeforeUpdate = $this->get_records($recordId);
 			if(!is_array($dataBeforeUpdate)) {
 				//couldn't find that record... sorry.
-				debug_print($recordId);
 				$details = __METHOD__ .": unable to retrieve record for criteria: ". debug_print($recordId,0);
 				$this->logsObj->log_by_class($details, 'error');
 				throw new exception($details);
@@ -292,8 +297,8 @@ class mainRecord {
 					$this->db->commitTrans();
 					
 					//log the result.
-					$details = "Updates to [record_id=". $recordId ."]::: ". $this->gfObj->string_from_array($updateArr, 'text_list', ' = ');
-					$this->logsObj->log_by_class($details, 'update');
+					$details = "Updates to [record_id=". $this->internalRecordId ."]::: " . $updateStr;
+					$this->logsObj->log_by_class($details, 'system');
 					
 					$retval = $numrows;
 				}
@@ -683,7 +688,7 @@ class mainRecord {
 					//okay so far.
 					$data = $this->db->farray();
 					$retval = $data[0];
-					$this->logsObj->log_by_class(__METHOD__ .": created new record, [record_id=". $retval ."]");
+					$this->logsObj->log_by_class(__METHOD__ .": created new record, [record_id=". $retval ."]", 'create');
 				}
 			}
 		}
