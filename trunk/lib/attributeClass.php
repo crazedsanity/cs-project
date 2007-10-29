@@ -193,7 +193,7 @@ class attributeClass extends dbAbstract {
 		}
 		
 		$retval = array();
-		$sql = "SELECT attribute_id, name FROM attribute_table ";
+		$sql = "SELECT attribute_id, display_name FROM attribute_table ";
 		switch($type) {
 			case 1: {
 				$sql .= "WHERE attribute_id IN (SELECT distinct attribute_id FROM contact_attribute_link_table " .
@@ -210,7 +210,7 @@ class attributeClass extends dbAbstract {
 		$sql .= " ORDER BY name";
 		
 		if($this->run_sql($sql)) {
-			$retval = $this->db->farray_nvp('attribute_id', 'name');
+			$retval = $this->db->farray_nvp('attribute_id', 'display_name');
 		}
 		elseif(strlen($this->lastError)) {
 			$details = __METHOD__ .": failed to retrieve attribute list: ". $this->lastError;
