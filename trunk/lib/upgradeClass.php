@@ -194,17 +194,16 @@ class upgrade {
 			throw new exception(__METHOD__ .": upgrade already in progress...????");
 		}
 		else {
-			$this->upgrade_in_progress(TRUE);
+			$lockConfig = $this->upgrade_in_progress(TRUE);
 			$this->fsObj->cd("/");
-			$createFileRes = 1;
 			
 			//TODO: not only should the "create_file()" method be run, but also do a sanity check by calling lock_file_exists().
-			if($createFileRes === 0) {
+			if($lockConfig === 0) {
 				//can't create the lockfile.  Die.
-				throw new exception(__METHOD__ .": failed to create lockfile");
+				throw new exception(__METHOD__ .": failed to set 'upgrade in progress'");
 			}
 			else {
-				$this->gfObj->debug_print(__METHOD__ .": result of trying to create lockfile: (". $createFileRes .")");
+				$this->gfObj->debug_print(__METHOD__ .": result of setting 'upgrade in progress': (". $lockConfig .")");
 				
 				//check to see if our config file is writable.
 				if(!$this->fsObj->is_writable("lib/config.xml")) {
@@ -755,9 +754,14 @@ class upgrade {
 								$this->gfObj->debug_print(__METHOD__ .": new version's suffix number higher than current... ");
 								$retval = TRUE;
 							}
+							elseif($checkVersionData['number'] == $curVersionData['number']) {
+								$this->gfObj->debug_print(__METHOD__ .": new version's suffix number is EQUAL TO current... ");
+								$retval = FALSE;
+							}
 							else {
 								//umm... they're identical???  LOGIC HAS FAILED ME ALTOGETHER!!!
-								throw new exception(__METHOD__ .": seems like versions are identical (". $version ." === ". $checkIfHigher .")");
+								$this->gfObj->debug_print(__METHOD__ .": new version's suffix number is LESS THAN current... ");
+								$retval = FALSE;
 							}
 						}
 						else {
@@ -815,18 +819,25 @@ class upgrade {
 			throw new exception(__METHOD__ .": version (". $newVersion .") isn't higher than (". $dbVersion .")... something is broken");
 		}
 		elseif(is_array($this->config['MATCHING'])) {
-			//okay, we've got some stuff to deal with.
-			//NOTE: this assumes the MATCHING array has been ordered lowest to highest...
 			$lastVersion = $dbVersion;
 			foreach($this->config['MATCHING'] as $matchVersion=>$data) {
+				
 				$matchVersion = preg_replace('/^V/', '', $matchVersion);
-				if($newVersion == $matchVersion) {
-					throw new exception(__METHOD__ .": there's a config to upgrade this version to a higher one...? ". $this->gfObj->debug_print($data,0));
+				if($this->databaseVersion == $matchVersion || $this->is_higher_version($this->databaseVersion, $matchVersion)) {
+					//the version in MATCHING is equal to or HIGHER than our database version... make sure it is NOT
+					//	higher than the version in our versionFile.
+					if(!$this->is_higher_version($this->versionFileVersion, $matchVersion)) {
+						//the MATCHING version is NOT higher than the version file's version, looks ok.
+						$this->gfObj->debug_print(__METHOD__ .": adding (". $matchVersion .")");
+						$lastVersion = $matchVersion;
+						$retval[$matchVersion] = $data['TARGET_VERSION'];
+					}
+					else {
+						$this->gfObj->debug_print(__METHOD__ .": entry in upgrade.xml (". $matchVersion .") is higher than the VERSION file (". $this->versionFileVersion .")");
+					}
 				}
-				elseif($this->is_higher_version($matchVersion, $newVersion)) {
-					$this->gfObj->debug_print(__METHOD__ .": <b>adding (". $matchVersion .") => (". $data['TARGET_VERSION'] .")</b>");
-					$retval[$matchVersion] = $data['TARGET_VERSION'];
-					$lastVersion = $matchVersion;
+				else {
+					$this->gfObj->debug_print(__METHOD__ .": SKIPPING (". $matchVersion .")");
 				}
 			}
 			
