@@ -84,10 +84,19 @@ class attributeClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function create_attribute($name) {
+	public function create_attribute($name, $displayName=NULL) {
 		
+		if(is_null($displayName)) {
+			if(preg_match('/:/', $name)) {
+				$tmp = explode(':', $name);
+				$displayName = strtoupper($tmp[0]) .":". $tmp[1];
+			}
+			else {
+				$displayName = ucwords($name);
+			}
+		}
 		$this->check_attribute_name(__METHOD__, $name);
-		$sql = "INSERT INTO attribute_table (name) VALUES ('". $name ."');";
+		$sql = "INSERT INTO attribute_table (name, display_name) VALUES ('". $name ."', '". $displayName ."');";
 		if($this->run_sql($sql)) {
 			//it worked: get the new id.
 			if($this->run_sql("SELECT currval('attribute_table_attribute_id_seq'::text)")) {
@@ -160,7 +169,7 @@ class attributeClass extends dbAbstract {
 	//=========================================================================
 	private function clean_attribute_name($name) {
 		if(strlen($name)) {
-			$retval = $this->gfObj->cleanString(strtolower($name), 'email_plus_spaces');
+			$retval = $this->gfObj->cleanString(strtolower($name), 'sql');
 		}
 		else {
 			$details = __METHOD__ .": invalid attribute name given (". $name .")";
