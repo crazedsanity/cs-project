@@ -188,7 +188,6 @@ function cs_setContactEmailId(newValue) {
 					myObj.style.fontWeight = 'normal';
 				}
 			}
-			//alert("Value of "+ myName +" is "+ myObj.innerHTML);
 		}
 	}
 }//end cs_setContactEmailId()
@@ -202,6 +201,7 @@ function cs_contactAddEmail(obj) {
 	if(obj != null) {
 		//passed the object: they want the value updated.
 		newEmailObj.value = obj.value;
+		cs_setContactEmailId('new');
 	}
 	else {
 		var linkDivObj		= document.getElementById('contactAddEmail_link');
