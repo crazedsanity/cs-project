@@ -1,0 +1,15 @@
+php_value include_path ".:./lib:../lib/:../../lib"
+DirectoryIndex content content.php index.php index.html
+
+<files content>
+    ForceType application/x-httpd-php
+</files>
+<files extern>
+    ForceType application/x-httpd-php
+</files>
+<files setup>
+    ForceType application/x-httpd-php
+</files>
+<files project>
+    ForceType application/x-httpd-php
+</files>
