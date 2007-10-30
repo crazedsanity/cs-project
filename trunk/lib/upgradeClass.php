@@ -220,7 +220,7 @@ class upgrade {
 				$upgradeList = $this->get_upgrade_list();
 				
 				$i=0;
-				$this->gfObj->debug_print(__METHOD__ .": starting to run through the upgrade list...");
+				$this->gfObj->debug_print(__METHOD__ .": starting to run through the upgrade list, starting at (". $this->databaseVersion .")...");
 				$this->db->beginTrans(__METHOD__);
 				foreach($upgradeList as $fromVersion=>$toVersion) {
 					
@@ -827,6 +827,9 @@ class upgrade {
 					//the version in MATCHING is equal to or HIGHER than our database version... make sure it is NOT
 					//	higher than the version in our versionFile.
 					if(!$this->is_higher_version($this->versionFileVersion, $matchVersion)) {
+						if(!count($retval) && $matchVersion != $this->databaseVersion) {
+							$retval[$this->databaseVersion] = $matchVersion;
+						}
 						//the MATCHING version is NOT higher than the version file's version, looks ok.
 						$this->gfObj->debug_print(__METHOD__ .": adding (". $matchVersion .")");
 						$lastVersion = $matchVersion;
