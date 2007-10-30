@@ -1,4 +1,6 @@
 php_value include_path ".:./lib:../lib/:../../lib"
+php_value session.auto_start 1
+
 DirectoryIndex content content.php index.php index.html
 
 <files content>
