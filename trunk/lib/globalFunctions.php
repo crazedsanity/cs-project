@@ -21,7 +21,7 @@ function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
 		'contentSystem'		=> array('cs-content',		'0.10.1'),
-		'XMLParser'			=> array('cs-phpxml',		'0.5.4'),
+		'XMLParser'			=> array('cs-phpxml',		'0.5.5'),
 		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
 	);
 	
