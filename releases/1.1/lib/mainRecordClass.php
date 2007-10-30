@@ -186,9 +186,11 @@ class mainRecord {
 		
 		//TODO: when retrieving the list of projects, "record_get_num_children()" is unaware of the group, and can't even guess what status it should filter on... leads to the "Project #<blah> disappeared" problem. 
 		$query = "SELECT r.*, record_get_num_children(record_id) as num_children, s.name as status_text, " .
-				"u.username as assigned, contact_get_attribute(r.creator_contact_id, 'email') as email, " .
+				"u.username as assigned, ce.email, c.fname, c.lname, c.company, " .
 				"tag_list(r.record_id) " .
 				"FROM record_table AS r INNER JOIN status_table AS s ON (s.status_id=r.status_id) " .
+				"INNER JOIN contact_table AS c ON (r.creator_contact_id=c.contact_id) " .
+				"INNER JOIN contact_email_table AS ce ON (c.contact_email_id=ce.contact_email_id)" .
 				" LEFT OUTER JOIN user_table AS u ON (u.contact_id=r.leader_contact_id) ". $query;
 		$query .= " ". $orderStr;
 		$numrows = $this->db->exec($query);
@@ -649,10 +651,10 @@ class mainRecord {
 			throw new exception($details);
 		}
 		else {
-			#$this->db->beginTrans();
 			
-			//if it's a helpdesk issue, get (or create) a contact id!
-			$data['creator_contact_id'] = contact_id_from_email($this->db, $data['email'], TRUE);
+			$contactObj = new contactClass($this->db);
+			//get (or create) a contact id!
+			$data['creator_contact_id'] = $contactObj->get_contact_id_from_email($data['email'], TRUE);
 			
 			//set it as a helpdesk issue (or not)
 			$data['is_helpdesk_issue'] = $isHelpdeskIssue;

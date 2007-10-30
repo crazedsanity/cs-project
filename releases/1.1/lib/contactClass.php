@@ -400,5 +400,100 @@ class contactClass extends attributeClass {
 	//=========================================================================
 	
 	
+	
+	//=========================================================================
+	public function create_contact($fname,$lname, $email, $company=NULL) {
+		if(strlen($fname) && strlen($lname) && strlen($email)) {
+			//create the insert SQL.
+			$sqlArr = array(
+				'fname'				=> $fname,
+				'lname'				=> $lname,
+				'contact_email_id'	=> "-1"       //MUST be reset later...
+			);
+			$cleanStringArr = array(
+				'fname'				=> 'sql',
+				'lname'				=> 'sql',
+				'contact_email_id'	=> 'numeric'
+			);
+			
+			if(!is_null($company) && strlen($company)) {
+				$sqlArr['company'] = $company;
+				$cleanStringArr['company'] = 'sql';
+			}
+			
+			//start a transaction...
+			$this->db->beginTrans(__METHOD__);
+			
+			$sql = 'INSERT INTO contact_table '. string_from_array($sqlArr, 'insert', NULL, $cleanStringArr);
+			if(!$this->run_sql($sql)) {
+				//failure.
+				$this->db->rollbackTrans();
+				$details = __METHOD__ .": failed to insert data (". $this->lastNumrows ."::: ". $this->lastError;
+				$this->log_dberror($details);
+				throw new exception($details);
+			}
+			else {
+				//success: get the new contact_id.
+				$sql = "SELECT currval('contact_table_contact_id_seq'::text)";
+				if(!$this->run_sql($sql)) {
+					//failure!
+					$this->db->rollbackTrans();
+					$details = __METHOD__ .": insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError;
+					$this->log_dberror($details);
+					throw new exception($details);
+				}
+				else {
+					//retrieve the data.
+					$data = $this->db->farray();
+					$retval = $data[0];
+					
+					//before completing, let's create the primary email address.
+					$contactObj = new contactClass($this->db);
+					$contactObj->set_contact_id($retval);
+					$contactObj->create_contact_email($email, TRUE);
+					$this->db->commitTrans();
+					
+					//set the internal contactId.
+					$this->set_contact_id($retval);
+					
+					$this->logsObj->log_by_class("Created new contact (". $retval .")");
+				}
+			}
+		}
+		else {
+			$details = __METHOD__ .": not enough information, be sure to include fname, lname, and email";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
+		}
+		
+		return($retval);
+	}//end create_contact()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function get_contact_id_from_email($email, $autoCreate=TRUE) {
+		$retval = 0;
+		
+		$sql = "SELECT contact_id FROM contact_email_table WHERE email='". strtolower($email) ."'";
+		
+		if($this->run_sql($sql) && $this->lastNumrows == 1) {
+			//Contact exists.
+			$data = $this->db->farray();
+			$retval = $data[0];
+		}
+		else {
+			//no user...
+			if($autoCreate) {
+				$retval = $this->create_contact('autocreated', __METHOD__, $email, '*** AUTOCREATED ***');
+			}
+		}
+		
+		return($retval);
+	}//end get_contact_id_from_email()
+	//=========================================================================
+	
+	
 }//end contactClass{}
 ?>	

@@ -21,7 +21,7 @@ function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
 		'contentSystem'		=> array('cs-content',		'0.10.1'),
-		'XMLParser'			=> array('cs-phpxml',		'0.5.4'),
+		'XMLParser'			=> array('cs-phpxml',		'0.5.5'),
 		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
 	);
 	
@@ -1696,30 +1696,6 @@ function cs_debug_backtrace($printItForMe=NULL,$removeHR=NULL) {
 	return($backTraceData);
 }//end cs_debug_backtrace()
 
-
-
-function contact_id_from_email(cs_phpDB &$db, $email, $autoCreate=TRUE) {
-	//call a stored procedure!
-	$autoCreate = cleanString($autoCreate, 'bool_strict');
-	$email = cleanString($email, 'email');
-	$sql = "SELECT contact_id_from_email('". $email ."', ". $autoCreate .")";
-	$numrows = $db->exec($sql);
-	$dberror = $db->errorMsg();
-	
-	if(strlen($dberror) || $numrows != 1) {
-		//failed!
-		#$retval = NULL;
-		debug_print($sql);
-		throw new exception(__FUNCTION__ .": failed to get data... numrows=($numrows), dberror::: ". $dberror);
-	}
-	else {
-		//okay....
-		$data = $db->farray();
-		$retval = $data[0];
-	}
-	
-	return($retval);
-}//end contact_id_from_email()
 
 
 function get_config_db_params() {

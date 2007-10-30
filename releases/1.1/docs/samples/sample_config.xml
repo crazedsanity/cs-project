@@ -1,4 +1,4 @@
-<config generated="2007-09-12 11:09:47" version="1.0.0-ALPHA1" svnLastAuthor="$Author$" svnSignature="$Id$">
+<config generated="2007-09-12 11:09:47" version="1.0.0-ALPHA1" svnLastAuthor="$Author:crazedsanity $" svnSignature="$Id:sample_config.xml 376 2007-10-12 13:54:50Z crazedsanity $">
 	<isdevsite>0</isdevsite>
 	<proj_name>CS-Project</proj_name>
 	<project_url>project.danf.internal</project_url>
@@ -12,20 +12,6 @@
 	<debugremovehr>0</debugremovehr>
 	<workingonit>0</workingonit>
 	<version_string>1.0.0-ALPHA1</version_string>
-	<logcat__database>1</logcat__database>
-	<logcat__authentication>2</logcat__authentication>
-	<logcat__users>3</logcat__users>
-	<logcat__general>4</logcat__general>
-	<logcat__project>5</logcat__project>
-	<logcat__helpdesk>6</logcat__helpdesk>
-	<logcat__todo>7</logcat__todo>
-	<logcat__tags>8</logcat__tags>
-	<logcat__estimates>9</logcat__estimates>
-	<logcat__navigation>10</logcat__navigation>
-	<logcat__preferences>11</logcat__preferences>
-	<rectype__project>1</rectype__project>
-	<rectype__todo>2</rectype__todo>
-	<rectype__helpdesk>3</rectype__helpdesk>
 	<database__dbname>__dev_cs_project</database__dbname>
 	<database__host>localhost</database__host>
 	<database__port>5432</database__port>
