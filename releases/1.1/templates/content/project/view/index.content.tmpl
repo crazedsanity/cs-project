@@ -7,7 +7,9 @@
 						<tr>
 							<td>Name of Project: </td>
 							<td colspan=2>
-								<div id="name_text" style="display:inline;">[<a href="javascript:void(enableInput('name'))">Edit</a>] <font size="+1"><b>{project_name}</b></font> </div>
+								<div id="name_text" style="display:inline;">
+									[<a href="javascript:void(enableInput('name'))">Edit</a>] 
+									<font size="+1"><b>{projectName}</b></font> </div>
 								<div id="name_inputDiv" style="display:none;"><input id="name_input" type='text' name='data[name]' size='45' maxlength='80' value="{project_name}"></div>
 							</td>
 						</tr>
@@ -98,7 +100,6 @@
 			<tr>
 				<td align="left" style="border-top:solid #000 1px;border-bottom:solid #000 1px;padding-right:0px;">
 					<div style="height:40px;overflow:auto;background-color:#fff;">
-						<b>Parent Projects:</b> {ancestry_string}<BR>
 						<b>Child Projects:</b> <div style="display:inline;width:100%; height:{children_string_height}px; overflow:auto;">{children_string}</div>
 					</div>
 				</td>

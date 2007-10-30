@@ -250,11 +250,14 @@ else {
 		
 		//retrieve a list of it's parents.
 		$ancestryString = $proj->get_ancestry_link_list($projectId);
+		$displayProjectName = $ancestryString;
 		if(is_null($ancestryString)) {
 			//
 			$ancestryString = '<font color="red"><b>[N/A]</b></font>';
+			$displayProjectName = $detailsArr['name'];
 		}
 		$page->add_template_var('ancestry_string', $ancestryString);
+		$page->add_template_var('projectName', $displayProjectName);
 		
 		//list the immediate children.
 		$childFilter = $filter;
