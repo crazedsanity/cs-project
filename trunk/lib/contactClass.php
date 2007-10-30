@@ -406,13 +406,20 @@ class contactClass extends attributeClass {
 		if(strlen($fname) && strlen($lname) && strlen($email)) {
 			//create the insert SQL.
 			$sqlArr = array(
-				'fname'	=> $fname,
-				'lname'	=> $lname
+				'fname'				=> $fname,
+				'lname'				=> $lname,
+				'contact_email_id'	=> "-1"       //MUST be reset later...
 			);
 			$cleanStringArr = array(
-				'fname'	=> 'sql',
-				'lname'	=> 'sql'
+				'fname'				=> 'sql',
+				'lname'				=> 'sql',
+				'contact_email_id'	=> 'numeric'
 			);
+			
+			if(!is_null($company) && strlen($company)) {
+				$sqlArr['company'] = $company;
+				$cleanStringArr['company'] = 'sql';
+			}
 			
 			//start a transaction...
 			$this->db->beginTrans(__METHOD__);
