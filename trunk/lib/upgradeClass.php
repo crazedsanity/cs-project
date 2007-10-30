@@ -832,7 +832,7 @@ class upgrade {
 						}
 						//the MATCHING version is NOT higher than the version file's version, looks ok.
 						$this->gfObj->debug_print(__METHOD__ .": adding (". $matchVersion .")");
-						$lastVersion = $matchVersion;
+						$lastVersion = $data['TARGET_VERSION'];
 						$retval[$matchVersion] = $data['TARGET_VERSION'];
 					}
 					else {
