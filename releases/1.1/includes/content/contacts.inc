@@ -35,7 +35,7 @@ if($_POST) {
 				
 				$updatesArr = array();
 				
-				if(!is_numeric($_POST['contactData']['contact_email_id'])) {
+				if(strlen($_POST['new_contact_email'])) {
 					$isPrimary = FALSE;
 					if(!is_numeric($_POST['contactData']['contact_email_id'])) {
 						$isPrimary = TRUE;
@@ -45,19 +45,17 @@ if($_POST) {
 						}
 					}
 					
-					if(strlen($_POST['new_contact_email'])) {
-						if($contactObj->create_contact_email($_POST['new_contact_email'], $isPrimary)) {
-							$totalUpdates++;
-							$res = "Successfully added new email";
-							if($isPrimary) {
-								$res .= " and set as primary address";
-							}
-							add_update_result($updatesArr, $res);
+					if($contactObj->create_contact_email($_POST['new_contact_email'], $isPrimary)) {
+						$totalUpdates++;
+						$res = "Successfully added new email";
+						if($isPrimary) {
+							$res .= " and set as primary address";
 						}
-						else {
-							$totalFailures++;
-							add_update_result($updatesArr, "FAILED to create new email address...");
-						}
+						add_update_result($updatesArr, $res);
+					}
+					else {
+						$totalFailures++;
+						add_update_result($updatesArr, "FAILED to create new email address...");
 					}
 				}
 				

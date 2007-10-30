@@ -1499,6 +1499,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
 				$mail = new PHPMailer();
+				$mail->SetLanguage("en");
 				$mail->IsSMTP();
 				$mail->Host = CONFIG_EMAIL_SERVER_IP;
 				
@@ -1518,6 +1519,7 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		}
 		else {
 			$mail = new PHPMailer();
+			$mail->SetLanguage("en");
 			$mail->IsSMTP();
 			$mail->Host = CONFIG_EMAIL_SERVER_IP;
 			$mail->From = "cs-project__DO_NOT_REPLY";
