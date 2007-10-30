@@ -70,7 +70,8 @@ class adminUserClass extends userClass {
 		}
 		else {
 			//create the contact.
-			$contactId = $this->create_contact($data['fname'], $data['lname'], $data['email'], $data['company']);
+			$contactObj = new contactClass($this->db);
+			$contactId = $contactObj->create_contact($data['fname'], $data['lname'], $data['email'], $data['company']);
 			$data['contact_id'] = $contactId;
 			unset($data['fname'], $data['lname']);
 			
@@ -311,67 +312,6 @@ class adminUserClass extends userClass {
 		
 		return($retval);
 	}//end update_group()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	public function create_contact($fname,$lname, $email, $company=NULL) {
-		if(strlen($fname) && strlen($lname) && strlen($email)) {
-			//create the insert SQL.
-			$sqlArr = array(
-				'fname'	=> $fname,
-				'lname'	=> $lname
-			);
-			$cleanStringArr = array(
-				'fname'	=> 'sql',
-				'lname'	=> 'sql'
-			);
-			
-			//start a transaction...
-			$this->db->beginTrans(__METHOD__);
-			
-			$sql = 'INSERT INTO contact_table '. string_from_array($sqlArr, 'insert', NULL, $cleanStringArr);
-			if(!$this->run_sql($sql)) {
-				//failure.
-				$this->db->rollbackTrans();
-				$details = __METHOD__ .": failed to insert data (". $this->lastNumrows ."::: ". $this->lastError;
-				$this->log_dberror($details);
-				throw new exception($details);
-			}
-			else {
-				//success: get the new contact_id.
-				$sql = "SELECT currval('contact_table_contact_id_seq'::text)";
-				if(!$this->run_sql($sql)) {
-					//failure!
-					$this->db->rollbackTrans();
-					$details = __METHOD__ .": insert was successful, but could not retrieve new contact_id (". $this->lastNumrows .")::: ". $this->lastError;
-					$this->log_dberror($details);
-					throw new exception($details);
-				}
-				else {
-					//retrieve the data.
-					$data = $this->db->farray();
-					$retval = $data[0];
-					
-					//before completing, let's create the primary email address.
-					$contactObj = new contactClass($this->db);
-					$contactObj->set_contact_id($retval);
-					$contactObj->create_contact_email($email, TRUE);
-					$this->db->commitTrans();
-					
-					$this->logsObj->log_by_class("Created new contact (". $retval .")");
-				}
-			}
-		}
-		else {
-			$details = __METHOD__ .": not enough information, be sure to include fname, lname, and email";
-			$this->logsObj->log_by_class($details, 'error');
-			throw new exception($details);
-		}
-		
-		return($retval);
-	}//end create_contact()
 	//=========================================================================
 	
 	
