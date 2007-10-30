@@ -6,9 +6,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 34 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5.4/xmlCreatorClass.php $ 
- * Last Updated:::::::: $Date: 2007-09-12 13:31:19 -0500 (Wed, 12 Sep 2007) $
+ * Current Revision:::: $Revision: 46 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5/xmlCreatorClass.php $ 
+ * Last Updated:::::::: $Date: 2007-10-30 14:49:38 -0500 (Tue, 30 Oct 2007) $
  * 
  * 
  * Methods to create XML that's parseable by xmlBuilder{}.  Eliminates the need for manually creating
@@ -567,6 +567,19 @@ class xmlCreator extends cs_xmlAbstract {
 			$this->rootElement = $x[0];
 		}
 	}//end load_xmlparser_data()
+	//=================================================================================
+	
+	
+	
+	//=================================================================================
+	public function remove_path($path) {
+		if(!is_null($path)) {
+			$this->a2pObj->unset_data($path);
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid path given (". $path .")");
+		}
+	}//end remove_path();
 	//=================================================================================
 }//end xmlCreator{}
 ?>
