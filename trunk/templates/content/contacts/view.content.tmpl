@@ -78,7 +78,12 @@
 						<td>&nbsp;
 							<div id="contactAddEmail_text" style="display:none">
 								<input id="contactAddEmail_input" type="text" size="22" name="garbage_contactEmailId" 
-									disabled onKeyUp="cs_contactAddEmail(this);" onChange="cs_setContactEmailId('new')">
+									disabled 
+									onKeyUp="cs_contactAddEmail(this);" 
+									onBlur="cs_contactAddEmail(this);" 
+									onFocus="cs_contactAddEmail(this);" 
+									onSelect="cs_contactAddEmail(this);" 
+									onChange="cs_contactAddEmail(this);">
 							</div>
 						</td>
 					</tr>
