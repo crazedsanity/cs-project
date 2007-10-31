@@ -1,4 +1,12 @@
 --
+-- SVN INFORMATION:::
+-- SVN Signature::::::::: $Id$
+-- Last Committted Date:: $Date$
+-- Last Committed Path::: $HeadURL$
+--
+
+
+--
 -- PostgreSQL database dump
 --
 
@@ -618,7 +626,8 @@ SET default_with_oids = true;
 CREATE TABLE attribute_table (
     attribute_id integer NOT NULL,
     name text NOT NULL,
-    clean_as text DEFAULT 'sql'::text NOT NULL
+    clean_as text DEFAULT 'sql'::text NOT NULL,
+    display_name text NOT NULL
 );
 
 
@@ -678,6 +687,44 @@ ALTER TABLE public.contact_attribute_link_table_contact_attribute_link_id_seq OW
 ALTER SEQUENCE contact_attribute_link_table_contact_attribute_link_id_seq OWNED BY contact_attribute_link_table.contact_attribute_link_id;
 
 
+SET default_with_oids = false;
+
+--
+-- Name: contact_email_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE contact_email_table (
+    contact_email_id integer NOT NULL,
+    contact_id integer NOT NULL,
+    email text NOT NULL,
+    CONSTRAINT contact_email_table_email_check CHECK ((email = lower(email)))
+);
+
+
+ALTER TABLE public.contact_email_table OWNER TO postgres;
+
+--
+-- Name: contact_email_table_contact_email_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE contact_email_table_contact_email_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.contact_email_table_contact_email_id_seq OWNER TO postgres;
+
+--
+-- Name: contact_email_table_contact_email_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE contact_email_table_contact_email_id_seq OWNED BY contact_email_table.contact_email_id;
+
+
+SET default_with_oids = true;
+
 --
 -- Name: contact_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
@@ -685,7 +732,9 @@ ALTER SEQUENCE contact_attribute_link_table_contact_attribute_link_id_seq OWNED 
 CREATE TABLE contact_table (
     contact_id integer NOT NULL,
     fname text NOT NULL,
-    lname text NOT NULL
+    lname text NOT NULL,
+    company text,
+    contact_email_id integer NOT NULL
 );
 
 
@@ -863,6 +912,7 @@ ALTER TABLE public.log_estimate_table OWNER TO postgres;
 --
 
 CREATE SEQUENCE log_estimate_table_log_estimate_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -923,9 +973,7 @@ CREATE TABLE log_table (
     group_id integer,
     uid integer NOT NULL,
     affected_uid integer NOT NULL,
-    details text,
-    record_type_id integer,
-    record_id integer
+    details text
 );
 
 
@@ -1106,7 +1154,7 @@ CREATE TABLE record_table (
     status_id integer DEFAULT 0 NOT NULL,
     priority smallint,
     progress smallint DEFAULT 0 NOT NULL,
-    start_date timestamp without time zone DEFAULT ('now'::text)::date,
+    start_date timestamp without time zone DEFAULT now(),
     deadline date,
     last_updated timestamp with time zone DEFAULT now(),
     name text NOT NULL,
@@ -1334,6 +1382,7 @@ ALTER TABLE public.todo_comment_table OWNER TO postgres;
 --
 
 CREATE SEQUENCE todo_comment_table_todo_comment_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1380,6 +1429,7 @@ ALTER TABLE public.todo_table OWNER TO postgres;
 --
 
 CREATE SEQUENCE todo_table_todo_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1512,6 +1562,13 @@ ALTER TABLE attribute_table ALTER COLUMN attribute_id SET DEFAULT nextval('attri
 --
 
 ALTER TABLE contact_attribute_link_table ALTER COLUMN contact_attribute_link_id SET DEFAULT nextval('contact_attribute_link_table_contact_attribute_link_id_seq'::regclass);
+
+
+--
+-- Name: contact_email_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE contact_email_table ALTER COLUMN contact_email_id SET DEFAULT nextval('contact_email_table_contact_email_id_seq'::regclass);
 
 
 --
@@ -1682,6 +1739,22 @@ ALTER TABLE ONLY attribute_table
 
 ALTER TABLE ONLY contact_attribute_link_table
     ADD CONSTRAINT contact_attribute_link_table_pkey PRIMARY KEY (contact_attribute_link_id);
+
+
+--
+-- Name: contact_email_table_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY contact_email_table
+    ADD CONSTRAINT contact_email_table_email_key UNIQUE (email);
+
+
+--
+-- Name: contact_email_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY contact_email_table
+    ADD CONSTRAINT contact_email_table_pkey PRIMARY KEY (contact_email_id);
 
 
 --
@@ -1927,6 +2000,22 @@ ALTER TABLE ONLY contact_attribute_link_table
 
 
 --
+-- Name: contact_email_table_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY contact_email_table
+    ADD CONSTRAINT contact_email_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
+
+
+--
+-- Name: contact_table_contact_email_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY contact_table
+    ADD CONSTRAINT contact_table_contact_email_id_fkey FOREIGN KEY (contact_email_id) REFERENCES contact_email_table(contact_email_id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: group_table_leader_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1988,14 +2077,6 @@ ALTER TABLE ONLY log_table
 
 ALTER TABLE ONLY log_table
     ADD CONSTRAINT log_table_log_event_id_fkey FOREIGN KEY (log_event_id) REFERENCES log_event_table(log_event_id);
-
-
---
--- Name: log_table_record_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY log_table
-    ADD CONSTRAINT log_table_record_type_id_fkey FOREIGN KEY (record_type_id) REFERENCES record_type_table(record_type_id);
 
 
 --
