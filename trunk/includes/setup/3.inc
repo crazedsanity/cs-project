@@ -148,10 +148,10 @@ function is_valid_user(cs_genericPage &$page, array $data) {
 
 
 
-class __setupDefaultValues {
+class __setupDefaultValues extends upgrade {
 	
 	
-	private $db;
+	protected $db;
 	private $gfObj;
 	private $totalRecords=0;
 	
@@ -240,16 +240,17 @@ class __setupDefaultValues {
 		
 		//remove the suffix & parse it.
 		$versionString = $suffixData[0];
-		$versionData = explode('.', $versionString);
+		$versionData = $this->parse_version_string($fullVersionString);
+		$sqlData = $versionData;
 		
 		
-		$sqlData = array(
-			'version_string'		=> $fullVersionString,
-			'version_major'			=> $versionData[0],
-			'version_minor'			=> $versionData[1],
-			'version_maintenance'	=> $versionData[2],
-			'version_suffix'		=> $suffix
-		);
+		#$sqlData = array(
+		#	'version_string'		=> $fullVersionString,
+		#	'version_major'			=> $versionData[0],
+		#	'version_minor'			=> $versionData[1],
+		#	'version_maintenance'	=> $versionData[2],
+		#	'version_suffix'		=> $suffix
+		#);
 		
 		$retval = 0;
 		foreach($sqlData as $name => $value) {
@@ -278,7 +279,7 @@ class __setupDefaultValues {
 				$data = $this->db->farray();
 				$dbVersionString = $data['text'];
 				if(strlen($data['version_suffix'])) {
-					$dbVersion .= "-". $data['version_suffix'];
+					$dbVersionString .= "-". $data['version_suffix'];
 				}
 				
 				if($dbVersionString === $fullVersionString) {
@@ -296,7 +297,7 @@ class __setupDefaultValues {
 							$retval = "Successfully set version string";
 						}
 						else {
-							throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .")");
+							throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .") ::: ". debug_print($sqlData,0));
 						}
 					}
 					else {
@@ -304,7 +305,7 @@ class __setupDefaultValues {
 					}
 				}
 				else {
-					throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .")");
+					throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .") ::: ". debug_print($sqlData,0));
 				}
 			}
 			else {
@@ -662,7 +663,7 @@ class __setupDefaultValues {
 					'company'			=> '',
 					'fname'				=> 'Anonymous',
 					'lname'				=> '',
-					'email_contact_id'	=> '-1'
+					'contact_email_id'	=> '-1'
 				)
 			),
 			'anonymous email record' => array(
@@ -1022,12 +1023,12 @@ class __setupDefaultValues {
 							$lastUid = $data[0];
 							
 							//create an email address for them.
-							$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $contactId .", '". strtolower($subData['email']) ."'";
+							$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $contactId .", '". strtolower($subData['email']) ."')";
 							if($this->run_sql($sql,1) === TRUE) {
 								$counter++;
 								//get the newly inserted id, so we can update the contact table.
 								if($this->run_sql("SELECT currval('contact_email_table_contact_email_id_seq'::text)")) {
-									$data = $this->farray();
+									$data = $this->db->farray();
 									$contactEmailId = $data[0];
 									
 									$sql = "UPDATE contact_table SET contact_email_id=". $contactEmailId ." WHERE contact_id=". $contactId;
@@ -1103,7 +1104,7 @@ class __setupDefaultValues {
 	
 	
 	//=========================================================================
-	private function run_sql($sql, $expectedNumrows=NULL) {
+	protected function run_sql($sql, $expectedNumrows=NULL) {
 		if(strlen($sql)) {
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
