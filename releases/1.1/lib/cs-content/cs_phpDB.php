@@ -4,8 +4,8 @@
  * A class for generic PostgreSQL database access.
  * 
  * SVN INFORMATION:::
- * SVN Signature:::::::: $Id: cs_phpDB.php 203 2007-10-30 05:18:26Z crazedsanity $
- * Last Committted Date: $Date: 2007-10-30 00:18:26 -0500 (Tue, 30 Oct 2007) $
+ * SVN Signature:::::::: $Id: cs_phpDB.php 207 2007-10-31 17:44:42Z crazedsanity $
+ * Last Committted Date: $Date: 2007-10-31 12:44:42 -0500 (Wed, 31 Oct 2007) $
  * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_phpDB.php $
  * 
  */
@@ -813,7 +813,6 @@ class cs_phpDB extends cs_versionAbstract {
 			if($this->inTrans && is_null($this->transactionTree)) {
 				$transLevel = $this->get_transaction_level();
 				//transaction started without using beginTrans()...
-				$this->gfObj->debug_print($this->transactionTree); 
 				$this->transactionTree = array();
 				$this->gfObj->debug_print(__METHOD__ .": transaction already started, transStatus=(". $transStatus ."), transLevel=(". $transLevel .")");
 				$this->transactionTree[] = "Already started...";
@@ -845,10 +844,11 @@ class cs_phpDB extends cs_versionAbstract {
 				$retval = 1;
 			}
 			$this->exec("COMMIT");
-		}
-		else {
-			$this->gfObj->debug_print(__METHOD__ .": transLevel is (". $transLevel ."), not committing... " .
-				$this->gfObj->debug_print($this->transactionTree,0));
+			
+			//check to see if there was an error (deferred constraints are checked at commit time)
+			if(strlen($this->errorMsg())) {
+				$retval = 0;
+			}
 		}
 		$this->get_transaction_status();
 		return($retval);
@@ -1122,7 +1122,6 @@ class cs_phpDB extends cs_versionAbstract {
 	public function get_transaction_level() {
 		if(is_array($this->transactionTree)) {
 			$retval = count($this->transactionTree);
-			$this->gfObj->debug_print($this->transactionTree);
 		}
 		else {
 			$retval = 0;

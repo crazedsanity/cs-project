@@ -77,9 +77,10 @@ class noteClass extends dbAbstract {
 		
 		$criteria = string_from_array($critArr, "select");
 		
-		$query = "SELECT n.*, c.fname, c.lname, contact_get_attribute(n.creator_contact_id, 'email') AS email " .
+		$query = "SELECT n.*, c.fname, c.lname, ce.email " .
 				"FROM note_table AS n INNER JOIN record_table AS r ON (n.record_id=r.record_id) " .
-				"INNER JOIN contact_table AS c ON (n.creator_contact_id=c.contact_id)" .
+				"INNER JOIN contact_table AS c ON (n.creator_contact_id=c.contact_id) " .
+				"INNER JOIN contact_email_table AS ce ON (c.contact_email_id=ce.contact_email_id) " .
 				"WHERE ". $criteria ." ORDER BY $orderBy";
 		
 		$this->db->exec($query);

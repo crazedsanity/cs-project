@@ -148,10 +148,10 @@ function is_valid_user(cs_genericPage &$page, array $data) {
 
 
 
-class __setupDefaultValues {
+class __setupDefaultValues extends upgrade {
 	
 	
-	private $db;
+	protected $db;
 	private $gfObj;
 	private $totalRecords=0;
 	
@@ -175,7 +175,7 @@ class __setupDefaultValues {
 		try {
 			$params = get_db_params();
 			$this->db->connect($params);
-			$this->db->beginTrans();
+			$this->db->beginTrans(__METHOD__);
 			$retval = "Connected successfully to the database.";
 			
 			//now that we've connected, start doing stuff.
@@ -197,6 +197,7 @@ class __setupDefaultValues {
 				store_setup_data(4, 1, 'accessible');
 			}
 			else {
+				$this->db->rollbackTrans();
 				store_setup_data(3, 0, 'result');
 				throw new exception(__METHOD__ .": failed to commit the transaction (". $commitRes .")");
 			}
@@ -206,8 +207,6 @@ class __setupDefaultValues {
 			//TODO: rollback the transaction
 			$retval = "An error occurred: ". $e->getMessage();
 		}
-		
-		$this->gfObj->debug_print(__METHOD__ .": RETURNING: <b>". $retval ."</b>");
 		
 		return($retval);
 		
@@ -240,16 +239,17 @@ class __setupDefaultValues {
 		
 		//remove the suffix & parse it.
 		$versionString = $suffixData[0];
-		$versionData = explode('.', $versionString);
+		$versionData = $this->parse_version_string($fullVersionString);
+		$sqlData = $versionData;
 		
 		
-		$sqlData = array(
-			'version_string'		=> $fullVersionString,
-			'version_major'			=> $versionData[0],
-			'version_minor'			=> $versionData[1],
-			'version_maintenance'	=> $versionData[2],
-			'version_suffix'		=> $suffix
-		);
+		#$sqlData = array(
+		#	'version_string'		=> $fullVersionString,
+		#	'version_major'			=> $versionData[0],
+		#	'version_minor'			=> $versionData[1],
+		#	'version_maintenance'	=> $versionData[2],
+		#	'version_suffix'		=> $suffix
+		#);
 		
 		$retval = 0;
 		foreach($sqlData as $name => $value) {
@@ -278,7 +278,7 @@ class __setupDefaultValues {
 				$data = $this->db->farray();
 				$dbVersionString = $data['text'];
 				if(strlen($data['version_suffix'])) {
-					$dbVersion .= "-". $data['version_suffix'];
+					$dbVersionString .= "-". $data['version_suffix'];
 				}
 				
 				if($dbVersionString === $fullVersionString) {
@@ -559,20 +559,18 @@ class __setupDefaultValues {
 	//=========================================================================
 	private function create_attributes() {
 		$attributes = array(
-			1	=> array('company',		'sql'),
-			2	=> array('email',		'email'),
-			3	=> array('phone',		'phone'),
-			4	=> array('fax',			'phone'),
-			5	=> array('cell',		'phone'),
-			6	=> array('im_yahoo',	'alphanumeric'),
-			7	=> array('im_skype',	'alphanumeric'),
-			8	=> array('im_aol',		'alphanumeric'),
-			9	=> array('im_msn',		'alphanumeric'),
-			10	=> array('im_icq',		'alphanumeric'),
-			11	=> array('address',		'sql'),
-			12	=> array('city',		'alphanumeric'),
-			13	=> array('state',		'alphanumeric'),
-			14	=> array('zip',			'alphanumeric')
+			3	=> array('phone',		'phone',		'Phone'),
+			4	=> array('fax',			'phone',		'Fax'),
+			5	=> array('cell',		'phone',		'Cell'),
+			6	=> array('im_yahoo',	'alphanumeric',	'IM: Yahoo'),
+			7	=> array('im_skype',	'alphanumeric',	'IM: Skype'),
+			8	=> array('im_aol',		'alphanumeric',	'IM: AOL'),
+			9	=> array('im_msn',		'alphanumeric',	'IM: MSN'),
+			10	=> array('im_icq',		'alphanumeric',	'IM: ICQ'),
+			11	=> array('address',		'sql',			'Address'),
+			12	=> array('city',		'alphanumeric',	'City'),
+			13	=> array('state',		'alphanumeric',	'State'),
+			14	=> array('zip',			'alphanumeric',	'Zip')
 		);
 		
 		$retval = 0;
@@ -580,7 +578,8 @@ class __setupDefaultValues {
 			$insertArr = array(
 				'attribute_id'	=> $attributeId,
 				'name'			=> $subData[0],
-				'clean_as'		=> $subData[1]
+				'clean_as'		=> $subData[1],
+				'display_name'	=> $subData[2]
 			);
 			$sql = "INSERT INTO attribute_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 			$numrows = $this->db->exec($sql);
@@ -659,9 +658,18 @@ class __setupDefaultValues {
 			'anonymous contact record' => array(
 				'name' => 'contact_table',
 				'data' => array(
+					'contact_id'		=> 0,
+					'company'			=> '',
+					'fname'				=> 'Anonymous',
+					'lname'				=> '',
+					'contact_email_id'	=> '-1'
+				)
+			),
+			'anonymous email record' => array(
+				'name'	=> 'contact_email_table',
+				'data'	=> array(
 					'contact_id'	=> 0,
-					'fname'			=> 'Anonymous',
-					'lname'			=> ''
+					'email'			=> 'anonymous@null.com'
 				)
 			)
 		);
@@ -681,6 +689,21 @@ class __setupDefaultValues {
 			} else {
 				throw new exception(__METHOD__. ": failed perform operation (". $operationName .") for table (". $tableName .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
 			}
+		}
+		
+		$sql = "SELECT currval('contact_email_table_contact_email_id_seq'::text)";
+		if($this->run_sql($sql)) {
+			$data = $this->db->farray();
+			$sql = "UPDATE contact_table SET contact_email_id=". $data[0] ." WHERE contact_id=0";
+			if($this->run_sql($sql)) {
+				$this->totalRecords++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to set contact_email_id for anonymous");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to get sequence for contact_email_table");
 		}
 		
 		if($retval == count($allRecords)) {
@@ -770,7 +793,9 @@ class __setupDefaultValues {
 			1	=> 'bug',
 			2	=> 'feature request',
 			3	=> 'information',
-			4	=> 'network related'
+			4	=> 'network related',
+			5	=> 'critical',
+			6	=> 'exception'
 		);
 		
 		$retval = 0;
@@ -820,7 +845,7 @@ class __setupDefaultValues {
 	private function build_preferences() {
 		//format: {pref_type_id} => array({name}, {default_value}, {display_name}, {description})
 		$prefTypes = array(
-			1	=> array('startModule',	'helpdesk',	'Starting on Module',	'Defines which section will be loaded upon login if nothing was selected.'),
+			1	=> array('startModule', 'helpdesk',	'Starting on Module',	'Defines which section will be loaded upon login if nothing was selected.'),
 			5	=> array('sorting_helpdesk', 'public_id|DESC', 'Helpdesk Sorting', 'Define the type of sorting for the helpdesk page.'),
 			6	=> array('sorting_project', 'priority|ASC', 'Project Sorting', 'Define the type of sorting for the helpdesk page.'),
 			7	=> array('projectDetails_todoDisplayOnlyMine', 'all', 'Project Details: Todo display', 'Define what todos are displayed on a project\'s details page.'),
@@ -980,6 +1005,7 @@ class __setupDefaultValues {
 				$insertArr['fname'] = $nameData[0];
 				$insertArr['lname'] = preg_replace('/^'. $insertArr['fname'] .' /', '', $subData['name']);
 			}
+			$insertArr['contact_email_id'] = '-1';
 			
 			//create their contact record.
 			$sql = "INSERT INTO contact_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
@@ -1010,11 +1036,26 @@ class __setupDefaultValues {
 							$data = $this->db->farray();
 							$lastUid = $data[0];
 							
-							//create an email attribute for them.
-							$sql = "SELECT contact_update_attribute(". $contactId .", 'email', '". $subData['email'] ."')";
+							//create an email address for them.
+							$sql = "INSERT INTO contact_email_table (contact_id, email) VALUES (". $contactId .", '". strtolower($subData['email']) ."')";
 							if($this->run_sql($sql,1) === TRUE) {
 								$counter++;
-								$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
+								//get the newly inserted id, so we can update the contact table.
+								if($this->run_sql("SELECT currval('contact_email_table_contact_email_id_seq'::text)")) {
+									$data = $this->db->farray();
+									$contactEmailId = $data[0];
+									
+									$sql = "UPDATE contact_table SET contact_email_id=". $contactEmailId ." WHERE contact_id=". $contactId;
+									if($this->run_sql($sql)) {
+										$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
+									}
+									else {
+										throw new exception(__METHOD__ .": unable to update contact table with new contact_email_id...");
+									}
+								}
+								else {
+									throw new exception(__METHOD__ .": failed to retrieve contact_email_id");
+								}
 							}
 							else {
 								throw new exception(__METHOD__ .": failed to create email for ". $subData['username'] ."::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -1078,7 +1119,7 @@ class __setupDefaultValues {
 	
 	
 	//=========================================================================
-	private function run_sql($sql, $expectedNumrows=NULL) {
+	protected function run_sql($sql, $expectedNumrows=NULL) {
 		if(strlen($sql)) {
 			$numrows = $this->db->exec($sql);
 			$dberror = $this->db->errorMsg();
@@ -1168,22 +1209,16 @@ class __convertDatabase {
 	//=========================================================================
 	public function go() {
 		//determine what script we have to include & run.
-		$this->gfObj->debug_print(__METHOD__ .": starting...");
-		
 		if(!$this->db->is_connected()) {
 			throw new exception(__METHOD__ .": failed to connect to database...");
 		}
 		else {
-			$this->gfObj->debug_print(__METHOD__ .": connected.  Determining version...");
-			
 			$numrows = $this->db->exec("SELECT internal_data_get_value('version_string')");
 			$dberror = $this->db->errorMsg();
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				$data = $this->db->farray();
 				$version = $data[0];
-				$this->gfObj->debug_print(__METHOD__ .": version is (". $version .")");
-				
 				$this->run_conversion($version);
 			}
 			else {
@@ -1214,7 +1249,7 @@ class __convertDatabase {
 				}
 			}
 			catch(exception $e) {
-				$this->gfObj->debug_print(__METHOD__ .": FATAL EXCEPTION OCCURRED::: ". $e->getMessage());
+				$this->gfObj->debug_print(__METHOD__ .": FATAL EXCEPTION OCCURRED::: ". $e->getMessage(),1);
 			}
 		}
 		else {

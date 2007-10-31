@@ -1,8 +1,8 @@
 --
 -- SVN INFORMATION:::
--- SVN Signature: $Id$
--- Last Committted Date: $Date$
--- Last Committed Path: $HeadURL$
+-- SVN Signature::::::::: $Id$
+-- Last Committted Date:: $Date$
+-- Last Committed Path::: $HeadURL$
 --
 
 
