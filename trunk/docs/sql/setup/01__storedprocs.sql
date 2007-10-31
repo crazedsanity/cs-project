@@ -1,8 +1,8 @@
 --
 -- SVN INFORMATION:::
--- SVN Signature: $Id$
--- Last Committted Date: $Date$
--- Last Committed Path: $HeadURL$
+-- SVN Signature: $Id:::: 01__storedprocs.sql 186 2007-09-15 23:43:10Z crazedsanity $
+-- Last Committted Date:: $Date$
+-- Last Committed Path::: $HeadURL$
 --
 
 

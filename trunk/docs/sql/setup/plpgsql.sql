@@ -1,8 +1,8 @@
 --
 -- SVN INFORMATION:::
--- SVN Signature: $Id$
--- Last Committted Date: $Date$
--- Last Committed Path: $HeadURL$
+-- SVN Signature: $Id:::: plpgsql.sql 183 2007-09-14 23:17:47Z crazedsanity $
+-- Last Committted Date:: $Date$
+-- Last Committed Path::: $HeadURL$
 --
 
 --
