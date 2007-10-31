@@ -416,7 +416,7 @@ class mainRecord {
 		if($isNewRecord) {
 			//set the group_id properly.
 			//TODO: set defaults SOMEWHERE in the code, like in the main site config (for non-authenticated users).
-			$updatesArr['group_id'] = 2;
+			$updatesArr['group_id'] = 1;
 			if(isset($_SESSION['group_id'])) {
 				$updatesArr['group_id'] = $_SESSION['group_id'];
 			}
@@ -661,7 +661,6 @@ class mainRecord {
 			
 			//now build the SQL string. 
 			$sql = "INSERT INTO record_table ". $this->build_sql_string($data, 'insert');
-			debug_print($sql);
 			
 			//now run it.
 			$numrows = $this->db->exec($sql);
