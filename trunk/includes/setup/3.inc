@@ -175,7 +175,7 @@ class __setupDefaultValues extends upgrade {
 		try {
 			$params = get_db_params();
 			$this->db->connect($params);
-			$this->db->beginTrans();
+			$this->db->beginTrans(__METHOD__);
 			$retval = "Connected successfully to the database.";
 			
 			//now that we've connected, start doing stuff.
@@ -197,6 +197,7 @@ class __setupDefaultValues extends upgrade {
 				store_setup_data(4, 1, 'accessible');
 			}
 			else {
+				$this->db->rollbackTrans();
 				store_setup_data(3, 0, 'result');
 				throw new exception(__METHOD__ .": failed to commit the transaction (". $commitRes .")");
 			}
@@ -206,8 +207,6 @@ class __setupDefaultValues extends upgrade {
 			//TODO: rollback the transaction
 			$retval = "An error occurred: ". $e->getMessage();
 		}
-		
-		$this->gfObj->debug_print(__METHOD__ .": RETURNING: <b>". $retval ."</b>");
 		
 		return($retval);
 		
@@ -297,7 +296,7 @@ class __setupDefaultValues extends upgrade {
 							$retval = "Successfully set version string";
 						}
 						else {
-							throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .") ::: ". debug_print($sqlData,0));
+							throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .")");
 						}
 					}
 					else {
@@ -305,7 +304,7 @@ class __setupDefaultValues extends upgrade {
 					}
 				}
 				else {
-					throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .") ::: ". debug_print($sqlData,0));
+					throw new exception(__METHOD__ .": derived database version string (". $dbVersionString .") doesn't match our version (". $fullVersionString .")");
 				}
 			}
 			else {
@@ -692,6 +691,21 @@ class __setupDefaultValues extends upgrade {
 			}
 		}
 		
+		$sql = "SELECT currval('contact_email_table_contact_email_id_seq'::text)";
+		if($this->run_sql($sql)) {
+			$data = $this->db->farray();
+			$sql = "UPDATE contact_table SET contact_email_id=". $data[0] ." WHERE contact_id=0";
+			if($this->run_sql($sql)) {
+				$this->totalRecords++;
+			}
+			else {
+				throw new exception(__METHOD__ .": failed to set contact_email_id for anonymous");
+			}
+		}
+		else {
+			throw new exception(__METHOD__ .": failed to get sequence for contact_email_table");
+		}
+		
 		if($retval == count($allRecords)) {
 			//reset the sequence for the group table...
 			$sql = "SELECT setval('group_table_group_id_seq'::text, (SELECT max(group_id) FROM group_table))";
@@ -1036,6 +1050,7 @@ class __setupDefaultValues extends upgrade {
 										$retval = $this->gfObj->create_list($retval, " --- Created record for ". $subData['username'] ." (". $lastUid .")", "<BR>\n");
 									}
 									else {
+										throw new exception(__METHOD__ .": unable to update contact table with new contact_email_id...");
 									}
 								}
 								else {
@@ -1194,22 +1209,16 @@ class __convertDatabase {
 	//=========================================================================
 	public function go() {
 		//determine what script we have to include & run.
-		$this->gfObj->debug_print(__METHOD__ .": starting...");
-		
 		if(!$this->db->is_connected()) {
 			throw new exception(__METHOD__ .": failed to connect to database...");
 		}
 		else {
-			$this->gfObj->debug_print(__METHOD__ .": connected.  Determining version...");
-			
 			$numrows = $this->db->exec("SELECT internal_data_get_value('version_string')");
 			$dberror = $this->db->errorMsg();
 			
 			if(!strlen($dberror) && $numrows == 1) {
 				$data = $this->db->farray();
 				$version = $data[0];
-				$this->gfObj->debug_print(__METHOD__ .": version is (". $version .")");
-				
 				$this->run_conversion($version);
 			}
 			else {
@@ -1240,7 +1249,7 @@ class __convertDatabase {
 				}
 			}
 			catch(exception $e) {
-				$this->gfObj->debug_print(__METHOD__ .": FATAL EXCEPTION OCCURRED::: ". $e->getMessage());
+				$this->gfObj->debug_print(__METHOD__ .": FATAL EXCEPTION OCCURRED::: ". $e->getMessage(),1);
 			}
 		}
 		else {
