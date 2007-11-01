@@ -735,5 +735,65 @@ class mainRecord {
 	
 	
 	
+	//=========================================================================
+	protected function get_record_contact_associations($projectIdList=NULL) {
+		$retval = NULL;
+		if(is_null($projectIdList) || !is_array($projectIdList)) {
+			if(!is_numeric($projectIdList) && is_numeric($this->internalRecordId)) {
+				$projectIdList = array($this->internalRecordId);
+			}
+		}
+		
+		//set a var that says it should be just listed straight-up.
+		$justUserList = TRUE;
+		if(is_array($projectIdList)) {
+			$justUserList = FALSE;
+			$projectIdList = array_unique($projectIdList);
+		}
+		
+		$sqlArr = array(
+			'record_id'	=> $projectIdList
+		);
+		
+		//build the query.
+		$sql = "SELECT rcl.*, c.company, c.fname, c.lname, ce.email " .
+				"FROM record_contact_link_table AS rcl " .
+				"INNER JOIN contact_table AS c ON (rcl.contact_id=c.contact_id) " .
+				"INNER JOIN contact_email_table AS ce ON (c.contact_email_id=ce.contact_email_id) " .
+				"WHERE " . string_from_array($sqlArr, 'select');
+		$numrows = $this->db->exec($sql);
+		$dberror = $this->db->errorMsg();
+		
+		if(strlen($dberror) || $numrows < 1) {
+			//something went wrong.
+				if(strlen($dberror)) {
+				//log the error.
+				$details = __METHOD__ .": numrows=(". $numrows ."), dberror:::\n". 
+				$dberror ."\nSQL::: ". $sql;
+				$this->logsObj->log_dberror($details);
+			}
+		}
+		else {
+			//retrieve the results.
+			$retval = $this->db->farray_fieldnames('contact_id', NULL, 0);
+			if(!$justUserList) {
+				//sort them into arrays keyed off project_id.
+				$data = $retval;
+				$retval = array();
+				foreach($data as $index=>$subArr) {
+					$key = $subArr['record_id'];
+					$val = $subArr['contact_id'];
+					$retval[$key][] = $val;
+				}
+			}
+		}
+		
+		return($retval);
+		
+	}//end get_record_contact_associations()
+	//=========================================================================
+	
+	
+	
 }
 ?>

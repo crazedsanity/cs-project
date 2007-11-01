@@ -92,6 +92,9 @@ class helpdeskClass extends mainRecord {
 			//before continuing, get notes for this issue.
 			$noteObj = new noteClass($this->db);
 			$retval['notes'] = $noteObj->get_notes(array('record_id' => $retval['record_id']));
+			
+			//get users associated with this record...
+			$retval['associatedUsers'] = $this->get_record_contact_associations($retval['record_id']);
 		}
 		else {
 			$details = __METHOD__ .": invalid helpdeskId (". $helpdeskId .")";
