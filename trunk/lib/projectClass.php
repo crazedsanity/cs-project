@@ -56,17 +56,6 @@ class projectClass extends mainRecord {
 	
 	
 	//=========================================================================
-	/**
-	 * Special PHP5 method: last-ditch effort to include all files necessary to 
-	 * make this class work.
-	 */
-	public function __autoload() {
-	}//end __autoload()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
 	public function set_group_id($newId=NULL) {
 		$retval = NULL;
 		if((is_null($newId) || !is_numeric($newId)) && is_numeric($_SESSION['group_id'])) {
