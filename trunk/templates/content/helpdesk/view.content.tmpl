@@ -14,7 +14,7 @@
 <!-- BEGIN info_block -->
 <tr>
 	<td colspan="4">
-		<table cellpadding="3" cellspacing="0" width="100%">
+		<table cellpadding="3" cellspacing="0" width="100%" border="1">
 			<tr>
 				<th align="right">Issue Number:</th>
 				<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/extern/helpdesk/view?ID={public_id}">External Link</a></b>]</td>
@@ -61,6 +61,29 @@
 	<!-- END accessBlock__modifyButton -->
 						</table>
 <!-- END access_block -->
+<!-- BEGIN associatedUserBlock -->
+						<table border="1" cellpadding="3" cellspacing="0" style="padding-left:5px;">
+							<tr>
+								<th colspan="2">Notified Users</th>
+							</tr>
+							<tr>
+								<th>Name</th>
+								<th>Email</th>
+							</tr>
+	<!-- BEGIN associatedUser_none -->
+							<tr>
+								<td colspan="2"><font color="red"><b>NO USERS LISTED</b></font></td>
+							</tr>
+	<!-- END associatedUser_none -->
+	<!-- BEGIN associatedUser_data -->
+							<tr>
+								<td><a href="/content/contacts/view/%%contact_id%%">%%displayName%%</a></td>
+								
+								<td>%%email%%</td>
+							</tr>
+	<!-- END associatedUser_data -->
+						</table>
+<!-- END associatedUserBlock -->
 					</td>
 				</tr>
 				<tr>
