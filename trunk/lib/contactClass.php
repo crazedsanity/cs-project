@@ -12,7 +12,6 @@
  * 
  */
 
-require_once(dirname(__FILE__) .'/attributeClass.php');
 
 class contactClass extends attributeClass {
 	

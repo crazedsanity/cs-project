@@ -9,9 +9,6 @@
  * Last Updated:::::::: $Date$
  */
 
-include_once (dirname(__FILE__) ."/site_config.php");
-
-
 
 //##########################################################################
 /**
@@ -1713,5 +1710,6 @@ function get_config_db_params() {
 	
 	return($params);
 }//end get_config_db_params()
+	
 
 ?>

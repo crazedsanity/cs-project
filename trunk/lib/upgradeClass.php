@@ -12,10 +12,6 @@
  * 
  */
 
-require(dirname(__FILE__) .'/includes.php');
-require_once(dirname(__FILE__) .'/globalFunctions.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.php');
-
 class upgrade {
 	
 	private $fsObj;

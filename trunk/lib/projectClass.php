@@ -8,7 +8,6 @@
  * Repository Location: $HeadURL$ 
  * Last Updated:::::::: $Date$
  */
-require_once("site_config.php");
 
 class projectClass extends mainRecord {
 	

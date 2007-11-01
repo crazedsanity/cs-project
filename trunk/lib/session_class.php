@@ -13,9 +13,6 @@
  */
 ##
 
-require_once(dirname(__FILE__) ."/site_config.php");
-require_once(dirname(__FILE__) ."/globalFunctions.php");
-require_once(dirname(__FILE__) ."/upgradeClass.php");
 
 
 class Session {
