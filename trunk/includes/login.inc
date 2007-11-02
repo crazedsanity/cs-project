@@ -8,8 +8,6 @@
  * Last Updated:::::::: $Date$
  */
 
-require_once(dirname(__FILE__) ."/../lib/includes.php");
-require_once(dirname(__FILE__) ."/../lib/prefClass.php");
 
 $page->clear_content("header");
 
