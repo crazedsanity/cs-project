@@ -14,7 +14,7 @@ EXAMPLE: public_html/content  ->  ./index.php
 </files>
 */
 
-require_once(dirname(__FILE__) ."/../lib/includes.php");
+require_once(dirname(__FILE__) ."/../lib/site_config.php");
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 

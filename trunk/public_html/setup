@@ -20,7 +20,7 @@ define("PROJECT__INITIALSETUP", TRUE);
 //now set a SPECIAL name for the session cookie.
 ini_set('session.name', "CSPROJECT_SETUP_SESSID");
 
-require_once(dirname(__FILE__) ."/../lib/includes.php");
+require_once(dirname(__FILE__) ."/../lib/site_config.php");
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();
