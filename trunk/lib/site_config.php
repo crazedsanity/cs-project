@@ -182,7 +182,6 @@ function __autoload($className) {
 		if(file_exists($fileName)) {
 			require_once($fileName);
 			$retval = TRUE;
-			print __FUNCTION__ .": included (". $className .") [". $fileName ."]...<BR>\n";
 			break;
 		}
 	}
