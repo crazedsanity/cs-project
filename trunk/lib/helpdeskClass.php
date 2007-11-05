@@ -157,6 +157,11 @@ class helpdeskClass extends mainRecord {
 		);
 		$retval = $noteObj->create_note($noteData);
 		
+		if(is_numeric($noteObj->lastContactId) && $noteObj->lastContactId > 0) {
+			$recordContactLink = new recordContactLink($this->db);
+			$recordContactLink->add_link($tmp['record_id'], $noteObj->lastContactId);
+		}
+		
 		if($retval > 0) {
 			//send the submitter an email		
 			$newRemarks = $remark;
@@ -293,6 +298,10 @@ class helpdeskClass extends mainRecord {
 		$tempKeysArray = array_keys($myNewRecordArr);
 		$retval = $tempKeysArray[0];
 		
+		//associate the user that created it to the record, so they get notified. :) 
+		$linkObj = new recordContactLink($this->db);
+		$linkObj->add_link($newRecord, $myNewRecordArr[$retval]['creator_contact_id']);
+		
 		//now, let's tag it.
 		if(isset($dataArr['initialTag']) && is_numeric($dataArr['initialTag'])) {
 			$tagObj = new tagClass($this->db);
@@ -308,15 +317,24 @@ class helpdeskClass extends mainRecord {
 			$parseArr = $this->get_record($retval);
 			
 			$normalEmailExtra = NULL;
+			$emailAddressList = $linkObj->get_record_email_list($newRecord);
 			if((strlen($_SESSION['login_email'])) && ($_SESSION['login_email'] != $parseArr['email'])) {
-				send_email($_SESSION['login_email'], "Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."]", $emailTemplate, $parseArr);
+				send_email(
+					$emailAddressList, 
+					"Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."]", 
+					$emailTemplate, 
+					$parseArr
+				);
 				$normalEmailExtra = " [registered by ". $_SESSION['login_loginname'] .": uid=". $_SESSION['login_id'] ."]";
 			}
-			send_email($parseArr['email'], "Helpdesk Issue #$retval Created". $normalEmailExtra, $emailTemplate, $parseArr);
-			
-			//now send the alert...
-			$alehelpdeskubject = "[ALERT] Helpdesk Issue #$retval Created";
-			send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $alehelpdeskubject, $emailTemplate, $parseArr);
+			else {
+				send_email(
+					$emailAddressList, 
+					"Helpdesk Issue #$retval Created". $normalEmailExtra, 
+					$emailTemplate, 
+					$parseArr
+				);
+			}
 			
 			//log that it was created.
 			$details = "Helpdesk Issue #". $retval ." ([helpdesk_id=". $retval ."]) Created by (". $dataArr['email'] ."): ". $dataArr['name'];
