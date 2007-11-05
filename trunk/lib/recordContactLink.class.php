@@ -28,12 +28,16 @@ class recordContactLink extends dbAbstract {
 	
 	//=========================================================================
 	public function add_link($recordId, $contactId) {
-		$sql = "INSERT INTO record_contact_link_table (record_id, contact_id) " .
-				"VALUES (". $recordId .", ". $contactId .")";
 		
 		$retval = FALSE;
-		if($this->run_sql($sql)) {
-			$retval = TRUE;
+		
+		if(!$this->check_link_exists($recordId, $contactId)) {
+			$sql = "INSERT INTO record_contact_link_table (record_id, contact_id) " .
+					"VALUES (". $recordId .", ". $contactId .")";
+			
+			if($this->run_sql($sql)) {
+				$retval = TRUE;
+			}
 		}
 		
 		return($retval);
@@ -52,12 +56,14 @@ class recordContactLink extends dbAbstract {
 			$data = $this->db->farray_fieldnames(NULL, TRUE);
 			
 			foreach($data as $index=>$subData) {
-				$retval[$subData['record_id']] = $subData['contact_id'];
+				$retval[$subData['record_id']][] = $subData['contact_id'];
 			}
 			
 			//now make sure no extra records exist...
 			foreach($retval as $index=>$data) {
-				$retval[$index] = array_unique($data);
+				if(is_array($data)) {
+					$retval[$index] = array_unique($data);
+				}
 			}
 		}
 		
@@ -77,12 +83,17 @@ class recordContactLink extends dbAbstract {
 			$data = $this->db->farray_fieldnames(NULL, TRUE);
 			
 			foreach($data as $index=>$subData) {
-				$retval[$subData['contact_id']] = $subData['record_id'];
+				$retval[$subData['contact_id']][] = $subData['record_id'];
 			}
+			
+			$this->gfObj->debug_print($retval);
+			#exit;
 			
 			//now make sure no extra records exist...
 			foreach($retval as $index=>$data) {
-				$retval[$index] = array_unique($data);
+				if(is_array($data)) {
+					$retval[$index] = array_unique($data);
+				}
 			}
 		}
 		
@@ -98,18 +109,49 @@ class recordContactLink extends dbAbstract {
 				" AND contact_id=". $contactId;
 		$retval = FALSE;
 		
-		$this->db->beginTrans(__METHOD__);
 		if($this->run_sql($sql) && $this->lastNumrows == 1) {
 			$retval = TRUE;
-			$this->db->commitTrans(__METHOD__);
 		}
 		else {
 			$retval = FALSE;
-			$this->db->rollbackTrans(__METHOD__);
 		}
 		
 		return($retval);
 	}//end remove_link()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function check_link_exists($recordId, $contactId) {
+		$sql = "SELECT * FROM record_contact_link_table WHERE record_id=". 
+				$recordId ." AND contact_id=". $contactId;
+		
+		$retval = FALSE;		
+		if($this->run_sql($sql) && $this->lastNumrows > 0) {
+			$retval = TRUE;
+		}
+		
+		return($retval);
+	}//end check_link_exists()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function get_record_email_list($recordId) {
+		$sql = "SELECT rcl.contact_id, ce.email FROM record_contact_link_table AS rcl " .
+				"INNER JOIN contact_table AS c ON (c.contact_id=rcl.contact_id) " .
+				"INNER JOIN contact_email_table AS ce ON (c.contact_email_id=ce.contact_email_id) " .
+				"WHERE rcl.record_id=". $recordId;
+		
+		$retval = array();
+		if($this->run_sql($sql) && $this->lastNumrows > 0) {
+			$retval = $this->db->farray_nvp('contact_id', 'email');
+		}
+		
+		return($retval);
+	}//end get_record_email_list()
 	//=========================================================================
 	
 	
