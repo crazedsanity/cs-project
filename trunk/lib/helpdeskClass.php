@@ -120,6 +120,11 @@ class helpdeskClass extends mainRecord {
 	function update_record($helpdeskId, $updatesArr=NULL, $appendRemark=TRUE) {
 		
 		$retval = parent::update_record(array('public_id' => $helpdeskId, 'is_helpdesk_issue' => 't', 'status_id' => 'all'), $updatesArr);
+		if($retval && is_numeric($updatesArr['leader_contact_id']) && $updatesArr['leader_contact_id'] > 0) {
+			$recData = $this->get_record($helpdeskId);
+			$linkObj = new recordContactLink($this->db);
+			$linkObj->add_link($recData['record_id'], $updatesArr['leader_contact_id']);
+		}
 		
 		return($retval);
 	}//end update_record()
