@@ -47,7 +47,9 @@ Database tables must be built in a very strict manner to ensure ease of scriptin
 	-- must always end in "_seq"
 	-- FORM: "{baseName}_table_{baseName}_id_seq" (default syntax for PostgreSQL serial key).
  * INDEXES:
-	-- BASIC SYNTAX:::::: "{tableName}_{indexedColumn}_[pkey/fkey/index]"
-	-- PRIMARY KEY INDEX: "{tableName}_{indexedColumn}_pkey"
-	-- FOREIGN KEY INDEX: "{tableName}_{indexedColumn}_fkey"
-	-- STANDARD INDEX:::: "{tableName}_{indexedColumn}_index"
+	-- BASIC SYNTAX::::::: "{tableName}_{indexedColumn}_[pkey/fkey/idx/uidx]"
+	-- PRIMARY KEY INDEX:: "{tableName}_{indexedColumn}_pkey"
+	-- FOREIGN KEY INDEX:: "{tableName}_{indexedColumn}_fkey"
+	-- STANDARD INDEX::::: "{tableName}_{indexedColumn}_idx"
+	-- UNIQUE INDEX::::::: "{tableName}_{indexedColumn}_uidx"
+	-- MULTI-COLUMN INDEX: "{tableName}_{indexedColumn1}_{indexedColumn2}_idx"
