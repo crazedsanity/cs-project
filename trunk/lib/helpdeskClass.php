@@ -19,6 +19,8 @@ class helpdeskClass extends mainRecord {
 	
 	protected $logsObj;
 	
+	public $lastContactId;
+	
 	//================================================================================================
 	/**
 	 * CONSTRUCTOR.
@@ -163,6 +165,7 @@ class helpdeskClass extends mainRecord {
 		$retval = $noteObj->create_note($noteData);
 		
 		if(is_numeric($noteObj->lastContactId) && $noteObj->lastContactId > 0) {
+			$this->lastContactId = $noteObj->lastContactId;
 			$recordContactLink = new recordContactLink($this->db);
 			$recordContactLink->add_link($tmp['record_id'], $noteObj->lastContactId);
 		}
