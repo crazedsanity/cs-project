@@ -16,6 +16,8 @@ class noteClass extends dbAbstract {
 	var $projectId	= NULL; //ProjectID we're currently associated with.
 	var $noteId		= NULL; //ID of the note we're currently editing.
 	var $lastError	= NULL; //Indicates the last error encountered.
+	
+	public $lastContactId=NULL;
 
 
 	//================================================================================================
@@ -244,6 +246,8 @@ class noteClass extends dbAbstract {
 		else {
 			$creatorContactId = "0";
 		}
+		$this->lastContactId = $creatorContactId;
+		
 		$addFieldsArr = array(
 			"creator_contact_id"	=> $creatorContactId
 		);

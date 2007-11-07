@@ -2,9 +2,9 @@
 /*
  * FILE INFORMATION: 
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/contentSystemClass.php $
- * $Id: contentSystemClass.php 199 2007-10-25 20:47:33Z crazedsanity $
- * $LastChangedDate: 2007-10-25 15:47:33 -0500 (Thu, 25 Oct 2007) $
- * $LastChangedRevision: 199 $
+ * $Id: contentSystemClass.php 214 2007-11-07 17:35:59Z crazedsanity $
+ * $LastChangedDate: 2007-11-07 11:35:59 -0600 (Wed, 07 Nov 2007) $
+ * $LastChangedRevision: 214 $
  * $LastChangedBy: crazedsanity $
  * 
  * HOW THE SYSTEM WORKS:::
@@ -201,13 +201,16 @@ class contentSystem extends cs_versionAbstract {
 	 * if they're not, this will cause them to be redirected to another URL 
 	 * (generally, so they can login).
 	 */
-	public function force_authentication($redirectToUrl, $appendDestination=TRUE) {
+	public function force_authentication($redirectToUrl, $destinationArg='loginDestination') {
 		if(is_object($this->session) && method_exists($this->session, 'is_authenticated')) {
 			if(strlen($redirectToUrl)) {
 				$cleanedRedirect = $this->clean_url($redirectToUrl);
 				if($this->section != $cleanedRedirect) {
 					if(!$this->session->is_authenticated()) {
 						//run the redirect.
+						if(strlen($destinationArg)) {
+							$redirectToUrl .= '?'. $destinationArg .'='. urlencode($_SERVER['REQUEST_URI']);
+						}
 						$this->gfObj->conditional_header($redirectToUrl, TRUE);
 					}
 				}

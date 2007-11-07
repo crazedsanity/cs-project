@@ -10,12 +10,18 @@
  * Last Updated:::::::: $Date$
  */
 
+
+require(dirname(__FILE__) .'/globalFunctions.php');
+require(dirname(__FILE__) .'/phpmailer/class.phpmailer.php');
+require(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
+require(dirname(__FILE__) .'/session_class.php');
+require(dirname(__FILE__) .'/upgradeClass.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.php');
 require_once(dirname(__FILE__) .'/cs-content/contentSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlParserClass.php');
 require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
-require_once(dirname(__FILE__) .'/upgradeClass.php');
 
 define(CONFIG_FILENAME, 'config.xml');
 //Set of functions that should be usefull to everyone
@@ -31,7 +37,6 @@ function exception_handler($exception) {
 	//attempt to log the problem; if it happens too early, we can't do much about it.
 	try {
 		print "<pre><h3>FATAL EXCEPTION ENCOUNTERED: </h3>". $exception ."</pre>";
-		include(dirname(__FILE__) ."/includes.php");
 		include_once(dirname(__FILE__) ."/globalFunctions.php");
 		if(function_exists('get_config_db_params') && class_exists('cs_phpDB') && class_exists('logsClass')) {
 			$db = new cs_phpDB;
@@ -141,5 +146,53 @@ $GLOBALS['TMPLDIR']=$GLOBALS['SITE_ROOT'] . "/templates";
 
 //define an array of status_id's that are "NOT ENDED".
 $GLOBALS['STATUS_NOTENDED'] = array(0,1,2,6);
+
+
+
+$GLOBALS['templateVars'] = array(
+	"PHP_SELF"		=> $_SERVER['PHP_SELF'],
+	"cs-content_version"	=> VERSION_STRING,
+	"PROJ_NAME"				=> PROJ_NAME
+);
+
+
+//define some constants...
+define('SEQ_HELPDESK',		'special__helpdesk_public_id_seq');
+define('SEQ_PROJECT',		'special__project_public_id_seq');
+define('SEQ_MAIN',			'record_table_record_id_seq');
+define('TABLE_TODOCOMMENT',	'todo_comment_table');
+define('FORMAT_WORDWRAP',	90);
+
+//=========================================================================
+/**
+ * Special PHP5 function: last-ditch effort to include all files necessary to 
+ * make this class work.
+ */
+function __autoload($className) {
+	$retval = FALSE;
+	$possible = array(
+		dirname(__FILE__) .'/'. $className .'.php',
+		dirname(__FILE__) .'/'. $className .'Class.php',
+		dirname(__FILE__) .'/'. $className .'.class.php',
+		dirname(__FILE__) .'/abstractClasses/'. $className .'.abstract.php'
+	);
+	
+	foreach($possible as $fileName) {
+		if(file_exists($fileName)) {
+			require_once($fileName);
+			$retval = TRUE;
+			break;
+		}
+	}
+	
+	if($retval == TRUE) {
+		return($retval);
+	}
+	else {
+		throw new exception(__FUNCTION__ .": unable to find class file for (". $className .")");
+	}
+	
+}//end __autoload()
+//=========================================================================
 
 ?>

@@ -8,14 +8,16 @@
  * Last Updated:::::::: $Date$
  */
 
-require_once(dirname(__FILE__) ."/../lib/includes.php");
-require_once(dirname(__FILE__) ."/../lib/prefClass.php");
 
 $page->clear_content("header");
 
 $db = new cs_phpDB;
 $db->connect(get_config_db_params());
 $page->db = &$db;
+
+if(isset($_GET['loginDestination']) && strlen($_GET['loginDestination'])) {
+	$_SESSION['loginDestination'] = $_GET['loginDestination'];
+}
 
 if(!$_GET['logout'] && !$_POST && $page->session->sid_check == 1) {
 	//they came here & need to be redirected.

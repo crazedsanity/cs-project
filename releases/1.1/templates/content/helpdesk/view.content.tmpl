@@ -14,14 +14,15 @@
 <!-- BEGIN info_block -->
 <tr>
 	<td colspan="4">
-		<table cellpadding="3" cellspacing="0" width="100%">
+		<table cellpadding="3" cellspacing="0" width="100%" border="0">
 			<tr>
 				<th align="right">Issue Number:</th>
 				<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/extern/helpdesk/view?ID={public_id}">External Link</a></b>]</td>
 				
-				<td rowspan="4" align="left">
+				<td rowspan="4" align="left" nowrap>
 <!-- BEGIN access_block -->
-						<table border="1" cellpadding="2" cellspacing="0" align="left">
+						<table border="1" cellpadding="2" cellspacing="0" align="left"
+						style="padding-right:10px;border:none;">
 							<tr>
 								<td style="border-left:solid #000 1px;border-top:solid #000 1px;">Assigned: </td>
 								<td style="border-right:solid #000 1px;border-top:solid #000 1px;" nowrap> 
@@ -61,6 +62,35 @@
 	<!-- END accessBlock__modifyButton -->
 						</table>
 <!-- END access_block -->
+<!-- BEGIN associatedUserBlock -->
+						<div id="associatedUser_text" style="display:inline;">[<a href="javascript:void(enableInput('associatedUser', 'BlindDown'));">Show Associated Users</a>]</div>
+						<div id="associatedUser_inputDiv" style="display:none;width:320; height:130px; overflow:auto;">
+						<table border="0" cellpadding="3" cellspacing="0" width="200" align="center" 
+						style="border:solid #000 1px;">
+							<tr>
+								<th colspan="2" style="background-color:#FFF">Notified Users</th>
+							</tr>
+							<tr>
+								<th style="border:solid #000 1px;">Name</th>
+								<th style="border:solid #000 1px;">Email</th>
+							</tr>
+	<!-- BEGIN associatedUser_none -->
+							<tr>
+								<td colspan="2"><font color="red"><b>NO USERS LISTED</b></font></td>
+							</tr>
+	<!-- END associatedUser_none -->
+	<!-- BEGIN associatedUser_data -->
+							<tr>
+								<td nowrap style="border-bottom:solid #999 1px;border-right:solid #999 1px;border-left:solid #000 1px;">
+									<a href="/content/contacts/view/%%contact_id%%">%%displayName%%</a></td>
+								
+								<td style="border-bottom:solid #999 1px;border-left:solid #999 1px;border-right:solid #000 1px;">
+									%%email%%</td>
+							</tr>
+	<!-- END associatedUser_data -->
+						</table>
+						</div>
+<!-- END associatedUserBlock -->
 					</td>
 				</tr>
 				<tr>

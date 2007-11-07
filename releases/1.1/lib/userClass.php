@@ -9,9 +9,6 @@
  * Last Updated:::::::: $Date$
  */
 
-require_once(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
-require_once(dirname(__FILE__) .'/contactClass.php');
-
 
 class userClass extends dbAbstract {
 	

@@ -13,12 +13,10 @@
  */
 ##
 
-require_once(dirname(__FILE__) ."/site_config.php");
-require_once(dirname(__FILE__) ."/globalFunctions.php");
-require_once(dirname(__FILE__) ."/upgradeClass.php");
+require_once(dirname(__FILE__) .'/cs-content/cs_sessionClass.php');
 
 
-class Session {
+class Session extends cs_session {
 
 	var $db;
 	var $uid;
@@ -35,7 +33,7 @@ class Session {
 
 
 	//##########################################################################
-	function __construct(&$db, $create_session=1) 	{
+	function __construct(cs_phpDB &$db, $create_session=1) 	{
 		
 		if(!defined("CONFIG_SESSION_NAME")) {
 			$gf = new cs_globalFunctions;
@@ -48,17 +46,7 @@ class Session {
 		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=||
 		//	MUCHO IMPORTANTE!!!! DB MUST BE CONNECTED!!!	||
 		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=||
-		if(!is_object($db)) {
-			//looks like we haven't got a database yet... create one.
-			$this->db = new phpDB;
-			$this->db->connect();
-		}
-		else {
-			$this->db = $db;
-		}
-		
-		//create our logging object.
-		$this->logsObj = new logsClass($this->db, 'Authentication');
+		$this->db = $db;
 		
 		//create a session, if needs be.
 		if($create_session) {
@@ -71,6 +59,10 @@ class Session {
 			$this->last_activity = "-1";
 			$this->sid_check = $this->Auth_SID();
 		}
+		
+		//create our logging object.
+		$this->logsObj = new logsClass($this->db, 'Authentication');
+		
 	}//end __construct()
 	//##########################################################################
 
@@ -111,6 +103,8 @@ class Session {
 		//  In other words, $this->uid needs to be numeric, or bad things will happen;
 		//  if we can't determine who the user is supposed to be, we'll assume they're
 		//  anonymous.
+		
+		$this->create_cookie(CONFIG_SESSION_NAME, $this->sid);
 	
 		if($_SESSION['uid']) {
 			//self-righting mechanism....
@@ -282,6 +276,10 @@ class Session {
 					//create a record in the session table.
 					if(is_null($this->check_session_idleness())) {
 						$insertRes = $this->insert_session_record();
+						
+						if($retval == 1 && is_array($this->authInfo)) {
+							$this->create_cookie('CS_CONTACT_ID', $this->authInfo['contact_id'], '30 days');
+						}
 					}
 				}
 			}

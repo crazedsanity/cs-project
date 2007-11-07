@@ -226,7 +226,7 @@ else {
 		exit;
 	}
 	elseif($action == "view" && is_numeric($helpdeskId)) {
-		$doNotRipRows = array("edit_form", "info_block", "access_block");
+		$doNotRipRows = array("edit_form", "info_block", "access_block", "associatedUserBlock");
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
 		create_page_title($page, array('title' => "Issue #". $helpdeskId .": \"". $helpdeskData['name'] ."\""));
 		
@@ -376,6 +376,21 @@ else {
 			}
 			$page->add_template_var('issueNotes', $issueNotesRow);
 		}
+		
+		
+		//show the list of associated users.
+		$parsedRow = $page->templateRows['associatedUser_none'];
+		if(is_array($helpdeskData['associatedUsers'])) {
+			$baseRow = $page->templateRows['associatedUser_data'];
+			$parsedRow = "";
+			foreach($helpdeskData['associatedUsers'] as $id => $data) {
+				$displayName = truncate_string($data['fname'] ." ". $data['lname'], 20);
+				$repArr = $data;
+				$repArr['displayName'] = $displayName;
+				$parsedRow .= $page->mini_parser($baseRow, $repArr, '%%', '%%');
+			}
+		}
+		$page->add_template_var('associatedUser_data', $parsedRow);
 		
 	}
 	else {

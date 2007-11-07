@@ -7,7 +7,7 @@
 	<tbody>
 		<tr>
 			<th align="right">Issue Number:</th>
-			<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/extern/helpdesk/view?ID={public_id}">External Link</a></b>]</td>
+			<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/content/helpdesk/view?ID={public_id}">Internal Link</a></b>]</td>
 		</tr>
 		<tr>
 			<th align="right">Customer: </th>
@@ -49,16 +49,26 @@
 		</tr>
 <!-- BEGIN remark_row -->
 		<tr>
-		
-			<td colspan="3">Remark:  <br>
+			<td colspan="3"><h3 style="display:inline">Email:</h3> 
+			
+<!-- BEGIN remark_editEmail -->
+<input type="text" name="email" size="40"></td>
+<!-- END remark_editEmail -->
+<!-- BEGIN remark_showEmail -->
+{displayEmail} <a href="{PHP_SELF}?ID={public_id}&dropCookie=1"> [<font color="red"><b>This is not me</b></font>]</a>
+<!-- END remark_showEmail -->
+		</tr>
+		<tr>
+			<td></td>
+			
+			<td colspan="2">Remark:  <br>
 				<textarea name="remark" rows="8" cols="80"></textarea>
 			</td>
 		</tr>
 		<tr>
-			<td colspan="3"><i>(Changes only take effect when clicking "modify", while "solve" only cares about the solution field, and "remark" only cares about the remarks field.)</i></td>
-		</tr>
-		<tr>
-			<td colspan="3">&nbsp;&nbsp;
+			<td></td>
+						
+			<td colspan="2">&nbsp;&nbsp;
 			<input name="action" value="Remark" type="submit">&nbsp;
 			</td>
 		</tr>

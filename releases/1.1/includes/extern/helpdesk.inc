@@ -12,6 +12,8 @@
 
 $page->set_all_block_rows("header");
 
+$myContactId = $page->session->get_cookie('CS_CONTACT_ID');
+
 if($_POST) {
 	$postAction = strtolower($_POST['action']);
 	if($postAction == "remark") {
@@ -23,6 +25,17 @@ if($_POST) {
 			
 			if(is_array($helpdeskData)) {
 				//okay, so they can still remark.
+				
+				//get information about the user based on the email address...
+				if(strlen($_POST['email'])) {
+					$contactObj = new contactClass($proj->db);
+					$myContactId = $contactObj->get_contact_id_from_email($_POST['email'], TRUE);
+					$page->session->create_cookie('CS_CONTACT_ID', $myContactId);
+					
+					//Add "contact_id" to the session, so the note gets created properly.
+					$_SESSION['contact_id'] = $myContactId;
+				}
+				
 				$result = $proj->helpdeskObj->remark($helpdeskId, $_POST['remark']);
 					
 				//now tell 'em what happened.
@@ -113,6 +126,11 @@ else {
 		conditional_header($GLOBALS['PHP_SELF'] ."?from=re-sort&sortFieldWas=". $_GET['sort']);
 		exit;
 	}
+	elseif($action == 'view' && $_GET['dropCookie']) {
+		$page->session->drop_cookie('CS_CONTACT_ID');
+		$goHere = $_SERVER['PHP_SELF'] .'?ID='. $_GET['ID'] .'&random='. time();
+		$page->conditional_header($goHere, TRUE);
+	}
 	elseif(($action == "view" || $action == "respond") && is_numeric($helpdeskId)) {
 		$htmlTitle = "View Issue #$helpdeskId";
 		$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
@@ -138,6 +156,17 @@ else {
 		
 		//remove all block rows unless they're supposed to be kept... 
 		$doNotRipRows = array();
+		if(is_numeric($page->session->get_cookie('CS_CONTACT_ID'))) {
+			$doNotRipRows[] = 'remark_showEmail';
+			$contactObj = new contactClass($page->db);
+			$contactObj->set_contact_id($page->session->get_cookie('CS_CONTACT_ID'));
+			$data = $contactObj->get_contact();
+			$page->add_template_var('displayEmail', $data['email']);
+		}
+		else {
+			$doNotRipRows[] = 'remark_editEmail';
+		}
+		
 		if(in_array($helpdeskData['status_id'], $GLOBALS['STATUS_NOTENDED'])) {
 			$doNotRipRows[] = 'remark_row';
 		}

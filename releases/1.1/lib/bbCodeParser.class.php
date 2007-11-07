@@ -18,7 +18,7 @@
  * been converted.
  */
 
-require_once(dirname(__FILE__) .'/../cs-content/cs_bbCodeParser.class.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_bbCodeParser.class.php');
 
 class bbCodeParser extends cs_bbCodeParser {
 	

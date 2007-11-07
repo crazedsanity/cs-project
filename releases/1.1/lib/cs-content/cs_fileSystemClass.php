@@ -3,10 +3,10 @@
 /*
  * FILE INFORMATION:
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_fileSystemClass.php $
- * $Id: cs_fileSystemClass.php 170 2007-09-25 22:54:19Z crazedsanity $
- * $LastChangedDate: 2007-09-25 17:54:19 -0500 (Tue, 25 Sep 2007) $
+ * $Id: cs_fileSystemClass.php 214 2007-11-07 17:35:59Z crazedsanity $
+ * $LastChangedDate: 2007-11-07 11:35:59 -0600 (Wed, 07 Nov 2007) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 170 $
+ * $LastChangedRevision: 214 $
  */
 
 require_once(dirname(__FILE__) ."/cs_globalFunctions.php");
@@ -307,11 +307,11 @@ class cs_fileSystemClass extends cs_versionAbstract {
 					$this->closeFile();
 				}
 				else {
-					throw new exception(__METHOD__ .": unable to open specified file");
+					throw new exception(__METHOD__ .": unable to open specified file (". $filename .")");
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .": file is not writable");
+				throw new exception(__METHOD__ .": Cannot truncate, file (". $filename .") is not writable");
 			}
 		}
 		return($retval);
