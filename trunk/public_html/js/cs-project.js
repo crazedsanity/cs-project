@@ -25,16 +25,24 @@ function enableInput(prefixName) {
 	var inputDivName = prefixName + '_inputDiv';
 	
 	
+	
+	if(document.getElementById(inputDivName)) {
+		//make the text disappear.
+		toggleDisplay(textDivName, 'inline');
+	}
+	
+	if(document.getElementById(inputDivName)) {
+		//make the input div appear.
+		//toggleDisplay(inputDivName, 'inline');
+		new Effect.Appear(inputDivName);
+	}
+	
 	//now enable the input.
-	var inputObj = document.getElementById(inputObjName);
-	inputObj.disabled = false;
-	inputObj.style.display = 'inline';
-	
-	//make the text disappear.
-	toggleDisplay(textDivName, 'inline');
-	
-	//make the input div appear.
-	toggleDisplay(inputDivName, 'inline');
+	if(document.getElementById(inputObjName) != null) {
+		var inputObj = document.getElementById(inputObjName);
+		inputObj.disabled = false;
+		inputObj.style.display = 'inline';
+	}
 }
 
 /**
