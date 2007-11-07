@@ -475,17 +475,20 @@ class contactClass extends attributeClass {
 	public function get_contact_id_from_email($email, $autoCreate=TRUE) {
 		$retval = 0;
 		
-		$sql = "SELECT contact_id FROM contact_email_table WHERE email='". strtolower($email) ."'";
-		
-		if($this->run_sql($sql) && $this->lastNumrows == 1) {
-			//Contact exists.
-			$data = $this->db->farray();
-			$retval = $data[0];
-		}
-		else {
-			//no user...
-			if($autoCreate) {
-				$retval = $this->create_contact('autocreated', __METHOD__, $email, '*** AUTOCREATED ***');
+		if(preg_match('/@/', $email) && strlen($email) > 5) {
+			$sql = "SELECT contact_id FROM contact_email_table WHERE email='". strtolower($email) ."'";
+			
+			if($this->run_sql($sql) && $this->lastNumrows == 1) {
+				//Contact exists.
+				$data = $this->db->farray();
+				$retval = $data[0];
+			}
+			else {
+				//no user...
+				if($autoCreate) {
+					$emailBits = explode('@', $email);
+					$retval = $this->create_contact($emailBits[0], __METHOD__, $email, '*** AUTOCREATED ***');
+				}
 			}
 		}
 		
@@ -494,5 +497,6 @@ class contactClass extends attributeClass {
 	//=========================================================================
 	
 	
+	
 }//end contactClass{}
-?>	
+?>
