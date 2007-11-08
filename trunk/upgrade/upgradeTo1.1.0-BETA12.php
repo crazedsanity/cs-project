@@ -4,7 +4,7 @@
  */
 
 
-class upgrade_to_1_1_0_BETA11 extends dbAbstract {
+class upgrade_to_1_1_0_BETA12 extends dbAbstract {
 	
 	//=========================================================================
 	public function __construct(cs_phpDB $db) {
