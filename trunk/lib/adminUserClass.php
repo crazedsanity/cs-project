@@ -168,7 +168,9 @@ class adminUserClass extends userClass {
 	public function get_users(array $criteria=NULL) {
 		
 		//build some SQL.
-		$sql = "SELECT uid, username,contact_get_attribute(contact_id, 'email') AS email from user_table ";
+		$sql = "SELECT u.uid, u.username, ce.email from user_table AS u INNER JOIN " .
+				"contact_table AS c ON (u.contact_id=c.contact_id) INNER JOIN " .
+				"contact_email_table AS ce ON (c.contact_email_id=ce.contact_email_id)";
 		
 		if(!is_null($criteria) && count($criteria)) {
 			//add some criteria.
