@@ -686,8 +686,10 @@ class Session extends cs_session {
 			$this->logUid = $resultSet['id'];
 			
 			//check if we should use an old version of the authentication...
+			$userObj = new userClass($this->db, $resultSet['id']);
+			$checkPass = $userObj->encrypt_pass($password);
 			if(strlen($resultSet['password']) == 32) {
-				if(md5($password .'_'. $resultSet['contact_id']) == $resultSet['password']) {
+				if($checkPass == $resultSet['password']) {
 					//good password.  Good.
 					$retval = 1;
 					$this->authInfo = $resultSet;
