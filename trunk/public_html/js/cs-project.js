@@ -231,3 +231,18 @@ function cs_contactAddEmail(obj) {
 }//end cs_contactAddEmail()
 
 
+/**
+ * The data inside the given div is replaced...
+ */
+function cs_submitButton_processing(buttonDivName) {
+	if(document.getElementById(buttonDivName)) {
+		var buttonObj = document.getElementById(buttonDivName);
+		
+		//remove the data...
+		buttonObj.innerHTML = "<img src='/images/processing.gif' border='0'>";
+	}
+	else {
+		alert("can't find " + buttonDivName + "!");
+	}
+}//end cs_submitButton_processing()
+
