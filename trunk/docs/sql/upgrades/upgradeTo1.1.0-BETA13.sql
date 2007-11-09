@@ -13,7 +13,7 @@ CREATE TABLE auth_token_table (
 	checksum text NOT NULL DEFAULT currval('auth_token_table_auth_token_id_seq'::text),
 	token varchar(32) NOT NULL,
 	creation date NOT NULL DEFAULT CURRENT_DATE,
-	expiration interval NOT NULL DEFAULT '1 day'::interval
+	duration interval NOT NULL DEFAULT '1 day'::interval
 );
 
 SELECT setval('auth_token_table_auth_token_id_seq'::text, 1000)
