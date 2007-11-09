@@ -1710,6 +1710,51 @@ function get_config_db_params() {
 	
 	return($params);
 }//end get_config_db_params()
+
+
+
+
+
+//=============================================================================
+function create_page_title(cs_genericPage &$page, array $parts) {
+	$titleCacheURL = '/pageData/title';
+	$argCacheURL = '/pageData/pieces';
+	
+	if(!isset($page->ui) || get_class($page->ui) != 'sessionCacheClass') {
+		$page->ui = new sessionCache("/userInput/content");
+	}
+	$cachedParts = $page->ui->get_cache($argCacheURL);
+	if(!strlen($parts['module']) || !strlen($parts['title'])) {
+		if(!strlen($parts['module']) && !strlen($cachedParts['module'])) {
+			throw new exception(__METHOD__ .": found cache, but module missing");
+		}
+	}
+
+	if(!strlen($parts['module'])) {
+		$parts['module'] = $cachedParts['module'];
+	}
+	$retval = ucfirst($parts['module']) ."" . " [". PROJ_NAME ."]";
+	if(strlen($parts['title'])) {
+		$retval = ucwords($parts['title']) ." -- ". $retval;
+	}
+	
+	$page->ui->set_cache($argCacheURL, $parts);
+	$page->ui->set_cache($titleCacheURL, $retval);
+	
+	$page->add_template_var('html_title', $retval);
+	
+	return($retval);
+}//end create_page_title();
+//=============================================================================
+
+
+
+//=============================================================================
+function get_page_title(cs_genericPage &$page) {
+	$cacheURL = '/pageData/title';
+	return($page->ui->get_cache($cacheURL));
+}//end get_page_title()
+//=============================================================================
 	
 
 ?>
