@@ -1,0 +1,20 @@
+<?php
+/*
+ * Created on Mar 10, 2006
+ *       by
+ *  Dan Falconer
+ */
+
+
+require_once(dirname(__FILE__) ."/../lib/site_config.php");
+error_reporting(E_ALL ^ E_WARNING);
+$db = new cs_phpDB;
+$db->connect(get_config_db_params());
+$session = new Session($db);
+
+$GLOBALS['DEBUGPRINTOPT'] = DEBUGPRINTOPT;
+
+$contentObj = new contentSystem();
+$contentObj->handle_session($session);
+$contentObj->finish();
+?>
