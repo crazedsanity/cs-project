@@ -85,7 +85,7 @@ class adminUserClass extends userClass {
 			);
 			
 			//good to go: encrypt the password.
-			$data['password'] = $this->encrypt_pass($data['password']);
+			$data['password'] = $this->encrypt_pass($data['password'], $contactId);
 			$sql = "INSERT INTO user_table ". string_from_array($data, 'insert', NULL, $cleanStringArr, TRUE, TRUE);
 			
 			if(!$this->run_sql($sql)) {

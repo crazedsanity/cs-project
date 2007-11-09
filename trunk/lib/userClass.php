@@ -291,12 +291,15 @@ class userClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function encrypt_pass($pass) {
+	public function encrypt_pass($pass, $contactId=NULL) {
 		//encrypt it... 
-		$myInfo = $this->get_user_info($this->uid);
+		if(is_null($contactId) || !is_numeric($contactId)) {
+			$myInfo = $this->get_user_info($this->uid);
+			$contactId = $myInfo['contact_id'];
+		}
 		
-		if(is_numeric($myInfo['contact_id'])) {
-			$retval = md5($pass .'_'. $myInfo['contact_id']);
+		if(is_numeric($contactId)) {
+			$retval = md5($pass .'_'. $contactId);
 		}
 		else {
 			$details = __METHOD__ .": failed to get a useable contact_id for uid=(". $this->uid .")";
