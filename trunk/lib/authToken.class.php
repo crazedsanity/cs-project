@@ -8,15 +8,19 @@
  * Current Revision:::: $Revision$ 
  * Repository Location: $HeadURL$ 
  * Last Updated:::::::: $Date$
+ * 
+ * TODO: test methods to make sure they work!
  */
 
 class authToken extends dbAbstract {
 	
-	
+	protected $gfObj;
 	
 	//=========================================================================
 	public function __construct(cs_phpDB $db) {
 		$this->db = $db;
+		$this->gfObj = new cs_globalFunctions;
+		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
 	}//end __construct()
 	//=========================================================================
 	
@@ -48,9 +52,12 @@ class authToken extends dbAbstract {
 				'token'				=> $tokenValue
 			);
 			
-			$sql = "INSERT INTO auth_token_table ". $this->gfObj->string_from_array($insertArr, 'insert');
+			$sql = "INSERT INTO auth_token_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 			if($this->run_sql($sql)) {
-				$retval = $authTokenId;
+				$retval = array(
+					'id'	=> $authTokenId,
+					'hash'	=> $tokenValue
+				);
 			}
 			else {
 				throw new exception(__METHOD__ .": failed to insert new auth token");
@@ -59,6 +66,8 @@ class authToken extends dbAbstract {
 		else {
 			throw new exception(__METHOD__ .": failed to retrieve next auth_token_id");
 		}
+		
+		return($retval);
 	}//end create_token()
 	//=========================================================================
 	
