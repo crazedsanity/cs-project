@@ -15,6 +15,7 @@
 class authToken extends dbAbstract {
 	
 	protected $gfObj;
+	protected $tokenDuration = NULL;
 	
 	//=========================================================================
 	public function __construct(cs_phpDB $db) {
@@ -51,6 +52,11 @@ class authToken extends dbAbstract {
 				'checksum'			=> $checksum,
 				'token'				=> $tokenValue
 			);
+			
+			//set token duration if non-standard duration set...
+			if(!is_null($this->tokenDuration)) {
+				$insertArr['duration'] = $this->tokenDuration;
+			}
 			
 			$sql = "INSERT INTO auth_token_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 			if($this->run_sql($sql)) {
@@ -123,6 +129,35 @@ class authToken extends dbAbstract {
 		
 		return($retval);
 	}//end authenticate_token()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function set_token_duration($string=NULL) {
+		
+		if(!is_null($string) && preg_match('/ /', $string)) {
+			$retval = FALSE;
+			
+			//ensure the string is valid.
+			$sql = "SELECT '". $this->gfObj->cleanString('sql') ."'::interval";
+			
+			//start transaction, then roll it back (just in case).
+			$this->db->beginTrans(__METHOD__);
+			if($this->run_sql($sql)) {
+				$retval = $this->db->farray();
+				$retval = $retval[0];
+			}
+			$this->db->rollbackTrans(__METHOD__);
+			
+			$this->tokenDuration = $retval;
+		}
+		else {
+			$this->tokenDuration = NULL;
+		}
+		
+		return($retval);
+	}//end set_token_duration()
 	//=========================================================================
 }
 ?>
