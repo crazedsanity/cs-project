@@ -149,13 +149,15 @@ function cs_enableSubmitButton(buttonName, disVal) {
 		var buttonObj = document.getElementById('submitButton');
 	}
 	
-	if(disVal == null || (disVal != true && disVal != false)) {
-		disVal = false;
-	}
+	//if(disVal == null || (disVal != true && disVal != false)) {
+	//	disVal = false;
+	//}
 	
 	if(buttonObj != null && buttonObj.type == 'submit') {
 		buttonObj.disabled = disVal;
 	}
+	
+	return(disVal);
 }//end cs_enableSubmitButton()
 
 
@@ -245,4 +247,47 @@ function cs_submitButton_processing(buttonDivName) {
 		alert("can't find " + buttonDivName + "!");
 	}
 }//end cs_submitButton_processing()
+
+
+function lostPassword_validate() {
+	//document.print("checking... " + time());
+	//var dateObj = new Date();
+	//document.write("checking... " + dateObj.getMilliseconds());
+	//clearInterval();
+	
+	var hashObj = document.getElementById('hashInput');
+	var usernameObj = document.getElementById('usernameInput');
+	var debugObj = document.getElementById('debug');
+	
+	var buttonShouldBe = "";
+	var enableVal = "";
+	var showEnableVal = "";
+	
+	//alert(hashObj.toString());
+	
+	if(hashObj != null && usernameObj != null) {
+		//check that the hash is 32 characters long.
+		if(hashObj.value.length == 32 && usernameObj.value.length > 3) {
+			buttonShouldBe = 'enabled';
+			enableVal = cs_enableSubmitButton();
+		}
+		else {
+			buttonShouldBe = 'DISabled';
+			enableVal = cs_enableSubmitButton(null, true);
+		}
+		
+		showEnableVal = "FALSE";
+		if(enableVal == true) {
+			showEnableVal = "true";
+		}
+	}
+	
+	debugObj.innerHTML = "HASH VALUE: " + hashObj.value + "<br>\nLENGTH: " + hashObj.value.length
+		+ "<hr>Username Value: " + usernameObj.value + "<br>\nLENGTH: " + usernameObj.value.length
+		+ "<hr>Button should be: " + buttonShouldBe + "<br>\nButton REALLY IS " + enableVal;
+	
+	//debugObj.innerHTML = info + hashObj.toString();
+	//clearInterval();
+	
+}//end lostPassword_validate()
 
