@@ -8,6 +8,10 @@ $page->add_template_var('cs-project_version', VERSION_STRING);
 $page->clear_content('infobar');
 
 
+$db = new cs_phpDB;
+$db->connect(get_config_db_params());
+$page->db = &$db;
+
 
 #$titlePart = NULL;
 $titlePart = "Help";
