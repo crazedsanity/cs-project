@@ -5,7 +5,7 @@
  * TODO: use CAPTCHA to avoid automated username harvesting...
  */
 
-
+$doNotRipRows = array();
 if($_POST) {
 	
 	switch($_POST['action']) {
@@ -21,14 +21,11 @@ if($_POST) {
 					$contactObj->set_contact_id($info['contact_id']);
 					$myData = $contactObj->get_contact();
 					
-					debug_print($myData);
-					
 					//now let's build the authToken.
 					$atObj = new authToken($page->db);
 					
 					$atObj->db->beginTrans();
 					$myTokenData = $atObj->create_token($myData['contact_id'], $myData['email'], $myData['username']);
-					debug_print($myTokenData);
 					
 					//now that we've got what we need, send an email.
 					$page->add_template_file('__passTmpl', 'email/lost_password.tmpl');
@@ -85,6 +82,18 @@ if($_POST) {
 }
 else {
 	//TODO: handle tokens.
+	
+	
+	if(isset($_GET['validate']) && is_numeric($_GET['validate'])) {
+		$page->add_template_var('HTMLBODY_EXTRA', 'onLoad="javascript:void(setInterval(\'lostPassword_validate()\', 300));"');
+		$atObj = new authToken($page->db);
+		$doNotRipRows[] = 'authenticateRequest';
+	}
+	else {
+		$doNotRipRows[] = 'newSubmission';
+	}
 }
+
+$page->set_all_block_rows('content', $doNotRipRows);
 
 ?>
