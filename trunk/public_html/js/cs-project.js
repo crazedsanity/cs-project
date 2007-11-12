@@ -256,7 +256,7 @@ function lostPassword_validate() {
 	//clearInterval();
 	
 	var hashObj = document.getElementById('hashInput');
-	var usernameObj = document.getElementById('usernameInput');
+	var checksumObj = document.getElementById('checksumInput');
 	var debugObj = document.getElementById('debug');
 	
 	var buttonShouldBe = "";
@@ -265,9 +265,9 @@ function lostPassword_validate() {
 	
 	//alert(hashObj.toString());
 	
-	if(hashObj != null && usernameObj != null) {
+	if(hashObj != null && checksumObj != null) {
 		//check that the hash is 32 characters long.
-		if(hashObj.value.length == 32 && usernameObj.value.length > 3) {
+		if(hashObj.value.length == 32 && checksumObj.value.length > 3) {
 			buttonShouldBe = 'enabled';
 			enableVal = cs_enableSubmitButton();
 		}
@@ -283,7 +283,7 @@ function lostPassword_validate() {
 	}
 	
 	debugObj.innerHTML = "HASH VALUE: " + hashObj.value + "<br>\nLENGTH: " + hashObj.value.length
-		+ "<hr>Username Value: " + usernameObj.value + "<br>\nLENGTH: " + usernameObj.value.length
+		+ "<hr>checksum Value: " + checksumObj.value + "<br>\nLENGTH: " + checksumObj.value.length
 		+ "<hr>Button should be: " + buttonShouldBe + "<br>\nButton REALLY IS " + enableVal;
 	
 	//debugObj.innerHTML = info + hashObj.toString();
