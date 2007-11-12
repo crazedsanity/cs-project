@@ -12,16 +12,20 @@
  * TODO: test methods to make sure they work!
  */
 
+//TODO: log everything!
+
 class authToken extends dbAbstract {
 	
 	protected $gfObj;
 	protected $tokenDuration = NULL;
+	protected $logsObj;
 	
 	//=========================================================================
 	public function __construct(cs_phpDB $db) {
 		$this->db = $db;
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
+		$this->logsObj = new logsClass($this->db, 'Authentication Token');
 	}//end __construct()
 	//=========================================================================
 	
@@ -93,6 +97,7 @@ class authToken extends dbAbstract {
 	 * Destroy tokens that have gone past their expiration.
 	 */
 	public function expire_tokens() {
+		//TODO: log each destroyed token individually
 		$sql = "DELETE FROM auth_token_table WHERE (creation + duration) < CURRENT_DATE;";
 		$this->run_sql($sql);
 		
@@ -103,23 +108,39 @@ class authToken extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function authenticate_token($tokenId, $hash, $checksum, $stringToHash=NULL) {
+	/**
+	 * Determine if a token is authentic: the id is used to make the search as 
+	 * fast as possible, while the hash & checksum are given to compare against.
+	 * Failure results in FALSE, while success returns the contact_id for the
+	 * given token.
+	 * 
+	 * NOTE: the calling program can leave it to this method to say if the 
+	 * token is authentic, or use a checksum which can in turn be used to get 
+	 * a specific contact_id; when they authenticate, the return of this 
+	 * method must then match the contact_id retrieved from the checksum...
+	 * 
+	 * EXAMPLE:
+	 * $tokenContactId = authToken::authenticate_token($tokenId, $hash, $checksum);
+	 * $realContactId = contactClass::get_contact_id_from_email($checksum);
+	 * if($tokenContactId == $realContactId) {
+	 * 		//token is truly authentic
+	 * }
+	 */
+	public function authenticate_token($tokenId, $hash, $checksum) {
 		$retval = FALSE;
 		
 		//pull the record for this token.
 		$sql = "SELECT at.* FROM auth_token_table AS at INNER JOIN contact_table " .
-				"AS c ON (c.contact_id=at.contact_id) WHERE token_id=". $tokenId ." AND " .
+				"AS c ON (c.contact_id=at.contact_id) WHERE auth_token_id=". $tokenId ." AND " .
 				"(creation + duration)::date >= CURRENT_DATE";
 		if($this->run_sql($sql)) {
 			if($this->lastNumrows == 1) {
 				//we've got the record information.
-				$record = $this->db->farray();
-				$data = $record[0];
+				$record = $this->db->farray_fieldnames();
 				
-				//create a hash from the data, see if it matches the record data.
-				$derivedHash = $this->create_hash_string($tokenId, $data['contact_id'], $data['checksum'], $stringToHash);
-				if($derivedHash == $data['token']) {
-					$retval = TRUE;
+				if($hash == $record['token'] && $checksum == $record['checksum']) {
+					$retval = $record['contact_id'];
+					debug_print(__METHOD__ .": returning (". $retval .")");
 				}
 			}
 			else {
@@ -158,6 +179,14 @@ class authToken extends dbAbstract {
 		
 		return($retval);
 	}//end set_token_duration()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function destroy_token($tokenId) {
+		
+	}//end destroy_token()
 	//=========================================================================
 }
 ?>
