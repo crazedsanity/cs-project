@@ -184,8 +184,36 @@ class authToken extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function destroy_token($tokenId) {
+	public function token_exists($tokenId) {
+		$retval = FALSE;
+		if(!is_null($tokenId) && is_numeric($tokenId)) {
+			$sql = "SELECT * FROM auth_token_table WHERE auth_token_id=". $tokenId;
+			if($this->run_sql($sql) && $this->lastNumrows == 1) {
+				$retval = TRUE;
+			}
+		}
 		
+		return($retval);
+	}//end token_exists()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function destroy_token($tokenId) {
+		$retval = FALSE;
+		if(!is_null($tokenId) && is_numeric($tokenId)) {
+			$this->db->beginTrans(__METHOD__);
+			$sql = "DELETE FROM auth_token_table WHERE auth_token_id=". $tokenId;
+			if($this->run_sql($sql) && $this->lastNumrows == 1) {
+				$this->commitTrans(__METHOD__);
+			}
+			else {
+				$this->rollbackTrans(__METHOD__);
+			}
+		}
+		
+		return($retval);
 	}//end destroy_token()
 	//=========================================================================
 }
