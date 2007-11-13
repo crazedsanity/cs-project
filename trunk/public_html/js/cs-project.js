@@ -1,13 +1,26 @@
 
 
 
-function toggleDisplay(obj, oldDisplay) {
-	var el = document.getElementById(obj);
-	var newDisplay = oldDisplay;
-	
-	if(el.style.display != 'none') {
-		el.style.display = 'none';
-	} else {
+function toggleDisplay(obj) {
+	if(obj != null) {
+		//check if "obj" is an object or just a string.
+		if(obj != null && typeof(obj) == 'object') {
+			var el = obj;
+		}
+		else {
+			var el = document.getElementById(obj);
+		}
+		
+		var oldDisplay = el.style.display;
+		
+		
+		if(oldDisplay == 'none') {
+			var newDisplay = 'inline';
+		}
+		else {
+			var newDisplay = 'none';
+		}
+		
 		el.style.display = newDisplay;
 	}
 }
@@ -237,15 +250,21 @@ function cs_contactAddEmail(obj) {
  * The data inside the given div is replaced...
  */
 function cs_submitButton_processing(buttonDivName) {
-	if(document.getElementById(buttonDivName)) {
-		var buttonObj = document.getElementById(buttonDivName);
+	
+	var buttonDivObj = document.getElementById(buttonDivName + '_button');
+	var imageDivObj  = document.getElementById(buttonDivName + '_image');
+	
+	if(buttonDivObj != null && imageDivObj != null) {
+		//buttonDivObj.style.display = 'none';
+		//imageDivObj.style.display = 'inline';
 		
-		//remove the data...
-		buttonObj.innerHTML = "<img src='/images/processing.gif' border='0'>";
+		toggleDisplay(buttonDivObj, 'none');
+		toggleDisplay(imageDivObj, 'inline');
 	}
 	else {
-		alert("can't find " + buttonDivName + "!");
+		alert("at least one object is null::: " + buttonDivObj + imageDivObj);
 	}
+	
 }//end cs_submitButton_processing()
 
 
@@ -262,12 +281,25 @@ function lostPassword_validate() {
 	var buttonShouldBe = "";
 	var enableVal = "";
 	var showEnableVal = "";
+	var passMatchText = "not checked...";
+	var passMatch = false;
+	
+	var passCheckObj = document.getElementById('password');
+	var passConfirmObj = document.getElementById('passwordConfirm');
 	
 	//alert(hashObj.toString());
 	
-	if(hashObj != null && checksumObj != null) {
+	if(hashObj != null && checksumObj != null && passCheckObj != null && passConfirmObj != null) {
+		
+		passMatchText = "do not match";
+		passMatch = false;
+		if(passCheckObj.value == passConfirmObj.value) {
+			passMatchText = "<b>match</b>";
+			passMatch = true;
+		}
+		
 		//check that the hash is 32 characters long.
-		if(hashObj.value.length == 32 && checksumObj.value.length > 3) {
+		if(hashObj.value.length == 32 && checksumObj.value.length > 3 && passMatch == true) {
 			buttonShouldBe = 'enabled';
 			enableVal = cs_enableSubmitButton();
 		}
@@ -284,10 +316,21 @@ function lostPassword_validate() {
 	
 	debugObj.innerHTML = "HASH VALUE: " + hashObj.value + "<br>\nLENGTH: " + hashObj.value.length
 		+ "<hr>checksum Value: " + checksumObj.value + "<br>\nLENGTH: " + checksumObj.value.length
-		+ "<hr>Button should be: " + buttonShouldBe + "<br>\nButton REALLY IS " + enableVal;
+		+ "<hr>Button should be: " + buttonShouldBe + "<br>\nButton REALLY IS " + enableVal 
+		+ "<hr>Passwords: " + passMatchText;
 	
 	//debugObj.innerHTML = info + hashObj.toString();
 	//clearInterval();
 	
 }//end lostPassword_validate()
+
+
+function cs_confirmLostPass() {
+	cs_submitButton_processing('submitRequest');
+	var hashInputObj = document.getElementById('hashInput');
+	var checksumInputObj = document.getElementById('checksumInput');
+	
+	hashInputObj.readonly = true;
+	checksumInputObj.readonly = true;
+}//end cs_confirmLostPass()
 
