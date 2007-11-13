@@ -310,5 +310,28 @@ class userClass extends dbAbstract {
 	}//end encrypt_pass()
 	//=========================================================================
 	
+	
+	
+	//=========================================================================
+	public function uid_from_contact_id($contactId) {
+		if(!is_null($contactId) && is_numeric($contactId)) {
+			$sql = "SELECT uid FROM user_table WHERE contact_id=". $contactId;
+			if($this->run_sql($sql) && $this->lastNumrows == 1) {
+				$data = $this->db->farray();
+				$retval = $data[0];
+				$this->uid = $retval;
+			}
+			else {
+				$details = __METHOD__ .": failed to retrieve a uid for contact_id=". $contactId;
+			}
+		}
+		else {
+			$details = __METHOD__ .": invalid contactId (". $contactId .")";
+		}
+		
+		return($retval);
+	}//end uid_from_contact_id()
+	//=========================================================================
+	
 }//end userClass{}
 ?>
