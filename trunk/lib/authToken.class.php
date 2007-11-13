@@ -58,8 +58,10 @@ class authToken extends dbAbstract {
 			);
 			
 			//set token duration if non-standard duration set...
+			$logsExtra = "";
 			if(!is_null($this->tokenDuration)) {
 				$insertArr['duration'] = $this->tokenDuration;
+				$logsExtra = " with duration of '". $this->tokenDuration ."'";
 			}
 			
 			$sql = "INSERT INTO auth_token_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
@@ -68,13 +70,18 @@ class authToken extends dbAbstract {
 					'id'	=> $authTokenId,
 					'hash'	=> $tokenValue
 				);
+				$this->logsObj->log_by_class("Created token #". $authTokenId ." for [contact_id=". $contactId ."]". $logsExtra, 'create');
 			}
 			else {
-				throw new exception(__METHOD__ .": failed to insert new auth token");
+				$details = __METHOD__ .": failed to insert new auth token";
+				$this->logsObj->log_dberror($details);
+				throw new exception($details);
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": failed to retrieve next auth_token_id");
+			$details = __METHOD__ .": failed to retrieve next auth_token_id";
+			$this->logsObj->log_dberror($details);
+			throw new exception($details);
 		}
 		
 		return($retval);
@@ -98,8 +105,19 @@ class authToken extends dbAbstract {
 	 */
 	public function expire_tokens() {
 		//TODO: log each destroyed token individually
-		$sql = "DELETE FROM auth_token_table WHERE (creation + duration) < CURRENT_DATE;";
-		$this->run_sql($sql);
+		$sql = "SELECT * FROM auth_token_table WHERE (creation + duration) < CURRENT_DATE;";
+		$retval = 0;
+		if($this->run_sql($sql) && $this->lastNumrows > 0) {
+			$allRecords = $this->db->farray_fieldnames('auth_token_id');
+			foreach($allRecords as $tokenId => $data) {
+				//log information about the token.
+				$details = "Destroyed auth_token_id=". $tokenId ." for [contact_id=". $data['contact_id'] ."] " .
+						"with result=(". $this->destroy_token($tokenId) .")";
+				$this->logsObj->log_by_class($details, 'delete');
+				$retval++;
+			}
+			$this->logsObj->log_by_class("Expired ". $retval ." tokens", 'report');
+		}
 		
 		return($this->lastNumrows);
 	}//end expire_tokens()
@@ -141,10 +159,17 @@ class authToken extends dbAbstract {
 				if($hash == $record['token'] && $checksum == $record['checksum']) {
 					$retval = $record['contact_id'];
 					debug_print(__METHOD__ .": returning (". $retval .")");
+					$details = "Successfully authenticated token #". $tokenId ." for [contact_id=". $retval ."]";
 				}
+				else {
+					$details = "FAILED to authenticate token #". $tokenId ." for [contact_id=". $retval ."]";
+				}
+				$this->logsObj->log_by_class($details, 'information');
 			}
 			else {
-				throw new exception(__METHOD__ .": too many tokens retrieved: database is insane!");
+				$details = __METHOD__ .": too many tokens retrieved: database is insane!";
+				$this->logsObj->log_dberror($details);
+				throw new exception($details);
 			}
 		}
 		
@@ -191,6 +216,9 @@ class authToken extends dbAbstract {
 			if($this->run_sql($sql) && $this->lastNumrows == 1) {
 				$retval = TRUE;
 			}
+			else {
+				$this->logsObj->log_by_class("Invalid token requested (". $tokenId .")");
+			}
 		}
 		
 		return($retval);
@@ -206,10 +234,12 @@ class authToken extends dbAbstract {
 			$this->db->beginTrans(__METHOD__);
 			$sql = "DELETE FROM auth_token_table WHERE auth_token_id=". $tokenId;
 			if($this->run_sql($sql) && $this->lastNumrows == 1) {
-				$this->commitTrans(__METHOD__);
+				$this->db->commitTrans(__METHOD__);
+				$retval = TRUE;
 			}
 			else {
-				$this->rollbackTrans(__METHOD__);
+				$this->db->rollbackTrans(__METHOD__);
+				$retval = FALSE;
 			}
 		}
 		
