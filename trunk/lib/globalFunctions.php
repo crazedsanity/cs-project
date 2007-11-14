@@ -1754,7 +1754,7 @@ function send_single_email($toAddr, $subject, $body) {
 	if(!$mail->Send()) {
 		throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
 	}
-	$toAddr = array($toAddr);
+	return($toAddr);
 }//end send_single_email()
 //=============================================================================
 	
