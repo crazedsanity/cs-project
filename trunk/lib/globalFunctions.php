@@ -1417,6 +1417,10 @@ function create_date_string() {
 /**
  */
 function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
+	if(!strlen(constant('PHPMAILER_METHOD')) || 
+	(constant('PHPMAILER_METHOD') == 'IsSMTP' && !strlen(constant('PHPMAILER_HOST')))) {
+		throw new exception(__METHOD__ .": missing constant for method or host");
+	}
 	if(!ISDEVSITE) {
 		//pre-check on the $toAddr.
 		$precheck = FALSE;
@@ -1495,45 +1499,12 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
-				$mail = new PHPMailer();
-				$mail->SetLanguage("en");
-				$mail->IsSMTP();
-				$mail->Host = CONFIG_EMAIL_SERVER_IP;
-				
-				//TODO: have this a configurable option: eventually, we could have something that automatically checks that mailbox.
-				$mail->From = "cs-project__DO_NOT_REPLY";
-				$mail->FromName = PROJ_NAME ." Notice";
-				$mail->AddAddress($emailAddr);
-				$mail->ContentType = "text/html";
-				$mail->Subject = $subject;
-				$mail->WordWrap = 75;
-				$mail->Body = $bbCodeParser->parseString($body);
-				if(!$mail->Send()) {
-					throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
-				}
-				unset($mail);
+				$retval = create_list($retval, send_single_email($emailAddr, $subject, $body));
 			}
 		}
 		else {
-			$mail = new PHPMailer();
-			$mail->SetLanguage("en");
-			$mail->IsSMTP();
-			$mail->Host = CONFIG_EMAIL_SERVER_IP;
-			$mail->From = "cs-project__DO_NOT_REPLY";
-			$mail->FromName = PROJ_NAME ." Notice";
-			$mail->AddAddress($toAddr);
-			$mail->ContentType = "text/html";
-			$mail->Subject = $subject;
-			$mail->WordWrap = 75;
-			$mail->Body = $bbCodeParser->parseString($body);
-			if(!$mail->Send()) {
-				throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
-			}
-			$toAddr = array($toAddr);
+			$retval = send_single_email($toAddr, $subject, $body);
 		}
-		
-		//give 'em the list we sent the message to.
-		$retval = string_from_array($toAddr);
 	}
 	else {
 		//tell 'em what happened.
@@ -1754,6 +1725,36 @@ function get_page_title(cs_genericPage &$page) {
 	$cacheURL = '/pageData/title';
 	return($page->ui->get_cache($cacheURL));
 }//end get_page_title()
+//=============================================================================
+
+
+
+//=============================================================================
+/**
+ * Send an email to a single address with no special parsing.
+ */
+function send_single_email($toAddr, $subject, $body) {
+	$mail = new PHPMailer();
+	$mail->SetLanguage("en");
+	$mail->IsSendmail();
+	
+	$methodName = PHPMAILER_METHOD;
+	$mail->$methodName();
+	if(strlen(PHPMAILER_HOST)) {
+		$mail->Host = PHPMAILER_HOST;
+	}
+	$mail->From = "cs-project__DO_NOT_REPLY";
+	$mail->FromName = PROJ_NAME ." Notice";
+	$mail->AddAddress($toAddr);
+	$mail->ContentType = "text/html";
+	$mail->Subject = $subject;
+	$mail->Body = $bbCodeParser->parseString($body);
+	$mail->WordWrap = 75;
+	if(!$mail->Send()) {
+		throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
+	}
+	$toAddr = array($toAddr);
+}//end send_single_email()
 //=============================================================================
 	
 
