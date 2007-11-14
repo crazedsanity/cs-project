@@ -40,6 +40,13 @@ class upgrade_to_1_1_0_BETA13 extends dbAbstract {
 	
 	//=========================================================================
 	private function run_schema_changes() {
+		
+		$this->gfObj->debug_print(__METHOD__ .": running SQL file...");
+		$this->run_sql_file(dirname(__FILE__) .'/../docs/sql/upgrades/upgradeTo1.1.0-BETA13.sql');
+		
+		$details = "Executed SQL file, '". $this->lastSQLFile ."'.  Encoded contents::: ". 
+			base64_encode($this->fsObj->read($this->lastSQLFile));
+		$this->logsObj->log_by_class($details, 'system');
 	}//end run_schema_changes()
 	//=========================================================================
 	
@@ -51,43 +58,29 @@ class upgrade_to_1_1_0_BETA13 extends dbAbstract {
 		$fs = new cs_fileSystemClass;
 		$configFile = dirname(__FILE__) ."/../lib/config.xml";
 		$configContents = $fs->read($configFile);
+		
+		$encodedContents = base64_encode($configContents);
 		$xmlObj = new XMLParser($configContents);
 		
 		$myData = $xmlObj->get_tree();
-		$removeIndexes = array();
-		foreach($myData['CONFIG'] as $index=>$stuff) {
-			if(preg_match('/^LOGCAT__/', $index) || preg_match('/^RECTYPE__/', $index)) {
-				debug_print(__METHOD__ .": removing index (". $index .")");
-				$removeIndexes[] = $index;
-			}
-		}
 		
-		if(count($removeIndexes)) {
-			$xmlCreator = new XMLCreator('CONFIG', NULL);
-			$xmlCreator->load_xmlparser_data($xmlObj);
-			
-			foreach($removeIndexes as $num=>$name) {
-				debug_print(__METHOD__ .": removing #". $num .", name=(". $name .")");
-				$oldValue = $myData['CONFIG'][$name]['value'];
-				$xmlCreator->remove_path('/CONFIG/'. $name);
-				$this->logsObj->log_by_class(__METHOD__ .": removing index (". $name ."), old value=(". $oldValue .")", 'system');
-			}
-			$details = "Removed ". count($removeIndexes) ." unneeded config indexes";
-			$this->logsObj->log_by_class($details, 'system');
-			$newXmlConfig = $xmlCreator->create_xml_string();
-			debug_print(cleanString($newXmlConfig, 'htmlentity'));
-			
-			$fs->closeFile();
-			$fs->create_file($configFile, TRUE);
-			$fs->openFile($configFile);
-			$retval = $fs->write($newXmlConfig, $configFile);
-			$this->logsObj->log_by_class("Wrote new config file (". $retval .")", 'system');
-		}
-		else {
-			$details = "No indexes removed";
-			$this->logsObj->log_by_class($details, 'system');
-		}
-		debug_print(__METHOD__ .": ". $details);
+		$xmlCreator = new XMLCreator('CONFIG', NULL);
+		$xmlCreator->load_xmlparser_data($xmlObj);
+		
+		$oldHost = $myData['CONFIG_EMAIL_SERVER_IP'];
+		$xmlCreator->remove_path('/CONFIG/CONFIG_EMAIL_SERVER_IP');
+		$xmlCreator->add_tag('/CONFIG/PHPMAILER_HOST', $oldHost);
+		$xmlCreator->add_tag('/CONFIG/PHPMAILER_METHOD', 'IsSMTP');
+		
+		
+		$newXmlConfig = $xmlCreator->create_xml_string();
+		debug_print(cleanString($newXmlConfig, 'htmlentity'));
+		
+		$fs->closeFile();
+		$fs->create_file($configFile, TRUE);
+		$fs->openFile($configFile);
+		$retval = $fs->write($newXmlConfig, $configFile);
+		$this->logsObj->log_by_class("Wrote new config file (". $retval .")", 'system');
 		
 	}//end rewrite_config_file()
 	//=========================================================================
