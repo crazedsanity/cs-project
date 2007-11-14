@@ -1489,13 +1489,6 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$contentType = "html";
 		}
 		
-		//in order to parse special BBCode, gotta create a lot of objects.
-		$db = new cs_phpDB;
-		$db->connect(get_config_db_params());
-		$proj = new projectClass($db);
-		$help = new helpdeskClass($db);
-		$bbCodeParser = new bbCodeParser($proj, $help);
-		
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
@@ -1734,6 +1727,14 @@ function get_page_title(cs_genericPage &$page) {
  * Send an email to a single address with no special parsing.
  */
 function send_single_email($toAddr, $subject, $body) {
+		
+	//in order to parse special BBCode, gotta create a lot of objects.
+	$db = new cs_phpDB;
+	$db->connect(get_config_db_params());
+	$proj = new projectClass($db);
+	$help = new helpdeskClass($db);
+	$bbCodeParser = new bbCodeParser($proj, $help);
+	
 	$mail = new PHPMailer();
 	$mail->SetLanguage("en");
 	$mail->IsSendmail();
@@ -1743,7 +1744,7 @@ function send_single_email($toAddr, $subject, $body) {
 	if(strlen(PHPMAILER_HOST)) {
 		$mail->Host = PHPMAILER_HOST;
 	}
-	$mail->From = "cs-project__DO_NOT_REPLY";
+	$mail->From = "cs-project__DO_NOT_REPLY@". PROJECT_URL;
 	$mail->FromName = PROJ_NAME ." Notice";
 	$mail->AddAddress($toAddr);
 	$mail->ContentType = "text/html";
