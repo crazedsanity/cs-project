@@ -16,6 +16,9 @@ class upgrade_to_1_1_0_BETA13 extends dbAbstract {
 		$this->db = $db;
 		
 		$this->logsObj = new logsClass($this->db, 'Upgrade');
+		
+		$this->gfObj = new cs_globalFunctions;
+		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
 	}//end __construct()
 	//=========================================================================
 	
@@ -62,19 +65,18 @@ class upgrade_to_1_1_0_BETA13 extends dbAbstract {
 		$encodedContents = base64_encode($configContents);
 		$xmlObj = new XMLParser($configContents);
 		
-		$myData = $xmlObj->get_tree();
+		$myData = $xmlObj->get_tree(TRUE);
 		
 		$xmlCreator = new XMLCreator('CONFIG', NULL);
 		$xmlCreator->load_xmlparser_data($xmlObj);
 		
-		$oldHost = $myData['CONFIG_EMAIL_SERVER_IP'];
+		$oldHost = $myData['CONFIG']['CONFIG_EMAIL_SERVER_IP'];
 		$xmlCreator->remove_path('/CONFIG/CONFIG_EMAIL_SERVER_IP');
 		$xmlCreator->add_tag('/CONFIG/PHPMAILER_HOST', $oldHost);
 		$xmlCreator->add_tag('/CONFIG/PHPMAILER_METHOD', 'IsSMTP');
 		
 		
 		$newXmlConfig = $xmlCreator->create_xml_string();
-		debug_print(cleanString($newXmlConfig, 'htmlentity'));
 		
 		$fs->closeFile();
 		$fs->create_file($configFile, TRUE);
