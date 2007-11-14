@@ -1417,6 +1417,10 @@ function create_date_string() {
 /**
  */
 function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
+	if(!strlen(constant('PHPMAILER_METHOD')) || 
+	(constant('PHPMAILER_METHOD') == 'IsSMTP' && !strlen(constant('PHPMAILER_HOST')))) {
+		throw new exception(__METHOD__ .": missing constant for method or host");
+	}
 	if(!ISDEVSITE) {
 		//pre-check on the $toAddr.
 		$precheck = FALSE;
@@ -1485,55 +1489,15 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 			$contentType = "html";
 		}
 		
-		//in order to parse special BBCode, gotta create a lot of objects.
-		$db = new cs_phpDB;
-		$db->connect(get_config_db_params());
-		$proj = new projectClass($db);
-		$help = new helpdeskClass($db);
-		$bbCodeParser = new bbCodeParser($proj, $help);
-		
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
-				$mail = new PHPMailer();
-				$mail->SetLanguage("en");
-				$mail->IsSMTP();
-				$mail->Host = CONFIG_EMAIL_SERVER_IP;
-				
-				//TODO: have this a configurable option: eventually, we could have something that automatically checks that mailbox.
-				$mail->From = "cs-project__DO_NOT_REPLY";
-				$mail->FromName = PROJ_NAME ." Notice";
-				$mail->AddAddress($emailAddr);
-				$mail->ContentType = "text/html";
-				$mail->Subject = $subject;
-				$mail->WordWrap = 75;
-				$mail->Body = $bbCodeParser->parseString($body);
-				if(!$mail->Send()) {
-					throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
-				}
-				unset($mail);
+				$retval = create_list($retval, send_single_email($emailAddr, $subject, $body));
 			}
 		}
 		else {
-			$mail = new PHPMailer();
-			$mail->SetLanguage("en");
-			$mail->IsSMTP();
-			$mail->Host = CONFIG_EMAIL_SERVER_IP;
-			$mail->From = "cs-project__DO_NOT_REPLY";
-			$mail->FromName = PROJ_NAME ." Notice";
-			$mail->AddAddress($toAddr);
-			$mail->ContentType = "text/html";
-			$mail->Subject = $subject;
-			$mail->WordWrap = 75;
-			$mail->Body = $bbCodeParser->parseString($body);
-			if(!$mail->Send()) {
-				throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
-			}
-			$toAddr = array($toAddr);
+			$retval = send_single_email($toAddr, $subject, $body);
 		}
-		
-		//give 'em the list we sent the message to.
-		$retval = string_from_array($toAddr);
 	}
 	else {
 		//tell 'em what happened.
@@ -1710,6 +1674,89 @@ function get_config_db_params() {
 	
 	return($params);
 }//end get_config_db_params()
+
+
+
+
+
+//=============================================================================
+function create_page_title(cs_genericPage &$page, array $parts) {
+	$titleCacheURL = '/pageData/title';
+	$argCacheURL = '/pageData/pieces';
+	
+	if(!isset($page->ui) || get_class($page->ui) != 'sessionCacheClass') {
+		$page->ui = new sessionCache("/userInput/content");
+	}
+	$cachedParts = $page->ui->get_cache($argCacheURL);
+	if(!strlen($parts['module']) || !strlen($parts['title'])) {
+		if(!strlen($parts['module']) && !strlen($cachedParts['module'])) {
+			throw new exception(__METHOD__ .": found cache, but module missing");
+		}
+	}
+
+	if(!strlen($parts['module'])) {
+		$parts['module'] = $cachedParts['module'];
+	}
+	$retval = ucfirst($parts['module']) ."" . " [". PROJ_NAME ."]";
+	if(strlen($parts['title'])) {
+		$retval = ucwords($parts['title']) ." -- ". $retval;
+	}
+	
+	$page->ui->set_cache($argCacheURL, $parts);
+	$page->ui->set_cache($titleCacheURL, $retval);
+	
+	$page->add_template_var('html_title', $retval);
+	
+	return($retval);
+}//end create_page_title();
+//=============================================================================
+
+
+
+//=============================================================================
+function get_page_title(cs_genericPage &$page) {
+	$cacheURL = '/pageData/title';
+	return($page->ui->get_cache($cacheURL));
+}//end get_page_title()
+//=============================================================================
+
+
+
+//=============================================================================
+/**
+ * Send an email to a single address with no special parsing.
+ */
+function send_single_email($toAddr, $subject, $body) {
+		
+	//in order to parse special BBCode, gotta create a lot of objects.
+	$db = new cs_phpDB;
+	$db->connect(get_config_db_params());
+	$proj = new projectClass($db);
+	$help = new helpdeskClass($db);
+	$bbCodeParser = new bbCodeParser($proj, $help);
+	
+	$mail = new PHPMailer();
+	$mail->SetLanguage("en");
+	$mail->IsSendmail();
+	
+	$methodName = PHPMAILER_METHOD;
+	$mail->$methodName();
+	if(strlen(PHPMAILER_HOST)) {
+		$mail->Host = PHPMAILER_HOST;
+	}
+	$mail->From = "cs-project__DO_NOT_REPLY@". PROJECT_URL;
+	$mail->FromName = PROJ_NAME ." Notice";
+	$mail->AddAddress($toAddr);
+	$mail->ContentType = "text/html";
+	$mail->Subject = $subject;
+	$mail->Body = $bbCodeParser->parseString($body);
+	$mail->WordWrap = 75;
+	if(!$mail->Send()) {
+		throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
+	}
+	return($toAddr);
+}//end send_single_email()
+//=============================================================================
 	
 
 ?>

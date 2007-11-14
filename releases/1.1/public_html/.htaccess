@@ -15,3 +15,6 @@ DirectoryIndex content content.php index.php index.html
 <files project>
     ForceType application/x-httpd-php
 </files>
+<files help>
+    ForceType application/x-httpd-php
+</files>

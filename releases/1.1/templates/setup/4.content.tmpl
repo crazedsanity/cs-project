@@ -39,7 +39,10 @@
 	
 	<tr>
 		<th nowrap>Mail Server IP</th>
-		<td><input type="text" name="fields[config_email_server_ip]" value="{config_email_server_ip}" size="40"></td>
+		<td>
+			<input type="text" name="fields[phpmailer_host]" value="{phpmailer_host}" size="40">
+			<input type="HIDDEN" name="fields[phpmailer_method]" value="IsSMTP">
+		</td>
 		<td>This should be the IP of your mailserver, like <i>127.0.0.1</i>...</td>
 	</tr>
 

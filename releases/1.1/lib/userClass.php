@@ -291,12 +291,15 @@ class userClass extends dbAbstract {
 	
 	
 	//=========================================================================
-	public function encrypt_pass($pass) {
+	public function encrypt_pass($pass, $contactId=NULL) {
 		//encrypt it... 
-		$myInfo = $this->get_user_info($this->uid);
+		if(is_null($contactId) || !is_numeric($contactId)) {
+			$myInfo = $this->get_user_info($this->uid);
+			$contactId = $myInfo['contact_id'];
+		}
 		
-		if(is_numeric($myInfo['contact_id'])) {
-			$retval = md5($pass .'_'. $myInfo['contact_id']);
+		if(is_numeric($contactId)) {
+			$retval = md5($pass .'_'. $contactId);
 		}
 		else {
 			$details = __METHOD__ .": failed to get a useable contact_id for uid=(". $this->uid .")";
@@ -305,6 +308,29 @@ class userClass extends dbAbstract {
 		}
 		return($retval);
 	}//end encrypt_pass()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function uid_from_contact_id($contactId) {
+		if(!is_null($contactId) && is_numeric($contactId)) {
+			$sql = "SELECT uid FROM user_table WHERE contact_id=". $contactId;
+			if($this->run_sql($sql) && $this->lastNumrows == 1) {
+				$data = $this->db->farray();
+				$retval = $data[0];
+				$this->uid = $retval;
+			}
+			else {
+				$details = __METHOD__ .": failed to retrieve a uid for contact_id=". $contactId;
+			}
+		}
+		else {
+			$details = __METHOD__ .": invalid contactId (". $contactId .")";
+		}
+		
+		return($retval);
+	}//end uid_from_contact_id()
 	//=========================================================================
 	
 }//end userClass{}
