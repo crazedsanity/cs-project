@@ -205,7 +205,7 @@ class helpdeskClass extends mainRecord {
 			$details = 'Sent notification(s) of for [helpdesk_id='. $helpdeskId .'] remark to: '. $sendEmailRes;
 			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			
-			if($isSolution) {
+			if($isSolution && strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
 				$subject = '[ALERT] Helpdesk Issue #'. $helpdeskId .' was SOLVED';
 				if(strlen($_SESSION['login_username'])) {
 					$subject .= ' by '. $_SESSION['login_username'];
@@ -326,22 +326,20 @@ class helpdeskClass extends mainRecord {
 			
 			$normalEmailExtra = NULL;
 			$emailAddressList = $linkObj->get_record_email_list($newRecord);
+			
 			if((strlen($_SESSION['login_email'])) && ($_SESSION['login_email'] != $parseArr['email'])) {
-				send_email(
-					$emailAddressList, 
-					"Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."]", 
-					$emailTemplate, 
-					$parseArr
-				);
+				$subject = "Created Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
+				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
 				$normalEmailExtra = " [registered by ". $_SESSION['login_loginname'] .": uid=". $_SESSION['login_id'] ."]";
 			}
 			else {
-				send_email(
-					$emailAddressList, 
-					"Helpdesk Issue #$retval Created". $normalEmailExtra, 
-					$emailTemplate, 
-					$parseArr
-				);
+				$subject = "Created Helpdesk Issue #$retval Created". $normalEmailExtra ." -- ". $parseArr['name'];
+				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
+			}
+			
+			if(strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
+				//send the alert!!!
+				send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, '[ALERT] '. $subject, $emailTemplate, $parseArr);
 			}
 			
 			//log that it was created.
