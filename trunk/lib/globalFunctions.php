@@ -1492,11 +1492,21 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
-				$retval = create_list($retval, send_single_email($emailAddr, $subject, $body));
+				try {
+					$retval = create_list($retval, send_single_email($emailAddr, $subject, $body));
+				}
+				catch(exception $e) {
+					$retval = create_list($retval, $emailAddr ." (failed: ". $e->getMessage() .")");
+				}
 			}
 		}
 		else {
-			$retval = send_single_email($toAddr, $subject, $body);
+			try {
+				$retval = send_single_email($toAddr, $subject, $body);
+			}
+			catch(exception $e) {
+					$retval = $toAddr ." (failed: ". $e->getMessage() .")";
+			}
 		}
 	}
 	else {
@@ -1751,8 +1761,16 @@ function send_single_email($toAddr, $subject, $body) {
 	$mail->Subject = $subject;
 	$mail->Body = $bbCodeParser->parseString($body);
 	$mail->WordWrap = 75;
+	
+	$logsObj = new logsClass($db, 'Email');
+	
 	if(!$mail->Send()) {
-		throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
+		$details = __FUNCTION__ .": Message to (". $toAddr .") could not be sent::: ". $mail->ErrorInfo;
+		$logsObj->log_by_class($details, 'error');
+		throw new exception($details);
+	}
+	else {
+		$logsObj->log_by_class('Successfully sent email to ('. $toAddr .'): '. $subject, 'information');
 	}
 	return($toAddr);
 }//end send_single_email()
