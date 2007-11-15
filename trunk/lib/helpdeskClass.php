@@ -202,7 +202,7 @@ class helpdeskClass extends mainRecord {
 			$sendEmailRes = send_email($recipientsArr, $subject, $emailTemplate, $parseArr);
 			
 			//log who we sent the emails to.
-			$details = 'Sent notification(s) of remark to: '. $sendEmailRes;
+			$details = 'Sent notification(s) of for [helpdesk_id='. $helpdeskId .'] remark to: '. $sendEmailRes;
 			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			
 			if($isSolution) {
