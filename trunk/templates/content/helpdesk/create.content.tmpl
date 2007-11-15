@@ -16,18 +16,18 @@
 <tr>
 	<td>Give your request a name:</td>
 	
-	<td colspan="5"><input name="data[name]" size="80" maxlength="80" type="text"><br></td>
+	<td colspan="5"><input name="data[name]" size="80" maxlength="80" type="text" tabindex="1"><br></td>
 </tr>
 <tr>
 	<td>Describe your request:</td>
 	
-	<td colspan="5"><textarea name="data[subject]" cols="65" rows="10"></textarea><br></td>
+	<td colspan="5"><textarea name="data[subject]" cols="65" rows="10" tabindex="2"></textarea><br></td>
 
 </tr>
 <tr>
 	<td>Issue Category:</td>
 	<td colspan="5">
-		<select name="data[initialTag]">
+		<select name="data[initialTag]" tabindex="3">
 			{select_tags}
 		</select>
 		</td>
@@ -36,7 +36,7 @@
 	<td align="right">
 		<input name="module" value="helpdesk" type="HIDDEN">
 		<input name="data[parentRecordId]" value="{linked_proj}" type="HIDDEN">
-		<input name="submit" value="go" type="submit">
+		<input name="submit" value="go" type="submit" tabindex="4">
 	</td>
 </tr>
 </tbody>
