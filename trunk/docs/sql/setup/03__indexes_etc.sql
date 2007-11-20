@@ -1,8 +1,8 @@
 --
 -- SVN INFORMATION:::
 -- SVN Signature: $Id:::: 03__indexes_etc.sql 253 2007-09-29 19:48:37Z crazedsanity $
--- Last Committted Date:: $Date$
--- Last Committed Path::: $HeadURL$
+-- Last Committted Date:: $Date:2007-11-20 11:02:38 -0600 (Tue, 20 Nov 2007) $
+-- Last Committed Path::: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/docs/sql/setup/03__indexes_etc.sql $
 --
 
 --
@@ -466,7 +466,8 @@ ALTER TABLE ONLY contact_attribute_link_table
 --
 
 ALTER TABLE ONLY contact_email_table
-    ADD CONSTRAINT contact_email_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
+    ADD CONSTRAINT contact_email_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id)
+	DEFERRABLE INITIALLY DEFERRED;
 
 
 --
