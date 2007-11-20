@@ -447,15 +447,24 @@ class contactClass extends attributeClass {
 					$retval = $data[0];
 					
 					//before completing, let's create the primary email address.
-					$contactObj = new contactClass($this->db);
-					$contactObj->set_contact_id($retval);
-					$contactObj->create_contact_email($email, TRUE);
-					$this->db->commitTrans();
-					
-					//set the internal contactId.
 					$this->set_contact_id($retval);
+					$contactEmailId = $this->create_contact_email($email, TRUE);
 					
-					$this->logsObj->log_by_class("Created new contact (". $retval .")");
+					//update the contact_email_id on their contact record.
+					$sql = "UPDATE contact_table SET contact_email_id=". $contactEmailId ." WHERE contact_id=". $retval;
+					if(is_numeric($contactEmailId) && $this->run_sql($sql)) {
+						$this->db->commitTrans();
+						
+						//set the internal contactId.
+						$this->set_contact_id($retval);
+						
+						$this->logsObj->log_by_class("Created new contact (". $retval .")");
+					}
+					else {
+						$this->db->rollbackTrans();
+						
+						$this->logsObj->log_by_class(__METHOD__ .": failed to create email for new contact (". $contactEmailId .")");
+					}
 				}
 			}
 		}
