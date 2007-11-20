@@ -2004,8 +2004,7 @@ ALTER TABLE ONLY contact_attribute_link_table
 --
 
 ALTER TABLE ONLY contact_email_table
-    ADD CONSTRAINT contact_email_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id)
-	DEFERRABLE INITIALLY DEFERRED;
+    ADD CONSTRAINT contact_email_table_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES contact_table(contact_id);
 
 
 --
