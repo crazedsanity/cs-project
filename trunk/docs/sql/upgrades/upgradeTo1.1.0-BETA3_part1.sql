@@ -1,8 +1,8 @@
 --
 -- SVN INFORMATION:::
--- SVN Signature::::::: $Id$
--- Last Committted::::: $Date$
--- Last Committed Path: $HeadURL$
+-- SVN Signature::::::: $Id:upgradeTo1.1.0-BETA3_part1.sql 443 2007-10-24 16:56:31Z crazedsanity $
+-- Last Committted::::: $Date:2007-10-24 11:56:31 -0500 (Wed, 24 Oct 2007) $
+-- Last Committed Path: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/docs/sql/upgrades/upgradeTo1.1.0-BETA3_part1.sql $
 --
 
 ALTER TABLE contact_table 
