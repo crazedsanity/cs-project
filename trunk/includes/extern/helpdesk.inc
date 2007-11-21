@@ -179,7 +179,6 @@ else {
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
 				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], FALSE);
 				$repArr['body'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $repArr['body']);
 				$repArr['body'] = preg_replace('/\S\s\s/', ' &nbsp;', $repArr['body']);
