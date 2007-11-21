@@ -247,12 +247,16 @@ else {
 		$page->add_template_var("select_category_list", $categoryList);
 		
 		//convert the returned data into htmlentities so brackets show properly.
-		$helpdeskData['subject'] = $bbCodeParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"));
+		$helpdeskData['subject'] = $bbCodeParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"), TRUE);
+		$helpdeskData['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $helpdeskData['subject']);
+		$helpdeskData['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $helpdeskData['subject']);
+		
+		
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlentity_plus_brackets");
 		$helpdeskData['solution'] = cleanString($helpdeskData['solution'], "htmlentity_plus_brackets");
 		
 		//make the wrapping SANE.
-		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
+		#$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
 		
 		//show the buttons appropriate to their membership level & ownership.
 		//if they're the owner, show the "solution" section.
@@ -367,6 +371,9 @@ else {
 			foreach($myNotes as $repArr) {
 				$repArr['body'] = $bbCodeParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
+				$repArr['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $repArr['subject']);
+				$repArr['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $repArr['subject']);
+		
 				
 				$repArr['solutionIndicator'] = "";
 				if($repArr['is_solution'] == 't') {

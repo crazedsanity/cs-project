@@ -37,17 +37,17 @@
 		
 			<th style="border-bottom:solid #000 1px;" align="right" valign="top">Issue Text:</th>
 			
-			<td style="border-bottom:solid #000 1px;" width="650" colspan="2"><pre>{subject}</pre></td>
+			<td style="border-bottom:solid #000 1px;" width="650" colspan="2"><code>{subject}</code></td>
 		</tr>
 		<tr>
 			<th style="border-bottom:solid #000 1px;" align="right">Notes:<BR><font size="-3"><i>(Includes previous/current<BR>solution(s), if available)</i></font></th>
 			<td style="border-bottom:solid #000 1px;" colspan="2">&nbsp;
 		<!-- BEGIN issueNotes --><div style="border-top:dashed #000 1px;">%%solutionIndicator%% <u> [#%%note_id%%] <b>%%subject%%</b> (%%fname%%@%%created%%)</u></div>
-			<div style="width:100%; overflow:auto"><pre style="font-size:10px;">%%body%%</pre></div>
+			<div style="width:100%; overflow:auto"><code style="font-size:10px;">%%body%%</code></div>
 		<!-- END issueNotes -->
 			</td>
 		</tr>
-<!-- BEGIN remark_row -->
+
 		<tr>
 			<td colspan="3"><h3 style="display:inline">Email:</h3> 
 			
@@ -72,7 +72,7 @@
 			<input name="action" value="Remark" type="submit">&nbsp;
 			</td>
 		</tr>
-<!-- END remxark_row -->
+		
 	</tbody>
 </table>
 </form>

@@ -147,7 +147,9 @@ else {
 		
 		//make the wrapping SANE.
 		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);
-		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject'],FALSE);
+		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject'], TRUE);
+		$helpdeskData['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $helpdeskData['subject']);
+		$helpdeskData['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $helpdeskData['subject']);
 		
 		//add everything to the page as a template var...
 		foreach($helpdeskData as $field=>$value) {
@@ -177,7 +179,10 @@ else {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
 				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
-				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], FALSE);
+				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], TRUE);
+				$repArr['body'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $repArr['body']);
+				$repArr['body'] = preg_replace('/\S\s\s/', ' &nbsp;', $repArr['body']);
+				
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
 				
 				$repArr['solutionIndicator'] = "";
