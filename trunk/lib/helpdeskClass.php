@@ -292,6 +292,25 @@ class helpdeskClass extends mainRecord {
 		if(!is_numeric($dataArr['priority'])) {
 			$dataArr['priority'] = 9;
 		}
+		
+		$tagObj = new tagClass($this->db);
+		if(is_array($dataArr['initialTag']) && count($dataArr['initialTag'])) {
+			
+			//get the list of tags, so we know what the total modifier is.
+			$allTags = $tagObj->get_tag_list();
+			
+			foreach($dataArr['initialTag'] as $id) {
+				$dataArr['priority'] += $allTags[$id]['modifier'];
+			}
+			
+			if($dataArr['priority'] > 9) {
+				$dataArr['priority'] = 9;
+			}
+			elseif($dataArr['priority'] < 0) {
+				$dataArr['priority'] = 0;
+			}
+			
+		}
 		$dataArr['is_helpdesk_issue'] = 't';
 		$newRecord = parent::create_record($dataArr, TRUE);
 		
@@ -311,9 +330,10 @@ class helpdeskClass extends mainRecord {
 		$linkObj->add_link($newRecord, $myNewRecordArr[$retval]['creator_contact_id']);
 		
 		//now, let's tag it.
-		if(isset($dataArr['initialTag']) && is_numeric($dataArr['initialTag'])) {
-			$tagObj = new tagClass($this->db);
-			$tagObj->add_tag($newRecord, $dataArr['initialTag']);
+		if(is_array($dataArr['initialTag']) && count($dataArr['initialTag'])) {
+			foreach($dataArr['initialTag'] as $id) {
+				$tagObj->add_tag($newRecord, $id);
+			}
 		}
 		
 		//determine what to do next...
@@ -393,10 +413,43 @@ class helpdeskClass extends mainRecord {
 	function get_category_list($selectThis=NULL) {
 		//create a list of tags.
 		$object = new tagClass($this->db);
-		$tagList = $object->get_tag_list();
+		$mainTagList = $object->get_tag_list();
+		
+		//create the "replacement array" and such.
+		$tagList = array();
+		foreach($mainTagList as $tagNameId => $subData) {
+			$tagList[$tagNameId] = $subData['name'];
+			$mod = $subData['modifier'];
+			if($mod > 0) {
+				if($mod == 1) {
+					$mainTagList[$tagNameId]['bgcolor'] = '#CCC';
+				}
+				elseif($mod == 2) {
+					$mainTagList[$tagNameId]['bgcolor'] = '#BBB';
+				}
+				else {
+					$mainTagList[$tagNameId]['bgcolor'] = '#AAA';
+				}
+			}
+			elseif($mod < 0) {
+				if($mod == -1) {
+					$mainTagList[$tagNameId]['bgcolor'] = 'yellow';
+				}
+				elseif($mod == -2) {
+					$mainTagList[$tagNameId]['bgcolor'] = 'orange';
+				}
+				else {
+					$mainTagList[$tagNameId]['bgcolor'] = 'red';
+				}
+			}
+			else {
+				$mainTagList[$tagNameId]['bgcolor'] = 'white';
+			}
+		}
 		
 		//now create the list.
-		$retval = array_as_option_list($tagList);
+		$templateString = "\t\t<option value='%%value%%' %%selectedString%% style=\"background-color:%%bgcolor%%\">%%display%% (%%modifier%%)</option>";
+		$retval = array_as_option_list($tagList, $selectThis, 'select', $templateString, $mainTagList);
 		return($retval);
 	}//end get_category_list()
 	//================================================================================================
