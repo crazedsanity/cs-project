@@ -64,5 +64,11 @@
 			<class_name>upgrade_to_1_1_0_BETA13</class_name>
 			<call_method>run_upgrade</call_method>
 		</v1.1.0-BETA12>
+		<v1.1.0-BETA13>
+			<target_version>1.1.0-BETA14</target_version>
+			<script_name>upgradeTo1.1.0-BETA14.php</script_name>
+			<class_name>upgrade_to_1_1_0_BETA14</class_name>
+			<call_method>run_upgrade</call_method>
+		</v1.1.0-BETA13>
 	</matching>
 </upgrade>
