@@ -123,7 +123,7 @@ if($_POST) {
 		else {
 			exit("invalid action: [$action]");
 		}
-	} elseif($_POST['submit'] == "go" && count($_POST['data']) > 1) {
+	} elseif(isset($_POST['submit']) && count($_POST['data']) > 1) {
 		//CREATING NEW RECORD!!!
 		$dataArr = $_POST['data'];
 		$result = $proj->helpdeskObj->create_record($dataArr);
