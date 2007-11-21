@@ -4,11 +4,11 @@
  * 
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id$
- * Last Author::::::::: $Author$ 
- * Current Revision:::: $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:::::::: $Date$
+ * SVN Signature::::::: $Id:recordContactLink.class.php 567 2007-11-07 17:47:51Z crazedsanity $
+ * Last Author::::::::: $Author:crazedsanity $ 
+ * Current Revision:::: $Revision:567 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/releases/1.1/lib/recordContactLink.class.php $ 
+ * Last Updated:::::::: $Date:2007-11-07 11:47:51 -0600 (Wed, 07 Nov 2007) $
  */
 
 

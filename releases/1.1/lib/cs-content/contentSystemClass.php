@@ -2,9 +2,9 @@
 /*
  * FILE INFORMATION: 
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/contentSystemClass.php $
- * $Id: contentSystemClass.php 214 2007-11-07 17:35:59Z crazedsanity $
- * $LastChangedDate: 2007-11-07 11:35:59 -0600 (Wed, 07 Nov 2007) $
- * $LastChangedRevision: 214 $
+ * $Id: contentSystemClass.php 221 2007-11-21 17:39:01Z crazedsanity $
+ * $LastChangedDate: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
+ * $LastChangedRevision: 221 $
  * $LastChangedBy: crazedsanity $
  * 
  * HOW THE SYSTEM WORKS:::
@@ -687,9 +687,8 @@ class contentSystem extends cs_versionAbstract {
 		}
 		else {
 			//TODO: make it *actually* die gracefully... the way it works now looks more like puke than grace.
-			$this->gfObj->debug_print(__METHOD__ .": something broke. \nDETAILS::: $details" .
+			throw new exception(__METHOD__ .": something broke. \nDETAILS::: $details" .
 					"\nREASON::: ". $this->reason);
-			exit;
 		}
 	}//end die_gracefully()
 	//------------------------------------------------------------------------

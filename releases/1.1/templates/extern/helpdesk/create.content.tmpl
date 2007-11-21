@@ -9,34 +9,48 @@
 <tr>
 	<td>Enter your email:</td>
 	
-	<td colspan="5">
+	<td>
 		<input name="data[email]" value="{email}" size="20" maxlength="80" type="text" {cust_email_readonly}></td>
 
 </tr>
 <tr>
 	<td>Give your request a name:</td>
 	
-	<td colspan="5"><input name="data[name]" size="80" maxlength="80" type="text"><br></td>
+	<td><input name="data[name]" size="80" maxlength="80" type="text" tabindex="1"><br></td>
 </tr>
 <tr>
 	<td>Describe your request:</td>
 	
-	<td colspan="5"><textarea name="data[subject]" cols="65" rows="10"></textarea><br></td>
+	<td><textarea name="data[subject]" cols="65" rows="10" tabindex="2"></textarea><br></td>
 
 </tr>
 <tr>
 	<td>Issue Category:</td>
-	<td colspan="5">
-		<select name="data[initialTag]">
-			{select_tags}
-		</select>
-		</td>
-</tr>
-<tr>
-	<td align="right">
-		<input name="module" value="helpdesk" type="HIDDEN">
-		<input name="data[parentRecordId]" value="{linked_proj}" type="HIDDEN">
-		<input name="submit" value="go" type="submit">
+	
+	<td>
+		<table cellpadding="0" cellspacing="3" width="100%">
+			<tr>
+				<td>
+					<select id='tagList' name="data[initialTag][]" multiple tabindex="3">
+						{select_tags}
+					</select>
+				</td>
+					
+				<td align="left">
+					<div class="note" style="border-bottom:solid #000 1px; padding-bottom:10px;">
+						<h3 style="display:inline">Selecting Tags:</h3><br>
+						Select all the tags that <u>apply to your issue</u>.  In parenthesis beside <br>
+						each item is a number: this indicates how it will affect the issue. Please <br>
+						select tags based on relevance and NOT just to make the issue more <br>
+						important.
+					</div>
+					
+					<input name="module" value="helpdesk" type="HIDDEN">
+					<input name="data[parentRecordId]" value="{linked_proj}" type="HIDDEN">
+					<input name="submit" value="Create New Issue" type="submit" tabindex="4">
+				</td>
+			</tr>
+		</table>
 	</td>
 </tr>
 </tbody>

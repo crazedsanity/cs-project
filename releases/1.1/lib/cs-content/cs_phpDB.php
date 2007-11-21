@@ -4,8 +4,8 @@
  * A class for generic PostgreSQL database access.
  * 
  * SVN INFORMATION:::
- * SVN Signature:::::::: $Id: cs_phpDB.php 207 2007-10-31 17:44:42Z crazedsanity $
- * Last Committted Date: $Date: 2007-10-31 12:44:42 -0500 (Wed, 31 Oct 2007) $
+ * SVN Signature:::::::: $Id: cs_phpDB.php 221 2007-11-21 17:39:01Z crazedsanity $
+ * Last Committted Date: $Date: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
  * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_phpDB.php $
  * 
  */
@@ -23,6 +23,11 @@
 //  		as number of rows, result id of last operation, etc.
 //
 ///////////////////////
+
+//TODO: option to not use layered transactions
+//TODO: rollbackTrans() in layered transaction causes abort when final layer is committed/aborted
+//TODO: stop sending queries to backend when transction is bad/aborted.
+//TODO: commit/abort specific layer requests (i.e. if there's 8 layers & the first is named "x", calling commitTrans("x") will cause the whole transaction to commit & all layers to be destroyed.
 
 require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 

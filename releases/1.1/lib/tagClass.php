@@ -4,11 +4,11 @@
  * 
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id$
- * Last Author::::::::: $Author$ 
- * Current Revision:::: $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:::::::: $Date$
+ * SVN Signature::::::: $Id:tagClass.php 626 2007-11-20 16:54:11Z crazedsanity $
+ * Last Author::::::::: $Author:crazedsanity $ 
+ * Current Revision:::: $Revision:626 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/tagClass.php $ 
+ * Last Updated:::::::: $Date:2007-11-20 10:54:11 -0600 (Tue, 20 Nov 2007) $
  * 
  * 
  * Class for tagging items, so they can be viewed in a different way: this way, for items pertaining to
@@ -54,7 +54,7 @@ class tagClass
 	 * @return (exception)	database error or no rows.
 	 */
 	public function get_tag_list() {
-		$sql = "SELECT * FROM tag_name_table ORDER BY lower(name)";
+		$sql = "SELECT * FROM tag_name_table ORDER BY modifier, lower(name)";
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
@@ -67,7 +67,7 @@ class tagClass
 		}
 		else {
 			//good to go!
-			$data = $this->db->farray_nvp("tag_name_id", "name");
+			$data = $this->db->farray_fieldnames("tag_name_id", NULL, 0);
 			return($data);
 		}
 	}//end get_tag_list()

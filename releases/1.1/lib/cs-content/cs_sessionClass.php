@@ -2,10 +2,10 @@
 /*
  * FILE INFORMATION:
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_sessionClass.php $
- * $Id: cs_sessionClass.php 214 2007-11-07 17:35:59Z crazedsanity $
- * $LastChangedDate: 2007-11-07 11:35:59 -0600 (Wed, 07 Nov 2007) $
+ * $Id: cs_sessionClass.php 221 2007-11-21 17:39:01Z crazedsanity $
+ * $LastChangedDate: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 214 $
+ * $LastChangedRevision: 221 $
  */
 
 require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");

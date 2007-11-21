@@ -3,10 +3,10 @@
 /*
  * FILE INFORMATION:
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_fileSystemClass.php $
- * $Id: cs_fileSystemClass.php 214 2007-11-07 17:35:59Z crazedsanity $
- * $LastChangedDate: 2007-11-07 11:35:59 -0600 (Wed, 07 Nov 2007) $
+ * $Id: cs_fileSystemClass.php 221 2007-11-21 17:39:01Z crazedsanity $
+ * $LastChangedDate: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 214 $
+ * $LastChangedRevision: 221 $
  */
 
 require_once(dirname(__FILE__) ."/cs_globalFunctions.php");
@@ -253,6 +253,7 @@ class cs_fileSystemClass extends cs_versionAbstract {
 	 * can enlighten me, I'd be glad to give them credit.
 	 */
 	private function translate_perms($in_Perms) {
+		$sP = "";
 		$sP .= (($in_Perms & 0x0100) ? 'r' : '-') .
 			(($in_Perms & 0x0080) ? 'w' : '-') .
 			(($in_Perms & 0x0040) ? (($in_Perms & 0x0800) ? 's' : 'x' ) :

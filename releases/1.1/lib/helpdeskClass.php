@@ -202,10 +202,10 @@ class helpdeskClass extends mainRecord {
 			$sendEmailRes = send_email($recipientsArr, $subject, $emailTemplate, $parseArr);
 			
 			//log who we sent the emails to.
-			$details = 'Sent notification(s) of remark to: '. $sendEmailRes;
+			$details = 'Sent notification(s) of for [helpdesk_id='. $helpdeskId .'] remark to: '. $sendEmailRes;
 			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			
-			if($isSolution) {
+			if($isSolution && strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
 				$subject = '[ALERT] Helpdesk Issue #'. $helpdeskId .' was SOLVED';
 				if(strlen($_SESSION['login_username'])) {
 					$subject .= ' by '. $_SESSION['login_username'];
@@ -292,6 +292,25 @@ class helpdeskClass extends mainRecord {
 		if(!is_numeric($dataArr['priority'])) {
 			$dataArr['priority'] = 9;
 		}
+		
+		$tagObj = new tagClass($this->db);
+		if(is_array($dataArr['initialTag']) && count($dataArr['initialTag'])) {
+			
+			//get the list of tags, so we know what the total modifier is.
+			$allTags = $tagObj->get_tag_list();
+			
+			foreach($dataArr['initialTag'] as $id) {
+				$dataArr['priority'] += $allTags[$id]['modifier'];
+			}
+			
+			if($dataArr['priority'] > 9) {
+				$dataArr['priority'] = 9;
+			}
+			elseif($dataArr['priority'] < 0) {
+				$dataArr['priority'] = 0;
+			}
+			
+		}
 		$dataArr['is_helpdesk_issue'] = 't';
 		$newRecord = parent::create_record($dataArr, TRUE);
 		
@@ -311,9 +330,10 @@ class helpdeskClass extends mainRecord {
 		$linkObj->add_link($newRecord, $myNewRecordArr[$retval]['creator_contact_id']);
 		
 		//now, let's tag it.
-		if(isset($dataArr['initialTag']) && is_numeric($dataArr['initialTag'])) {
-			$tagObj = new tagClass($this->db);
-			$tagObj->add_tag($newRecord, $dataArr['initialTag']);
+		if(is_array($dataArr['initialTag']) && count($dataArr['initialTag'])) {
+			foreach($dataArr['initialTag'] as $id) {
+				$tagObj->add_tag($newRecord, $id);
+			}
 		}
 		
 		//determine what to do next...
@@ -326,22 +346,20 @@ class helpdeskClass extends mainRecord {
 			
 			$normalEmailExtra = NULL;
 			$emailAddressList = $linkObj->get_record_email_list($newRecord);
+			
 			if((strlen($_SESSION['login_email'])) && ($_SESSION['login_email'] != $parseArr['email'])) {
-				send_email(
-					$emailAddressList, 
-					"Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."]", 
-					$emailTemplate, 
-					$parseArr
-				);
+				$subject = "Created Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
+				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
 				$normalEmailExtra = " [registered by ". $_SESSION['login_loginname'] .": uid=". $_SESSION['login_id'] ."]";
 			}
 			else {
-				send_email(
-					$emailAddressList, 
-					"Helpdesk Issue #$retval Created". $normalEmailExtra, 
-					$emailTemplate, 
-					$parseArr
-				);
+				$subject = "Created Helpdesk Issue #$retval Created". $normalEmailExtra ." -- ". $parseArr['name'];
+				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
+			}
+			
+			if(strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
+				//send the alert!!!
+				send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, '[ALERT] '. $subject, $emailTemplate, $parseArr);
 			}
 			
 			//log that it was created.
@@ -395,10 +413,43 @@ class helpdeskClass extends mainRecord {
 	function get_category_list($selectThis=NULL) {
 		//create a list of tags.
 		$object = new tagClass($this->db);
-		$tagList = $object->get_tag_list();
+		$mainTagList = $object->get_tag_list();
+		
+		//create the "replacement array" and such.
+		$tagList = array();
+		foreach($mainTagList as $tagNameId => $subData) {
+			$tagList[$tagNameId] = $subData['name'];
+			$mod = $subData['modifier'];
+			if($mod > 0) {
+				if($mod == 1) {
+					$mainTagList[$tagNameId]['bgcolor'] = '#CCC';
+				}
+				elseif($mod == 2) {
+					$mainTagList[$tagNameId]['bgcolor'] = '#BBB';
+				}
+				else {
+					$mainTagList[$tagNameId]['bgcolor'] = '#AAA';
+				}
+			}
+			elseif($mod < 0) {
+				if($mod == -1) {
+					$mainTagList[$tagNameId]['bgcolor'] = 'yellow';
+				}
+				elseif($mod == -2) {
+					$mainTagList[$tagNameId]['bgcolor'] = 'orange';
+				}
+				else {
+					$mainTagList[$tagNameId]['bgcolor'] = 'red';
+				}
+			}
+			else {
+				$mainTagList[$tagNameId]['bgcolor'] = 'white';
+			}
+		}
 		
 		//now create the list.
-		$retval = array_as_option_list($tagList);
+		$templateString = "\t\t<option value='%%value%%' %%selectedString%% style=\"background-color:%%bgcolor%%\">%%display%% (%%modifier%%)</option>";
+		$retval = array_as_option_list($tagList, $selectThis, 'select', $templateString, $mainTagList);
 		return($retval);
 	}//end get_category_list()
 	//================================================================================================

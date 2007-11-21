@@ -5,9 +5,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 155 $ 
+ * Current Revision:::: $Revision: 221 $ 
  * Repository Location: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_versionAbstract.class.php $ 
- * Last Updated:::::::: $Date: 2007-09-12 14:28:20 -0500 (Wed, 12 Sep 2007) $
+ * Last Updated:::::::: $Date: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
  */
 
 abstract class cs_versionAbstract {

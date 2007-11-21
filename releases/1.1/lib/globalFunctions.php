@@ -2,11 +2,11 @@
 /*
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id$
- * Last Author::::::::: $Author$ 
- * Current Revision:::: $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:::::::: $Date$
+ * SVN Signature::::::: $Id:globalFunctions.php 626 2007-11-20 16:54:11Z crazedsanity $
+ * Last Author::::::::: $Author:crazedsanity $ 
+ * Current Revision:::: $Revision:626 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/globalFunctions.php $ 
+ * Last Updated:::::::: $Date:2007-11-20 10:54:11 -0600 (Tue, 20 Nov 2007) $
  */
 
 
@@ -17,7 +17,7 @@
 function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'0.10.4'),
+		'contentSystem'		=> array('cs-content',		'0.10.5'),
 		'XMLParser'			=> array('cs-phpxml',		'0.5.5'),
 		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
 	);
@@ -462,7 +462,7 @@ function array_as_option_list(array $data, $checkedValue=NULL, $type="select", $
 	foreach($data as $value=>$display) {
 		//see if it's the value that's been selected.
 		$selectedString = "";
-		if($value == $checkedValue) {
+		if($value == $checkedValue || $display == $checkedValue) {
 			//yep, it's selected.
 			$selectedString = " ". $myType;
 		}
@@ -1492,11 +1492,21 @@ function send_email($toAddr, $subject, $bodyTemplate, $parseArr=NULL) {
 		//if multiple recipients, must send multiple emails.
 		if(is_array($toAddr)) {
 			foreach($toAddr as $emailAddr) {
-				$retval = create_list($retval, send_single_email($emailAddr, $subject, $body));
+				try {
+					$retval = create_list($retval, send_single_email($emailAddr, $subject, $body));
+				}
+				catch(exception $e) {
+					$retval = create_list($retval, $emailAddr ." (failed: ". $e->getMessage() .")");
+				}
 			}
 		}
 		else {
-			$retval = send_single_email($toAddr, $subject, $body);
+			try {
+				$retval = send_single_email($toAddr, $subject, $body);
+			}
+			catch(exception $e) {
+					$retval = $toAddr ." (failed: ". $e->getMessage() .")";
+			}
 		}
 	}
 	else {
@@ -1751,8 +1761,16 @@ function send_single_email($toAddr, $subject, $body) {
 	$mail->Subject = $subject;
 	$mail->Body = $bbCodeParser->parseString($body);
 	$mail->WordWrap = 75;
+	
+	$logsObj = new logsClass($db, 'Email');
+	
 	if(!$mail->Send()) {
-		throw new exception(__FUNCTION__ .": Message could not be sent::: ". $mail->ErrorInfo);
+		$details = __FUNCTION__ .": Message to (". $toAddr .") could not be sent::: ". $mail->ErrorInfo;
+		$logsObj->log_by_class($details, 'error');
+		throw new exception($details);
+	}
+	else {
+		$logsObj->log_by_class('Successfully sent email to ('. $toAddr .'): '. $subject, 'information');
 	}
 	return($toAddr);
 }//end send_single_email()

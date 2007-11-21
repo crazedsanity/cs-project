@@ -3,11 +3,11 @@
 /*
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id$
- * Last Author::::::::: $Author$ 
- * Current Revision:::: $Revision$
- * Repository Location: $HeadURL$ 
- * Last Updated:::::::: $Date$
+ * SVN Signature::::::: $Id:adminUserClass.php 626 2007-11-20 16:54:11Z crazedsanity $
+ * Last Author::::::::: $Author:crazedsanity $ 
+ * Current Revision:::: $Revision:626 $
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/adminUserClass.php $ 
+ * Last Updated:::::::: $Date:2007-11-20 10:54:11 -0600 (Tue, 20 Nov 2007) $
  */
 
 class adminUserClass extends userClass {
@@ -85,6 +85,7 @@ class adminUserClass extends userClass {
 			);
 			
 			//good to go: encrypt the password.
+			$originalPassword = $data['password'];
 			$data['password'] = $this->encrypt_pass($data['password'], $contactId);
 			$sql = "INSERT INTO user_table ". string_from_array($data, 'insert', NULL, $cleanStringArr, TRUE, TRUE);
 			
@@ -107,6 +108,14 @@ class adminUserClass extends userClass {
 					
 					//now add the user to the specified group.
 					$this->add_user_to_group($uid, $data['group_id']);
+					
+					//now send an email out to the user to let 'em know.
+					$templateContents = html_file_to_string('email/new_user.tmpl');
+					$repArr = $data;
+					$repArr['uid'] = $retval;
+					$repArr['password'] = $originalPassword;
+					$subject = 'Registration Confirmation ['. $repArr['username'] .']';
+					send_email($data['email'], $subject, $templateContents, $repArr);
 				}
 				else {
 					$details = "Created new user (". $data['username'] .") [NEW ID QUERY FAILED, numrows=(". $this->lastNumrows ."), DBERROR::: ". $this->lastError ."]";
