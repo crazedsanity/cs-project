@@ -369,10 +369,11 @@ else {
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = $bbCodeParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
+				$repArr['body'] = $bbCodeParser->parseString($repArr['body']);
+				$repArr['body'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $repArr['body']);
+				$repArr['body'] = preg_replace('/\S\s\s/', ' &nbsp;', $repArr['body']);
+				
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
-				$repArr['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $repArr['subject']);
-				$repArr['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $repArr['subject']);
 		
 				
 				$repArr['solutionIndicator'] = "";
