@@ -146,8 +146,9 @@ else {
 		unset($helpdeskData['notes']);
 		
 		//make the wrapping SANE.
-		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);
-		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject'], TRUE);
+		#$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);
+		$helpdeskData['subject'] = cleanString($helpdeskData['subject'], "htmlentity_plus_brackets");
+		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject']);
 		$helpdeskData['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $helpdeskData['subject']);
 		$helpdeskData['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $helpdeskData['subject']);
 		
@@ -179,7 +180,7 @@ else {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
 				$repArr['body'] = cleanString($repArr['body'], "htmlentity_plus_brackets");
-				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], TRUE);
+				$repArr['body'] = $bbCodeParser->parseString($repArr['body'], FALSE);
 				$repArr['body'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $repArr['body']);
 				$repArr['body'] = preg_replace('/\S\s\s/', ' &nbsp;', $repArr['body']);
 				
