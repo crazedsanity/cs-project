@@ -6,14 +6,24 @@
 				<tr>
 					<td>
 						<b>Available Tags:</b><BR>
-						<ul>
+						<table border="0" cellpadding="1" cellspacing="0">
 					<!-- BEGIN availableTagsList -->
-							<li><a href="{PHP_SELF}?showTag=%%tagNameId%%">(%%tagNameId%%) %%tagName%%</a></li>
+							<tr>
+								<td nowrap style="padding-left:5px;">
+									<img src="/images/bullet-round.png" border="0">
+									<a href="{PHP_SELF}?showTag=%%tagNameId%%"> %%tagName%%</a>
+								</td>
+							</tr>
 					<!-- END availableTagsList -->
-					<!-- BEGIN availableTagsList_noLink -->
-							<li>(%%tagNameId%%) %%tagName%%</li>
-					<!-- END availableTagsList_noLink -->
-						</ul>
+					<!-- BEGIN availableTagsList_selected -->
+							<tr>
+								<td nowrap style="padding-left:5px;">
+									<img src="/images/bullet-round.png" border="0">
+									<b> %%tagName%%</b>
+								</td>
+							</tr>
+					<!-- END availableTagsList_selected -->
+						</table>
 					</td>
 				</tr>
 				<tr>
