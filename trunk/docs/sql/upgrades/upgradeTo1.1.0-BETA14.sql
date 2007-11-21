@@ -9,5 +9,5 @@
 
 ALTER TABLE tag_name_table ADD COLUMN modifier int;
 UPDATE tag_name_table SET modifier = -1;
-ALTER TABLE tag_name_table ALTER COLUMN SET DEFAULT -1;
-ALTER TABLE tag_name_table SET NOT NULL;
+ALTER TABLE tag_name_table ALTER COLUMN modifier SET DEFAULT -1;
+ALTER TABLE tag_name_table ALTER COLUMN modifier SET NOT NULL;
