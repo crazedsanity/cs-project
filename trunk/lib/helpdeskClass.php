@@ -413,7 +413,7 @@ class helpdeskClass extends mainRecord {
 	function get_category_list($selectThis=NULL) {
 		//create a list of tags.
 		$object = new tagClass($this->db);
-		$mainTagList = $object->get_tag_list();
+		$mainTagList = $object->get_tag_list(TRUE);
 		
 		//create the "replacement array" and such.
 		$tagList = array();

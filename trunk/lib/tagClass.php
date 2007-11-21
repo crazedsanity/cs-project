@@ -53,7 +53,7 @@ class tagClass
 	 * @return (array)		PASS: contains tag_name_id=>name array.
 	 * @return (exception)	database error or no rows.
 	 */
-	public function get_tag_list() {
+	public function get_tag_list($getAllData=FALSE) {
 		$sql = "SELECT * FROM tag_name_table ORDER BY modifier, lower(name)";
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
@@ -67,7 +67,12 @@ class tagClass
 		}
 		else {
 			//good to go!
-			$data = $this->db->farray_fieldnames("tag_name_id", NULL, 0);
+			if($getAllData) {
+				$data = $this->db->farray_fieldnames("tag_name_id", NULL, 0);
+			}
+			else {
+				$data = $this->db->farray_nvp('tag_name_id', 'name');
+			}
 			return($data);
 		}
 	}//end get_tag_list()
