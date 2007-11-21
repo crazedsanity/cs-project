@@ -2,11 +2,11 @@
 /*
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id$
- * Last Author::::::::: $Author$ 
- * Current Revision:::: $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:::::::: $Date$
+ * SVN Signature::::::: $Id:noteClass.php 626 2007-11-20 16:54:11Z crazedsanity $
+ * Last Author::::::::: $Author:crazedsanity $ 
+ * Current Revision:::: $Revision:626 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/lib/noteClass.php $ 
+ * Last Updated:::::::: $Date:2007-11-20 10:54:11 -0600 (Tue, 20 Nov 2007) $
  */
  
 
@@ -103,7 +103,6 @@ class noteClass extends dbAbstract {
 			
 			foreach($retval as $id=>$arr) {
 				//add some wrapping & cleaning (so the data appears properly)
-				$retval[$id]['body'] = wordwrap($arr['body'], 95);
 				$retval[$id]['subject'] = cleanString($retval[$id]['subject'], "htmlentity_plus_brackets");
 				$retval[$id]['body'] = cleanString($retval[$id]['body'], "htmlentity_plus_brackets");
 				
