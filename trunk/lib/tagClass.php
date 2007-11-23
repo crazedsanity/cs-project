@@ -53,8 +53,12 @@ class tagClass
 	 * @return (array)		PASS: contains tag_name_id=>name array.
 	 * @return (exception)	database error or no rows.
 	 */
-	public function get_tag_list($getAllData=FALSE) {
-		$sql = "SELECT * FROM tag_name_table ORDER BY modifier, lower(name)";
+	public function get_tag_list($getAllData=FALSE, $orderByMod=TRUE) {
+		$orderBy = "ORDER BY lower(name)";
+		if($orderByMod) {
+			$orderBy = "ORDER BY modifier, lower(name)";
+		}
+		$sql = "SELECT * FROM tag_name_table ". $orderBy;
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();
 		
@@ -285,7 +289,7 @@ class tagClass
 	
 	
 	//=========================================================================
-	private function update_tag_record($critArr, array $changes) {
+	private function update_tag_record(array $critArr, array $changes) {
 		$updateStr = string_from_array($changes, 'update');
 		$criteria = string_from_array($critArr, 'select', NULL, 'numeric');
 		$sql = "UPDATE tag_table SET ". $updateStr ."" .
@@ -439,6 +443,53 @@ class tagClass
 		
 		return($retval);
 	}//end create_new_tag_name()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	private function update_tag_name_record(array $critArr, array $changes) {
+		$updateStr = string_from_array($changes, 'update');
+		$criteria = string_from_array($critArr, 'select', NULL, 'numeric');
+		$sql = "UPDATE tag_name_table SET ". $updateStr ."" .
+				"WHERE ". $criteria;
+		
+		//start a transaction & run the update.
+		$numrows = $this->db->exec($sql);
+		$this->lastError = $this->db->errorMsg();
+		
+		if(strlen($this->lastError) || $numrows !== 1) {
+			//something bad happened.
+			$retval = 0;
+			if(strlen($this->lastError)) {
+				//make it apparent that something went wrong.
+				$this->logsObj->log_dberror(__METHOD__ .": unable to update ($numrows) or dberror::: ". $this->lastError);
+				$retval = NULL;
+			}
+		}
+		else {
+			//good to go.
+			$retval = $numrows;
+			$this->logsObj->log_by_class("Updated tag record::: ". $updateStr ."\nCRITERIA::: ". $criteria, 'system');
+		}
+		
+		return($retval);
+	}//end update_tag_name_record()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function update_tag_modifier($tagNameId, $modifier) {
+		if(is_numeric($tagNameId) && is_numeric($modifier)) {
+			$retval = $this->update_tag_name_record(array('tag_name_id' => $tagNameId), array('modifier' => $modifier));
+		}
+		else {
+			throw new exception(__METHOD__ .": invalid input given...");
+		}
+		
+		return($retval);
+	}//end update_tag_modifier()
 	//=========================================================================
 }
 
