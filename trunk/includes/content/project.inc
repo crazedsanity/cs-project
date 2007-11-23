@@ -183,9 +183,16 @@ else {
 					$helpdeskObj->remark($linkIssue, $remarkDetails);
 					
 					if($linkRes) {
+						$oldIsHelpdesk = $proj->helpdeskObj->isHelpdeskIssue;
+						$proj->helpdeskObj->isHelpdeskIssue=FALSE;
+						$oldProjData = $proj->helpdeskObj->get_parent_record($issueData['ancestry']);
+						$proj->helpdeskObj->isHelpdeskIssue=$oldIsHelpdesk;
+						$oldProjLinkList = $proj->get_ancestry_link_list($oldProjData['public_id'], TRUE, TRUE, TRUE);
+						
 						$page->set_message_wrapper(array(
 							'title'		=> "Issue Linked Successfully",
-							'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.",
+							'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.<BR><BR>" .
+											"<b>Back to old project:</b> [". $oldProjLinkList ."]",
 							'type'		=> "status"
 						));
 					}
