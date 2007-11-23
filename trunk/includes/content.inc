@@ -116,6 +116,7 @@ $tabNames = array(
 	'summary'		=> "Summary",
 	'project'		=> "Projects",
 	'helpdesk'		=> "Helpdesk",
+	'tags'			=> "Tags",
 	'contacts'		=> "Contacts",
 	'settings'		=> "Settings",
 );
