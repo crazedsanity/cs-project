@@ -52,7 +52,7 @@ class noteClass extends dbAbstract {
 	 * @return 0			FAIL: unable to retrieve notes.
 	 * @return <array>		PASS: array contains records, indexed by id.
 	 */
-	function get_notes($critArr=NULL, $primaryOrder=NULL) {
+	function get_notes($critArr=NULL, $primaryOrder=NULL, $formatIt=TRUE) {
 		
 		if(is_array($primaryOrder)) {
 			$arrayKeysArr = array_keys($primaryOrder);
@@ -102,9 +102,19 @@ class noteClass extends dbAbstract {
 			$retval = $this->db->farray_fieldnames("note_id",NULL,0);
 			
 			foreach($retval as $id=>$arr) {
-				//add some wrapping & cleaning (so the data appears properly)
-				$retval[$id]['subject'] = cleanString($retval[$id]['subject'], "htmlentity_plus_brackets");
-				$retval[$id]['body'] = cleanString($retval[$id]['body'], "htmlentity_plus_brackets");
+				if($formatIt === TRUE) {
+					//add some wrapping & cleaning (so the data appears properly)
+					$retval[$id]['subject'] = cleanString($retval[$id]['subject'], "htmlentity_plus_brackets");
+					
+					$body = $retval[$id]['body'];
+					$body = cleanString($body, "htmlentity_plus_brackets");
+					$body = preg_replace("/\n/", "<BR>", $body);
+					$body = preg_replace('/\s\s/', '&nbsp;&nbsp;', $body);
+					$body = preg_replace('/\S\s\s/', ' &nbsp;', $body);
+					
+					$retval[$id]['body'] = $body;
+				}
+				
 				
 				//make the created & updated fields nicer.
 				$cleanDatesArr = array('created', 'updated');
