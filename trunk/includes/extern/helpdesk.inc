@@ -149,7 +149,6 @@ else {
 		#$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);
 		$helpdeskData['subject'] = cleanString($helpdeskData['subject'], "htmlentity_plus_brackets");
 		$helpdeskData['subject'] = $bbCodeParser->parseString($helpdeskData['subject'], TRUE);
-		$helpdeskData['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $helpdeskData['subject']);
 		$helpdeskData['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $helpdeskData['subject']);
 		
 		//add everything to the page as a template var...
