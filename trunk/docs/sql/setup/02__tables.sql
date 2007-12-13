@@ -1,6 +1,6 @@
 --
 -- SVN INFORMATION:::
--- SVN Signature: $Id:::: 02__tables.sql 253 2007-09-29 19:48:37Z crazedsanity $
+-- SVN Signature::::::::: $Id$
 -- Last Committted Date:: $Date$
 -- Last Committed Path::: $HeadURL$
 --
