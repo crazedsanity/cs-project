@@ -23,7 +23,7 @@ class invoice extends dbAbstract {
 		$this->db = $db;
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
-		$this->logsObj = new logsClass($this->db, 'Authentication Token');
+		$this->logsObj = new logsClass($this->db, 'Invoice');
 	}//end __construct()
 	//=========================================================================
 	

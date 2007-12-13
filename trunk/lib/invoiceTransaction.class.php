@@ -9,12 +9,11 @@
  * Repository Location: $HeadURL$ 
  * Last Updated:::::::: $Date$
  * 
- * TODO: test methods to make sure they work!
  */
 
 //TODO: log everything!
 
-class invoiceItem extends dbAbstract {
+class invoiceTransaction extends dbAbstract {
 	
 	protected $gfObj;
 	protected $logsObj;
@@ -24,15 +23,8 @@ class invoiceItem extends dbAbstract {
 		$this->db = $db;
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
-		$this->logsObj = new logsClass($this->db, 'Invoice Item');
+		$this->logsObj = new logsClass($this->db, 'Invoice Transaction');
 	}//end __construct()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	public function create_item(array $data) {
-	}//end create_item()
 	//=========================================================================
 }
 ?>
