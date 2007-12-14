@@ -14,7 +14,7 @@
 
 //TODO: log everything!
 
-class invoiceItem extends dbAbstract {
+class invoiceItem extends invoice {
 	
 	protected $gfObj;
 	protected $logsObj;

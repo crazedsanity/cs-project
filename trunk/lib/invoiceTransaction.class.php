@@ -13,7 +13,7 @@
 
 //TODO: log everything!
 
-class invoiceTransaction extends dbAbstract {
+class invoiceTransaction extends invoice {
 	
 	protected $gfObj;
 	protected $logsObj;
