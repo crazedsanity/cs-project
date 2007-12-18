@@ -65,6 +65,7 @@ class invoiceItem extends invoice {
 				'quantity'		=> 'int'
 			);
 			
+			$invoiceArr = array();
 			foreach($fields as $name=>$cleanType) {
 				if(isset($data[$name]) && strlen($this->gfObj->cleanString($data[$name], $cleanType))) {
 					$insertArr[$name] = $this->gfObj->cleanString($data[$name], $cleanType);
