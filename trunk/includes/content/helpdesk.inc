@@ -23,12 +23,28 @@ if($_POST) {
 			$_POST['updates']['parentRecordId'] = $_POST['updates']['project_id'];
 			unset($_POST['updates']['project_id']);
 			
-			//that means we've gotta update everything sent... right?
+			
+			//if they've changed the name, we gotta log it.
+			//TODO: probably log this within helpdeskClass::update().
+			if(isset($_POST['updates']['name'])) {
+				//retrieve the old info.
+				$oldData = $proj->helpdeskObj->get_record($_POST['id']);
+				
+				if($oldData['name'] !== $_POST['updates']['name']) {
+					$addRemark = 'Updated [b]name[/b] from ([b][i]'. $oldData['name'] .'[/i][/b])';
+				}
+			}
+			
 			$doNotAcceptFields = array("solution", "remark");
 			foreach($doNotAcceptFields as $unsetThis) {
 				unset($_POST['updates'][$unsetThis]);
 			}
 			$result = $proj->helpdeskObj->update_record($helpdeskId, $_POST['updates']);
+			
+			if(strlen($addRemark)) {
+				$proj->helpdeskObj->remark($_POST['id'], $addRemark);
+			}
+			
 			
 			//tell them what happened.
 			if($result == 1) {

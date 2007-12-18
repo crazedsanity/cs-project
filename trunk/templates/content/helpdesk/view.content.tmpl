@@ -109,7 +109,10 @@
 				<tr>
 					<th align="right">Title: </th>
 					
-					<td colspan="2">{name}</td>
+					<td colspan="2">
+						<div id="name_text" style="display:inline">{name} [<a href="#" onClick="enableInput('name');">Edit</a>]</div>
+						<div id="name_inputDiv" style="display:none"><input id="name_input" name="updates[name]" type="text" value="{name}" size="80" disabled></div>
+					</td>
 				
 				</tr>
 				<tr>
