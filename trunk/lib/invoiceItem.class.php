@@ -14,7 +14,7 @@
 
 //TODO: log everything!
 
-class invoiceItem extends invoice {
+class invoiceItem extends dbAbstract {
 	
 	protected $gfObj;
 	protected $logsObj;
@@ -24,7 +24,7 @@ class invoiceItem extends invoice {
 		$this->db = $db;
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
-		$this->logsObj = new logsClass($this->db, 'Invoice Item');
+		$this->logsObj = new logsClass($this->db, 'Authentication Token');
 	}//end __construct()
 	//=========================================================================
 	
