@@ -279,9 +279,13 @@ else {
 		$assignedStr = $helpdeskData['leader_contact_id'];
 		if($helpdeskData['status_id'] == 4) {
 			//allow the current user to re-open this issue.
+			$doNotRipRows[] = "assigned_text";
+			$doNotRipRows[] = "priority_text";
 			$doNotRipRows[] = "reopen_button";
 		}
 		else {
+			$doNotRipRows[] = "assigned_optionList";
+			$doNotRipRows[] = "priority_optionList";
 			if(($assignedStr == $_SESSION['contact_id']) || ($assignedStr == "" || is_null($assignedStr))) {
 				//well, we can show 'em the update/modify button.
 				$doNotRipRows[] = "update_button";

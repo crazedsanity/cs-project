@@ -26,19 +26,27 @@
 							<tr>
 								<td style="border-left:solid #000 1px;border-top:solid #000 1px;">Assigned: </td>
 								<td style="border-right:solid #000 1px;border-top:solid #000 1px;" nowrap> 
+								<!-- BEGIN assigned_optionList -->
 									<select name="updates[leader_contact_id]">
 										{user_assign_list}
 									</select>
 									[<b>{assigned}</b>]
+								<!-- END assigned_optionList -->
+								<!-- BEGIN assigned_text --><b>{assigned}</b>
+								<!-- END assigned_text -->
 								</td>
 							</tr>
 							<tr>
 								<td style="border-left:solid #000 1px;">Priority: </td>
 								
 								<td style="border-right:solid #000 1px"> 
+									<!-- BEGIN priority_optionList -->
 									<select name="updates[priority]">
 										{select_priority_list}
 									</select>
+									<!-- END priority_optionList -->
+									<!-- BEGIN priority_text --> {priority}
+									<!-- END priority_text -->
 								</td>
 							</tr>
 							<tr>
