@@ -410,10 +410,10 @@ class helpdeskClass extends mainRecord {
 	/**
 	 * This returns a list of available TAGS (the "helpdesk_cat" table is deprecated)
 	 */
-	function get_category_list($selectThis=NULL) {
+	function get_category_list($selectThis=NULL, $orderByMod=FALSE) {
 		//create a list of tags.
 		$object = new tagClass($this->db);
-		$mainTagList = $object->get_tag_list(TRUE);
+		$mainTagList = $object->get_tag_list(TRUE, $orderByMod);
 		
 		//create the "replacement array" and such.
 		$tagList = array();

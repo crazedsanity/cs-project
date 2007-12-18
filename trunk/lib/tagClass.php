@@ -53,7 +53,7 @@ class tagClass
 	 * @return (array)		PASS: contains tag_name_id=>name array.
 	 * @return (exception)	database error or no rows.
 	 */
-	public function get_tag_list($getAllData=FALSE, $orderByMod=TRUE) {
+	public function get_tag_list($getAllData=FALSE, $orderByMod=FALSE) {
 		$orderBy = "ORDER BY lower(name)";
 		if($orderByMod) {
 			$orderBy = "ORDER BY modifier, lower(name)";
@@ -148,7 +148,8 @@ class tagClass
 		$sqlArr = array (
 			'record_id'			=> cleanString($recordId, 'numeric')
 		);
-		$sql = "SELECT tag_name_id, name FROM tag_name_table INNER JOIN tag_table USING (tag_name_id) WHERE ". string_from_array($sqlArr, 'select');
+		$sql = "SELECT tag_name_id, name FROM tag_name_table INNER JOIN tag_table USING (tag_name_id) " .
+				"WHERE ". string_from_array($sqlArr, 'select') .' ORDER BY lower(name)';
 		
 		$numrows = $this->db->exec($sql);
 		$dberror = $this->db->errorMsg();

@@ -221,7 +221,7 @@ else {
 		$page->set_all_block_rows("content");
 		
 		//show the "category" selection.
-		$categoryList = $proj->helpdeskObj->get_category_list('bug');
+		$categoryList = $proj->helpdeskObj->get_category_list('bug', TRUE);
 		$page->add_template_var("select_tags", $categoryList);
 		
 		//
