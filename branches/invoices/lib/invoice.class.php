@@ -16,6 +16,7 @@
 
 //TODO: log everything!
 
+
 class invoice extends dbAbstract {
 	
 	protected $gfObj;
@@ -28,9 +29,6 @@ class invoice extends dbAbstract {
 	//set some internal things that should NEVER be changed after initialization.
 	const mainTable = 'invoice_table';
 	const mainTableSeq = 'invoice_table_invoice_id_seq';
-	
-	const itemTable = 'invoice_item_table';
-	const itemTableSeq = 'invoice_item_table_invoice_item_id_seq';
 	
 	const transTable = 'invoice_transaction_table';
 	const transTableSeq = 'invoice_transaction_table_invoice_transaction_id_seq';
@@ -86,9 +84,18 @@ class invoice extends dbAbstract {
 	
 	//=========================================================================
 	/**
-	 * Add a line item to the invoice; should be an instance of invoiceItem{}.
+	 * Add a line item to the invoice.
 	 */
-	public function add_item(invoiceItem $item) {
+	public function add_item(array $data) {
+		if(is_numeric($this->invoiceId)) {
+			$invoiceItem = new invoiceItem($this->db, $this->invoiceId);
+			$retval = $invoiceItem->create_item($data);
+		}
+		else {
+			throw new exception(__METHOD__ .': no invoice created!');
+		}
+		
+		return($retval);
 	}//end add_item()
 	//=========================================================================
 	
@@ -107,6 +114,8 @@ class invoice extends dbAbstract {
 		else {
 			throw new exception(__METHOD__ .": failed to retrieve last invoice_id: ". $this->lastError);
 		}
+		
+		$this->invoiceId = $retval;
 		
 		return($retval);
 	}//end get_inserted_invoice_id()
