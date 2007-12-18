@@ -297,7 +297,7 @@ class helpdeskClass extends mainRecord {
 		if(is_array($dataArr['initialTag']) && count($dataArr['initialTag'])) {
 			
 			//get the list of tags, so we know what the total modifier is.
-			$allTags = $tagObj->get_tag_list();
+			$allTags = $tagObj->get_tag_list(TRUE);
 			
 			foreach($dataArr['initialTag'] as $id) {
 				$dataArr['priority'] += $allTags[$id]['modifier'];
