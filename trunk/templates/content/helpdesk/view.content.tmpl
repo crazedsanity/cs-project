@@ -17,14 +17,22 @@
 		<table cellpadding="3" cellspacing="0" width="100%" border="0">
 			<tr>
 				<th align="right">Issue Number:</th>
-				<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/extern/helpdesk/view?ID={public_id}">External Link</a></b>]</td>
+				<td>{public_id}&nbsp;&nbsp;&nbsp;[<b><a href="/extern/helpdesk/view?ID={public_id}">External Link</a></b>]
+									
+									<a href="/help/helpdesk/external_link" target="_blank">
+									<img src="/images/icon-help.png" border="0"></a></td>
 				
 				<td rowspan="4" align="left" nowrap>
 <!-- BEGIN access_block -->
 						<table border="1" cellpadding="2" cellspacing="0" align="left"
 						style="padding-right:10px;border:none;">
 							<tr>
-								<td style="border-left:solid #000 1px;border-top:solid #000 1px;">Assigned: </td>
+								<td style="border-left:solid #000 1px;border-top:solid #000 1px;">Assigned: 
+									
+									<a href="/help/helpdesk/assigned" target="_blank">
+									<img src="/images/icon-help.png" border="0"></a>
+								</td>
+								
 								<td style="border-right:solid #000 1px;border-top:solid #000 1px;" nowrap> 
 								<!-- BEGIN assigned_optionList -->
 									<select name="updates[leader_contact_id]">
@@ -37,7 +45,10 @@
 								</td>
 							</tr>
 							<tr>
-								<td style="border-left:solid #000 1px;">Priority: </td>
+								<td style="border-left:solid #000 1px;">Priority: 
+									<a href="/help/helpdesk/priority" target="_blank">
+									<img src="/images/icon-help.png" border="0"></a>
+								</td>
 								
 								<td style="border-right:solid #000 1px"> 
 									<!-- BEGIN priority_optionList -->
@@ -51,7 +62,12 @@
 							</tr>
 							<tr>
 								<td colspan="2" align="center" style="border-left:solid #000 1px;border-right:solid #000 1px">
-									Attached to project:<br>[ <b>{ancestryLinkList}</b> ]
+									Attached to project:
+									
+									<a href="/help/helpdesk/project_linkage" target="_blank">
+									<img src="/images/icon-help.png" border="0"></a>
+									
+									<br>[ <b>{ancestryLinkList}</b> ]
 								</td>
 							</tr>
 	<!-- BEGIN linkToIssue -->
@@ -75,7 +91,10 @@
 						<table border="0" cellpadding="3" cellspacing="0" width="200" align="center" 
 						style="border:solid #000 1px;">
 							<tr>
-								<th colspan="2" style="background-color:#FFF">Notified Users</th>
+								<th colspan="2" style="background-color:#FFF">
+									Notified Users <a href="/help/helpdesk/notified_users" target="_blank">
+									<img src="/images/icon-help.png" border="0"></a>
+								</th>
 							</tr>
 							<tr>
 								<th style="border:solid #000 1px;">Name</th>
@@ -124,7 +143,10 @@
 				
 				</tr>
 				<tr>
-					<th align="right">Tags: </th>
+					<th align="right">Tags: 
+						<a href="/help/tags" target="_blank">
+						<img src="/images/icon-help.png" border="0"></a>
+					</th>
 					
 					<td colspan="2">
 				<!-- BEGIN removeable_tag --><a href="/content/tags/remove/%%tag_name_id%%/{record_id}">%%name%%</a>%%separator%%
@@ -201,6 +223,10 @@
 <!-- BEGIN owner_options -->
 		<input name="action" value="solve" type="submit">&nbsp;
 <!-- END owner_options -->
+	
+									
+		<a href="/help/helpdesk/submit_buttons" target="_blank">
+		<img src="/images/icon-help.png" border="0"></a>
 	</td>
 </tr>
 <!-- END buttons_row -->
