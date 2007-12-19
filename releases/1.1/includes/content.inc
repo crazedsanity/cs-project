@@ -39,6 +39,17 @@ if(!isset($defaultModule) || strlen($defaultModule) < 2) {
 
 $user = new userClass($page->db, $_SESSION['uid']);
 
+if(is_numeric($_SESSION['login_contact_id'])) {
+	$contactObj = new contactClass($page->db);
+	$contactObj->set_contact_id($_SESSION['login_contact_id']);
+	$contactData = $contactObj->get_contact();
+	
+	$page->add_template_var('LOGGED_USERNAME', $_SESSION['login_username']);
+	$page->add_template_var('LOGGED_CONTACT_ID', $_SESSION['login_contact_id']);
+	$page->add_template_var('LOGGED_CONTACT_NAME', $contactData['fname'] .' '. $contactData['lname']);
+	$page->add_template_var('LOGGED_COMPANY', $contactData['company']);
+}
+
 if(!$page->ui->get_cache("userData/settings")) {
 	$page->ui->set_cache("userData/settings", $user->get_settings());
 }
@@ -116,6 +127,7 @@ $tabNames = array(
 	'summary'		=> "Summary",
 	'project'		=> "Projects",
 	'helpdesk'		=> "Helpdesk",
+	'tags'			=> "Tags",
 	'contacts'		=> "Contacts",
 	'settings'		=> "Settings",
 );

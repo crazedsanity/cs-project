@@ -4,8 +4,8 @@
  * A class for generic PostgreSQL database access.
  * 
  * SVN INFORMATION:::
- * SVN Signature:::::::: $Id: cs_phpDB.php 221 2007-11-21 17:39:01Z crazedsanity $
- * Last Committted Date: $Date: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
+ * SVN Signature:::::::: $Id: cs_phpDB.php 225 2007-12-19 00:20:13Z crazedsanity $
+ * Last Committted Date: $Date: 2007-12-18 18:20:13 -0600 (Tue, 18 Dec 2007) $
  * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_phpDB.php $
  * 
  */
@@ -104,6 +104,10 @@ class cs_phpDB extends cs_versionAbstract {
 	//=========================================================================
 	public function __construct() {
 		$this->gfObj = new cs_globalFunctions;
+		
+		if(defined('DEBUGPRINTOPT')) {
+			$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
+		}
 		
 		$this->isInitialized = TRUE;
 	}//end __construct()

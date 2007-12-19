@@ -23,12 +23,28 @@ if($_POST) {
 			$_POST['updates']['parentRecordId'] = $_POST['updates']['project_id'];
 			unset($_POST['updates']['project_id']);
 			
-			//that means we've gotta update everything sent... right?
+			
+			//if they've changed the name, we gotta log it.
+			//TODO: probably log this within helpdeskClass::update().
+			if(isset($_POST['updates']['name'])) {
+				//retrieve the old info.
+				$oldData = $proj->helpdeskObj->get_record($_POST['id']);
+				
+				if($oldData['name'] !== $_POST['updates']['name']) {
+					$addRemark = 'Updated [b]name[/b] from ([b][i]'. $oldData['name'] .'[/i][/b])';
+				}
+			}
+			
 			$doNotAcceptFields = array("solution", "remark");
 			foreach($doNotAcceptFields as $unsetThis) {
 				unset($_POST['updates'][$unsetThis]);
 			}
 			$result = $proj->helpdeskObj->update_record($helpdeskId, $_POST['updates']);
+			
+			if(strlen($addRemark)) {
+				$proj->helpdeskObj->remark($_POST['id'], $addRemark);
+			}
+			
 			
 			//tell them what happened.
 			if($result == 1) {
@@ -205,7 +221,7 @@ else {
 		$page->set_all_block_rows("content");
 		
 		//show the "category" selection.
-		$categoryList = $proj->helpdeskObj->get_category_list('bug');
+		$categoryList = $proj->helpdeskObj->get_category_list('bug', TRUE);
 		$page->add_template_var("select_tags", $categoryList);
 		
 		//
@@ -247,21 +263,29 @@ else {
 		$page->add_template_var("select_category_list", $categoryList);
 		
 		//convert the returned data into htmlentities so brackets show properly.
-		$helpdeskData['subject'] = $bbCodeParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"));
+		$helpdeskData['subject'] = $bbCodeParser->parseString(cleanString($helpdeskData['subject'], "htmlentity_plus_brackets"), TRUE);
+		$helpdeskData['subject'] = preg_replace('/\s\s/', '&nbsp;&nbsp;', $helpdeskData['subject']);
+		$helpdeskData['subject'] = preg_replace('/\S\s\s/', ' &nbsp;', $helpdeskData['subject']);
+		
+		
 		$helpdeskData['name'] = cleanString($helpdeskData['name'], "htmlentity_plus_brackets");
 		$helpdeskData['solution'] = cleanString($helpdeskData['solution'], "htmlentity_plus_brackets");
 		
 		//make the wrapping SANE.
-		$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
+		#$helpdeskData['subject'] = wordwrap($helpdeskData['subject'], FORMAT_WORDWRAP);	
 		
 		//show the buttons appropriate to their membership level & ownership.
 		//if they're the owner, show the "solution" section.
 		$assignedStr = $helpdeskData['leader_contact_id'];
 		if($helpdeskData['status_id'] == 4) {
 			//allow the current user to re-open this issue.
+			$doNotRipRows[] = "assigned_text";
+			$doNotRipRows[] = "priority_text";
 			$doNotRipRows[] = "reopen_button";
 		}
 		else {
+			$doNotRipRows[] = "assigned_optionList";
+			$doNotRipRows[] = "priority_optionList";
 			if(($assignedStr == $_SESSION['contact_id']) || ($assignedStr == "" || is_null($assignedStr))) {
 				//well, we can show 'em the update/modify button.
 				$doNotRipRows[] = "update_button";
@@ -365,8 +389,10 @@ else {
 		if(is_array($myNotes) && count($myNotes)) {
 			$baseRow = $page->templateRows['issueNotes'];
 			foreach($myNotes as $repArr) {
-				$repArr['body'] = $bbCodeParser->parseString(cleanString($repArr['body'], "htmlentity_plus_brackets"));
+				$repArr['body'] = $bbCodeParser->parseString($repArr['body']);
+				
 				$repArr['subject'] = cleanString($repArr['subject'], "htmlentity_plus_brackets");
+		
 				
 				$repArr['solutionIndicator'] = "";
 				if($repArr['is_solution'] == 't') {

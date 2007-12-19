@@ -1,6 +1,6 @@
 --
 -- SVN INFORMATION:::
--- SVN Signature: $Id:::: 00__connectSettings.sql 185 2007-09-15 23:42:34Z crazedsanity $
+-- SVN Signature::::::::: $Id$
 -- Last Committted Date:: $Date$
 -- Last Committed Path::: $HeadURL$
 --

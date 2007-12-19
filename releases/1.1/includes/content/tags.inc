@@ -106,7 +106,10 @@ elseif($_POST) {
 	debug_print($_POST);
 	$goHere = $_SERVER['PHP_SELF'];
 	
-	if($_POST['new_tag']) {
+	if($_POST['action'] == 'update') {
+		$result = $proj->tagObj->update_tag_modifier($_POST['tag_name_id'], $_POST['modifier']);
+	}
+	elseif($_POST['new_tag']) {
 		//check for pre-existing tags of that name.
 		$myTagList = $proj->tagObj->get_tag_list();
 		$existingTagNameId = array_search($_POST['new_tag'], $myTagList);
@@ -158,10 +161,10 @@ elseif($_POST) {
 }
 
 //get the list of tags, regardless of whether we'll show 'em all or not.
-$myTagList = $proj->tagObj->get_tag_list();
+$myTagList = $proj->tagObj->get_tag_list(TRUE, FALSE);
 
 $showData = TRUE;
-$showTagNameId = $sessionCache->get_cache('tagNameId');
+#$showTagNameId = $sessionCache->get_cache('tagNameId');
 
 
 if($_GET['move']) {
@@ -205,7 +208,7 @@ elseif(!is_numeric($showTagNameId) || is_null($showTagNameId)) {
 		$messageArr = array(
 			'title'		=> 'No Tag Specified',
 			'message'	=> "For your convenience, records for the first available tag, " .
-							"\"". $myTagList[$showTagNameId] ."\" ($showTagNameId) are currently displayed.  " .
+							"\"". $myTagList[$showTagNameId]['name'] ."\" ($showTagNameId) are currently displayed.  " .
 							"You may select a different tag from the list.",
 			'type'		=> 'notice'
 		);
@@ -241,14 +244,19 @@ elseif(is_numeric($showTagNameId) && !isset($myTagList[$showTagNameId])) {
 //retrieve the (possibly updated) setting
 $showTagNameId = $sessionCache->get_cache('tagNameId');
 
-if($showData) {
+if($showData) {	
 	//get data for this tag.
 	$data = $proj->tagObj->get_records_for_tag($showTagNameId);
 	
 	//set some vars.
-	$page->add_template_var("tagName", $myTagList[$showTagNameId]);
+	$page->add_template_var("tagName", $myTagList[$showTagNameId]['name']);
+	$page->add_template_var('tagModifier', $myTagList[$showTagNameId]['modifier']);
 	$page->add_template_var("tagRecordCount", count($data));
 	$page->add_template_var("showTagNameId", $showTagNameId);
+	
+	$page->add_template_var('modifier_option_list', create_priority_option_list($myTagList[$showTagNameId]['modifier'], 5, -5));
+	
+	create_page_title($page, array('title' => "Tag #". $showTagNameId . ": ". $myTagList[$showTagNameId]['name']));
 	
 	//rip all block rows.
 	$page->set_all_block_rows('content');
@@ -273,7 +281,8 @@ if($showData) {
 	//display the list of available tags.
 	$tagListBaseRow = $page->templateRows['availableTagsList'];
 	$myRow = "";
-	foreach($myTagList as $tagNameId=>$tagName) {
+	foreach($myTagList as $tagNameId=>$data) {
+		$tagName = $data['name'];
 		$tagListBaseRow = $page->templateRows['availableTagsList'];
 		if($tagNameId == $showTagNameId) {
 			//switch to a row without the link, so it's more apparent what's selected.

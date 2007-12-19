@@ -297,7 +297,7 @@ class helpdeskClass extends mainRecord {
 		if(is_array($dataArr['initialTag']) && count($dataArr['initialTag'])) {
 			
 			//get the list of tags, so we know what the total modifier is.
-			$allTags = $tagObj->get_tag_list();
+			$allTags = $tagObj->get_tag_list(TRUE);
 			
 			foreach($dataArr['initialTag'] as $id) {
 				$dataArr['priority'] += $allTags[$id]['modifier'];
@@ -410,10 +410,10 @@ class helpdeskClass extends mainRecord {
 	/**
 	 * This returns a list of available TAGS (the "helpdesk_cat" table is deprecated)
 	 */
-	function get_category_list($selectThis=NULL) {
+	function get_category_list($selectThis=NULL, $orderByMod=FALSE) {
 		//create a list of tags.
 		$object = new tagClass($this->db);
-		$mainTagList = $object->get_tag_list(TRUE);
+		$mainTagList = $object->get_tag_list(TRUE, $orderByMod);
 		
 		//create the "replacement array" and such.
 		$tagList = array();

@@ -130,7 +130,6 @@ if(is_array($helpdeskArr) && count($helpdeskArr) > 0) {
 function process_row(&$page, $projectArr, $expandArr, $baseRow, $level=0) {
 	//loop through the array...
 	$linkLevel = $level+1;
-		
 	
 	//pre-pad subprojects, so they appear indented.
 	if($level > 0) {
@@ -140,7 +139,16 @@ function process_row(&$page, $projectArr, $expandArr, $baseRow, $level=0) {
 		}
 	}
 	if(is_array($projectArr)) {
+	
+		$projObj = new projectClass($page->db);
+		
 		foreach($projectArr as $id=>$subArr) {
+			
+			$subArr['linkList'] = $projObj->get_ancestry_link_list($id);
+			if(!strlen($subArr['linkList'])) {
+				$subArr['linkList'] = $subArr['name'];
+			}
+			
 			//parse stuff into the template row...
 			$rowColor1 = swapValue($rowColor1, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
 			$rowColor2 = swapValue($rowColor2,"#D5D5D5", "#C2C2C2");
