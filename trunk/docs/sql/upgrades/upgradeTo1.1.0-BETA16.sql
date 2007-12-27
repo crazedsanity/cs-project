@@ -42,7 +42,7 @@ CREATE TABLE invoice_item_table (
 	invoice_item_id integer NOT NULL PRIMARY KEY,
 	invoice_id integer NOT NULL REFERENCES invoice_table(invoice_id),
 	description text NOT NULL,
-	unit_price decimal(10,2),
+	unit_price decimal(5,2),
 	quantity integer NOT NULL DEFAULT 1
 );
 
@@ -52,7 +52,10 @@ CREATE TABLE invoice_transaction_table (
 	invoice_transaction_id integer NOT NULL PRIMARY KEY,
 	invoice_id integer NOT NULL REFERENCES invoice_table(invoice_id),
 	auth_string text NOT NULL,
+	name text text NOT NULL,
 	number text NOT NULL,
+	trans_date date NOT NULL,
+	amount decimal(10,2) NOT NULL,
 	date_created date NOT NULL DEFAULT CURRENT_DATE
 );
 
