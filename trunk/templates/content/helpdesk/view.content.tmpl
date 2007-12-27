@@ -149,19 +149,24 @@
 					</th>
 					
 					<td colspan="2">
+				<!-- BEGIN editable_tags -->
 				<!-- BEGIN removeable_tag --><a href="/content/tags/remove/%%tag_name_id%%/{record_id}">%%name%%</a>%%separator%%
 				<!-- END removeable_tag -->
-				
-				<BR>
-					
+						
+						<BR>
+						
 								<select>
 				<!-- BEGIN addTag_option -->	<option value='%%value%%'%%selectedString%% onClick="location.href='/content/tags/add/%%value%%/{record_id}'">%%display%%</option>
 				<!-- END addTag_option -->
 									{add_tag_list}
 								</select> <i><font color="red">(NOTE: this will *immediately* add a tag -- don't do it if you've changed something!)</font></i><BR>
 								
-				<input type="text" name="newTag" value=""><input type="button" value="Add New Tag" 
-					onClick="this.value='Creating Tag...';document.main.newTag.readonly=true;document.hiddenAddTagForm.new_tag.value=document.main.newTag.value;document.hiddenAddTagForm.submit()"></td>
+						<input type="text" name="newTag" value=""><input type="button" value="Add New Tag" 
+						onClick="this.value='Creating Tag...';document.main.newTag.readonly=true;document.hiddenAddTagForm.new_tag.value=document.main.newTag.value;document.hiddenAddTagForm.submit()">
+				<!-- END editable_tags -->
+				<!-- BEGIN text_tags --><b>%%name%%</b>%%separator%%
+				<!-- END text_tags -->
+					</td>
 				
 				</tr>
 				<tr>

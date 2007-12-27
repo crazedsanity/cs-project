@@ -278,14 +278,16 @@ else {
 		//if they're the owner, show the "solution" section.
 		$assignedStr = $helpdeskData['leader_contact_id'];
 		if($helpdeskData['status_id'] == 4) {
-			//allow the current user to re-open this issue.
+			//CLOSED: allow the current user to re-open this issue.
 			$doNotRipRows[] = "assigned_text";
 			$doNotRipRows[] = "priority_text";
 			$doNotRipRows[] = "reopen_button";
 		}
 		else {
+			//NOT closed...
 			$doNotRipRows[] = "assigned_optionList";
 			$doNotRipRows[] = "priority_optionList";
+			$doNotRipRows[] = "editable_tags";
 			if(($assignedStr == $_SESSION['contact_id']) || ($assignedStr == "" || is_null($assignedStr))) {
 				//well, we can show 'em the update/modify button.
 				$doNotRipRows[] = "update_button";
@@ -353,7 +355,14 @@ else {
 		
 		$myTagList = $proj->tagObj->get_tags_for_record($helpdeskData['record_id']);
 		if(is_array($myTagList)) {
-			$baseRow = $page->templateRows['removeable_tag'];
+			if($helpdeskData['status_id'] == 4) {
+				$tagListVar = 'text_tags';
+				$baseRow = $page->templateRows['text_tags'];
+			}
+			else {
+				$tagListVar = 'removeable_tag';
+				$baseRow = $page->templateRows['removeable_tag'];
+			}
 			$myTagRow = "";
 			$tCount = 0;
 			foreach($myTagList as $tagNameId=>$tagName) {
@@ -371,12 +380,8 @@ else {
 				);
 				$myTagRow .= mini_parser($baseRow, $repArr, '%%', '%%');
 			}
+			$page->add_template_var($tagListVar, $myTagRow);
 		}
-		else {
-			//tell 'em there's no tags!
-			$myTagRow = "";
-		}
-		$page->add_template_var('removeable_tag', $myTagRow);
 		
 		//Display tags that can be added.
 		$availableTagsList = $proj->tagObj->get_available_tags_for_record($helpdeskData['record_id'], 3);
