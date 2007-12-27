@@ -57,7 +57,4 @@ elseif($_POST['username'] && $_POST['password']) {
 if($_GET['destination']) {
 	$_SESSION['loginDestination'] = urlencode($_GET['destination']);
 }
-//show the default page.
-$page->change_content(html_file_to_string("login.tmpl"));
-
 ?>
