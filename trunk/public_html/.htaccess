@@ -18,3 +18,6 @@ DirectoryIndex content content.php index.php index.html
 <files help>
     ForceType application/x-httpd-php
 </files>
+<files test>
+    ForceType application/x-httpd-php
+</files>
