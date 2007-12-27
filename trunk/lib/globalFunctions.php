@@ -102,6 +102,7 @@ function html_file_to_string($file){
 		return $htmlString;
 	}
 	else {
+		cs_debug_backtrace(1);
 		//Could not find the file requested to stringify.
 		//Sending warning to user and logging it.
 
@@ -110,14 +111,7 @@ function html_file_to_string($file){
 			"Could not find all files necessary to create this page.<br>Please call technical support.<BR>\nfile=[". $file ."]",
 			"","status"
 		);
-
-		//Connect to db to log
-		$logDb = new phpDB;
-		$logDb->connect("pl");
-		
-		$details = $filename ." -- ". page_get_env();
-		#log_activity($logDb,125,$_SESSION['uid'],"$details");
-		return "&nbsp;";
+		return(NULL);
 	}
 
 }//end html_file_to_string()
