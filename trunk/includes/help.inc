@@ -5,7 +5,6 @@
 
 
 $page->add_template_var('cs-project_version', VERSION_STRING);
-$page->clear_content('infobar');
 
 
 $db = new cs_phpDB;
@@ -34,5 +33,7 @@ $titleParts = array(
 	'title'		=> $titlePart
 );
 create_page_title($page, $titleParts);
+
+$page->templateVars['content'] = nl2br($page->templateVars['content']);
 
 ?>
