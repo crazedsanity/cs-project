@@ -14,6 +14,7 @@ require_once(dirname(__FILE__) .'/../../lib/contactClass.php');
 
 $contactObj = new contactClass($page->db);
 
+$page->allow_invalid_urls(TRUE);
 
 if($_POST) {
 	if(strlen($_POST['action']) && is_numeric($_POST['contact_id'])) {
