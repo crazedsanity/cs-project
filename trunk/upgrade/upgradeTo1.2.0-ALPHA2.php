@@ -4,7 +4,7 @@
  */
 
 
-class upgrade_to_1_1_0_BETA14 extends dbAbstract {
+class upgrade_to_1_2_0_ALPHA2 extends dbAbstract {
 	
 	private $logsObj;
 	
@@ -31,7 +31,7 @@ class upgrade_to_1_1_0_BETA14 extends dbAbstract {
 		$this->db->beginTrans(__METHOD__);
 		
 		$this->run_schema_changes();
-		$this->update_tag_modifiers();
+		$this->update_tag_icons();
 		
 		$this->db->commitTrans(__METHOD__);
 		
@@ -44,7 +44,7 @@ class upgrade_to_1_1_0_BETA14 extends dbAbstract {
 	private function run_schema_changes() {
 		
 		$this->gfObj->debug_print(__METHOD__ .": running SQL file...");
-		$this->run_sql_file(dirname(__FILE__) .'/../docs/sql/upgrades/upgradeTo1.1.0-BETA14.sql');
+		$this->run_sql_file(dirname(__FILE__) .'/../docs/sql/upgrades/upgradeTo1.2.0-ALPHA2.sql');
 		
 		$details = "Executed SQL file, '". $this->lastSQLFile ."'.  Encoded contents::: ". 
 			base64_encode($this->fsObj->read($this->lastSQLFile));
@@ -55,49 +55,33 @@ class upgrade_to_1_1_0_BETA14 extends dbAbstract {
 	
 	
 	//=========================================================================
-	private function update_tag_modifiers() {
+	private function update_tag_icons() {
 		
-		$sql = "SELECT tag_name_id, name FROM tag_name_table ORDER BY tag_name_id";
+		$sql = "SELECT tag_name_id, name, icon_name FROM tag_name_table ORDER BY tag_name_id";
 		if($this->run_sql($sql) && $this->lastNumrows > 1) {
-			$allTags = $this->db->farray_nvp('tag_name_id', 'name');
+			$allTags = $this->db->farray_fieldnames('name', 'tag_name_id');
 			
-			$specialModifiers = array(
-				'critical'			=> -5,
-				'exception'			=> -2,
-				'invalid data'		=> -2,
-				'authentication'	=> -1,
-				'bug'				=> -1,
-				'cannot fix'		=> -1,
-				'data cleaning'		=> -1,
-				'feature request'	=> -1,
-				'email'				=> 0,
-				'formatting'		=> 0,
-				'has dependencies'	=> 0,
-				'information'		=> 0,
-				'network related'	=> 0,
-				'session'			=> 0,
-				'upgrade'			=> 1,
-				'duplicate'			=> 2,
-				'cannot reproduce'	=> 3,
+			$iconMods = array(
+				'critical'			=> 'red_x',
+				'bug'				=> 'bug',
+				'feature request'	=> 'feature_request',
+				'committed'			=> 'check_red',
+				'verified'			=> 'check_yellow',
+				'released'			=> 'check_green'
 			);
 			
 			$updates = 0;
-			foreach($allTags as $id=>$name) {
-				if(is_numeric($specialModifiers[$name])) {
-					//change the modifier accordingly...
-					$sql = "UPDATE tag_name_table SET modifier=". $specialModifiers[$name] ." WHERE tag_name_id=". $id;
-					if($this->run_sql($sql) && $this->lastNumrows == 1) {
-						$updates++;
-					}
-					else {
-						throw new exception(__METHOD__ .": failed to update tag (". $name .") with special " .
-								"modifier (". $specialModifiers[$name] .")");
-					}
-					
-					//
-					$details = "Changed modifier of [tag_name_id=". $id ."] to (". $specialModifiers[$name] .")";
-					$this->logsObj->log_by_class($details, 'update');
+			foreach($iconMods as $name=>$icon) {
+				if(isset($allTags[$name])) {
+					//update.
+					$sql = "UPDATE tag_name_table SET icon_name='". $icon ."' WHERE id=". $allTags[$name];
 				}
+				else {
+					//insert.
+					$sql = "INSERT INTO tag_name_table (name, icon_name) VALUES ('". $name ."', '". $icon ."');";
+				}
+				$this->run_sql($sql);
+				$updates += $this->lastNumrows;
 			}
 		}
 		else {
