@@ -353,7 +353,7 @@ else {
 		
 		
 		
-		$myTagList = $proj->tagObj->get_tags_for_record($helpdeskData['record_id']);
+		$myTagList = $proj->tagObj->get_tags_for_record($helpdeskData['record_id'], TRUE);
 		if(is_array($myTagList)) {
 			if($helpdeskData['status_id'] == 4) {
 				$tagListVar = 'text_tags';
@@ -365,7 +365,8 @@ else {
 			}
 			$myTagRow = "";
 			$tCount = 0;
-			foreach($myTagList as $tagNameId=>$tagName) {
+			foreach($myTagList as $tagNameId=>$tagData) {
+				$tagName = $tagData['name'];
 				
 				//don't show a separator for the end piece.
 				$tCount++;
@@ -376,7 +377,8 @@ else {
 				$repArr = array(
 					'tag_name_id'	=> $tagNameId,
 					'name'			=> $tagName,
-					'separator'		=> $separator
+					'separator'		=> $separator,
+					'imgHtml'		=> $tagData['imgHtml']
 				);
 				$myTagRow .= mini_parser($baseRow, $repArr, '%%', '%%');
 			}

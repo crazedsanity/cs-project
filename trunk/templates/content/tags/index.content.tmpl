@@ -12,6 +12,8 @@
 								<td nowrap style="padding-left:5px;">
 									<img src="/images/bullet-round.png" border="0">
 									<a href="{PHP_SELF}?showTag=%%tagNameId%%"> %%tagName%%</a>
+									<!-- BEGIN availableTagsList__tagIcon --><img src="/images/tags/%%icon_name%%.gif" border="0">
+									<!-- END availableTagsList__tagIcon -->
 								</td>
 							</tr>
 					<!-- END availableTagsList -->
@@ -20,6 +22,7 @@
 								<td nowrap style="padding-left:5px;">
 									<img src="/images/bullet-round.png" border="0">
 									<font size="+1"><b>%%tagName%%</b></font>
+									{availableTagsList__tagIcon}
 								</td>
 							</tr>
 					<!-- END availableTagsList_noLink -->

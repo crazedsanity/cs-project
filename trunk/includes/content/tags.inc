@@ -280,6 +280,7 @@ if($showData) {
 	
 	//display the list of available tags.
 	$tagListBaseRow = $page->templateRows['availableTagsList'];
+	$showIconRow = $page->templateRows['availableTagsList__tagIcon'];
 	$myRow = "";
 	foreach($myTagList as $tagNameId=>$data) {
 		$tagName = $data['name'];
@@ -292,7 +293,12 @@ if($showData) {
 			'tagNameId'	=> $tagNameId,
 			'tagName'	=> $tagName
 		);
-		$myRow .= mini_parser($tagListBaseRow, $repArr, '%%', '%%');
+		$tmpRow = mini_parser($tagListBaseRow, $repArr, '%%', '%%');
+		if(strlen($data['icon_name'])) {
+			$parsedIconDisplay = mini_parser($showIconRow, array('icon_name' => $data['icon_name']), '%%', '%%');
+			$tmpRow = mini_parser($tmpRow, array('availableTagsList__tagIcon'=>$parsedIconDisplay), '{', '}');
+		}
+		$myRow .= $tmpRow;
 	}
 	$page->add_template_var("availableTagsList", $myRow);
 }
