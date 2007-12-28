@@ -220,7 +220,7 @@ class mainRecord {
 				$retval[$index]['start_date'] = $tmp[0];
 				
 				//retrieve a list of tags.
-				$retval[$index]['tag_list'] = $tagObj->get_tag_list_for_record($data['record_id'], TRUE, FALSE);
+				$retval[$index]['tag_list'] = $tagObj->get_tag_list_for_record($data['record_id'], TRUE, TRUE);
 			}
 			
 			//set it into cache.
