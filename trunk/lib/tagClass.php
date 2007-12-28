@@ -26,6 +26,12 @@ class tagClass
 	/** Object for logging stuff */
 	private $logsObj;
 	
+	/** Path to tag images... */
+	const iconPath = '/images/tags/';
+	
+	/** Extension for all tag images... */
+	const iconExt = '.gif';
+	
 	//=========================================================================
 	/**
 	 * Constructor.  Requires connected phpDB{} object.
@@ -143,12 +149,18 @@ class tagClass
 	 * @return NULL			FAIL: no records
 	 * @return (exception)	FAIL: database error
 	 */
-	public function get_tags_for_record($recordId) {
+	public function get_tags_for_record($recordId, $getIconName=FALSE) {
 		//
 		$sqlArr = array (
 			'record_id'			=> cleanString($recordId, 'numeric')
 		);
-		$sql = "SELECT tag_name_id, name FROM tag_name_table INNER JOIN tag_table USING (tag_name_id) " .
+		
+		$selectThis = 'tag_name_id, name';
+		if($getIconName) {
+			$selectThis .= ', icon_name';
+		}
+		
+		$sql = "SELECT ". $selectThis ." FROM tag_name_table INNER JOIN tag_table USING (tag_name_id) " .
 				"WHERE ". string_from_array($sqlArr, 'select') .' ORDER BY lower(name)';
 		
 		$numrows = $this->db->exec($sql);
@@ -168,7 +180,15 @@ class tagClass
 		}
 		else {
 			//retrieve the data for returning.
-			$retval = $this->db->farray_nvp('tag_name_id', 'name');
+			if($getIconName) {
+				$retval = $this->db->farray_fieldnames('tag_name_id', NULL, 0);
+				foreach($retval as $index=>$value) {
+					$retval[$index]['imgHtml'] = $this->create_icon_image_html($value['icon_name'], $value['name']);
+				}
+			}
+			else {
+				$retval = $this->db->farray_nvp('tag_name_id', 'name');
+			}
 		}
 		
 		return($retval);
@@ -491,6 +511,60 @@ class tagClass
 		
 		return($retval);
 	}//end update_tag_modifier()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function get_tag_list_for_record($recordId, $addImageHTML=TRUE, $onlyShowIcons=FALSE) {
+		$data = $this->get_tags_for_record($recordId, TRUE);
+		
+		
+		
+		$retval = NULL;
+		if(is_array($data)) {
+			$gf = new cs_globalFunctions();
+			
+			foreach($data as $index=>$value) {
+				if($addImageHTML) {
+					if($onlyShowIcons) {
+						if(strlen($value['icon_name'])) {
+							$current = $this->create_icon_image_html($value['icon_name'], $value['name']);
+						}
+						else {
+							$current = $value['name'];
+						}
+					}
+					else {
+						if(strlen($value['icon_name'])) {
+							$current = $value['name'] .' '. $this->create_icon_image_html($value['icon_name'], $value['name']);
+						}
+						else {
+							$current = $value['name'];
+						}
+					}
+				}
+				else {
+					$current = $value['icon_name'];
+				}
+				$retval = $gf->create_list($retval, $current, ',');
+			}
+		}
+		
+		return($retval);
+	}//end get_tag_list_for_record()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	public function create_icon_image_html($icon, $name=NULL) {
+		$retval = NULL;
+		if(strlen($icon)) {
+			$retval = '<img src="' . self::iconPath . $icon . self::iconExt . '" alt="'. $name .'" border="0">';
+		}
+		return($retval);
+	}//end create_icon_image_html()
 	//=========================================================================
 }
 

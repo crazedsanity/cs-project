@@ -186,8 +186,7 @@ class mainRecord {
 		
 		//TODO: when retrieving the list of projects, "record_get_num_children()" is unaware of the group, and can't even guess what status it should filter on... leads to the "Project #<blah> disappeared" problem. 
 		$query = "SELECT r.*, record_get_num_children(record_id) as num_children, s.name as status_text, " .
-				"u.username as assigned, ce.email, c.fname, c.lname, c.company, " .
-				"tag_list(r.record_id) " .
+				"u.username as assigned, ce.email, c.fname, c.lname, c.company " .
 				"FROM record_table AS r INNER JOIN status_table AS s ON (s.status_id=r.status_id) " .
 				"INNER JOIN contact_table AS c ON (r.creator_contact_id=c.contact_id) " .
 				"INNER JOIN contact_email_table AS ce ON (c.contact_email_id=ce.contact_email_id)" .
@@ -212,12 +211,16 @@ class mainRecord {
 			$retval = $this->db->farray_fieldnames("public_id",NULL,0);
 			
 			//format the start_date
+			$tagObj = new tagClass($this->db);
 			foreach($retval as $index=>$data) {
 				$tmp = explode('.', $data['start_date']);
 				if(preg_match('/00:00:00$/', $tmp[0])) {
 					$tmp[0] = preg_replace('/ 00:00:00$/', '', $tmp[0]);
 				}
 				$retval[$index]['start_date'] = $tmp[0];
+				
+				//retrieve a list of tags.
+				$retval[$index]['tag_list'] = $tagObj->get_tag_list_for_record($data['record_id'], TRUE, FALSE);
 			}
 			
 			//set it into cache.
