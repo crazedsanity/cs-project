@@ -690,7 +690,9 @@ ALTER SEQUENCE status_table_status_id_seq OWNED BY status_table.status_id;
 
 CREATE TABLE tag_name_table (
     tag_name_id integer NOT NULL,
-    name text NOT NULL
+    name text NOT NULL,
+	modifier integer NOT NULL default -1,
+	icon_name text
 );
 
 
