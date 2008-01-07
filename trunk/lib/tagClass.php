@@ -376,7 +376,7 @@ class tagClass
 		//make sure we didn't encounter a nasty internal error...
 		if(is_null($currentPosition) || !is_numeric($currentPosition)) {
 			//what can we do?
-			$details = __METHOD__ .": couldn't find current position for tagId=(". $tagId .")";
+			$details = __METHOD__ .": couldn't find current position for tagId=(". $tagId ."): ". $currentPosition;
 			$this->logsObj->log_dberror($details);
 			throw new exception($details);
 		}
