@@ -16,6 +16,27 @@
 
 $sessionCache = new sessionCache("settings");
 
+function myFunction($x) {
+	$objResponse = new xajaxResponse();
+	$objResponse->addAssign('ajaxOutput', 'innerHTML', "User sent (". $x .")");
+	return($objResponse);
+}
+
+
+$xajax->registerFunction('myFunction');
+$xajax->processRequests();
+
+ob_start();
+$xajax->printJavascript('/xajax');
+$xajaxHeaders = ob_get_contents();
+ob_end_clean();
+
+
+
+$page->add_template_var('XAJAX_HEADERS', $xajaxHeaders);
+
+
+
 if($page->ftsSections[2] == 'add') {
 	//okay, they're adding a tag: the URL should look 
 	//	something like: /content/tags/add/helpdesk/2/555
