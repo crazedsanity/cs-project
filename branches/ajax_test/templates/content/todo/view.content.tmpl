@@ -1,0 +1,227 @@
+<!--
+ * Last Author:         $Author$ 
+ * Current Revision:    $Revision$ 
+ * Repository Location: $HeadURL$ 
+ * Last Updated:        $Date$
+-->
+
+<form method="POST" action="">
+<input type="HIDDEN" name="module" value="todo">
+<input type="HIDDEN" name="todo_id" value="{todo_id}">
+<table>
+<tbody>
+<tr>
+	<th>Title: </th>
+	
+	<td>
+		<div style="padding:0px;" id="titleDisplay">
+				<div id="title_text" style="display:inline;">[<a href="javascript:void(enableInput('title'));">Edit</a>] <font size="+1"><b>{name}</b></font></div>
+<!-- BEGIN edit_title_link -->
+		<div id="title_inputDiv" style="display:none;"><input id="title_input" type="text" size="80" name="updates[name]" value="{name}" disabled></div>
+<!-- END edit_title_link -->
+		</div>
+	</td>
+</tr>
+<tr>
+	<th>From:</th>
+	
+	<td><b>{creator}<b></td>
+</tr>
+<tr>
+	
+	<th>Submit:</th>
+	<td> {created}</td>
+</tr>
+<tr>
+	<th>Description of the request: </th>
+	<td style="border:solid #000 1px;"><pre>{body}</pre></td>
+</tr>
+<tr>
+	<th valign="top" style="border-top:dashed #000 1px;">Previous remarks:</th>
+	
+	<td style="border-top:dashed #000 1px;">
+	<table border=0 cellpadding=3 cellspacing=0>
+<!-- BEGIN previousComments -->
+			<tr>
+				<td><b>%%subject%%</b> (<i>#%%todo_comment_id%%</i>) by <i>%%creator%%</i>: %%created%%</td>
+			</tr>
+			<tr>
+				<td><pre>%%body%%</pre></td>
+			</tr>
+<!-- END previousComments -->
+	</table></td>
+</tr>
+<!-- BEGIN addComment -->
+<tr>
+	<th valign="top">Add a new remark:</th>
+	
+	<td>
+		<div id="comment_text" style="display:inline;">[<a href="javascript:void(enableInput('comment'));"><b>Click to Add Comment</b></a>]</div>
+		<div id="comment_inputDiv" style="display:none">
+			<textarea id="comment_input" cols="100" rows="6" name="comment" disabled></textarea>
+		</div>
+	</td>
+</tr>
+<!-- END addComment -->
+<tr>
+	<th>Assign to: </th>
+	<td>
+		<!-- BEGIN assign_list -->
+			<div id="assigned_contact_id_text" style="display:inline;">[<a href="javascript:void(enableInput('assigned_contact_id'))">Edit</a>] {assigned_user}</div>
+			<div id="assigned_contact_id_inputDiv" style="display:none"><select id="assigned_contact_id_input" name="updates[assigned_contact_id]" disabled></div>
+				{user_assign_list}
+			</select>
+		<!-- END assign_list -->
+		<!-- BEGIN assigned_user_text -->
+			{assigned_user}
+		<!-- END assigned_user_text -->
+	
+	<!-- BEGIN undertake_button -->
+			<input type="submit" name="action" value="Undertake">
+	<!-- END undertake_button -->
+	</td>
+</tr>
+<tr>
+	<th>Project:</th>
+	<td style="border:solid #000 1px;">&lt;&lt; <a href="/content/project/view?ID={public_id}">{record_name}</a> &gt;&gt;
+		<div class="note" style="display:inline;">NOTE: add link to facility that allows changing linked project...</div></td>
+</tr>
+<tr>
+	<th>Status: </th>
+	<td>{status_text}&nbsp;</td>
+</tr>
+<tr>
+	<th>Begin:</th>
+
+	<td nowrap>
+		<!-- BEGIN modifiable_started -->
+		<div id="started_text" style="display:inline;">[<a href="javascript:void(enableInput('started'));">Edit</a>] {started}</div>
+		<div id="started_inputDiv" style="display:none;">
+			<input id="started_input" name="updates[started]" size="10" maxlength="10" value="{started}" type="text" disabled> [yyyy-mm-dd]
+		</div> 
+		<!-- END modifiable_started -->
+		<!-- BEGIN readonly_started -->
+			{started}
+		<!-- END readonly_started -->
+	</td>
+</tr>
+<tr>
+
+	<th>Deadline: </th>
+	
+	<td>
+	<!-- BEGIN modifiable_deadline -->
+		<div id="deadline_text" style="display:inline;">[<a href="javascript:void(enableInput('deadline'))">Edit</a>] {deadline}</div>
+		<div id="deadline_inputDiv" style="display:none">
+			<input id="deadline_input" name="updates[deadline]" size="10" maxlength="10" value="{deadline}" type="text">  [yyyy-mm-dd]
+		</div>
+	<!-- END modifiable_deadline -->
+	<!-- BEGIN readonly_deadline -->
+		{deadline}
+	<!-- END readonly_deadline -->
+	</td>
+</tr>
+<tr>
+	<td></td>
+	<td><hr>
+	<i><font size="-3" color="red">(Only enter something if it's actually changing!)</font></i>
+	<BR></td>
+</tr>
+<tr>
+	<td></td>
+	
+	<td style="border-bottom:solid #000 1px;">
+		<table border=2>
+			<tr>
+				<th colspan="2">Hours Logged So Far (Last {hoursLoggedLimit}):</th>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">
+					<table>
+						<tr>
+							<td><b>Timestamp</b></td>
+							<td> | <b>User</b></td>
+							<td> | <b>Hours</b></td>
+							<td> | <b>System Note</b></td>
+						</tr>
+						<!-- BEGIN logEstimateRecord_row -->
+						<tr>
+							<td style="background-color:%%class%%">%%creation%%</td>
+							<td style="background-color:%%class%%">%%username%%</td>
+							<td style="background-color:%%class%%">%%add_elapsed%%</td>
+							<td style="background-color:%%class%%">%%system_note%%</td>
+						</tr>
+						<!-- END logEstimateRecord_row -->
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<b>Original Estimate:</b> {estimate_original}
+				<!-- BEGIN input_orig_estimate -->
+					<input type="text" size="15" maxlength="15" name="updates[estimate_original]" value="">
+				<!-- END input_orig_estimate -->
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<b>Current Estimate:</b>  <div id="estimate_current_text" style="display:inline;">{estimate_current} 
+					<!-- BEGIN modifiable_curr_estimate -->
+						[<a href="javascript:void(enableInput('estimate_current'))">Edit</a>]</div>
+						<div id="estimate_current_inputDiv" style="display:none;">
+							<input id="estimate_current_input" type="text" size="15" maxlength="15" name="updates[estimate_current]" value="" disabled>
+					<!-- END modifiable_curr_estimate -->
+					</div>
+				</td>
+				
+				<td>
+					<b>Time Elapsed:</b> {estimate_elapsed}
+			<!-- BEGIN addElapsed -->
+					 -- <b>Add more:</b><input type="text" size="15" maxlength="15" name="updates[add_elapsed]" value="">
+			<!-- END addElapsed -->
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td>&nbsp;</td>
+	<td>
+		<table border="0" cellpadding="3" cellspacing="0">
+			<tr>
+				<td><b>Priority: </b>
+					<!-- BEGIN modifiable_priority -->
+					<div id="priority_text" style="display:inline;">{priority} [<a href="javascript:void(enableInput('priority'))">Edit</a>]</div>
+					<div id="priority_inputDiv" style="display:none;"><select id="priority_input" name="updates[priority]">
+						{select_priority_list}
+					</select>
+					</div>
+					<input type="HIDDEN" name="updates[status_id]" value="{status_id}">
+					<!-- END modifiable_priority -->
+					<!-- BEGIN readonly_priority -->
+						{priority}
+					<!-- END readonly_priority -->
+				</td>
+				
+				<td style="padding-left:50px;"><b>Progress:</b>  {progress}%</td>
+				
+<!-- BEGIN done_box -->
+				<td style="padding-left:50px;"><b>Done:</b> <input type="checkbox" name="done"></td>
+<!-- END done_box -->
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td align="center" colspan="2">
+<!-- BEGIN action_buttons -->
+		<input name="action" value="{modify_or_create_button}" type="submit">&nbsp;
+		<input type="submit" name="action" value="Comment">
+<!-- END action_buttons -->
+		<input type="button" value="Go Back" onClick="location.href='/content/project/view?ID={public_id}'">
+<!-- BEGIN reopen_button -->
+		<input type="submit" name="action" value="Re-open">
+<!-- END reopen_button -->
+	</td>
+</tr>
+</tbody>
+</table>
+</form>
+<BR><BR><BR>
