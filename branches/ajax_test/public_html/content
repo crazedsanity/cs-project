@@ -15,7 +15,6 @@ EXAMPLE: public_html/content  ->  ./index.php
 */
 
 require_once(dirname(__FILE__) ."/../lib/site_config.php");
-require_once(dirname(__FILE__) ."/xajax/xajax_core/xajax.inc.php");
 
 $db = new cs_phpDB;
 $db->connect(get_config_db_params());
@@ -26,15 +25,6 @@ define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();
 $contentObj->handle_session($session);
 $contentObj->force_authentication("/login.php");
-
-$xajax = new xajax();
-
-ob_start();
-$xajax->printJavascript('/xajax');
-$xajaxHeaders = ob_get_contents();
-ob_end_clean();
-
-$contentObj->templateObj->add_template_var('XAJAX_HEADERS', $xajaxHeaders);
 $contentObj->finish();
 
 ?>
