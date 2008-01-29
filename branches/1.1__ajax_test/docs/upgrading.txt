@@ -1,0 +1,60 @@
+UPGRADING CS-PROJECT
+--------------------
+
+=== DEFINITIONS ===
+Because the definition of a given term is sometimes inconsistent across software projects, I feel it is important to make their meanings as clear as possible to avoid confusion.
+
+	* "version string": this is a string of numbers separated by dots, sometimes containing a suffix, to indicate a particular "variant" of CS-Project's codebase.  Example: "1.0.0-BETA1" is the first BETA version of release 1 (minor version 0, maintenance 0).
+	
+	* "version suffix": A version suffix indicates that the given version is not known to be stable.  They contain a number after the suffix to indicate how many of that release has been made (for 3 beta releases, the suffix would be "-BETA3").  An example of suffixes used by CS-Project:
+		-- ALPHA: very unstable, lacking many user-friendly features, usually known contain bugs (some of which may be critical), and has generally only been tested by a very limited number of people.  Usually only available to hardcore developers & testers.
+		-- BETA: appears to be stable, may lack some less-important features, but free of all known bugs.  These are usually available to anyone that seeks to test them.
+		-- RC: this is a "release candidate".  All accepted feature requests have been implemented, and is free of all known bugs.  This is usually made available to the public, though not widely publicized.
+
+	* "major version": a massive change to the interface and underlying architecture.  These changes are usually very apparent and usually require reading documentation to discover what has changed.
+
+	* "minor version": incorporation of one or more feature requests.  Incorporates all prior changes and fixes.
+
+	* "maintenance version": whenever one or more bugs are fixed, a maintenance release is created.  These sometimes incorporate minor feature requests deemed appropriate and fall within the scope of the current minor version.
+
+=== UPDATE FREQUENCY ===
+Constant work is being done on CS-Project to make it as powerful (and useful) as possible.  It is nice, however, to know roughly how often one should expect changes to occur:
+
+	* All file releases are based on Subversion releases.
+	* Major version releases:
+		-- no set timeline is available for major releases.
+	* Minor version releases:
+		-- these should generally only happen every 1-12 months, depending upon the number of features requested.
+	* Maintenance releases:
+		-- created whenever a critical bug is fixed
+		-- can sometimes happen up to several times per day
+
+=== AVAILABILITY ===
+	* Releases are available via Subversion immediately.
+	* File releases will be made 
+	* These releases are generally available as a file download once a month, depending on the number of changes that happened (if they contain critical bug fixes, updates are usually made available the same day they're fixed).
+
+
+---------------------
+HOW TO OBTAIN UPDATES
+---------------------
+
+Whenever an existing installation is updated/upgraded, the database is updated to reflect the new version.  This sometimes involves scripted changes, which should always run seemlessly in the background.
+
+
+=== Subversion (the easy way) ===
+	* maintenance updates:
+		-- update your install using "svn update" (via command line or a program)
+		-- open/reload website to ensure the new version is reflected
+	* major/minor versions:
+		-- use "svn info" to determine the current release (the URL will have "releases/" followed by the major.minor version your installation is using)
+		-- to switch to (for example) version 1.2, run the following command:
+			"svn switch https://cs-project.svn.sourceforge.net/svnroot/cs-project/releases/1.2"
+		-- open/reload website to ensure the new version is reflected.
+
+=== Manual Download ===
+	* download the latest copy from http://sf.net/projects/cs-project
+	* backup your existing install
+	* extract new version into a new directory
+	* copy old changed files and the config.xml file into the new directory.
+	* open/reload the website to ensure it reflects the new version.
