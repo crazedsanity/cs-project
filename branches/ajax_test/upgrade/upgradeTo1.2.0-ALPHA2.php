@@ -74,7 +74,7 @@ class upgrade_to_1_2_0_ALPHA2 extends dbAbstract {
 			foreach($iconMods as $name=>$icon) {
 				if(isset($allTags[$name])) {
 					//update.
-					$sql = "UPDATE tag_name_table SET icon_name='". $icon ."' WHERE id=". $allTags[$name];
+					$sql = "UPDATE tag_name_table SET icon_name='". $icon ."' WHERE tag_name_id=". $allTags[$name]['tag_name_id'];
 				}
 				else {
 					//insert.
