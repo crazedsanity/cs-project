@@ -7,6 +7,15 @@
  * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/includes/content/helpdesk.inc $ 
  * Last Updated:        $Date:2007-11-20 11:04:33 -0600 (Tue, 20 Nov 2007) $
  */
+
+
+
+$GLOBALS['objects'] = array();
+$GLOBALS['objects']['page'] =& $page;
+$GLOBALS['objects']['proj'] =& $proj;
+$GLOBALS['objects']['tag'] =& $proj->tagObj;
+
+
 if($_POST) {
 	$action = strtolower($_POST['action']);
 	$helpdeskId = $_POST['id'];
@@ -171,14 +180,6 @@ if($_POST) {
 			));
 		}
 	}
-	else {
-		//the didn't post enough...
-		set_message_wrapper(array(
-			"title"		=> "FAILED TO CREATE ISSUE!",
-			"message"	=> "Unable to create the message... [$retval]",
-			"type"		=> "error"
-		));
-	}
 	
 	//build the redirection URL.
 	$url = $baseUrl;
@@ -187,20 +188,22 @@ if($_POST) {
 	if(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID'])) {
 		unset($urlSection);
 	}
-	if(isset($urlSection) && !preg_match('/\?/', $url)) {
-		if(!preg_match('/$\//', $url)) {
-			$urlSection = "/". $urlSection;
+	else {
+		if(isset($urlSection) && !preg_match('/\?/', $url)) {
+			if(!preg_match('/$\//', $url)) {
+				$urlSection = "/". $urlSection;
+			}
+			$url .= $urlSection;
 		}
-		$url .= $urlSection;
-	}
-	if(!$byPassUrlExtras && count($urlExtrasArr) > 0) {
-		$urlExtrasStr = string_from_array($urlExtrasArr, "url");
-		if($urlExtrasStr !== 0) {
-			$url .= "?". $urlExtrasStr .'&random='. time();
+		if(!$byPassUrlExtras && count($urlExtrasArr) > 0) {
+			$urlExtrasStr = string_from_array($urlExtrasArr, "url");
+			if($urlExtrasStr !== 0) {
+				$url .= "?". $urlExtrasStr .'&random='. time();
+			}
 		}
+		conditional_header($url);
+		exit;
 	}
-	conditional_header($url);
-	exit;
 }
 else {
 	$helpdeskId = $_GET['ID'];
@@ -353,37 +356,13 @@ else {
 		
 		
 		
-		$myTagList = $proj->tagObj->get_tags_for_record($helpdeskData['record_id'], TRUE);
-		if(is_array($myTagList)) {
-			if($helpdeskData['status_id'] == 4) {
-				$tagListVar = 'text_tags';
-				$baseRow = $page->templateRows['text_tags'];
-			}
-			else {
-				$tagListVar = 'removeable_tag';
-				$baseRow = $page->templateRows['removeable_tag'];
-			}
-			$myTagRow = "";
-			$tCount = 0;
-			foreach($myTagList as $tagNameId=>$tagData) {
-				$tagName = $tagData['name'];
-				
-				//don't show a separator for the end piece.
-				$tCount++;
-				$separator = ' || ';
-				if($tCount == count($myTagList)) {
-					$separator = "";
-				}
-				$repArr = array(
-					'tag_name_id'	=> $tagNameId,
-					'name'			=> $tagName,
-					'separator'		=> $separator,
-					'imgHtml'		=> $tagData['imgHtml']
-				);
-				$myTagRow .= mini_parser($baseRow, $repArr, '%%', '%%');
-			}
-			$page->add_template_var($tagListVar, $myTagRow);
+		$useTextTags = FALSE;
+		if($helpdeskData['status_id'] == 4) {
+			$useTextTags = TRUE;
 		}
+		generate_tag_list($helpdeskData['record_id'], $useTextTags);
+		
+		
 		
 		//Display tags that can be added.
 		$availableTagsList = $proj->tagObj->get_available_tags_for_record($helpdeskData['record_id'], 3);
@@ -509,4 +488,107 @@ else {
 		}
 	}
 }
+
+//AJAX FUNCTIONS
+
+
+
+
+$xajax->registerFunction('ajax__removeTag');
+$xajax->processRequests();
+
+ob_start();
+$xajax->printJavascript('/xajax');
+$xajaxHeaders = ob_get_contents();
+ob_end_clean();
+
+
+
+$page->add_template_var('XAJAX_HEADERS', $xajaxHeaders);
+
+function ajax__removeTag($tagNameId, $recordId) {
+	ob_start();
+	$tagObj = $GLOBALS['objects']['tag'];
+	$objResponse = new xajaxResponse();
+	
+	$tagObj->remove_tag($recordId,$tagNameId);
+	
+	$newTagList = generate_tag_list($recordId);
+	
+	if(strlen($newTagList)) {
+		$returnThis = $newTagList;
+	}
+	else {
+		$returnThis = "invalid response from generate_tag_list($recordId)";
+	}
+	
+	$objResponse->addAssign('tagList', 'innerHTML', $returnThis);
+	#$objResponse->addAssign('tagList', 'innerHTML', 'GOT IT!!!');
+	#$objResponse->addAssign('ajaxOutput', 'innerHTML', "User sent (". $x .")");
+	ob_end_clean();
+	return($objResponse);
+}//end ajax__removeTag()
+
+
+function generate_tag_list($recordId, $useTextRows=FALSE) {
+	$page = $GLOBALS['objects']['page'];
+	$tagObj = $GLOBALS['objects']['tag'];
+	
+	if(!is_numeric($recordId)) {
+		return("invalid recordId=(". $recordId .")");
+	}
+	elseif(!(is_object($tagObj) && get_class($tagObj) == 'tagClass')) {
+		return("didn't get tagClass object");
+	}
+	elseif(!(is_object($page) && get_class($page) == 'cs_genericPage')) {
+		return("invalid page object: (". get_class($page) .")");
+	}
+	
+	
+	$myTagList = $tagObj->get_tags_for_record($recordId, TRUE);
+	if(is_array($myTagList)) {
+		if($useTextRows) {
+			$tagListVar = 'text_tags';
+			$baseRow = $page->templateRows['text_tags'];
+		}
+		else {
+			$tagListVar = 'removeable_tag';
+			$baseRow = $page->templateRows['removeable_tag'];
+		}
+		$myTagRow = "";
+		$tCount = 0;
+		foreach($myTagList as $tagNameId=>$tagData) {
+			$tagName = $tagData['name'];
+			
+			//don't show a separator for the end piece.
+			$tCount++;
+			$separator = ' || ';
+			if($tCount == count($myTagList)) {
+				$separator = "";
+			}
+			$repArr = array(
+				'tag_name_id'	=> $tagNameId,
+				'name'			=> $tagName,
+				'separator'		=> $separator,
+				'imgHtml'		=> $tagData['imgHtml']
+			);
+			$myTagRow .= mini_parser($baseRow, $repArr, '%%', '%%');
+		}
+		$page->add_template_var($tagListVar, $myTagRow);
+		
+		if(strlen($myTagRow)) {
+			$retval = $myTagRow;
+		}
+		else {
+			$retval = __METHOD__ .": No data parsed..?";
+		}
+	}
+	else {
+		$retval = "No tags in list!";
+	}
+	
+	return($retval);
+}
+
+
 ?>
