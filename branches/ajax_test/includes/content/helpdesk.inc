@@ -365,11 +365,7 @@ else {
 		
 		
 		//Display tags that can be added.
-		$availableTagsList = $proj->tagObj->get_available_tags_for_record($helpdeskData['record_id'], 3);
-		if(is_array($availableTagsList) && count($availableTagsList) > 0) {
-			$myTagsList = array_as_option_list($availableTagsList,NULL,'select',$page->templateRows['addTag_option']);
-			$page->add_template_var("add_tag_list", $myTagsList);
-		}
+		generate_addable_tags($helpdeskData['record_id']);
 		
 		//now parse the note rows.
 		if(is_array($myNotes) && count($myNotes)) {
@@ -495,6 +491,7 @@ else {
 
 
 $xajax->registerFunction('ajax__removeTag');
+$xajax->registerFunction('ajax__addTag');
 $xajax->processRequests();
 
 ob_start();
@@ -523,11 +520,27 @@ function ajax__removeTag($tagNameId, $recordId) {
 	}
 	
 	$objResponse->addAssign('tagList', 'innerHTML', $returnThis);
-	#$objResponse->addAssign('tagList', 'innerHTML', 'GOT IT!!!');
-	#$objResponse->addAssign('ajaxOutput', 'innerHTML', "User sent (". $x .")");
+	$objResponse->addAssign('addTagOptionList', 'innerHTML', generate_addable_tags($recordId));
 	ob_end_clean();
 	return($objResponse);
 }//end ajax__removeTag()
+
+
+
+function ajax__addTag($tagNameId, $recordId) {
+	ob_start();
+	
+	$tagObj = $GLOBALS['objects']['tag'];
+	$objResponse = new xajaxResponse();
+	
+	$tagObj->add_tag($recordId, $tagNameId);
+	
+	$objResponse->addAssign('tagList', 'innerHTML', generate_tag_list($recordId));
+	$objResponse->addAssign('addTagOptionList', 'innerHTML', generate_addable_tags($recordId));
+	return($objResponse);
+	ob_end_clean();
+	
+}//end ajax__addTag()
 
 
 function generate_tag_list($recordId, $useTextRows=FALSE) {
@@ -549,12 +562,16 @@ function generate_tag_list($recordId, $useTextRows=FALSE) {
 	if(is_array($myTagList)) {
 		if($useTextRows) {
 			$tagListVar = 'text_tags';
-			$baseRow = $page->templateRows['text_tags'];
 		}
 		else {
 			$tagListVar = 'removeable_tag';
-			$baseRow = $page->templateRows['removeable_tag'];
 		}
+		
+		if(!isset($page->templateRows[$tagListVar])) {
+			$page->set_all_block_rows();
+		}
+		$baseRow = $page->templateRows[$tagListVar];
+		
 		$myTagRow = "";
 		$tCount = 0;
 		foreach($myTagList as $tagNameId=>$tagData) {
@@ -574,6 +591,7 @@ function generate_tag_list($recordId, $useTextRows=FALSE) {
 			);
 			$myTagRow .= mini_parser($baseRow, $repArr, '%%', '%%');
 		}
+		$myTagRow = mini_parser($myTagRow, array('record_id'=>$recordId), '{', '}');
 		$page->add_template_var($tagListVar, $myTagRow);
 		
 		if(strlen($myTagRow)) {
@@ -587,6 +605,22 @@ function generate_tag_list($recordId, $useTextRows=FALSE) {
 		$retval = "No tags in list!";
 	}
 	
+	return($retval);
+}
+
+
+function generate_addable_tags($recordId) {
+	$tagObj = $GLOBALS['objects']['tag'];
+	$page = $GLOBALS['objects']['page'];
+	$availableTagsList = $tagObj->get_available_tags_for_record($recordId, 3);
+	$retval = NULL;
+	if(is_array($availableTagsList) && count($availableTagsList) > 0) {
+		$myTagsList = array_as_option_list($availableTagsList,NULL,'select',$page->templateRows['addTag_option']);
+		$myTagsList = '<select>'. $myTagsList .'</select>';
+		$myTagsList = mini_parser($myTagsList, array('record_id' => $recordId), '{', '}');
+		$page->add_template_var("add_tag_list", $myTagsList);
+		$retval = $myTagsList;
+	}
 	return($retval);
 }
 
