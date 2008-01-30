@@ -1,11 +1,8 @@
 
-<div id="ajaxOutput" style="border:solid #000 3px;">
-This is where the output from AJAX will go...
-</div>
-
 <table border=1 cellpadding=3 cellspacing=0>
 	<tr>
 		<td>
+			<div id="tagList">
 			<table border=1 cellpadding=3 cellspacing=0>
 				<tr>
 					<td>
@@ -14,7 +11,7 @@ This is where the output from AJAX will go...
 					<!-- BEGIN availableTagsList -->
 							<div id="listedTag_%%tagNameId%%" style="padding-left:5px;">
 									<img src="/images/bullet-round.png" border="0">
-									<a href="javascript:void(xajax_myFunction(%%tagNameId%%));"> %%tagName%%</a>
+									<a href="javascript:void(xajax_ajax__showtagrecords(%%tagNameId%%));"> %%tagName%%</a>
 									<!-- BEGIN availableTagsList__tagIcon -->
 									<img src="/images/tags/%%icon_name%%.gif" border="0">
 									<!-- END availableTagsList__tagIcon -->
@@ -39,55 +36,64 @@ This is where the output from AJAX will go...
 						</form>
 					</td>
 			</table>
+			</div>
 		</td>
 		
 		<td>
+			<div id="currentTagData">
+			<!-- BEGIN currentTagData -->
 			<form method="POST" action="{PHP_SELF}?editTagId={showTagNameId}">
 				<input type="HIDDEN" name="tag_name_id" value="{showTagNameId}">
 				<input type="HIDDEN" name="action" value="update">
-			<table border=1 cellpadding=3 cellspacing=0>
-				<tr>
-					<td align="center" colspan="2">
-						<h1 style="display:inline;">{tagName}</h1><br>
-						<table border="0" cellpadding="3" cellspacing="0">
-							<tr>
-								<td><b>Associated Records:</b></td>
-								<td>{tagRecordCount}</td>
-							</tr>
-							<tr>
-								<td><b>Modifier:</b>
-									<a href="/help/tags/modifier" target="_blank"><img src="/images/icon-help.png" border="0"></a></td>
-								<td>
-									<select name="modifier" onChange="this.form.submit();">
-										{modifier_option_list}
-									</select>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<th>Record Type</th>
-					<th>Name</th>
-				</tr>
-				
-				<!-- BEGIN tag_row -->
-					<tr style="background-color: %%rowColor%%;" onmouseover="this.style.backgroundColor = '#ffffff'" 
-					onmouseout="this.style.backgroundColor ='%%rowColor2%%'" 
-					onclick="location.href = '/content/%%module%%/view?ID=%%public_id%%'">
-						
-						<td>%%module%%</td>
-					
-						<td nowrap><a href="/content/%%module%%/view?ID=%%public_id%%">%%name%%</a>&nbsp;</td>
-					</tr>
-				<!-- END tag_row -->
-				<!-- BEGIN tag_row__noRecords -->
+				<table border=1 cellpadding=3 cellspacing=0>
 					<tr>
-						<td colspan="5"><font color="red"><b>NO RECORDS</b></font></td>
+						<td align="center" colspan="2">
+							<div id="currentTagData_header">
+							<!-- BEGIN currentTagData_header -->
+							<h1 style="display:inline;">{tagName}</h1><br>
+							<table border="0" cellpadding="3" cellspacing="0">
+								<tr>
+									<td><b>Associated Records:</b></td>
+									<td>{tagRecordCount}</td>
+								</tr>
+								<tr>
+									<td><b>Modifier:</b>
+										<a href="/help/tags/modifier" target="_blank"><img src="/images/icon-help.png" border="0"></a></td>
+									<td>
+										<select name="modifier" onChange="this.form.submit();">
+											{modifier_option_list}
+										</select>
+									</td>
+								</tr>
+							</table>
+							<!-- END currentTagData_header -->
+							</div>
+						</td>
 					</tr>
-				<!-- END tag_row__noRecords -->
-			</table>
+					<tr>
+						<th>Record Type</th>
+						<th>Name</th>
+					</tr>
+					<!-- BEGIN tag_row -->
+						<tr style="background-color: %%rowColor%%;" onmouseover="this.style.backgroundColor = '#ffffff'" 
+						onmouseout="this.style.backgroundColor ='%%rowColor2%%'" 
+						onclick="location.href = '/content/%%module%%/view?ID=%%public_id%%'">
+							
+							<td>%%module%%</td>
+						
+							<td nowrap><a href="/content/%%module%%/view?ID=%%public_id%%">%%name%%</a>&nbsp;</td>
+						</tr>
+					<!-- END tag_row -->
+					<!-- BEGIN tag_row__noRecords -->
+						<tr>
+							<td colspan="5"><font color="red"><b>NO RECORDS</b></font></td>
+						</tr>
+					<!-- END tag_row__noRecords -->
+					</div>
+				</table>
 			</form>
+			<!-- END currentTagData -->
+			</div>
 		</td>
 		
 	</tr>

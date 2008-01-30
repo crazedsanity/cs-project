@@ -166,7 +166,7 @@ elseif($_POST) {
 $myTagList = $proj->tagObj->get_tag_list(TRUE, FALSE);
 
 $showData = TRUE;
-#$showTagNameId = $sessionCache->get_cache('tagNameId');
+$showTagNameId = $sessionCache->get_cache('tagNameId');
 
 
 if($_GET['move']) {
@@ -246,22 +246,21 @@ elseif(is_numeric($showTagNameId) && !isset($myTagList[$showTagNameId])) {
 //retrieve the (possibly updated) setting
 $showTagNameId = $sessionCache->get_cache('tagNameId');
 
-if($showData) {	
+if($showData) {
+	#showCurrentTag($showTagNameId);
+	updateTagList($showTagNameId);
+	showCurrentTag($showTagNameId);
+}
+
+
+//AJAX FUNCTIONS...
+
+function showRecordList($showTagNameId) {
+	$tagObj = $GLOBALS['objects']['tag'];
+	$page = $GLOBALS['objects']['page'];
+	
 	//get data for this tag.
-	$data = $proj->tagObj->get_records_for_tag($showTagNameId);
-	
-	//set some vars.
-	$page->add_template_var("tagName", $myTagList[$showTagNameId]['name']);
-	$page->add_template_var('tagModifier', $myTagList[$showTagNameId]['modifier']);
-	$page->add_template_var("tagRecordCount", count($data));
-	$page->add_template_var("showTagNameId", $showTagNameId);
-	
-	$page->add_template_var('modifier_option_list', create_priority_option_list($myTagList[$showTagNameId]['modifier'], 5, -5));
-	
-	create_page_title($page, array('title' => "Tag #". $showTagNameId . ": ". $myTagList[$showTagNameId]['name']));
-	
-	//rip all block rows.
-	$page->set_all_block_rows('content');
+	$data = $tagObj->get_records_for_tag($showTagNameId);
 	
 	//now list all records for this tag (assign the "no records" row, then check).
 	$tagRow = $page->templateRows['tag_row__noRecords'];
@@ -269,6 +268,8 @@ if($showData) {
 		//got data.
 		$tagRow = "";
 		$baseRow = $page->templateRows['tag_row'];
+		$rowColor1 = NULL;
+		$rowColor2 = NULL;
 		foreach($data as $index=>$subData) {
 			//add some things for alternating row colors.
 			$subData['rowColor'] = swapValue($rowColor1, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
@@ -279,6 +280,57 @@ if($showData) {
 		}
 	}
 	$page->add_template_var('tag_row', $tagRow);
+	$page->add_template_var('currentTagData', $page->templateRows['currentTagData']);
+	return($tagRow);
+}//end showRecordList()
+
+
+function showCurrentTag($showTagNameId) {
+	
+	$page = $GLOBALS['objects']['page'];
+	$tagObj = $GLOBALS['objects']['tag'];
+	
+	$myTagList = $tagObj->get_tag_list(TRUE, FALSE);
+	
+	//get data for this tag.
+	$data = $tagObj->get_records_for_tag($showTagNameId);
+	
+	if(!isset($page->templateRows['currentTagData_header'])) {
+		$page->set_all_block_rows();
+	}
+	$parseTemplate = $page->templateRows['currentTagData_header'];
+	
+	$repArr = array(
+		'tagName'					=> $myTagList[$showTagNameId]['name'],
+		'tagModifier'				=> $myTagList[$showTagNameId]['modifier'],
+		'tagRecordCount'			=> count($data),
+		'showTagNameId'			=> $showTagNameId,
+		'modifier_option_list'	=> create_priority_option_list($myTagList[$showTagNameId]['modifier'], 5, -5)
+	);
+	
+	$retval = mini_parser($parseTemplate, $repArr, '{', '}');
+	
+	foreach($repArr as $tmplVar=>$value) {
+		$page->add_template_var($tmplVar, $value);
+	}
+	
+	$page->add_template_var('currentTagData_header', $page->templateRows['currentTagData_header']);
+	
+	return($retval);
+}//end showCurrentTag()
+
+
+function updateTagList($showTagNameId) {
+	$page = $GLOBALS['objects']['page'];
+	$tagObj = $GLOBALS['objects']['tag'];
+	
+	$myTagList = $tagObj->get_tag_list(TRUE, FALSE);
+	create_page_title($page, array('title' => "Tag #". $showTagNameId . ": ". $myTagList[$showTagNameId]['name']));
+	
+	//rip all block rows.
+	$page->set_all_block_rows('content');
+	
+	$recordList = showRecordList($showTagNameId);
 	
 	//display the list of available tags.
 	$tagListBaseRow = $page->templateRows['availableTagsList'];
@@ -298,11 +350,36 @@ if($showData) {
 		$tmpRow = mini_parser($tagListBaseRow, $repArr, '%%', '%%');
 		if(strlen($data['icon_name'])) {
 			$parsedIconDisplay = mini_parser($showIconRow, array('icon_name' => $data['icon_name']), '%%', '%%');
-			$tmpRow = mini_parser($tmpRow, array('availableTagsList__tagIcon'=>$parsedIconDisplay), '{', '}');
 		}
+		else {
+			$parsedIconDisplay = "";
+		}
+		$tmpRow = mini_parser($tmpRow, array('availableTagsList__tagIcon'=>$parsedIconDisplay), '{', '}');
 		$myRow .= $tmpRow;
 	}
 	$page->add_template_var("availableTagsList", $myRow);
-}
+	$retval = mini_parser($myRow, array('tag_row'=>$recordList), '{', '}');
+	
+	return($retval);
+}//end updateTagList()
+
+
+function ajax__showTagRecords($tagNameId) {
+	$objResponse = new xajaxResponse();
+	
+	//update the list of tags.
+	$tagList = updateTagList($tagNameId);
+	$objResponse->addAssign('tagList', 'innerHTML', $tagList);
+	
+	//now update the data for the current tag.
+	$currentTagData = showCurrentTag($tagNameId);
+	$objResponse->addAssign('currentTagData_header', 'innerHTML', $currentTagData);
+	
+	//store in the session, so if they reload, the selected tag will remain.
+	$sessionCache = new sessionCache("settings");
+	$sessionCache->set_cache('tagNameId', $tagNameId);
+	
+	return($objResponse);
+}//end ajax__showTagRecords()
 
 ?>
