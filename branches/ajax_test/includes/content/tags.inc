@@ -369,7 +369,7 @@ function ajax__showTagRecords($tagNameId) {
 	
 	//update the list of tags.
 	$tagList = updateTagList($tagNameId);
-	$objResponse->addAssign('tagList', 'innerHTML', $tagList);
+	$objResponse->addAssign('availableTags', 'innerHTML', $tagList);
 	
 	//now update the data for the current tag.
 	$currentTagData = showCurrentTag($tagNameId);
