@@ -10,11 +10,6 @@
 
 
 
-$GLOBALS['objects'] = array();
-$GLOBALS['objects']['page'] =& $page;
-$GLOBALS['objects']['proj'] =& $proj;
-$GLOBALS['objects']['tag'] =& $proj->tagObj;
-
 
 if($_POST) {
 	$action = strtolower($_POST['action']);
@@ -485,23 +480,10 @@ else {
 	}
 }
 
+//call the function to add AJAX stuff...
+addAjax();
+
 //AJAX FUNCTIONS
-
-
-
-
-$xajax->registerFunction('ajax__removeTag');
-$xajax->registerFunction('ajax__addTag');
-$xajax->processRequests();
-
-ob_start();
-$xajax->printJavascript('/xajax');
-$xajaxHeaders = ob_get_contents();
-ob_end_clean();
-
-
-
-$page->add_template_var('XAJAX_HEADERS', $xajaxHeaders);
 
 function ajax__removeTag($tagNameId, $recordId) {
 	ob_start();
