@@ -488,9 +488,33 @@ addAjax();
 function ajax__removeTag($tagNameId, $recordId) {
 	ob_start();
 	$tagObj = $GLOBALS['objects']['tag'];
+	$page = $GLOBALS['objects']['page'];
 	$objResponse = new xajaxResponse();
 	
-	$tagObj->remove_tag($recordId,$tagNameId);
+	$messageArr = array(
+		'title'		=> 'Unable to Remove Tag',
+		'message'	=> "There was an unknown error while attempting to remove the tag.",
+		'type'		=> 'error'
+	);
+	
+	if(is_numeric($tagNameId) && is_numeric($recordId)) {
+		$result = $tagObj->remove_tag($recordId,$tagNameId);
+		$tagList = $tagObj->get_tag_list();
+		
+		//check the results.
+		if($result==1) {
+			//Cool.  Tell 'em the tag was removed.
+			$messageArr = array(
+				'title'		=> 'Tag Successfully Removed',
+				'message'	=> "We removed \"". $tagList[$tagNameId] ."\".",
+				'type'		=> 'status'
+			);
+		}
+		else {
+			//already got most of the array, just change the actual message.
+			$messageArr['message'] = "Result of trying to remove tag: (". $result .")";
+		}
+	}
 	
 	$newTagList = generate_tag_list($recordId);
 	
@@ -501,8 +525,13 @@ function ajax__removeTag($tagNameId, $recordId) {
 		$returnThis = "invalid response from generate_tag_list($recordId)";
 	}
 	
+	$page->set_message_wrapper($messageArr);
+	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	
 	$objResponse->addAssign('tagList', 'innerHTML', $returnThis);
 	$objResponse->addAssign('addTagOptionList', 'innerHTML', generate_addable_tags($recordId));
+	
+	
 	ob_end_clean();
 	return($objResponse);
 }//end ajax__removeTag()
@@ -513,12 +542,34 @@ function ajax__addTag($tagNameId, $recordId) {
 	ob_start();
 	
 	$tagObj = $GLOBALS['objects']['tag'];
+	$page = $GLOBALS['objects']['page'];
 	$objResponse = new xajaxResponse();
 	
-	$tagObj->add_tag($recordId, $tagNameId);
+	$result = $tagObj->add_tag($recordId, $tagNameId);
 	
 	$objResponse->addAssign('tagList', 'innerHTML', generate_tag_list($recordId));
 	$objResponse->addAssign('addTagOptionList', 'innerHTML', generate_addable_tags($recordId));
+	
+	//display a message saying it worked.
+	if($result == 1) {
+		$tagList = $tagObj->get_tag_list();
+		$messageArr = array(
+			'title'		=> 'Tag Added Successfully',
+			'message'	=> "Successfully tagged record with \"". $tagList[$tagNameId] ."\"",
+			'type'		=> 'status'
+		);
+	}
+	else {
+		$messageArr = array(
+			'title'		=> 'Failed to Add Tag',
+			'message'	=> "Result of adding tag was (". $result .")",
+			'type'		=> 'error'
+		);
+	}
+	$page->set_message_wrapper($messageArr);
+	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	
+	
 	return($objResponse);
 	ob_end_clean();
 	

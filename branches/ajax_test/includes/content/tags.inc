@@ -18,94 +18,8 @@ $sessionCache = new sessionCache("settings");
 
 addAjax();
 
-if($page->ftsSections[2] == 'add') {
-	//okay, they're adding a tag: the URL should look 
-	//	something like: /content/tags/add/helpdesk/2/555
-	//	where helpdesk is the source section, and 2 is that tag_name_id to attach record_id #555 to.
-	
-	//okay... let's do some pre-checking.
-	$tagNameId = $page->ftsSections[3];
-	$recordId = $page->ftsSections[4];
-	
-	
-	//set a default message.
-	$messageArr = array(
-		'title'			=> 'Failed to Add Tag',
-		'message'		=> "Either no tag was specified, or the tag was invalid.",
-		'type'			=> 'error'
-	);
-	
-	//here's where to go.
-	$goBack = $_SERVER['HTTP_REFERER'];
-	
-	if(is_numeric($tagNameId) && is_numeric($recordId)) {
-		$tagList = $proj->tagObj->get_tag_list();
-		
-		//okay, let's do the do.
-		$result = $proj->tagObj->add_tag($recordId, $tagNameId);
-		
-		if($result == 1) {
-			//it worked.
-			$messageArr = array(
-				'title'		=> 'Tag Added Successfully',
-				'message'	=> "Successfully tagged record with \"". $tagList[$tagNameId] ."\"",
-				'type'		=> 'status'
-			);
-		}
-	}
-	else {
-		set_message_wrapper(array(
-			'title'			=> 'Failed to Add Tag',
-			'message'		=> "Either no tag was specified, or the tag was invalid.",
-			'type'			=> 'error'
-		));
-	}
-	set_message_wrapper($messageArr);
-	conditional_header($goBack);
-	exit;
-}
-elseif($page->ftsSections[2] == 'remove') {
-	//here's where to go.
-	$goBack = $_SERVER['HTTP_REFERER'];
-	
-	//set some vars.
-	$tagNameId = $page->ftsSections[3];
-	$recordId = $page->ftsSections[4];
-	$tagList = $proj->tagObj->get_tag_list();
-	
-	//default message to display.
-	$messageArr = array(
-		'title'		=> 'Unable to Remove Tag',
-		'message'	=> "There was an unknown error while attempting to remove the tag.",
-		'type'		=> 'error'
-	);
-	
-	if(is_numeric($tagNameId) && is_numeric($recordId)) {
-		$result = $proj->tagObj->remove_tag($recordId,$tagNameId);
-		
-		//check the results.
-		if($result==1) {
-			//Cool.  Tell 'em the tag was removed.
-			$messageArr = array(
-				'title'		=> 'Tag Successfully Removed',
-				'message'	=> "We removed \"". $tagList[$tagNameId] ."\".",
-				'type'		=> 'status'
-			);
-		}
-		else {
-			//already got most of the array, just change the actual message.
-			$messageArr['message'] = "Result of trying to remove tag: (". $result .")";
-		}
-	}
-	
-	set_message_wrapper($messageArr);
-	conditional_header($goBack);
-	
-	exit;
-}
-elseif($_POST) {
+if($_POST) {
 	//got post vars.  Check them, then reload.
-	debug_print($_POST);
 	$goHere = $_SERVER['PHP_SELF'];
 	
 	if($_POST['action'] == 'update') {
@@ -115,8 +29,6 @@ elseif($_POST) {
 		//check for pre-existing tags of that name.
 		$myTagList = $proj->tagObj->get_tag_list();
 		$existingTagNameId = array_search($_POST['new_tag'], $myTagList);
-		debug_print($myTagList);
-		debug_print($existingTagNameId);
 		
 		if(is_numeric($existingTagNameId)) {
 			$newTagNameId = $existingTagNameId;
@@ -157,9 +69,12 @@ elseif($_POST) {
 		$goHere = $_POST['goBack'] ."&newTag=$newTagNameId";
 	}
 	
-	//do the redirect to remove POST headers.
-	conditional_header($goHere);
-	exit;
+	if(strlen($goHere)) {
+		
+		//do the redirect to remove POST headers.
+		conditional_header($goHere);
+		exit;
+	}
 }
 
 //get the list of tags, regardless of whether we'll show 'em all or not.
