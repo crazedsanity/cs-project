@@ -45,7 +45,7 @@
 			<form method="POST" action="{PHP_SELF}?editTagId={showTagNameId}">
 				<input type="HIDDEN" name="tag_name_id" value="{showTagNameId}">
 				<input type="HIDDEN" name="action" value="update">
-				<table border=1 cellpadding=3 cellspacing=0>
+				<table border=1 cellpadding=3 cellspacing=0 width="100%">
 					<tr>
 						<td align="center" colspan="2">
 							<div id="currentTagData_header">
@@ -70,6 +70,11 @@
 							</div>
 						</td>
 					</tr>
+				</table>
+				
+				<div id="associatedRecords">
+				<!-- BEGIN associatedRecords -->
+				<table border=1 cellpadding=3 cellspacing=0 width="100%">
 					<tr>
 						<th>Record Type</th>
 						<th>Name</th>
@@ -89,8 +94,9 @@
 							<td colspan="5"><font color="red"><b>NO RECORDS</b></font></td>
 						</tr>
 					<!-- END tag_row__noRecords -->
-					</div>
 				</table>
+				<!-- END associatedRecords -->
+				</div>
 			</form>
 			<!-- END currentTagData -->
 			</div>

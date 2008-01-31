@@ -250,6 +250,7 @@ if($showData) {
 	#showCurrentTag($showTagNameId);
 	updateTagList($showTagNameId);
 	showCurrentTag($showTagNameId);
+	showRecordList($showTagNameId);
 }
 
 
@@ -261,6 +262,11 @@ function showRecordList($showTagNameId) {
 	
 	//get data for this tag.
 	$data = $tagObj->get_records_for_tag($showTagNameId);
+	
+	if(!isset($page->templateRows['associatedRecords'])) {
+		$page->set_all_block_rows();
+	}
+	$parseTmpl = $page->templateRows['associatedRecords'];
 	
 	//now list all records for this tag (assign the "no records" row, then check).
 	$tagRow = $page->templateRows['tag_row__noRecords'];
@@ -279,9 +285,24 @@ function showRecordList($showTagNameId) {
 			$tagRow .= mini_parser($baseRow, $subData, '%%', '%%');
 		}
 	}
-	$page->add_template_var('tag_row', $tagRow);
-	$page->add_template_var('currentTagData', $page->templateRows['currentTagData']);
-	return($tagRow);
+	
+	$repArr = array(
+		'tag_row'				=> $tagRow,
+		'currentTagData'		=> $page->templateRows['currentTagData'],
+		'associatedRecords'	=> $page->templateRows['associatedRecords'],
+		'tag_row__noRecords'	=> ""
+	);
+	
+	$retval = mini_parser($parseTmpl, $repArr, '{', '}');
+	foreach($repArr as $index=>$value) {
+		$page->add_template_var($index, $value);
+	}
+	
+	#$page->add_template_var('tag_row', $tagRow);
+	#$page->add_template_var('currentTagData', $page->templateRows['currentTagData']);
+	#$page->add_template_var('associatedRecords', $page->templateRows['associatedRecords']);
+	
+	return($retval);
 }//end showRecordList()
 
 
@@ -369,11 +390,14 @@ function ajax__showTagRecords($tagNameId) {
 	
 	//update the list of tags.
 	$tagList = updateTagList($tagNameId);
-	$objResponse->addAssign('availableTags', 'innerHTML', $tagList);
+	$objResponse->addAssign('tagList', 'innerHTML', $tagList);
 	
 	//now update the data for the current tag.
 	$currentTagData = showCurrentTag($tagNameId);
 	$objResponse->addAssign('currentTagData_header', 'innerHTML', $currentTagData);
+	
+	//update associated record list.
+	$objResponse->addAssign('associatedRecords', 'innerHTML', showRecordList($tagNameId));
 	
 	//store in the session, so if they reload, the selected tag will remain.
 	$sessionCache = new sessionCache("settings");
