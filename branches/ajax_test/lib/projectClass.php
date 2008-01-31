@@ -300,8 +300,6 @@ class projectClass extends mainRecord {
 	function get_notes() {
 		$this->noteObj->projectId = $this->projectId;
 		$retval = $this->noteObj->get_notes(array('record_id'=>$this->internalRecordId));
-		
-		$userList = $this->list_users();
 		return($retval);
 	}//end get_notes()
 	//=========================================================================
