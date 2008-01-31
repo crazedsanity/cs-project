@@ -334,3 +334,38 @@ function cs_confirmLostPass() {
 	checksumInputObj.readonly = true;
 }//end cs_confirmLostPass()
 
+
+function clearErrorMessage() {
+	var name = 'MAIN_error_message';
+	document.getElementById(name).innerHTML="";
+}//end clearErrorMessage()
+
+
+/**
+ * Overload the xajax call to be able to do things like clearing out the 
+ * div that contains set messages...
+ */
+function checkAjax() {
+	var retval = false;
+	if(this.xajaxLoaded) {
+		retval = true;
+	}
+	return retval;
+}
+var clearMessageTimeoutID;
+if(checkAjax()) {
+	//keep around the old call function
+	xajax.realCall = xajax.call;
+	//override the call function to bend to our wicked ways
+	xajax.call = function(sFunction, aArgs, sRequestType)
+	{
+		//clear out the message.
+		if(this.clearMessageTimeoutID) {
+			clearTimeout(this.clearMessageTimeoutID);
+		}
+		this.clearMessageTimeoutID = setTimeout("clearErrorMessage();", 10000);
+		
+		//call the old call function
+		return this.realCall(sFunction, aArgs, sRequestType);
+	}
+}

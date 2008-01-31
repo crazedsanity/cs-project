@@ -149,23 +149,23 @@
 					</th>
 					
 					<td colspan="2">
-				<!-- BEGIN editable_tags -->
-				<!-- BEGIN removeable_tag --><a href="/content/tags/remove/%%tag_name_id%%/{record_id}">%%name%%%%imgHtml%%</a>%%separator%%
+					<div id="tagList">
+				<!-- BEGIN removeable_tag --><a href="javascript:void(xajax_ajax__removetag(%%tag_name_id%%,{record_id}))">%%name%%%%imgHtml%%</a>%%separator%%
 				<!-- END removeable_tag -->
+				<!-- BEGIN text_tags --><b>%%name%%%%imgHtml%%</b>%%separator%%
+				<!-- END text_tags -->
+					</div>
+				<!-- BEGIN editable_tags -->
 						
 						<BR>
 						
-								<select>
-				<!-- BEGIN addTag_option -->	<option value='%%value%%'%%selectedString%% onClick="location.href='/content/tags/add/%%value%%/{record_id}'">%%display%%</option>
+				<!-- BEGIN addTag_option -->	<option value='%%value%%'%%selectedString%% onClick="javascript:void(xajax_ajax__addtag(%%value%%, {record_id}));">%%display%%</option>
 				<!-- END addTag_option -->
-									{add_tag_list}
-								</select> <i><font color="red">(NOTE: this will *immediately* add a tag -- don't do it if you've changed something!)</font></i><BR>
+									<div id="addTagOptionList">{add_tag_list}</div>
 								
 						<input type="text" name="newTag" value=""><input type="button" value="Add New Tag" 
 						onClick="this.value='Creating Tag...';document.main.newTag.readonly=true;document.hiddenAddTagForm.new_tag.value=document.main.newTag.value;document.hiddenAddTagForm.submit()">
 				<!-- END editable_tags -->
-				<!-- BEGIN text_tags --><b>%%name%%%%imgHtml%%</b>%%separator%%
-				<!-- END text_tags -->
 					</td>
 				
 				</tr>
