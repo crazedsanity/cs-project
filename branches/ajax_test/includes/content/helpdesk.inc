@@ -581,14 +581,16 @@ function generate_tag_list($recordId, $useTextRows=FALSE) {
 		}
 		else {
 			$retval = __METHOD__ .": No data parsed..?";
+			throw new exception($retval);
 		}
 	}
 	else {
 		$retval = "No tags in list!";
+		throw new exception($retval);
 	}
 	
 	return($retval);
-}
+}//end generate_tag_list()
 
 
 function generate_addable_tags($recordId) {
