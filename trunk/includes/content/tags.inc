@@ -271,6 +271,7 @@ function updateTagList($showTagNameId) {
 	//display the list of available tags.
 	$tagListBaseRow = $page->templateRows['availableTagsList'];
 	$showIconRow = $page->templateRows['availableTagsList__tagIcon'];
+	$outerTemplate = $page->templateRows['tagList'];
 	$myRow = "";
 	foreach($myTagList as $tagNameId=>$data) {
 		$tagName = $data['name'];
@@ -294,7 +295,10 @@ function updateTagList($showTagNameId) {
 		$myRow .= $tmpRow;
 	}
 	$page->add_template_var("availableTagsList", $myRow);
+	$page->add_template_var('tagList', $outerTemplate);
+	
 	$retval = mini_parser($myRow, array('tag_row'=>$recordList), '{', '}');
+	$retval = mini_parser($outerTemplate, array('availableTagsList' => $retval), '{', '}');
 	
 	return($retval);
 }//end updateTagList()
