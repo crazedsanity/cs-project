@@ -636,8 +636,7 @@ function generate_tag_list($recordId, $useTextRows=FALSE) {
 		}
 	}
 	else {
-		$retval = "No tags in list!";
-		throw new exception($retval);
+		$retval = "";
 	}
 	
 	return($retval);
