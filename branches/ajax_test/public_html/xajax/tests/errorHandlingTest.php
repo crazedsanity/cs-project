@@ -8,10 +8,10 @@ $xajax->setLogFile("xajax_error_log.log");
 
 function myErrorRiddenFunction()
 {
-	$value = $silly['nuts'];
+	$value = NULL;
 	$objResponse = new xajaxResponse();
 	$objResponse->addAlert("Bad array value: $value");
-	include("file_doesnt_exist.php");
+	include(dirname(__FILE__) ."/file_doesnt_exist.php");
 	return $objResponse->getXML();
 }
 

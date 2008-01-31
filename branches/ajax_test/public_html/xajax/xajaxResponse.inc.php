@@ -320,6 +320,7 @@ class xajaxResponse
 			if ($queryEnd === FALSE)
 				$queryEnd = strlen($sURL);
 			$queryPart = substr($sURL, $queryStart, $queryEnd-$queryStart);
+			$queryParts = array();
 			parse_str($queryPart, $queryParts);
 			$newQueryPart = "";
 			if ($queryParts)
@@ -621,7 +622,7 @@ class xajaxResponse
 	
 	function includeScript($sFilename)
 	{
-		return $this->addIncludeScript($sFileName);
+		return $this->addIncludeScript($sFilename);
 	}
 
 	/**	
@@ -684,7 +685,7 @@ class xajaxResponse
 		else if (is_array($mCommands)) {
 			$this->aCommands = array_merge($this->aCommands, $mCommands);
 		}
-		else if (is_string($mCommands) && strpos($mXML, '<xjx>')!==false) {
+		else if (is_string($mCommands) && strpos($mCommands, '<xjx>')!==false) {
 			trigger_error("Using xajaxResponse->loadXML doesn't work with raw XML any more", E_USER_ERROR);
 		}
 		else {
