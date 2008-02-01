@@ -1,4 +1,4 @@
-<table border="0" cellpadding="2" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
 	<tr>
 		<td><!-- first cell of main table -->
 			<form action="{PHP_SELF}" method="POST" name=frm>
@@ -118,17 +118,13 @@
 				</td>
 	</tr>
 	<tr>
-		<td>
-		{related_todo}
+		<td width="50%">
+			<div id="related_todo" width="100%">{related_todo}</div>
+			<div id="related_note" style="padding-top:1em;">{related_note}</div>
 		</td>
 		
-		<td>
-		{related_issue}
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2">
-		{related_note}
+		<td width="50%">
+			<div id="related_issue">{related_issue}</div>
 		</td>
 	</tr>
 </table>
