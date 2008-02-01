@@ -316,6 +316,12 @@ else {
 			$page->add_template_var("helpdeskPrefWarning", $page->templateRows['helpdeskPrefWarning']);
 		}
 		
+		//SPECIAL PROCESSING FOR TODO's...
+		if(is_array($detailsArr['related']['todo'])) {
+			parse_related_todo($detailsArr['related']['todo']);
+		}
+		unset($detailsArr['related']['todo']);
+		
 		//parse-in everything under "related"...
 		foreach($detailsArr['related'] as $type => $subArr) {
 			$rowName = "related_". $type ."_row";

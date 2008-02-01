@@ -54,4 +54,89 @@ function addAjax() {
 	$page->add_template_var('XAJAX_HEADERS', $xajaxHeaders);
 }//end addAjax()
 
+function parse_related_todo(array $parseData) {
+	$page = $GLOBALS['objects']['page'];
+	$bgColor = NULL;
+	$bgColor2 = NULL;
+	
+	$rowName = 'related_todo_row';
+	$baseRow = $page->templateRows[$rowName];
+	
+	foreach($parseData as $id=>$arr) {
+		swapValue($bgColor, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
+		swapValue($bgColor2, "#d5d5d5", "#c2c2c2");
+		$repArr = array(
+			"id"		=> $id,
+			"bgColor"	=> $bgColor,
+			"bgColor2"	=> $bgColor2
+		);
+		$changeFontColor=TRUE;
+		//Making TODO stuff look purdy.  Boy.
+		if(!preg_match('/accepted/', strtolower($arr['status_text']))) {
+			$repArr['bgColor'] = "e0e0e0";
+			$repArr['bgColor2'] = "e0e0e0";
+		}
+		
+		//Add dashes to fields that don't have any information in them.
+		if(strlen($arr['deadline']) <6) {
+			$changeFontColor = FALSE;
+			$arr['deadline'] = "&#151;&#151;&#151;&#151;";
+		}
+		if(strlen($arr['begin_date']) <6) {
+			$changeFontColor = FALSE;
+			$arr['begin_date'] = "&#151;&#151;&#151;&#151;";
+		}
+		if(strlen($arr['assigned_user']) == 0) {
+			//put some dashes in if nobody is assigned.
+			$arr['assigned_user'] = "&#151;&#151;";
+		} 
+		
+		//cross-out all items that are ended.
+		if(preg_match('/ended/', strtolower($arr['status_text']))) {
+			$changeFontColor = FALSE;
+			$strikeThroughArr = array(
+				"creator", "creator", "assigned", "status_text", "remark", "begin_date", "deadline"
+			);
+			foreach($strikeThroughArr as $myField) {
+				$arr[$myField] = '<del>&nbsp;'. $arr[$myField] .'&nbsp;</del>';
+			}
+			unset($strikeThroughArr);
+		}
+		
+		if(strlen($arr['deadline']) && preg_match('/ended/', strtolower($arr['status_text']))) {
+			//make the deadline look nice.
+			$today = date("Ymd");
+			$myDeadline = str_replace("-", "", $arr['deadline']);
+			settype($myDeadline, "int");
+			settype($today, "int");
+			
+			if(!$changeFontColor) {
+				//do nothing.
+			}
+			elseif($myDeadline <= $today) {
+				$arr['deadline'] = '<font color="red"><b>'. $arr['deadline'] .'</b></font>';
+			}
+			else {
+				$arr['deadline'] = '<font color="green">'. $arr['deadline'] .'</font>';
+			}
+		}
+	
+		if($arr['status_id'] == 2) {
+			$repArr['font_weight'] = "bold";
+		}
+		else {
+			$repArr['font_weight'] = "normal";
+		}
+					
+		//put every item in our array into the replacement array.
+		foreach($arr as $x=>$y) {
+			$repArr[$x] = $y;
+		}
+		$myRow .= mini_parser($baseRow, $repArr, "%%", "%%");
+	}
+	$page->add_template_var($rowName, $myRow);
+}//end parse_related_todo()
+
+
+
 ?>

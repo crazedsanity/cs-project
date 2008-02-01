@@ -455,5 +455,42 @@ class helpdeskClass extends mainRecord {
 	//================================================================================================
 	
 	
+	
+	//=========================================================================
+	function get_todos($helpdeskId) {
+		$retval = 0;
+		$prefObj = new pref($this->db, $_SESSION['uid']);
+		$todoDisplayPref = $prefObj->get_pref_value_by_name('projectDetails_todoDisplayOnlyMine');
+		
+		$todoObj = new todoClass($this->db);
+		
+		//attempt to get a list of the todos...
+		//TODO: change this reference to "publicId" instead of "projectId"
+		$todoObj->projectId = $helpdeskId;
+		
+		
+		$critArr = array("record_id"=>$this->get_parent_from_ancestry($this->get_ancestry($helpdeskId,TRUE),0));
+		$contactCrit = NULL;
+		if($todoDisplayPref != 'all') {
+			if($todoDisplayPref == 'mine') {
+				$contactCrit = array(
+					't.creator_contact_id'	=> $_SESSION['contact_id'],
+					't.assigned_contact_id'	=> $_SESSION['contact_id']
+				);
+			}
+			elseif($todoDisplayPref == 'assigned') {
+				$contactCrit = array(
+					't.assigned_contact_id'	=> $_SESSION['contact_id']
+				);
+			}
+		}
+		$retval = $todoObj->get_todos($critArr, NULL, $contactCrit);
+			
+		return($retval);
+		
+	}//end get_todos()
+	//=========================================================================
+	
+	
 }//end helpdeskClass{}
 ?>

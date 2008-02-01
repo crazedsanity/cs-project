@@ -2,10 +2,10 @@
 /*
  * SVN INFORMATION:::
  * ------------------
- * Last Author:         $Author$ 
- * Current Revision:    $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:        $Date$
+ * Last Author:         $Author:crazedsanity $ 
+ * Current Revision:    $Revision:637 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/includes/content/todo.inc $ 
+ * Last Updated:        $Date:2007-11-20 11:04:33 -0600 (Tue, 20 Nov 2007) $
  */
 
 if($_POST) {
@@ -110,7 +110,12 @@ else {
 		}
 		else {
 			//get the details.
-			$projectDetails = $proj->get_details($_GET['parentPublicId']);
+			if($_GET['module'] == 'helpdesk') {
+				$projectDetails = $proj->helpdeskObj->get_record($_GET['parentPublicId']);
+			}
+			else {
+				$projectDetails = $proj->get_details($_GET['parentPublicId']);
+			}
 			$page->add_template_var("record_id", $projectDetails['record_id']);
 		}
 		

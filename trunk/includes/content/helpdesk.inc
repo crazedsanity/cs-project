@@ -349,6 +349,12 @@ else {
 		//now, rip all block rows that don't need to be there...
 		$page->set_all_block_rows("content", $doNotRipRows);
 		
+		$todoData = $proj->helpdeskObj->get_todos($helpdeskId);
+		$page->set_all_block_rows('related_todo');
+		if(is_array($todoData)) {
+			parse_related_todo($todoData);
+		}
+		
 		
 		
 		$useTextTags = FALSE;
