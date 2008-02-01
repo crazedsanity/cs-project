@@ -1,0 +1,35 @@
+<form action='' method='POST'>
+<input type="hidden" name="note_id" value={note_id}>
+<input type="hidden" name="module" value="notes">
+
+<table border=0 cellpadding=0 cellspacing=0><tr><td>
+<table border=0 bgcolor=#D5D5D5>
+<tr>
+	<td><a href="javascript:void();"><b>Notes</b></a></td>
+	
+<tr>
+	<td></td>
+</tr>
+<tr>
+	<td colspan=2>Title:<input type='text' name='updates[subject]' size='92' value="{note_subject}" {note_name_readonly}></td>
+</tr>
+<tr>
+	<td>
+	<textarea rows=20 cols=95 name="updates[body]" wrap=physical>{note_body}</textarea>
+	</td>
+<tr>
+</table>
+
+<table align="center">
+<tr>
+	<td align="center">
+		<input type="HIDDEN" name="updates[record_id]" value="{record_id}">
+		<input type="submit" name="{submit_name}" value="{submit_value}">
+	</td>
+</tr>
+<tr>
+	<td align="center"><a href='{goBackLink}'><b>GO BACK</b></a></td>
+</tr>
+</table>
+
+</td></tr></table>

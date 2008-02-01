@@ -2,10 +2,10 @@
 /*
  * SVN INFORMATION:::
  * ------------------
- * Last Author:         $Author$ 
- * Current Revision:    $Revision$ 
- * Repository Location: $HeadURL$ 
- * Last Updated:        $Date$
+ * Last Author:         $Author:crazedsanity $ 
+ * Current Revision:    $Revision:637 $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/includes/content/notes.inc $ 
+ * Last Updated:        $Date:2007-11-20 11:04:33 -0600 (Tue, 20 Nov 2007) $
  */
  
 if($_POST) {
@@ -105,7 +105,6 @@ else {
 					exit;
 				}
 				else {
-					$page->rip_all_block_rows('content', array('owner_options'));
 					$projectData = $proj->get_details($projectId, FALSE);
 					
 					if(is_array($projectData)) { 
