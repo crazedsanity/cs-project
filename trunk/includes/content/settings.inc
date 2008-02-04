@@ -152,7 +152,7 @@ elseif(isset($_GET['action'])) {
 }
 else {
 	//some display settings.
-	$x = $page->set_all_block_rows("content");
+	$x = $page->set_all_block_rows("content", array('group_nonMembers', 'group_currentMembers'));
 	
 	
 	
@@ -223,84 +223,7 @@ else {
 				$showGroup = $_SESSION['login_group_id'];
 			}
 			$page->ui->set_cache("settings/showGroup", $showGroup);
-			
-			//get a complete list of users.
-			$allUsers = $adminUserClass->get_users();
-			
-			//display the list of available groups.
-			$repArr = $adminUserClass->get_groups(FALSE);
-			$displayGroupList = array_as_option_list(
-				$myGroups, $showGroup, "select", $page->templateRows['show_group_list'], $repArr
-			);
-			$page->add_template_var('show_group_list', $displayGroupList);
-			
-			//set this for later use... 
-			$myGroupData = $repArr[$showGroup];
-			
-			//now show all the users (if there are any) associated with that group.
-			$groupData = $adminUserClass->get_group_user($showGroup);
-			$page->add_template_var('groupId', $showGroup);
-			$page->add_template_var('currentGroupLeader', $allUsers[$myGroupData['leader_uid']]['username']);
-						
-			if(is_array($groupData) && count($groupData)) {
-				$baseRow = $page->templateRows['show_group_list__selectUser'];
-				$addUsersRow = "";
-				$removeUsersRow = "";
-				
-				//build the list of users that CAN be added, and the list that can be removed.
-				$addUsers = 0;
-				$removeUsers = 0;
-				$changeLeaderOptionArr = array();
-				foreach($allUsers as $uid=>$userData) {
-					$userData['group_id'] = $showGroup;
-					if(isset($groupData[$uid])) {
-						//they're already in this group.
-						$removeUsersRow .= mini_parser($page->templateRows['show_group_list__removeUser'], $userData, '%%', '%%');
-						$removeUsers++;
-						$changeLeaderOptionArr[$uid] = $userData['username'];
-					}
-					else {
-						//not in this group.
-						$addUsersRow .= mini_parser($page->templateRows['show_group_list__selectUser'], $userData, '%%', '%%');
-						$addUsers++;
-					}
-				}
-				
-				//set the option list for changing the leader!
-				$changeLeaderOption = array_as_option_list($changeLeaderOptionArr, $myGroupData['leader_uid']);
-				$page->add_template_var('changeGroupLeader_list', $changeLeaderOption);
-				
-				if($removeUsers) {
-					//show 'em the list to be removed.
-					$page->add_template_var('show_group_list__removeUser', $removeUsersRow);
-				}
-				else {
-					//tell 'em there's no users to be removed.
-					$page->add_template_var('show_group_list__removeUser', $page->templateRows['show_group_list__noRemoveUser']);
-				}
-				
-				if($addUsers) {
-					//show 'em.
-					$page->add_template_var('show_group_list__selectUser', $addUsersRow);
-				}
-				else {
-					//no users to add.
-					$page->add_template_var('show_group_list__selectUser', $page->templateRows['show_group_list__noUser']);
-				}
-			}
-			else {
-				//show the row that says there's no users.
-				$page->add_template_var('show_group_list__selectUser', $page->templateRows['show_group_list__noUser']);
-				
-				//now put ALL users into the list that can be added...
-				foreach($allUsers as $uid=>$userData) {
-					$userData['group_id'] = $showGroup;
-					$addUsersRow .= mini_parser($page->templateRows['show_group_list__selectUser'], $userData, '%%', '%%');
-					$addUsers++;
-				}
-				$page->add_template_var('show_group_list__selectUser', $addUsersRow);
-				$page->add_template_var('show_group_list__removeUser', $page->templateRows['show_group_list__noRemoveUser']);
-			}
+			regenerate_group_lists($showGroup);
 		}
 	}
 }
@@ -382,4 +305,109 @@ function ajax__group_user($groupId, $uid, $addRemove) {
 	
 	return($objResponse);
 }//end ajax__group_add_user()
+
+
+function regenerate_group_lists($groupId) {
+	$user = $GLOBALS['objects']['user'];
+	$page = $GLOBALS['objects']['page'];
+	$page->ui = new sessionCache("/userInput/content");
+	$objResponse = new xajaxResponse();
+	
+	if($user->is_admin()) {
+		$page->set_all_block_rows();
+		$adminUserClass = $GLOBALS['objects']['admin'];
+		$myGroups = $adminUserClass->get_groups(TRUE);
+		
+		//get a complete list of users.
+		$allUsers = $adminUserClass->get_users();
+		
+		//display the list of available groups.
+		$repArr = $adminUserClass->get_groups(FALSE);
+		$displayGroupList = array_as_option_list(
+			$myGroups, $groupId, "select", $page->templateRows['show_group_list'], $repArr
+		);
+		$page->add_template_var('show_group_list', $displayGroupList);
+		
+		//set this for later use... 
+		$myGroupData = $repArr[$groupId];
+		
+		//now show all the users (if there are any) associated with that group.
+		$groupData = $adminUserClass->get_group_user($groupId);
+		$page->add_template_var('groupId', $groupId);
+		$page->add_template_var('currentGroupLeader', $allUsers[$myGroupData['leader_uid']]['username']);
+					
+		$addUsers = 0;
+		$removeUsers = 0;
+		if(is_array($groupData) && count($groupData)) {
+			$baseRow = $page->templateRows['show_group_list__selectUser'];
+			$addUsersRow = "";
+			$removeUsersRow = "";
+			
+			//build the list of users that CAN be added, and the list that can be removed.
+			$addUsers = 0;
+			$removeUsers = 0;
+			$changeLeaderOptionArr = array();
+			foreach($allUsers as $uid=>$userData) {
+				$userData['group_id'] = $groupId;
+				if(isset($groupData[$uid])) {
+					//they're already in this group.
+					$removeUsersRow .= mini_parser($page->templateRows['show_group_list__removeUser'], $userData, '%%', '%%');
+					$removeUsers++;
+					$changeLeaderOptionArr[$uid] = $userData['username'];
+				}
+				else {
+					//not in this group.
+					$addUsersRow .= mini_parser($page->templateRows['show_group_list__selectUser'], $userData, '%%', '%%');
+					$addUsers++;
+				}
+			}
+			
+			//set the option list for changing the leader!
+			$changeLeaderOption = array_as_option_list($changeLeaderOptionArr, $myGroupData['leader_uid']);
+			$page->add_template_var('changeGroupLeader_list', $changeLeaderOption);
+			
+			if($removeUsers) {
+				//show 'em the list to be removed.
+				$page->add_template_var('show_group_list__removeUser', $removeUsersRow);
+			}
+			else {
+				//tell 'em there's no users to be removed.
+				$page->add_template_var('show_group_list__removeUser', $page->templateRows['show_group_list__noRemoveUser']);
+			}
+			
+			if($addUsers) {
+				//show 'em.
+				$page->add_template_var('show_group_list__selectUser', $addUsersRow);
+			}
+			else {
+				//no users to add.
+				$page->add_template_var('show_group_list__selectUser', $page->templateRows['show_group_list__noUser']);
+			}
+		}
+		else {
+			//show the row that says there's no users.
+			$page->add_template_var('show_group_list__selectUser', $page->templateRows['show_group_list__noUser']);
+			
+			//now put ALL users into the list that can be added...
+			foreach($allUsers as $uid=>$userData) {
+				$userData['group_id'] = $groupId;
+				$addUsersRow .= mini_parser($page->templateRows['show_group_list__selectUser'], $userData, '%%', '%%');
+				$addUsers++;
+			}
+			$page->add_template_var('show_group_list__selectUser', $addUsersRow);
+			$page->add_template_var('show_group_list__removeUser', $page->templateRows['show_group_list__noRemoveUser']);
+		}
+	}
+	else {
+		$msg = array(
+			'title'		=> "Admin Privileges Required",
+			'message'	=> "You must have admin privileges in order to perform this action.",
+			'type'		=> "error"
+		);
+		$page->set_message_wrapper($msg);
+	}
+	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	
+	return($objResponse);
+}//end regenerate_group_lists()
 ?>
