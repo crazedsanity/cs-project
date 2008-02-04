@@ -213,28 +213,33 @@ class adminUserClass extends userClass {
 	
 	//=========================================================================
 	public function add_user_to_group($uid,$groupId) {
-		//add the user to a group.
-		$sqlArr = array(
-			'uid'		=> $uid,
-			'group_id'	=> $groupId
-		);
 		
-		$sql = "INSERT INTO user_group_table ". string_from_array($sqlArr, 'insert', NULL, 'number');
-		if(!$this->run_sql($sql)) {
-			//indications are it failed.
-			if(strlen($this->lastError)) {
-				$this->logsObj->log_dberror(__METHOD__ .": failed to add user to group (". $groupId ."): ". $this->lastError);
-			}
-			$retval = FALSE;
-		}
-		else {
-			//it worked!
-			$retval = TRUE;
+		$groupData = $this->get_group_user($groupId);
+		$retval = FALSE;
+		if(!isset($groupData[$uid])) {
+			//add the user to a group.
+			$sqlArr = array(
+				'uid'		=> $uid,
+				'group_id'	=> $groupId
+			);
 			
-			//log it!
-			$groupData = $this->get_groups(FALSE);
-			$details = "Added user to group #". $groupId ." (". $groupData[$groupId]['name'] .")";
-			$this->logsObj->log_by_class($details, 'update', $uid);
+			$sql = "INSERT INTO user_group_table ". string_from_array($sqlArr, 'insert', NULL, 'number');
+			if(!$this->run_sql($sql)) {
+				//indications are it failed.
+				if(strlen($this->lastError)) {
+					$this->logsObj->log_dberror(__METHOD__ .": failed to add user to group (". $groupId ."): ". $this->lastError);
+				}
+				$retval = FALSE;
+			}
+			else {
+				//it worked!
+				$retval = TRUE;
+				
+				//log it!
+				$groupData = $this->get_groups(FALSE);
+				$details = "Added user to group #". $groupId ." (". $groupData[$groupId]['name'] .")";
+				$this->logsObj->log_by_class($details, 'update', $uid);
+			}
 		}
 		
 		return($retval);
