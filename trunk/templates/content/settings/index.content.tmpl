@@ -63,13 +63,14 @@
 			<select name="prefType[%%pref_type_id%%]">
 				%%row_optionList%%
 <!-- BEGIN pref_optionList -->
-				<option %%selectedString%% value="%%value%%" onClick="document.prefTable.prefTypeId.value='%%pref_type_id%%';document.prefTable.submit();">%%display%% (%%effective_value%%)</option>
+				<option %%selectedString%% value="%%value%%" 
+					onClick="xajax_ajax__update_preference(%%pref_type_id%%, %%value%%);">%%display%% (%%effective_value%%)</option>
 <!-- END pref_optionList -->
 			</select>
 		</td>
 		
 		<td style="background-color:%%rowColor%%">
-			%%currentSetting%%
+			<div id="pref_currentSetting_%%pref_type_id%%">%%currentSetting%%</div>
 			<div class="note">(Default value: %%default_value%%)</div>
 		</td>
 	</tr>

@@ -10,6 +10,12 @@
  * Last Updated:        $Date$
  */
 
+
+$prefObj = new pref($page->db, $_SESSION['uid']);
+$GLOBALS['objects']['pref'] = $prefObj;
+
+addAjax();
+
 require_once(dirname(__FILE__) .'/../../lib/adminUserClass.php');
 require_once(dirname(__FILE__) .'/../../lib/prefClass.php');
 
@@ -100,30 +106,6 @@ if($_POST) {
 			$goHere = "/content/settings";
 		}
 		break;
-		
-		
-		
-		case 'set_preference': {
-			$pref = new pref($page->db, $_SESSION['uid']);
-			$result = $pref->update_user_pref($_POST['prefTypeId'], $_POST['prefType'][$_POST['prefTypeId']]);
-			
-			if($result == 1) {
-				$messageArr = array(
-					'title'		=> "Preference Updated",
-					'message'	=> "Your preference was successfully stored.",
-					'type'		=> "status"
-				);
-			}
-			else {
-				$messageArr = array(
-					'title'		=> "Error Updating Preference",
-					'message'	=> "There was an error while attempting to update your preference ($result).",
-					'type'		=> "error"
-				);
-			}
-			set_message_wrapper($messageArr);
-		}
-		break;
 			
 		DEFAULT:
 	}
@@ -132,6 +114,7 @@ if($_POST) {
 		conditional_header($goHere);
 		exit;
 	}
+	exit;
 }
 elseif(isset($_GET['action'])) {
 	
@@ -169,7 +152,6 @@ else {
 	//TODO: when they don't have the pref, select the default!
 	
 	//show 'em their preferences.
-	$prefObj = new pref($page->db, $_SESSION['uid']);
 	$allPrefs = $prefObj->list_all_prefs();
 	$userPrefs = $prefObj->get_user_prefs();
 	
@@ -314,4 +296,44 @@ else {
 		}
 	}
 }
+
+
+function ajax__update_preference($prefId, $newValue) {
+	$page = $GLOBALS['objects']['page'];
+	$prefObj = $GLOBALS['objects']['pref'];
+	$objResponse = new xajaxResponse();
+	
+	$prefData = $prefObj->list_all_prefs(array('pref_type_id' => $prefId));
+	#debug_print($prefData,1);
+	#exit;
+	
+	
+	//update the preference.
+	$result = $prefObj->update_user_pref($prefId, $newValue);
+	
+	$properSelectedName = $prefData['optionList'][$newValue]['name'];
+	
+	if($result == 1) {
+		$messageArr = array(
+			'title'		=> "Preference Updated",
+			'message'	=> "Your preference for <b>". $prefData['display_name'] ."</b> was successfully " .
+					"stored (<i>". $properSelectedName ."</i>).",
+			'type'		=> "status"
+		);
+	}
+	else {
+		$messageArr = array(
+			'title'		=> "Error Updating Preference",
+			'message'	=> "There was an error while attempting to update your preference ($result).",
+			'type'		=> "error"
+		);
+	}
+	$page->set_message_wrapper($messageArr);
+	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	
+	$objResponse->addAssign('pref_currentSetting_'. $prefId, 'innerHTML', $properSelectedName);
+	
+	return($objResponse);
+	
+}//end ajax__update_preference()
 ?>
