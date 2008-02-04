@@ -13,6 +13,14 @@
 
 $prefObj = new pref($page->db, $_SESSION['uid']);
 $GLOBALS['objects']['pref'] = $prefObj;
+if($user->is_admin() == 1) {
+	//add the template to show various admin stuff.
+	$page->add_template_var("admin_section", $page->templateRows['admin_section']);
+	
+	//create an object with administrative capabilities.
+	$adminUserClass = new adminUserClass($page->db);
+	$GLOBALS['objects']['admin'] = $adminUserClass;
+}
 
 addAjax();
 
@@ -333,4 +341,45 @@ function ajax__update_preference($prefId, $newValue) {
 	return($objResponse);
 	
 }//end ajax__update_preference()
+
+
+
+
+function ajax__group_user($groupId, $uid, $addRemove) {
+	$user = $GLOBALS['objects']['user'];
+	$page = $GLOBALS['objects']['page'];
+	$objResponse = new xajaxResponse();
+	if($user->is_admin()) {
+		
+		$adminUserClass = $GLOBALS['objects']['admin'];
+		if($addRemove == 'add') {
+			$result = $adminUserClass->add_user_to_group($uid, $groupId);
+		}
+		else {
+			$result = $adminUserClass->remove_user_from_group($uid, $groupId);
+		}
+		
+		$msg = array(
+			'title'		=> "Update Complete",
+			'message'	=> "Result of <b>". $addRemove ."</b>: (". $result .")",
+			'type'		=> "status"
+		);
+		
+		
+		$page->set_message_wrapper($msg);
+		
+		//now regenerate the current users & the excluded users lists.
+	}
+	else {
+		$msg = array(
+			'title'		=> "Admin Privileges Required",
+			'message'	=> "You must have admin privileges in order to perform this action.",
+			'type'		=> "error"
+		);
+		$page->set_message_wrapper($msg);
+	}
+	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	
+	return($objResponse);
+}//end ajax__group_add_user()
 ?>

@@ -90,6 +90,8 @@
 <hr>
 <h2><font color="red">Administrative Settings</font></h2>
 
+
+<a name="group">
 <table border=1 cellpadding=3 cellspacing=0>
 	<tr>
 		<th colspan="3"><a href="#groupManagement"></a>Group Management</th>
@@ -121,7 +123,7 @@
 			<table>
 <!-- BEGIN show_group_list__removeUser -->
 				<tr>
-					<td>(<b><a href="?action=removeUser&groupId=%%group_id%%&uid=%%uid%%">Remove</a></b>) %%username%%</td>
+					<td>(<b><a href="javascript:void(xajax_ajax__group_user(%%group_id%%, %%uid%%, 'remove'));">Remove</a></b>) %%username%%</td>
 				</tr>
 <!-- END show_group_list__removeUser -->
 <!-- BEGIN show_group_list__noRemoveUser -->
@@ -136,7 +138,7 @@
 			<table>
 <!-- BEGIN show_group_list__selectUser -->
 				<tr>
-					<td>(<b><a href="?action=addUser&groupId=%%group_id%%&uid=%%uid%%">Add</a></b>) %%username%%</td>
+					<td>(<b><a href="javascript:void(xajax_ajax__group_user(%%group_id%%, %%uid%%, 'add'));">Add</a></b>) %%username%%</td>
 				</tr>
 <!-- END show_group_list__selectUser -->
 <!-- BEGIN show_group_list__noUser -->

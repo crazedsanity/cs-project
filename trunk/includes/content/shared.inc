@@ -17,6 +17,7 @@ $GLOBALS['objects'] = array();
 $GLOBALS['objects']['page'] =& $page;
 $GLOBALS['objects']['proj'] =& $proj;
 $GLOBALS['objects']['tag'] =& $proj->tagObj;
+$GLOBALS['objects']['user'] =& $user;
 
 
 /**
