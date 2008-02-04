@@ -15,6 +15,8 @@ $db = new cs_phpDB;
 $db->connect(get_config_db_params());
 $page->db = &$db;
 
+$page->add_template_var('cs-project_version', VERSION_STRING);
+
 if(isset($_GET['loginDestination']) && strlen($_GET['loginDestination'])) {
 	$_SESSION['loginDestination'] = $_GET['loginDestination'];
 }
