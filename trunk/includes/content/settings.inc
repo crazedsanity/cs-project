@@ -304,9 +304,6 @@ function ajax__update_preference($prefId, $newValue) {
 	$objResponse = new xajaxResponse();
 	
 	$prefData = $prefObj->list_all_prefs(array('pref_type_id' => $prefId));
-	#debug_print($prefData,1);
-	#exit;
-	
 	
 	//update the preference.
 	$result = $prefObj->update_user_pref($prefId, $newValue);
