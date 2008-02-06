@@ -152,12 +152,8 @@ elseif(isset($_GET['action'])) {
 }
 else {
 	//some display settings.
-	$x = $page->set_all_block_rows("content", array('group_nonMembers', 'group_currentMembers'));
+	$x = $page->set_all_block_rows("content");
 	
-	
-	
-	//TODO: make this work.
-	//TODO: when they don't have the pref, select the default!
 	
 	//show 'em their preferences.
 	$allPrefs = $prefObj->list_all_prefs();
@@ -281,6 +277,7 @@ function ajax__group_user($groupId, $uid, $addRemove) {
 		else {
 			$result = $adminUserClass->remove_user_from_group($uid, $groupId);
 		}
+		$objResponse = regenerate_group_lists($groupId);
 		
 		$msg = array(
 			'title'		=> "Update Complete",
@@ -301,10 +298,11 @@ function ajax__group_user($groupId, $uid, $addRemove) {
 		);
 		$page->set_message_wrapper($msg);
 	}
+	
 	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
 	
 	return($objResponse);
-}//end ajax__group_add_user()
+}//end ajax__group_user()
 
 
 function regenerate_group_lists($groupId) {
@@ -314,7 +312,14 @@ function regenerate_group_lists($groupId) {
 	$objResponse = new xajaxResponse();
 	
 	if($user->is_admin()) {
-		$page->set_all_block_rows();
+		
+		if(!isset($page->templateRows['group_nonMembers'])) {
+			$page->set_all_block_rows();
+		}
+		//array('group_nonMembers', 'group_currentMembers')
+		$page->add_template_var('group_nonMembers', $page->templateRows['group_nonMembers']);
+		$page->add_template_var('group_currentMembers', $page->templateRows['group_currentMembers']);
+		
 		$adminUserClass = $GLOBALS['objects']['admin'];
 		$myGroups = $adminUserClass->get_groups(TRUE);
 		
@@ -338,7 +343,8 @@ function regenerate_group_lists($groupId) {
 					
 		$addUsers = 0;
 		$removeUsers = 0;
-		if(is_array($groupData) && count($groupData)) {
+		//TODO: is there any reason to do special processing if there is no $groupData?
+		#if(is_array($groupData) && count($groupData)) {
 			$baseRow = $page->templateRows['show_group_list__selectUser'];
 			$addUsersRow = "";
 			$removeUsersRow = "";
@@ -354,6 +360,8 @@ function regenerate_group_lists($groupId) {
 					$removeUsersRow .= mini_parser($page->templateRows['show_group_list__removeUser'], $userData, '%%', '%%');
 					$removeUsers++;
 					$changeLeaderOptionArr[$uid] = $userData['username'];
+					
+					//
 				}
 				else {
 					//not in this group.
@@ -361,6 +369,7 @@ function regenerate_group_lists($groupId) {
 					$addUsers++;
 				}
 			}
+			
 			
 			//set the option list for changing the leader!
 			$changeLeaderOption = array_as_option_list($changeLeaderOptionArr, $myGroupData['leader_uid']);
@@ -373,6 +382,7 @@ function regenerate_group_lists($groupId) {
 			else {
 				//tell 'em there's no users to be removed.
 				$page->add_template_var('show_group_list__removeUser', $page->templateRows['show_group_list__noRemoveUser']);
+				$removeUsersRow = $page->templateRows['show_group_list__noRemoveUser'];
 			}
 			
 			if($addUsers) {
@@ -382,8 +392,9 @@ function regenerate_group_lists($groupId) {
 			else {
 				//no users to add.
 				$page->add_template_var('show_group_list__selectUser', $page->templateRows['show_group_list__noUser']);
+				$addUsersRow = $page->templateRows['show_group_list__noUser'];
 			}
-		}
+		/*}
 		else {
 			//show the row that says there's no users.
 			$page->add_template_var('show_group_list__selectUser', $page->templateRows['show_group_list__noUser']);
@@ -396,7 +407,7 @@ function regenerate_group_lists($groupId) {
 			}
 			$page->add_template_var('show_group_list__selectUser', $addUsersRow);
 			$page->add_template_var('show_group_list__removeUser', $page->templateRows['show_group_list__noRemoveUser']);
-		}
+		}#*/
 	}
 	else {
 		$msg = array(
@@ -406,6 +417,26 @@ function regenerate_group_lists($groupId) {
 		);
 		$page->set_message_wrapper($msg);
 	}
+	$ajax_nonUsers = mini_parser(
+		$page->templateRows['group_nonMembers'],
+		array(
+			'show_group_list__removeUser'		=> $removeUsersRow,
+			'show_group_list__noRemoveUser'	=> ""
+		),
+		'{', '}'
+	);
+	
+	$ajax_curUsers = mini_parser(
+		$page->templateRows['group_currentMembers'],
+		array(
+			'show_group_list__selectUser'		=> $addUsersRow,
+			'show_group_list__noUser'			=> ""
+		),
+		'{', '}'
+	);
+	
+	$objResponse->addAssign('group_currentMembers', 'innerHTML', $ajax_curUsers);
+	$objResponse->addAssign('group_nonMembers', 'innerHTML', $ajax_nonUsers);
 	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
 	
 	return($objResponse);
