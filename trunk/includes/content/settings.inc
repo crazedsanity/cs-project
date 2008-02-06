@@ -120,34 +120,7 @@ if($_POST) {
 	
 	if(strlen($goHere)) {
 		conditional_header($goHere);
-		exit;
 	}
-	exit;
-}
-elseif(isset($_GET['action'])) {
-	
-	$adminUserClass = new adminUserClass($page->db);
-	
-	switch($_GET['action']) {
-		
-		case 'addUser': {
-			//add 'em!
-			$adminUserClass->add_user_to_group($_GET['uid'], $_GET['groupId']);
-		}
-		break;
-		
-		case 'removeUser': {
-			//remove 'em!
-			$adminUserClass->remove_user_from_group($_GET['uid'], $_GET['groupId']);
-		}
-		break;
-		
-		
-		default: {
-			//log that we didn't do anything.
-		}
-	}
-	conditional_header("/content/settings");
 	exit;
 }
 else {
