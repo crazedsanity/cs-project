@@ -444,4 +444,12 @@ function regenerate_group_lists($groupId, xajaxResponse &$objResponse=NULL) {
 	
 	return($objResponse);
 }//end regenerate_group_lists()
+
+
+function ajax__change_current_group($groupId) {
+	$cache = new sessionCache("/userInput/content");
+	$cache->set_cache("settings/showGroup", $groupId);
+	$objResponse = regenerate_group_lists($groupId);
+	return($objResponse);
+}//end ajax__change_current_group()
 ?>

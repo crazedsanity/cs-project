@@ -108,7 +108,7 @@
 			<b>Change current group:</b><BR>
 			<SELECT>
 <!-- BEGIN show_group_list -->
-				<option onClick="javascript:document.location.href='/content/settings?showGroup=%%value%%'" %%selectedString%%>%%display%% (%%short_name%%)</option>
+				<option onClick="javascript:void(xajax_ajax__change_current_group(%%group_id%%))" %%selectedString%%>%%display%% (%%short_name%%)</option>
 <!-- END show_group_list -->
 			</SELECT><BR><BR><hr>
 			<b>Change Leader </b>({currentGroupLeader})<b> to:</b> 
