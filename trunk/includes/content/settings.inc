@@ -193,6 +193,7 @@ else {
 			}
 			$page->ui->set_cache("settings/showGroup", $showGroup);
 			regenerate_group_lists($showGroup);
+			display_current_leader($showGroup);
 		}
 	}
 }
@@ -312,7 +313,6 @@ function regenerate_group_lists($groupId, xajaxResponse &$objResponse=NULL) {
 		//now show all the users (if there are any) associated with that group.
 		$groupData = $adminUserClass->get_group_user($groupId);
 		$page->add_template_var('groupId', $groupId);
-		$page->add_template_var('currentGroupLeader', $allUsers[$myGroupData['leader_uid']]['username']);
 					
 		$addUsers = 0;
 		$removeUsers = 0;
@@ -342,11 +342,6 @@ function regenerate_group_lists($groupId, xajaxResponse &$objResponse=NULL) {
 					$addUsers++;
 				}
 			}
-			
-			
-			//set the option list for changing the leader!
-			$changeLeaderOption = array_as_option_list($changeLeaderOptionArr, $myGroupData['leader_uid']);
-			$page->add_template_var('changeGroupLeader_list', $changeLeaderOption);
 			
 			if($removeUsers) {
 				//show 'em the list to be removed.
@@ -423,6 +418,55 @@ function ajax__change_current_group($groupId) {
 	$cache = new sessionCache("/userInput/content");
 	$cache->set_cache("settings/showGroup", $groupId);
 	$objResponse = regenerate_group_lists($groupId);
+	
+	//update the current leader.
+	$curLeaderInfo = display_current_leader($groupId, TRUE);
+	$objResponse->addAssign('currentGroupLeader', 'innerHTML', $curLeaderInfo);
+	
 	return($objResponse);
 }//end ajax__change_current_group()
+
+
+function display_current_leader($groupId, $isAjaxCall=FALSE) {
+	$user = $GLOBALS['objects']['user'];
+	$page = $GLOBALS['objects']['page'];
+	$adminUserClass = $GLOBALS['objects']['admin'];
+	$allUsers = $adminUserClass->get_users();
+	
+	$allGroupData = $adminUserClass->get_groups(FALSE);
+	$myGroupData = $allGroupData[$groupId];
+	#$page->add_template_var('currentGroupLeader', $allUsers[$myGroupData['leader_uid']]['username']);
+	
+			
+	$changeLeaderOptionArr = array();
+	$groupData = $adminUserClass->get_group_user($groupId);
+	
+	foreach($allUsers as $uid=>$userData) {
+		if(isset($groupData[$uid])) {
+			$changeLeaderOptionArr[$uid] = $userData['username'];
+		}
+	}
+	
+	//set the option list for changing the leader!
+	$changeLeaderOption = array_as_option_list($changeLeaderOptionArr, $myGroupData['leader_uid']);
+	$page->add_template_var('changeGroupLeader_list', $changeLeaderOption);
+	
+	$addTemplateVars = array(
+		'currentGroupLeader'		=> $allUsers[$myGroupData['leader_uid']]['username'],
+		'changeGroupLeader_list'	=> $changeLeaderOption
+	);
+	
+	
+	if($isAjaxCall) {
+		$retval = $page->templateRows['currentGroupLeaderBox'];
+		$retval = mini_parser($retval, $addTemplateVars, '{', '}');
+		return($retval);
+	}
+	else {
+		foreach($addTemplateVars as $name=>$value) {
+			$page->add_template_var($name, $value);
+		}
+		$page->add_template_var('currentGroupLeaderBox', $page->templateRows['currentGroupLeaderBox']);
+	}
+}//end display_current_leader()
 ?>

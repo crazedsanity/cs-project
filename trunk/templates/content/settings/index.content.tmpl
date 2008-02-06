@@ -111,11 +111,15 @@
 				<option onClick="javascript:void(xajax_ajax__change_current_group(%%group_id%%))" %%selectedString%%>%%display%% (%%short_name%%)</option>
 <!-- END show_group_list -->
 			</SELECT><BR><BR><hr>
+			<div id="currentGroupLeader">
+<!-- BEGIN currentGroupLeaderBox -->
 			<b>Change Leader </b>({currentGroupLeader})<b> to:</b> 
 			<input name="changeLeader[groupId]" type="HIDDEN" value="{groupId}">
 			<SELECT name="changeLeader[newLeader]">
 				{changeGroupLeader_list}
 			</SELECT><BR>
+<!-- END currentGroupLeaderBox -->
+			</div>
 			<input type="submit" value="Change Leader" onClick="this.form.action.value='changeLeader'">
 		</td>
 		
