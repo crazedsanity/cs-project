@@ -277,7 +277,7 @@ function ajax__group_user($groupId, $uid, $addRemove) {
 		else {
 			$result = $adminUserClass->remove_user_from_group($uid, $groupId);
 		}
-		$objResponse = regenerate_group_lists($groupId);
+		regenerate_group_lists($groupId, $objResponse);
 		
 		$msg = array(
 			'title'		=> "Update Complete",
@@ -305,7 +305,7 @@ function ajax__group_user($groupId, $uid, $addRemove) {
 }//end ajax__group_user()
 
 
-function regenerate_group_lists($groupId) {
+function regenerate_group_lists($groupId, xajaxResponse &$objResponse=NULL) {
 	$user = $GLOBALS['objects']['user'];
 	$page = $GLOBALS['objects']['page'];
 	$page->ui = new sessionCache("/userInput/content");
@@ -417,27 +417,30 @@ function regenerate_group_lists($groupId) {
 		);
 		$page->set_message_wrapper($msg);
 	}
-	$ajax_nonUsers = mini_parser(
-		$page->templateRows['group_nonMembers'],
-		array(
-			'show_group_list__removeUser'		=> $removeUsersRow,
-			'show_group_list__noRemoveUser'	=> ""
-		),
-		'{', '}'
-	);
 	
-	$ajax_curUsers = mini_parser(
-		$page->templateRows['group_currentMembers'],
-		array(
-			'show_group_list__selectUser'		=> $addUsersRow,
-			'show_group_list__noUser'			=> ""
-		),
-		'{', '}'
-	);
-	
-	$objResponse->addAssign('group_currentMembers', 'innerHTML', $ajax_curUsers);
-	$objResponse->addAssign('group_nonMembers', 'innerHTML', $ajax_nonUsers);
-	$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	if(!is_null($objResponse)) {
+		$ajax_nonUsers = mini_parser(
+			$page->templateRows['group_nonMembers'],
+			array(
+				'show_group_list__removeUser'		=> $removeUsersRow,
+				'show_group_list__noRemoveUser'	=> ""
+			),
+			'{', '}'
+		);
+		
+		$ajax_curUsers = mini_parser(
+			$page->templateRows['group_currentMembers'],
+			array(
+				'show_group_list__selectUser'		=> $addUsersRow,
+				'show_group_list__noUser'			=> ""
+			),
+			'{', '}'
+		);
+		
+		$objResponse->addAssign('group_currentMembers', 'innerHTML', $ajax_curUsers);
+		$objResponse->addAssign('group_nonMembers', 'innerHTML', $ajax_nonUsers);
+		$objResponse->addAssign('MAIN_error_message', 'innerHTML', $page->process_set_message());
+	}
 	
 	return($objResponse);
 }//end regenerate_group_lists()
