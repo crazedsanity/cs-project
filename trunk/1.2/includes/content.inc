@@ -133,7 +133,7 @@ $tabNames = array(
 );
 
 if($user->is_admin()) {
-	$tabNames['settings']	= "Settings<BR>\n<b>[Admin]</b>";
+	$tabNames['settings']	= "Settings</a><BR>\n<a href=\"/content/settings/admin\"><b>[Admin]</b>";
 }
 
 #$page->add_template_var('tabs', $page->file_to_string('tabs.shared.tmpl'));

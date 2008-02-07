@@ -128,48 +128,6 @@ else {
 	$x = $page->set_all_block_rows("content");
 	
 	
-	//show 'em their preferences.
-	$allPrefs = $prefObj->list_all_prefs();
-	$userPrefs = $prefObj->get_user_prefs();
-	
-	if(is_array($allPrefs)) {
-		$rowColor = "#D3D3D3";
-		foreach($allPrefs as $index=>$data) {
-			$myOptions = $data['optionList'];
-			
-			//TODO: fix this... it's sloppy.
-			$myOptionList = array();
-			$optionListRepArr = array();
-			foreach($data['optionList'] as $x=>$y) {
-				$tKey = $y['pref_option_id'];
-				$tVal = $y['name'];
-				$myOptionList[$tKey] = $tVal;
-				
-				$optionListRepArr[$tKey] = $y;
-			}
-			
-			unset($data['optionList'], $data['optionList']);
-			
-			$checkThis = NULL;
-			if(strlen($userPrefs[$data['pref_type_id']])) {
-				$checkThis = $userPrefs[$data['pref_type_id']];
-				$data['currentSetting'] = $myOptionList[$checkThis];
-			}
-			else {
-				$data['currentSetting'] = '<font color="red"><b>Select something!</b></font>';
-			}
-			
-			$data['row_optionList'] = array_as_option_list(
-				$myOptionList, $checkThis, 'select', $page->templateRows['pref_optionList'], $optionListRepArr
-			);
-			
-			$rowColor = swapValue($rowColor, '#D3D3D3', '#C3C3C3');
-			$data['rowColor'] = $rowColor;
-			
-			$prefRow .= mini_parser($page->templateRows['pref_row'], $data, '%%', '%%');
-		}
-		$page->add_template_var('pref_row', $prefRow);
-	}
 	
 	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
 		if($user->is_admin() == 1) {
@@ -204,6 +162,50 @@ else {
 				'type'		=> "fatal"
 			);
 			$page->set_message_wrapper($msg);
+		}
+	}
+	else {
+		//show 'em their preferences.
+		$allPrefs = $prefObj->list_all_prefs();
+		$userPrefs = $prefObj->get_user_prefs();
+		
+		if(is_array($allPrefs)) {
+			$rowColor = "#D3D3D3";
+			foreach($allPrefs as $index=>$data) {
+				$myOptions = $data['optionList'];
+				
+				//TODO: fix this... it's sloppy.
+				$myOptionList = array();
+				$optionListRepArr = array();
+				foreach($data['optionList'] as $x=>$y) {
+					$tKey = $y['pref_option_id'];
+					$tVal = $y['name'];
+					$myOptionList[$tKey] = $tVal;
+					
+					$optionListRepArr[$tKey] = $y;
+				}
+				
+				unset($data['optionList'], $data['optionList']);
+				
+				$checkThis = NULL;
+				if(strlen($userPrefs[$data['pref_type_id']])) {
+					$checkThis = $userPrefs[$data['pref_type_id']];
+					$data['currentSetting'] = $myOptionList[$checkThis];
+				}
+				else {
+					$data['currentSetting'] = '<font color="red"><b>Select something!</b></font>';
+				}
+				
+				$data['row_optionList'] = array_as_option_list(
+					$myOptionList, $checkThis, 'select', $page->templateRows['pref_optionList'], $optionListRepArr
+				);
+				
+				$rowColor = swapValue($rowColor, '#D3D3D3', '#C3C3C3');
+				$data['rowColor'] = $rowColor;
+				
+				$prefRow .= mini_parser($page->templateRows['pref_row'], $data, '%%', '%%');
+			}
+			$page->add_template_var('pref_row', $prefRow);
 		}
 	}
 }
