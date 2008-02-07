@@ -8,10 +8,18 @@
 	<th colspan="2">Config Settings</th>
 </tr>
 <tr>
+	<td colspan="2" align="center">
+		<div class="note" style="width:60em"><b>NOTE:</b> You should be <font color="red"><b>absolutely certain</b></font> of the 
+			effects of the changes you make here.  Changing an item to an incorrect value make render the 
+			installation useless.  To rectify a broken configuration, you would need to modify the 
+			<b>/lib/config.xml</b> file manually.</div>
+	</td>
+</tr>
+<tr>
 	<th>Name/Description</th>
 	<th>Value/Select Option</th>
 </tr>
-<!-- BEGIN xsetting_text -->
+<!-- BEGIN setting_text -->
 	<tr>
 		<td>
 			<b>%%title%%</b><hr>
@@ -21,7 +29,7 @@
 		<td><input name="%%index%%" type="text" value="%%value%%" %%disabled%%></td>
 	</tr>
 <!-- END setting_text -->
-<!-- BEGIN xsetting_select -->
+<!-- BEGIN setting_select -->
 	<tr>
 		<td>
 			<b>%%title%%</b><hr>
@@ -40,7 +48,7 @@
 		</td>
 	</tr>
 <!-- END setting_select -->
-<!-- BEGIN xsetting_hidden -->
+<!-- BEGIN setting_hidden -->
 	<tr>
 		<td>
 			<!-- NOTE: should we even have hidden elements in the form? -->

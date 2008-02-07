@@ -131,8 +131,13 @@ else {
 	
 	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
 		if($user->is_admin() == 1) {
-			//add the template to show various admin stuff.
-			$page->add_template_var("admin_section", $page->templateRows['admin_section']);
+			//read the sample config.
+			$xmlObj = new XMLParser(file_get_contents(dirname(__FILE__) .'/../../docs/samples/sample_config.xml'));
+			$myData = $xmlObj->get_path('/CONFIG');
+			$mainAttributes = $myData['attributes'];
+			unset($myData['type'], $myData['attributes']);
+			debug_print($myData);
+			
 			
 			//create an object with administrative capabilities.
 			$adminUserClass = new adminUserClass($page->db);
