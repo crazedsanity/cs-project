@@ -82,9 +82,10 @@ class cs_globalFunctions extends cs_versionAbstract {
 	 */
 	public function string_from_array($array,$style=NULL,$separator=NULL, $cleanString=NULL, $removeEmptyVals=FALSE) {
 		
+		$retval = NULL;
 		//precheck... if it's not an array, kill it.
 		if(!is_array($array)) {
-			return(0);
+			return(NULL);
 		}
 		
 		//make sure $style is valid.
@@ -167,7 +168,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 						$value = $this->cleanString($value, "sql");
 						$value = "'". $value ."'";
 					}
-					$retval = $this->create_list($retval, $field . $separator . $value, " ");
+					$retval = $this->create_list($retval, $value, ", ");
 				}
 				if($style == "order" && !preg_match('/order by/', strtolower($retval))) {
 					$retval = "ORDER BY ". $retval;
@@ -271,7 +272,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 		}
 		else {
 			//not an array.
-			$retval = 0;
+			$retval = NULL;
 		}
 		
 		return($retval);
@@ -639,6 +640,49 @@ class cs_globalFunctions extends cs_versionAbstract {
 		
 	}//end truncate_string()
 	//---------------------------------------------------------------------------------------------
+	
+	
+	
+	//##########################################################################
+	public function array_as_option_list(array $data, $checkedValue=NULL, $type="select", $useTemplateString=NULL, array $repArr=NULL) {
+		$typeArr = array (
+			"select"	=> "selected",
+			"radio"		=> "checked",
+			"checkbox"	=> "checked"
+		);
+		
+		$myType = $typeArr[$type];
+		if(is_null($useTemplateString)) {
+			//
+			$useTemplateString = "\t\t<option value='%%value%%'%%selectedString%%>%%display%%</option>";
+		}
+		
+		$retval = "";
+		foreach($data as $value=>$display) {
+			//see if it's the value that's been selected.
+			$selectedString = "";
+			if($value == $checkedValue || $display == $checkedValue) {
+				//yep, it's selected.
+				$selectedString = " ". $myType;
+			}
+			
+			//create the string.
+			$myRepArr = array(
+				'value'				=> $value,
+				'display'			=> $display,
+				'selectedString'	=> $selectedString
+			);
+			if(is_array($repArr) && is_array($repArr[$value])) {
+				//merge the arrays.
+				$myRepArr = array_merge($repArr[$value], $myRepArr);
+			}
+			$addThis = $this->mini_parser($useTemplateString, $myRepArr, "%%", "%%");
+			$retval = $this->create_list($retval, $addThis, "\n");
+		}
+		
+		return($retval);
+	}//end array_as_option_list()
+	//##########################################################################
 
 }//end cs_globalFunctions{}
 

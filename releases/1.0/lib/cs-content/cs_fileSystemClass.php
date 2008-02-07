@@ -1,12 +1,12 @@
-<?
+<?php
 
 /*
  * FILE INFORMATION:
- * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.9.0/cs_fileSystemClass.php $
- * $Id: cs_fileSystemClass.php 170 2007-09-25 22:54:19Z crazedsanity $
- * $LastChangedDate: 2007-09-25 17:54:19 -0500 (Tue, 25 Sep 2007) $
+ * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_fileSystemClass.php $
+ * $Id: cs_fileSystemClass.php 252 2008-01-31 21:57:49Z crazedsanity $
+ * $LastChangedDate: 2008-01-31 15:57:49 -0600 (Thu, 31 Jan 2008) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 170 $
+ * $LastChangedRevision: 252 $
  */
 
 require_once(dirname(__FILE__) ."/cs_globalFunctions.php");
@@ -253,6 +253,7 @@ class cs_fileSystemClass extends cs_versionAbstract {
 	 * can enlighten me, I'd be glad to give them credit.
 	 */
 	private function translate_perms($in_Perms) {
+		$sP = "";
 		$sP .= (($in_Perms & 0x0100) ? 'r' : '-') .
 			(($in_Perms & 0x0080) ? 'w' : '-') .
 			(($in_Perms & 0x0040) ? (($in_Perms & 0x0800) ? 's' : 'x' ) :
@@ -307,11 +308,11 @@ class cs_fileSystemClass extends cs_versionAbstract {
 					$this->closeFile();
 				}
 				else {
-					throw new exception(__METHOD__ .": unable to open specified file");
+					throw new exception(__METHOD__ .": unable to open specified file (". $filename .")");
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .": file is not writable");
+				throw new exception(__METHOD__ .": Cannot truncate, file (". $filename .") is not writable");
 			}
 		}
 		return($retval);
