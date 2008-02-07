@@ -1,0 +1,30 @@
+<table cellpadding="2" cellspacing="0" border="1">
+<tr>
+	<td colspan="6"><b>Related Helpdesk Issues</b> (<a href="/content/helpdesk/create?proj={public_id}&goBack=1">Create</a>):
+<!-- BEGIN helpdeskPrefWarning -->
+	<BR><font color="red"><b>Warning:</b></font> Not all preferences will be displayed, due to your <a href="/content/settings">Preferences</a>.
+<!-- END helpdeskPrefWarning -->
+	<hr></td>
+</tr>
+<tr>
+	<th>Issue #</th>
+	<th>Pri.</th>
+	<th>Tags</th>
+	<th>Title</th>
+	<th>Assign</th>
+	<th>Submitted</th>
+</tr>
+	
+<!-- BEGIN related_issue_row -->
+<tr style="background-color: %%bgColor%%;" onmouseover="this.style.backgroundColor = '#ffffff'" 
+	onmouseout="this.style.backgroundColor = '%%bgColor2%%'" onclick="location.href = '/content/helpdesk/view?ID=%%id%%'">
+	<td><font style="font-weight:%%font_weight%%;"><a href="/content/helpdesk/view?ID=%%id%%"><b>%%display_id%%</b></a><BR>(%%status_text%%)</font></td>
+	<td align="right"><font style="font-weight:%%font_weight%%;">%%priority%%</font></td>
+	<td><font style="font-weight:%%font_weight%%;">%%tag_list%%&nbsp;</font></td>
+	<td><font style="font-weight:%%font_weight%%;">%%name%%</font></td>
+	<td><font style="font-weight:%%font_weight%%;">%%assigned%%&nbsp;</font></td>
+	<td><font style="font-weight:%%font_weight%%;">%%start_date%%</font></td>
+
+</tr>
+<!-- END related_issue_row -->
+</table>
