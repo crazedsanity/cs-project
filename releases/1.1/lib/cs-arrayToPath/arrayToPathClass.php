@@ -6,7 +6,7 @@
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
  * Current Revision:::: $Revision: 17 $ 
- * Repository Location: $HeadURL: https://cs-arraytopath.svn.sourceforge.net/svnroot/cs-arraytopath/releases/0.2.2/arrayToPathClass.php $ 
+ * Repository Location: $HeadURL: https://cs-arraytopath.svn.sourceforge.net/svnroot/cs-arraytopath/releases/0.2/arrayToPathClass.php $ 
  * Last Updated:::::::: $Date: 2007-09-12 14:24:46 -0500 (Wed, 12 Sep 2007) $
  * 
  * 

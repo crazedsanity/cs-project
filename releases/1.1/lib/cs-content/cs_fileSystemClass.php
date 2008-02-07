@@ -1,12 +1,12 @@
-<?
+<?php
 
 /*
  * FILE INFORMATION:
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_fileSystemClass.php $
- * $Id: cs_fileSystemClass.php 221 2007-11-21 17:39:01Z crazedsanity $
- * $LastChangedDate: 2007-11-21 11:39:01 -0600 (Wed, 21 Nov 2007) $
+ * $Id: cs_fileSystemClass.php 252 2008-01-31 21:57:49Z crazedsanity $
+ * $LastChangedDate: 2008-01-31 15:57:49 -0600 (Thu, 31 Jan 2008) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 221 $
+ * $LastChangedRevision: 252 $
  */
 
 require_once(dirname(__FILE__) ."/cs_globalFunctions.php");

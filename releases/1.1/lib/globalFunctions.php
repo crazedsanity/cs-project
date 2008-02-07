@@ -17,9 +17,10 @@
 function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'0.10.6'),
-		'XMLParser'			=> array('cs-phpxml',		'0.5.5'),
-		'arrayToPath'		=> array('cs-arrayToPath',	'0.2.2')
+
+		'contentSystem'		=> array('cs-content',			'0.10.8'),
+		'XMLParser'			=> array('cs-phpxml',			'0.5.5'),
+		'arrayToPath'			=> array('cs-arrayToPath',	'0.2.2')
 	);
 	
 	if(!is_null($projectName)) {
@@ -105,18 +106,13 @@ function html_file_to_string($file){
 		//Could not find the file requested to stringify.
 		//Sending warning to user and logging it.
 
+		throw new exception(__METHOD__ .": Could not find all files necessary to create this page.<br>Please call technical support.<BR>\nfile=[". $file ."]");
 		set_message(
 			"Warning!",
 			"Could not find all files necessary to create this page.<br>Please call technical support.<BR>\nfile=[". $file ."]",
 			"","status"
 		);
 
-		//Connect to db to log
-		$logDb = new phpDB;
-		$logDb->connect("pl");
-		
-		$details = $filename ." -- ". page_get_env();
-		#log_activity($logDb,125,$_SESSION['uid'],"$details");
 		return "&nbsp;";
 	}
 
