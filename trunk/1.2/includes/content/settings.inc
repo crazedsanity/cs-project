@@ -171,29 +171,39 @@ else {
 		$page->add_template_var('pref_row', $prefRow);
 	}
 	
-	if($user->is_admin() == 1) {
-		//add the template to show various admin stuff.
-		$page->add_template_var("admin_section", $page->templateRows['admin_section']);
-		
-		//create an object with administrative capabilities.
-		$adminUserClass = new adminUserClass($page->db);
-		
-		//build the list of available groups.
-		$myGroups = $adminUserClass->get_groups(TRUE);
-		$page->add_template_var("addUser_gruppe", array_as_option_list($myGroups, $_SESSION['login_group_id']));
-		
-		//Group administration.
-		{
-			$showGroup = $page->ui->get_cache("settings/showGroup");
-			if(is_numeric($_GET['showGroup'])) {
-				$showGroup = $_GET['showGroup'];
+	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
+		if($user->is_admin() == 1) {
+			//add the template to show various admin stuff.
+			$page->add_template_var("admin_section", $page->templateRows['admin_section']);
+			
+			//create an object with administrative capabilities.
+			$adminUserClass = new adminUserClass($page->db);
+			
+			//build the list of available groups.
+			$myGroups = $adminUserClass->get_groups(TRUE);
+			$page->add_template_var("addUser_gruppe", array_as_option_list($myGroups, $_SESSION['login_group_id']));
+			
+			//Group administration.
+			{
+				$showGroup = $page->ui->get_cache("settings/showGroup");
+				if(is_numeric($_GET['showGroup'])) {
+					$showGroup = $_GET['showGroup'];
+				}
+				elseif(!is_numeric($showGroup)) {
+					$showGroup = $_SESSION['login_group_id'];
+				}
+				$page->ui->set_cache("settings/showGroup", $showGroup);
+				regenerate_group_lists($showGroup);
+				display_current_leader($showGroup);
 			}
-			elseif(!is_numeric($showGroup)) {
-				$showGroup = $_SESSION['login_group_id'];
-			}
-			$page->ui->set_cache("settings/showGroup", $showGroup);
-			regenerate_group_lists($showGroup);
-			display_current_leader($showGroup);
+		}
+		else {
+			$msg = array(
+				'title'		=> "Insufficient Privileges ",
+				'message'	=> "Administrative privileges are required to view this section.",
+				'type'		=> "fatal"
+			);
+			$page->set_message_wrapper($msg);
 		}
 	}
 }
