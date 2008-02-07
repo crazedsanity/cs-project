@@ -1,0 +1,25 @@
+
+
+<h2>What is a tag modifier?</h2>
+
+This value comes into play only when an issue is initially created.  The modifier is combined from all the selected tags and added to 9 (base priority) to determine what 
+the initial priority is.  For instance, if the "critical" tag is the only tag added to a new issue, the new issue's beginning priority will be set to 4, assuming the 
+modifier for "critical" is set to -5.
+
+<hr>
+
+<h2>Why use negative values?</h2>
+
+This is done for logical simplicity.  The most critical issue has a priority of 0, while unimportant issues are at 9.  To increase the importance, subtraction must take 
+place.
+
+<hr>
+
+<h2>Why are some tag modifiers negative, some positive, and some zero?</h2>
+
+A tag with a negative value means adding this tag to an issue makes it more important.  A tag with a positive value has the opposite effect; adding a positive tag means 
+it lessens the importance. <br><br>
+
+<b>Example:</b> <i>Suppose a user submits a critical bug that causes massive data corruption, but the user can't recreate the problem.  The issue is created with the tags 
+"critical" (-5) and "cannot reproduce" (+5).</i>
+
