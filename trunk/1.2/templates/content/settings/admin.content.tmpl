@@ -2,7 +2,56 @@
 <h2><font color="red">Administrative Settings</font></h2>
 
 
-<a name="group">
+<a name="config" />
+<table border="1" cellpadding="3" cellspacing="0">
+<tr>
+	<th colspan="2">Config Settings</th>
+</tr>
+<tr>
+	<th>Name/Description</th>
+	<th>Value/Select Option</th>
+</tr>
+<!-- BEGIN xsetting_text -->
+	<tr>
+		<td>
+			<b>%%title%%</b><hr>
+			%%description%%
+		</td>
+		
+		<td><input name="%%index%%" type="text" value="%%value%%" %%disabled%%></td>
+	</tr>
+<!-- END setting_text -->
+<!-- BEGIN xsetting_select -->
+	<tr>
+		<td>
+			<b>%%title%%</b><hr>
+			%%description%%
+		</td>
+		
+		<td>
+			<select name="%%index%%" %%disabled%%>
+			<!-- BEGIN xsetting_select__normal -->
+				<option value="%%value%%">%%displayValue%%</option>
+			<!-- END setting_select__normal -->
+			<!-- BEGIN xsetting_select__onSelect -->
+				<option value="%%value%%" onSelect="enableInput(%%namedSection%%);">%%displayValue%%</option>
+			<!-- END setting_select__onSelect -->
+			</select>
+		</td>
+	</tr>
+<!-- END setting_select -->
+<!-- BEGIN xsetting_hidden -->
+	<tr>
+		<td>
+			<!-- NOTE: should we even have hidden elements in the form? -->
+			<input type="HIDDEN" name="%%index%%" value="%%value%%">
+		</td>
+	</tr>
+<!-- END setting_hidden -->
+</table>
+
+
+<a name="group" />
 <table border=1 cellpadding=3 cellspacing=0>
 	<tr>
 		<th colspan="3"><a href="#groupManagement"></a>Group Management</th>
