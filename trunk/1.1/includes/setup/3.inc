@@ -790,19 +790,21 @@ class __setupDefaultValues extends upgrade {
 	//=========================================================================
 	private function create_tag_names() {
 		$tags = array(
-			1	=> 'bug',
-			2	=> 'feature request',
-			3	=> 'information',
-			4	=> 'network related',
-			5	=> 'critical',
-			6	=> 'exception'
+			1	=> array(-1, 'bug'),
+			2	=> array(-1, 'feature request'),
+			3	=> array(0,  'information'),
+			4	=> array(0,  'network related'),
+			5	=> array(-5, 'critical'),
+			6	=> array(-2, 'exception')
 		);
 		
 		$retval = 0;
-		foreach($tags as $id=>$name) {
+		foreach($tags as $id=>$data) {
+			$name = $data[1];
 			$insertArr = array(
 				'tag_name_id'	=> $id,
-				'name'			=> $name
+				'name'			=> $data[1],
+				'modifier'		=> $data[0]
 			);
 			$sql = "INSERT INTO tag_name_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
 			$numrows = $this->db->exec($sql);
