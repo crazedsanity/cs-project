@@ -7,7 +7,7 @@
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
  * Current Revision:::: $Revision: 35 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5.4/xmlAbstract.class.php $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/releases/0.5/xmlAbstract.class.php $ 
  * Last Updated:::::::: $Date: 2007-09-12 14:30:08 -0500 (Wed, 12 Sep 2007) $
  * 
  */

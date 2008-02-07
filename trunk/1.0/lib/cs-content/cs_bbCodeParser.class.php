@@ -5,11 +5,11 @@
  *  
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id: cs_bbCodeParser.class.php 173 2007-10-02 14:36:50Z crazedsanity $
+ * SVN Signature::::::: $Id: cs_bbCodeParser.class.php 179 2007-10-04 22:31:43Z crazedsanity $
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 173 $ 
- * Repository Location: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.9.0/cs_bbCodeParser.class.php $ 
- * Last Updated:::::::: $Date: 2007-10-02 09:36:50 -0500 (Tue, 02 Oct 2007) $
+ * Current Revision:::: $Revision: 179 $ 
+ * Repository Location: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_bbCodeParser.class.php $ 
+ * Last Updated:::::::: $Date: 2007-10-04 17:31:43 -0500 (Thu, 04 Oct 2007) $
  * 
  * 
  * Originally from a snippet (just the function) on PHPFreaks.com: http://www.phpfreaks.com/quickcode/BBCode/712.php

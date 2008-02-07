@@ -1,11 +1,11 @@
 <?php
 /*
  * FILE INFORMATION:
- * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.9.0/cs_genericPageClass.php $
- * $Id: cs_genericPageClass.php 172 2007-10-01 16:24:17Z crazedsanity $
- * $LastChangedDate: 2007-10-01 11:24:17 -0500 (Mon, 01 Oct 2007) $
+ * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/releases/0.10/cs_genericPageClass.php $
+ * $Id: cs_genericPageClass.php 252 2008-01-31 21:57:49Z crazedsanity $
+ * $LastChangedDate: 2008-01-31 15:57:49 -0600 (Thu, 31 Jan 2008) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 172 $
+ * $LastChangedRevision: 252 $
  */
 require_once(dirname(__FILE__) ."/template.inc");
 require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
@@ -21,6 +21,8 @@ class cs_genericPage extends cs_versionAbstract {
 	private $allowRedirect;
 	
 	private $showEditableLink = FALSE;
+	
+	private $allowInvalidUrls=NULL;
 	
 	//---------------------------------------------------------------------------------------------
 	/**
@@ -65,7 +67,7 @@ class cs_genericPage extends cs_versionAbstract {
 				$this->add_template_var($key, $value);
 			}
 		}
-		if(is_array($GLOBALS['templateFiles'])) {
+		if(isset($GLOBALS['templateFiles']) && is_array($GLOBALS['templateFiles'])) {
 			foreach($GLOBALS['templateFiles'] as $key => $value) {
 				$this->templateFiles[$key] = $value;
 			}
@@ -257,7 +259,7 @@ class cs_genericPage extends cs_versionAbstract {
 		
 		if($stripUndefVars) {
 			$numLoops = 0;
-			while(preg_match_all('/\{.*?\}/', $this->templateObj->varvals[out], $tags) && $numLoops < 50) {
+			while(preg_match_all('/\{.\S+?\}/', $this->templateObj->varvals['out'], $tags) && $numLoops < 50) {
 				$tags = $tags[0];
 				
 				//TODO: figure out why this works when running it twice.
@@ -286,8 +288,9 @@ class cs_genericPage extends cs_versionAbstract {
 	 */
 	public function process_set_message() {
 		//if there's not a message set, skip.
-		$errorBox = $this->file_to_string("system/message_box.tmpl");
-		if(is_array($_SESSION['message'])) {
+		$errorBox = "";
+		if(isset($_SESSION['message']) && is_array($_SESSION['message'])) {
+			$errorBox = $this->file_to_string("system/message_box.tmpl");
 			//let's make sure the "type" value is *lowercase*.
 			$_SESSION['message']['type'] = strtolower($_SESSION['message']['type']);
 			
@@ -307,6 +310,7 @@ class cs_genericPage extends cs_versionAbstract {
 			//	they'll never get past this point).
 			unset($_SESSION['message']);
 		}
+		return($errorBox);
 	}//end of process_set_message()
 	//---------------------------------------------------------------------------------------------
 	
@@ -594,6 +598,17 @@ class cs_genericPage extends cs_versionAbstract {
 		$retval = $this->rip_all_block_rows($templateVar, $exceptionArr);
 		return($retval);
 	}//end set_all_block_rows()
+	//---------------------------------------------------------------------------------------------
+	
+	
+	
+	//---------------------------------------------------------------------------------------------
+	public function allow_invalid_urls($newSetting=NULL) {
+		if(!is_null($newSetting) && is_bool($newSetting)) {
+			$this->allowInvalidUrls = $newSetting;
+		}
+		return($this->allowInvalidUrls);
+	}//end allow_invalid_urls()
 	//---------------------------------------------------------------------------------------------
 
 }//end cs_genericPage{}

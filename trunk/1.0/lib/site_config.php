@@ -1,4 +1,4 @@
-<?
+<?php
 //contains local site information
 /*
  * SVN INFORMATION:::
