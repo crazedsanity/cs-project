@@ -1,7 +1,9 @@
 <config generated="2007-09-12 11:09:47" version="1.0.0-ALPHA1" svnLastAuthor="$Author:crazedsanity $" svnSignature="$Id:sample_config.xml 376 2007-10-12 13:54:50Z crazedsanity $">
 	<isdevsite 
 		title="Is Development Site?" 
-		description="Whether it's a development site for cs-project or not... (TODO: add more info here)" 
+		description="Whether it's a development site for cs-project or not... (TODO: add more info here)"
+		type="select"
+		options="0=No (0)|1=Yes (1)" 
 		default="0">0</isdevsite>
 	<proj_name 
 		title="Project Name" 
@@ -40,6 +42,18 @@
 		description="Name of the session: really, this only matters if you have other websites running under the same 
 		domain using PHP sessions, in which case this should be unique to avoid random annoying issues."
 		default="CS_PROJECT_SESSID">CS_PROJECT_SESSID</config_session_name>
+	<version_string
+		title="Version String"
+		description="This is an important &lt;b&gt;INTERNAL&lt;/b&gt; setting that should NEVER be changed manually 
+			unless you really know what you're doing."
+		type="locked"
+		disabled="1">1.0.0-ALPHA1</version_string>
+	<stop_logins_on_global_alert
+		title="Stop Logins on Global Alert"
+		description="(&lt;font color=red&gt;&lt;b&gt;Currently unimplemented&lt;/b&gt;&lt;/font&gt;) Stop users from logging in if a global alert has been created."
+		type="select"
+		options=""
+		default="0">0</stop_logins_on_global_alert>
 	<debugprintopt 
 		title="Debug Printing?"
 		description="Generally, this should only be turned on if you're running a development site for cs-project..."
@@ -53,16 +67,15 @@
 		options="1=Do not show|1=Show"
 		default="0">0</debugremovehr>
 	<workingonit
+		title="Working On It?"
+		description="&lt;font color=&quot;red&quot;&gt;&lt;b&gt;&lt;blink&gt;WARNING!&lt;/blink&gt;&lt;/b&gt;&lt;/font&gt;
+		 Setting this to a non-zero value will DISABLE all connections to the database, and make your site unuseable.  
+		It is provided as a simple, fast way to stop connections to your database, usually for maintenance purposes.  
+		It is displayed here for reference only."
 		type="locked"
 		default="0">0</workingonit>
-	<version_string
-		title="Version String"
-		description="This is an important &lt;b&gt;INTERNAL&lt;/b&gt; setting that should NEVER be changed manually 
-			unless you really know what you're doing."
-		type="locked"
-		disabled="1">1.0.0-ALPHA1</version_string>
 	<database__host
-		title="Database Name (cs_project)"
+		title="Database Host Name (cs_project)"
 		description="Hostname"
 		default="localhost">localhost</database__host>
 	<database__dbname 
