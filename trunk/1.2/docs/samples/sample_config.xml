@@ -53,9 +53,14 @@
 		options="1=Do not show|1=Show"
 		default="0">0</debugremovehr>
 	<workingonit
-		type="hidden"
+		type="locked"
 		default="0">0</workingonit>
-	<version_string>1.0.0-ALPHA1</version_string>
+	<version_string
+		title="Version String"
+		description="This is an important &lt;b&gt;INTERNAL&lt;/b&gt; setting that should NEVER be changed manually 
+			unless you really know what you're doing."
+		type="locked"
+		disabled="1">1.0.0-ALPHA1</version_string>
 	<database__host
 		title="Database Name (cs_project)"
 		description="Hostname"

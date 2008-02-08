@@ -3,7 +3,7 @@
 
 
 <a name="config" />
-<table border="1" cellpadding="3" cellspacing="0">
+<table border="1" cellpadding="3" cellspacing="0" width="80%">
 <tr>
 	<th colspan="2">Config Settings</th>
 </tr>
@@ -16,13 +16,13 @@
 	</td>
 </tr>
 <tr>
-	<th>Name/Description</th>
-	<th>Value/Select Option</th>
+	<th width="80%">Name/Description</th>
+	<th width="20%">Value/Select Option</th>
 </tr>
 <!-- BEGIN setting_text -->
 	<tr>
 		<td>
-			<b>%%title%%</b><hr>
+			<b>%%title%%</b> (%%index%%)<BR>
 			%%description%%
 		</td>
 		
@@ -32,7 +32,7 @@
 <!-- BEGIN setting_select -->
 	<tr>
 		<td>
-			<b>%%title%%</b><hr>
+			<b>%%title%%</b> (%%index%%)<BR>
 			%%description%%
 		</td>
 		
@@ -48,14 +48,19 @@
 		</td>
 	</tr>
 <!-- END setting_select -->
-<!-- BEGIN setting_hidden -->
+<!-- BEGIN setting_locked -->
 	<tr>
 		<td>
+			<b>%%title%%</b> (%%index%%)<BR>
+			%%description%%
+		</td>
+		
+		<td>
 			<!-- NOTE: should we even have hidden elements in the form? -->
-			<input type="HIDDEN" name="%%index%%" value="%%value%%">
+			<input type="text" name="%%index%%" value="%%value%%" disabled>
 		</td>
 	</tr>
-<!-- END setting_hidden -->
+<!-- END setting_locked -->
 </table>
 
 

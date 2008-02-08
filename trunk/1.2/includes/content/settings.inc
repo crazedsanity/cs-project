@@ -128,7 +128,6 @@ else {
 	$x = $page->set_all_block_rows("content");
 	
 	
-	
 	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
 		if($user->is_admin() == 1) {
 			//read the sample config.
@@ -136,7 +135,42 @@ else {
 			$myData = $xmlObj->get_path('/CONFIG');
 			$mainAttributes = $myData['attributes'];
 			unset($myData['type'], $myData['attributes']);
-			debug_print($myData);
+			
+			$parsedRows = "";
+			$defaultRowName = 'setting_text';
+			foreach($myData as $indexName=>$data) {
+				$attributes = $data['attributes'];
+				$value = $data['value'];
+				unset($data['type'], $data['attributes'], $data['value']);
+				$indexName = strtolower($indexName);
+				
+				#debug_print($attributes);
+				
+				
+				//pull the appropriate template row.
+				$rowName = $defaultRowName;
+				if(strlen($attributes['TYPE'])) {
+					$rowName = 'setting_'. $attributes['TYPE'];
+				}
+				
+				debug_print("Parsing (". $indexName .") using rowName=(". $rowName .")");
+				
+				if(!isset($page->templateRows[$rowName])) {
+					throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
+				}
+				
+				//now parse stuff into the row...
+				$repArr = array(
+					'disabled'		=> $attributes['disabled'],
+					'index'			=> $indexName,
+					'title'			=> $attributes['TITLE'],
+					'description'	=> $attributes['DESCRIPTION'],
+					'value'			=> $value
+				);
+				$parsedRows .= $page->mini_parser($page->templateRows[$rowName], $repArr);
+			}
+			#debug_print($parsedRows);
+			$page->add_template_var($defaultRowName, $parsedRows);
 			
 			
 			//create an object with administrative capabilities.
