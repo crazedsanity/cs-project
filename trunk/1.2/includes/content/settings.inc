@@ -147,9 +147,6 @@ else {
 				unset($data['type'], $data['attributes'], $data['value']);
 				$indexName = strtolower($indexName);
 				
-				#debug_print($attributes);
-				
-				
 				//pull the appropriate template row.
 				$rowName = $defaultRowName;
 				if(strlen($attributes['TYPE'])) {
@@ -159,16 +156,12 @@ else {
 					if($attributes['TYPE'] == 'select' && isset($attributes['OPTIONS'])) {
 						#debug_print(explode('|', $attributes['OPTIONS']));
 						$tmpOptionList = explode('|', $attributes['OPTIONS']);
-						debug_print("parsing (". $indexName .")");
-						debug_print($tmpOptionList);
 						$optionList = array();
 						foreach($tmpOptionList as $optionInfo) {
 							$x = explode('=', $optionInfo);
 							$optionList[$x[0]] = $x[1];
 						}
-						debug_print($optionList);
 						$optionList = $page->gfObj->array_as_option_list($optionList, $attributes['DEFAULT']);
-						debug_print($optionList);
 					}
 				}
 				
