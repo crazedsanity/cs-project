@@ -130,9 +130,12 @@ else {
 	
 	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
 		if($user->is_admin() == 1) {
+			
 			//read the sample config.
-			$xmlObj = new XMLParser(file_get_contents(dirname(__FILE__) .'/../../docs/samples/sample_config.xml'));
-			$myData = $xmlObj->get_path('/CONFIG');
+			require_once(dirname(__FILE__) .'/../../lib/config.class.php');
+			$config = new config(dirname(__FILE__) .'/../../docs/samples/sample_config.xml', FALSE);
+			$myData = $config->get_config_contents(FALSE);
+			
 			$mainAttributes = $myData['attributes'];
 			unset($myData['type'], $myData['attributes']);
 			
@@ -151,9 +154,23 @@ else {
 				$rowName = $defaultRowName;
 				if(strlen($attributes['TYPE'])) {
 					$rowName = 'setting_'. $attributes['TYPE'];
+					
+					$optionList = NULL;
+					if($attributes['TYPE'] == 'select' && isset($attributes['OPTIONS'])) {
+						#debug_print(explode('|', $attributes['OPTIONS']));
+						$tmpOptionList = explode('|', $attributes['OPTIONS']);
+						debug_print("parsing (". $indexName .")");
+						debug_print($tmpOptionList);
+						$optionList = array();
+						foreach($tmpOptionList as $optionInfo) {
+							$x = explode('=', $optionInfo);
+							$optionList[$x[0]] = $x[1];
+						}
+						debug_print($optionList);
+						$optionList = $page->gfObj->array_as_option_list($optionList, $attributes['DEFAULT']);
+						debug_print($optionList);
+					}
 				}
-				
-				debug_print("Parsing (". $indexName .") using rowName=(". $rowName .")");
 				
 				if(!isset($page->templateRows[$rowName])) {
 					throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
@@ -167,6 +184,9 @@ else {
 					'description'	=> $attributes['DESCRIPTION'],
 					'value'			=> $value
 				);
+				if(!is_null($optionList)) {
+					$repArr['setting_select__normal'] = $optionList;
+				}
 				$parsedRows .= $page->mini_parser($page->templateRows[$rowName], $repArr);
 			}
 			#debug_print($parsedRows);
