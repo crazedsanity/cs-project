@@ -133,7 +133,7 @@ else {
 			
 			//read the sample config.
 			require_once(dirname(__FILE__) .'/../../lib/config.class.php');
-			$config = new config(dirname(__FILE__) .'/../../docs/samples/sample_config.xml', FALSE);
+			$config = new config(dirname(__FILE__) .'/../../lib/config.xml', FALSE);
 			$myData = $config->get_config_contents(FALSE);
 			
 			$mainAttributes = $myData['attributes'];
