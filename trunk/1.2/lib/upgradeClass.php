@@ -190,7 +190,7 @@ class upgrade {
 			throw new exception(__METHOD__ .": upgrade already in progress...????");
 		}
 		else {
-			$lockConfig = $this->upgrade_in_progress();
+			$lockConfig = $this->upgrade_in_progress(TRUE);
 			$this->fsObj->cd("/");
 			
 			//TODO: not only should the "create_file()" method be run, but also do a sanity check by calling lock_file_exists().
@@ -445,6 +445,7 @@ class upgrade {
 			//version-only upgrade.
 			$this->update_database_version($this->versionFileVersion);
 			$this->newVersion = $this->versionFileVersion;
+			$this->gfObj->debug_print(__METHOD__ .": doing version-only upgrade...");
 		}
 		else {
 			$scriptIndex = $versionIndex;
@@ -466,6 +467,7 @@ class upgrade {
 				throw new exception(__METHOD__ .": target version not specified, unable to proceed with upgrade for ". $versionIndex);
 			}
 		}
+		$this->gfObj->debug_print(__METHOD__ .": done... ");
 	}//end do_single_upgrade()
 	//=========================================================================
 	
@@ -560,6 +562,7 @@ class upgrade {
 		//we've got the filename, see if it exists.
 		$fileName = UPGRADE_DIR .'/'. $myConfigFile;
 		if(file_exists($fileName)) {
+			$this->gfObj->debug_print(__METHOD__ .": file exists... ");
 			$createClassName = $upgradeData['CLASS_NAME'];
 			$classUpgradeMethod = $upgradeData['CALL_METHOD'];
 			require_once($fileName);
