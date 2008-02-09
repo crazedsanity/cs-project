@@ -27,13 +27,9 @@ class upgrade_to_1_2_0_ALPHA3 extends dbAbstract {
 	//=========================================================================
 	public function run_upgrade() {
 		
-		$this->db->beginTrans(__METHOD__);
-		
 		$this->update_config_file();
-		exit;
 		
-		$this->db->commitTrans(__METHOD__);
-		
+		return('Upgrade complete');
 	}//end run_upgrade()
 	//=========================================================================
 	
@@ -48,25 +44,41 @@ class upgrade_to_1_2_0_ALPHA3 extends dbAbstract {
 		$updateXml = new xmlCreator();
 		$updateXml->load_xmlparser_data($siteXmlObj);
 		
+		
+		//BACKUP ORIGINAL XML CONFIG...
+		$backupFile = 'lib/__BACKUP__'. time() .'__config.xml';
+		$fs->create_file($backupFile);
+		$fs->openFile($backupFile);
+		$fs->write($updateXml->create_xml_string());
+		
 		$sampleIndexes = $sampleXmlObj->get_tree(TRUE);
 		$sampleIndexes = $sampleIndexes['CONFIG'];
+		
 		$siteConfigIndexes = $siteXmlObj->get_tree(TRUE);
+		$siteConfigIndexes = $siteConfigIndexes['CONFIG'];
 		
 		foreach($sampleIndexes as $indexName=>$indexValue) {
 			$path = '/CONFIG/'. $indexName;
 			$attributes = $sampleXmlObj->get_attribute($path);
 			#debug_print(__METHOD__ .": attributes from sample (/CONFIG/". $indexName ."::: ",1);
 			#debug_print($attributes,1);
+			debug_print(__METHOD__ .': indexName=('. $indexName .'), indexValue=('. $indexValue .'), original config value=('. $siteConfigIndexes[$indexName] .')');
 			
-			if(is_array($attributes)) {
-				$updateXml->add_attribute($path, $attributes);
+			//add tag if it's not there, update values otherwise.
+			$tagValue = $attributes['DEFAULT'];
+			if(isset($siteConfigIndexes[$indexName])) {
+				$tagValue = $siteConfigIndexes[$indexName];
 			}
+			elseif($indexName == 'PHPMAILER_HOST' && isset($siteConfigIndexes['CONFIG_EMAIL_SERVER_IP'])) {
+				$tagValue = $siteConfigIndexes['CONFIG_EMAIL_SERVER_IP'];
+				$updateXml->remove_path('/CONFIG/CONFIG_EMAIL_SERVER_IP');
+			}
+			$updateXml->add_tag($path, $tagValue, $attributes);
 		}
 		
-		$this->gfObj->debug_print($updateXml->create_xml_string());
-		$fs->openFile('lib/_test_config.xml');
+		$this->gfObj->debug_print($this->gfObj->cleanString($updateXml->create_xml_string(), 'htmlentity_plus_brackets'));
+		$fs->openFile('lib/config.xml');
 		$fs->write($updateXml->create_xml_string());
-		exit;
 	}//end update_config_file()
 	//=========================================================================
 }
