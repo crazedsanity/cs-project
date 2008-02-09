@@ -14,7 +14,7 @@ class config {
 	//-------------------------------------------------------------------------
     public function __construct($fileName=NULL, $redirectOnFileMissing=TRUE) {
     	$this->gf = new cs_globalFunctions();
-    	$this->fs = new cs_fileSystemClass(dirname(__FILE__));
+    	$this->fs = new cs_fileSystemClass(dirname(__FILE__) .'/..');
     	
     	$this->fileName = dirname(__FILE__) .'/'. CONFIG_FILENAME;
     	if(!is_null($fileName) && strlen($fileName)) {
@@ -43,7 +43,7 @@ class config {
 	 */
 	public function get_config_contents($simple=TRUE) {
 		if($this->fileExists) {
-			$xmlString = $this->fs->read(CONFIG_FILENAME);
+			$xmlString = $this->fs->read($this->fileName);
 			
 			//parse the file.
 			$xmlParser = new xmlParser($xmlString);
