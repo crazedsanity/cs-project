@@ -185,12 +185,11 @@ function __autoload($className) {
 		}
 	}
 	
-	if($retval == TRUE) {
-		return($retval);
-	}
-	else {
+	if($retval !== TRUE) {
 		throw new exception(__FUNCTION__ .": unable to find class file for (". $className .")");
 	}
+	
+	return($retval);
 	
 }//end __autoload()
 //=========================================================================

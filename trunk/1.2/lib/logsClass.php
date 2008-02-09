@@ -501,7 +501,7 @@ class logsClass extends dbAbstract {
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": failed to create new log_category");
+			throw new exception(__METHOD__ .": failed to create new log_category (". $catName .")");
 		}
 		
 		return($retval);
