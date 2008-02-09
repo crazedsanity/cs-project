@@ -27,7 +27,7 @@
 		default="IsSMTP">IsSMTP</phpmailer_method>
 	<phpmailer_host 
 		title="SMTP Server"
-		description="This should be the IP of your mailserver, like 127.0.0.1..."
+		description="This should be the IP of your mailserver, like 127.0.0.1 (only needed if &quot;SMTP&quot; is selected above)"
 		default="127.0.0.1">127.0.0.1</phpmailer_host>
 	<max_time
 		title="Maximum Session Length"
@@ -52,7 +52,7 @@
 		title="Stop Logins on Global Alert"
 		description="(&lt;font color=red&gt;&lt;b&gt;Currently unimplemented&lt;/b&gt;&lt;/font&gt;) Stop users from logging in if a global alert has been created."
 		type="select"
-		options=""
+		options="0=No (0)|1=Yes (1)"
 		default="0">0</stop_logins_on_global_alert>
 	<debugprintopt 
 		title="Debug Printing?"
@@ -64,7 +64,7 @@
 		title="Debug Print: Add 'HR' Tag?"
 		description="This setting affects whether or not there are separators between debug_print()'s (useful to discover if there's a print occurring that is otherwise not visible)"
 		type="select"
-		options="1=Do not show|1=Show"
+		options="0=Do not show (0)|1=Show (1)"
 		default="0">0</debugremovehr>
 	<workingonit
 		title="Working On It?"
