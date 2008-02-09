@@ -23,7 +23,6 @@
 		are handled by the webserver." 
 		type="select" 
 		options="IsSMTP=SMTP|IsSendmail=Sendmail|IsQmail=Qmail|IsMail=Mail" 
-		onSelect="IsSMTP=phpmailer_host"
 		default="IsSMTP">IsSMTP</phpmailer_method>
 	<phpmailer_host 
 		title="SMTP Server"
