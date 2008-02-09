@@ -190,7 +190,7 @@ class upgrade {
 			throw new exception(__METHOD__ .": upgrade already in progress...????");
 		}
 		else {
-			$lockConfig = $this->upgrade_in_progress(TRUE);
+			$lockConfig = $this->upgrade_in_progress();
 			$this->fsObj->cd("/");
 			
 			//TODO: not only should the "create_file()" method be run, but also do a sanity check by calling lock_file_exists().
@@ -819,7 +819,10 @@ class upgrade {
 			foreach($this->config['MATCHING'] as $matchVersion=>$data) {
 				
 				$matchVersion = preg_replace('/^V/', '', $matchVersion);
-				if($this->databaseVersion == $matchVersion || $this->is_higher_version($this->databaseVersion, $matchVersion)) {
+				if($matchVersion == $data['TARGET_VERSION']) {
+					throw new exception(__METHOD__ .": detected invalid TARGET_VERSION in (". $matchVersion ."): make sure TARGET_VERSION is higher than matching!");
+				}
+				elseif($this->databaseVersion == $matchVersion || $this->is_higher_version($this->databaseVersion, $matchVersion)) {
 					//the version in MATCHING is equal to or HIGHER than our database version... make sure it is NOT
 					//	higher than the version in our versionFile.
 					if(!$this->is_higher_version($this->versionFileVersion, $matchVersion)) {
