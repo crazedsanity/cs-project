@@ -133,10 +133,10 @@
 	<td style="border-bottom:solid #000 1px;">
 		<table border=2>
 			<tr>
-				<th colspan="2">Hours Logged So Far (Last {hoursLoggedLimit}):</th>
+				<th colspan="3">Hours Logged So Far (Last {hoursLoggedLimit}):</th>
 			</tr>
 			<tr>
-				<td colspan="2" align="center">
+				<td colspan="3" align="center">
 					<table>
 						<tr>
 							<td><b>Timestamp</b></td>
@@ -156,17 +156,18 @@
 				</td>
 			</tr>
 			<tr>
-				<td>
+				<td nowrap>
 					<b>Original Estimate:</b> {estimate_original}
 				<!-- BEGIN input_orig_estimate -->
-					<input type="text" size="15" maxlength="15" name="updates[estimate_original]" value="">
+					<input type="text" size="5" maxlength="5" name="updates[estimate_original]" value="">
 				<!-- END input_orig_estimate -->
-					&nbsp;&nbsp;&nbsp;&nbsp;
-					<b>Current Estimate:</b>  <div id="estimate_current_text" style="display:inline;">{estimate_current} 
+				</td>
+				<td nowrap>
+					<b>Current Estimate:</b>  <div nowrap id="estimate_current_text" style="display:inline;">{estimate_current} 
 					<!-- BEGIN modifiable_curr_estimate -->
 						[<a href="javascript:void(enableInput('estimate_current'))">Edit</a>]</div>
 						<div id="estimate_current_inputDiv" style="display:none;">
-							<input id="estimate_current_input" type="text" size="15" maxlength="15" name="updates[estimate_current]" value="" disabled>
+							<input id="estimate_current_input" type="text" size="5" maxlength="5" name="updates[estimate_current]" value="" disabled>
 					<!-- END modifiable_curr_estimate -->
 					</div>
 				</td>
@@ -174,7 +175,7 @@
 				<td>
 					<b>Time Elapsed:</b> {estimate_elapsed}
 			<!-- BEGIN addElapsed -->
-					 -- <b>Add more:</b><input type="text" size="15" maxlength="15" name="updates[add_elapsed]" value="">
+					 -- <b>Add more:</b><input type="text" size="5" maxlength="5" name="updates[add_elapsed]" value="">
 			<!-- END addElapsed -->
 				</td>
 			</tr>
