@@ -34,6 +34,4 @@ $titleParts = array(
 );
 create_page_title($page, $titleParts);
 
-$page->templateVars['content'] = nl2br($page->templateVars['content']);
-
 ?>
