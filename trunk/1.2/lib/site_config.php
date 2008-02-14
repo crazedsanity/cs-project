@@ -22,6 +22,7 @@ require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
 require_once(dirname(__FILE__) .'/cs-phpxml/xmlParserClass.php');
 require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
+require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
 //Set of functions that should be usefull to everyone
@@ -62,43 +63,8 @@ function exception_handler($exception) {
 //##########################################################################
 
 
-//-------------------------------------------------------------------
-function read_config_file($setEverything=TRUE) {
-	if(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
-		$gf = new cs_globalFunctions;
-		$gf->conditional_header("/setup?from=". urlencode($_SERVER['REQUEST_URI']));
-		exit;
-	}
-	
-	$fs = new cs_fileSystemClass(dirname(__FILE__));
-	
-	$xmlString = $fs->read(CONFIG_FILENAME);
-	
-	
-	//parse the file.
-	$xmlParser = new xmlParser($xmlString);
-	
-	$config = $xmlParser->get_tree(TRUE);
-	$config = $config['CONFIG'];
-	unset($config['type'], $config['attributes']);
-	
-	$conditionallySet = array('VERSION_STRING', 'WORKINGONIT');
-	foreach($config as $index=>$value) {
-		if(in_array($index, $conditionallySet)) {
-			//only set this part if we're told to.
-			if($setEverything) {
-				define($index, $value);
-			}
-		}
-		else {
-			define($index, $value);
-		}
-	}
-	
-	return($config);
-	
-}//end read_config_file()
-//-------------------------------------------------------------------
+$config = new config(dirname(__FILE__) .'/'. CONFIG_FILENAME, FALSE);
+$config->read_config_file(TRUE, TRUE);
 
 check_external_lib_versions();
 

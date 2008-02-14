@@ -6,41 +6,23 @@
 
 
 if($_POST) {
-	switch($_POST['selectedOption']) {
-		case 'convertExisting': {
-			store_setup_data(3, $_POST['fields'], 'convertExisting_post_info');
-			$convertObj = new __convertDatabase();
-			store_setup_data(3, $convertObj->go(), 'text');
-			$convertObj->finish($page);
-		}
-		break;
-		
-		
-		case 'newInstall': {
-			$validSubmission = test_submitted_data($page, $_POST['users']);
-			if($validSubmission === TRUE) {
-				$obj = new __setupDefaultValues();
-				store_setup_data(3, $obj->go(), 'text');
-				$obj->finish($page);
-			}
-			else {
-				store_setup_data(3, $_POST['users'], 'post_info');
-				$page->set_message_wrapper(
-					array(
-						'title'		=> "Invalid User Data",
-						'message'	=> "The user data you submitted appears to be invalid: <BR>\n". $validSubmission,
-						'type'		=> "error"
-					)
-				);
-				$page->conditional_header("/setup/3", TRUE);
-			}
-		}
-		break;
-		
-		
-		default:
-			throw new exception("Invalid option selected!");
-	};
+	$validSubmission = test_submitted_data($page, $_POST['users']);
+	if($validSubmission === TRUE) {
+		$obj = new __setupDefaultValues();
+		store_setup_data(3, $obj->go(), 'text');
+		$obj->finish($page);
+	}
+	else {
+		store_setup_data(3, $_POST['users'], 'post_info');
+		$page->set_message_wrapper(
+			array(
+				'title'		=> "Invalid User Data",
+				'message'	=> "The user data you submitted appears to be invalid: <BR>\n". $validSubmission,
+				'type'		=> "error"
+			)
+		);
+		$page->conditional_header("/setup/3", TRUE);
+	}
 	
 	$page->conditional_header("/setup/3", TRUE);
 }
@@ -56,14 +38,6 @@ else {
 				}
 				$page->add_template_var($varName, $userValue);
 			}
-		}
-	}
-	
-	//now parse the "convertExisting" stuff...
-	$convertData = get_setup_data(3, 'convertExisting_post_info');
-	if(is_array($convertData)) {
-		foreach($convertData as $userField => $userValue) {
-			$page->add_template_var($userField, $userValue);
 		}
 	}
 }
@@ -1170,191 +1144,6 @@ class __setupDefaultValues extends upgrade {
 	
 }//end __setupDefaultValues{}
 
-
-
-class __convertDatabase {
-	
-	
-	
-	private $db;
-	private $newDb;
-	private $gfObj;
-	
-	private $lastNumrows=NULL;
-	private $lastDberror=NULL;
-	
-	//=========================================================================
-	public function __construct() {
-		$this->db = new cs_phpDB;
-		
-		//retrieve the connection parameters.
-		$storedParams = get_setup_data(3, 'convertExisting_post_info');
-		$params = array();
-		foreach($storedParams as $index=>$value) {
-			$key = preg_replace('/^database__/', '', $index);
-			$params[$key] = $value;
-		}
-		$this->db->connect($params);
-		
-		$this->gfObj = new cs_globalFunctions;
-		$this->gfObj->debugPrintOpt=1;
-		
-		
-		$this->newDb = new cs_phpDb;;
-		$this->newDb->connect(get_db_params());
-	}//end __construct()
-	//=========================================================================
-	
-	
-	//=========================================================================
-	public function go() {
-		//determine what script we have to include & run.
-		if(!$this->db->is_connected()) {
-			throw new exception(__METHOD__ .": failed to connect to database...");
-		}
-		else {
-			$numrows = $this->db->exec("SELECT internal_data_get_value('version_string')");
-			$dberror = $this->db->errorMsg();
-			
-			if(!strlen($dberror) && $numrows == 1) {
-				$data = $this->db->farray();
-				$version = $data[0];
-				$this->run_conversion($version);
-			}
-			else {
-				throw new exception(__METHOD__ .": failed to get version... ". $dberror);
-			}
-		}
-		
-	}//end go()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function run_conversion($fromVersion) {
-		
-		//check if the script exists.
-		$convertScript = dirname(__FILE__) .'/../../upgrade/convert/'. $fromVersion .'.php';
-		if(file_exists($convertScript)) {
-			require_once($convertScript);
-			try {
-				//create the object...
-				$obj = new convertDatabase($this->db, $this->newDb);
-				if(method_exists($obj, 'go')) {
-					$result = $obj->go();
-				}
-				else {
-					throw new exception(__METHOD__ .": convertDatabase::go() does not exist");
-				}
-			}
-			catch(exception $e) {
-				$this->gfObj->debug_print(__METHOD__ .": FATAL EXCEPTION OCCURRED::: ". $e->getMessage(),1);
-			}
-		}
-		else {
-			throw new exception(__METHOD__ .": conversion script does not exist: ". $convertScript);
-		}
-	}//end run_conversion()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function get_config_values() {
-		
-		store_setup_data(3, 0, 'result');
-		$configData = array();
-		//setup the list of required items.
-		$requiredItems = array(
-			'log_category_table' => array(
-				'prefix'	=> 'logcat',
-				'idColumn'	=> 'log_category_id',
-				'data'		=> array(
-					'database', 'authentication', 'users', 'general', 'project', 'helpdesk', 'todo', 
-					'tags', 'estimates', 'navigation', 'preferences' 
-				),
-			),
-			'record_type_table' => array(
-				'prefix'	=> 'rectype',
-				'idColumn'	=> 'record_type_id',
-				'data'		=> array(
-					'project', 'todo', 'helpdesk'
-				)
-			)
-		);
-		
-		foreach($requiredItems as $tableName => $info) {
-			//check that all the required values are present.}
-			foreach($info['data'] as $itemName) {
-				$configIndex = $info['prefix'] .'__'. $itemName;
-				
-				$getItemSql = "SELECT * FROM ". $tableName ." WHERE lower(name) = '". $itemName ."'";
-				$numrows = $this->db->exec($getItemSql);
-				$dberror = $this->db->errorMsg();
-				
-				if(!strlen($dberror)) {
-					if($numrows == 1) {
-						//retrieve the id & store it.
-						$data = $this->db->farray_fieldnames();
-						$configData[$configIndex] = $data[$info['idColumn']];
-					}
-					else {
-						throw new exception(__METHOD__ .": invalid data...? numrows=(". $numrows ."), dberror::: ". $dberror ."<BR>\nSQL::: ". $getItemSql);
-					}
-				}
-				else {
-					throw new exception(__METHOD__ .": failed to retrieve id for (". $itemName ."), rows=(". $numrows .") ERROR::: ". $dberror ."<BR>\nSQL::: ". $getItemSql);
-				}
-			}
-		}
-		
-		$this->gfObj->debug_print(__METHOD__ .": config data::: ". $this->gfObj->debug_print($configData,0));
-		
-		//set this step's results.
-		store_setup_data(3, $configData, 'data');
-		store_setup_data(3, 1, 'result');
-		
-		return($configData);
-	}//end get_config_values()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	public function finish(cs_genericPage &$page) {
-		//retrieve some configuration values.
-		$this->get_config_values();
-		
-		//create an upgrade{} object, for setting some internal values.
-		$obj = new _setupUpgrade($this->newDb);
-		$config = get_setup_data(3, 'data');
-		$config['version_string'] = $obj->finalize_conversion();
-		store_setup_data(3, $config, 'data');
-		
-		store_setup_data(4, 1, 'accessible');
-		$stepRes = get_setup_data(3, 'result');
-		if($stepRes == 1) {
-			$page->set_message_wrapper(array(
-				'title'		=> "Successfully Setup Data",
-				'message'	=> "All default data was stored in the new database successfully!",
-				'type'		=> "status"
-			));
-			$page->conditional_header("/setup/4", TRUE);
-		}
-		else {
-			$page->set_message_wrapper(array(
-				'title'		=> "Step Failed",
-				'message'	=> "Please review the errors below and proceed accordingly.",
-				'type'		=> "error"
-			));
-			$page->conditional_header("/setup/3", TRUE);
-		}
-		
-	}//end finish()
-	//=========================================================================
-	
-}//end __convertDatabase{}
 
 
 class _setupUpgrade extends upgrade {

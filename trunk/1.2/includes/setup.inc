@@ -19,7 +19,8 @@
 require_once(dirname(__FILE__) .'/../lib/simpletest/unit_tester.php');
 require_once(dirname(__FILE__) .'/../lib/simpletest/reporter.php');
 
-$configData = read_config_file(FALSE);
+$configObj = new config(NULL, FALSE);
+$configData = $configObj->read_config_file(FALSE);
 
 if(strlen($configData['DATABASE__DBNAME'])) {
 	//setup already complete.  Stop 'em.

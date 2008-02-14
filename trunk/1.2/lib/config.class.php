@@ -12,7 +12,7 @@ class config {
 	private $fileName;
 	
 	//-------------------------------------------------------------------------
-    public function __construct($fileName=NULL, $redirectOnFileMissing=TRUE) {
+    public function __construct($fileName=NULL) {
     	$this->gf = new cs_globalFunctions();
     	$this->fs = new cs_fileSystemClass(dirname(__FILE__) .'/..');
     	
@@ -24,10 +24,6 @@ class config {
     	//Redirect them to the setup page. 
 		if(!file_exists($this->fileName)) {
 			$this->fileExists = FALSE;
-			if($redirectOnFileMissing) {
-				$this->gf->conditional_header("/setup?from=". urlencode($_SERVER['REQUEST_URI']));
-				exit;
-			}
 		}
 		else {
 			$this->fileExists = TRUE;
@@ -58,7 +54,7 @@ class config {
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": config file doesn't exist");
+			$config = NULL;
 		}
 		
 		return($config);
@@ -75,7 +71,7 @@ class config {
     public function read_config_file($defineConstants=TRUE, $setEverything=TRUE) {
 		$config = $this->get_config_contents(TRUE);
 		
-		if($defineConstants) {
+		if(!is_null($config) && $defineConstants) {
 			$conditionallySet = array('VERSION_STRING', 'WORKINGONIT');
 			foreach($config as $index=>$value) {
 				if(in_array($index, $conditionallySet)) {
@@ -104,17 +100,24 @@ class config {
 		
 		//read the sample config.
 		$config = new config(dirname(__FILE__) .'/config.xml', FALSE);
-		$myData = $config->get_config_contents(FALSE);
+		$myData = $config->get_config_contents();
+		
+		//parse the sample config for it's attributes, so we can display the page properly.
+		$sampleConfig = new config(dirname(__FILE__) .'/../docs/samples/sample_config.xml', FALSE);
+		$systemData = $sampleConfig->get_config_contents(FALSE);
 		
 		$mainAttributes = $myData['attributes'];
+		
 		unset($myData['type'], $myData['attributes']);
 		
 		$parsedRows = "";
 		$defaultRowName = 'setting_text';
-		foreach($myData as $indexName=>$data) {
-			$attributes = $data['attributes'];
-			$value = $data['value'];
-			unset($data['type'], $data['attributes'], $data['value']);
+		foreach($systemData as $indexName=>$defaultValue) {
+			$value = NULL;
+			if(is_array($myData) && isset($myData[$indexName])) {
+				$value = $myData[$indexName];
+			}
+			$attributes = $systemData[$indexName]['attributes'];
 			$indexName = strtolower($indexName);
 			
 			//pull the appropriate template row.
