@@ -93,5 +93,68 @@ class config {
 		return($config);
     }//end read_config_file()
 	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	/**
+	 * Create a page (portion of a page, actually) to set/update config settings.
+	 */
+	public function build_update_interface(cs_genericPage &$page) {
+		
+		//read the sample config.
+		$config = new config(dirname(__FILE__) .'/config.xml', FALSE);
+		$myData = $config->get_config_contents(FALSE);
+		
+		$mainAttributes = $myData['attributes'];
+		unset($myData['type'], $myData['attributes']);
+		
+		$parsedRows = "";
+		$defaultRowName = 'setting_text';
+		foreach($myData as $indexName=>$data) {
+			$attributes = $data['attributes'];
+			$value = $data['value'];
+			unset($data['type'], $data['attributes'], $data['value']);
+			$indexName = strtolower($indexName);
+			
+			//pull the appropriate template row.
+			$rowName = $defaultRowName;
+			if(strlen($attributes['TYPE'])) {
+				$rowName = 'setting_'. $attributes['TYPE'];
+				
+				$optionList = NULL;
+				if($attributes['TYPE'] == 'select' && isset($attributes['OPTIONS'])) {
+					#debug_print(explode('|', $attributes['OPTIONS']));
+					$tmpOptionList = explode('|', $attributes['OPTIONS']);
+					$optionList = array();
+					foreach($tmpOptionList as $optionInfo) {
+						$x = explode('=', $optionInfo);
+						$optionList[$x[0]] = $x[1];
+					}
+					$optionList = $page->gfObj->array_as_option_list($optionList, $attributes['DEFAULT']);
+				}
+			}
+			
+			if(!isset($page->templateRows[$rowName])) {
+				throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
+			}
+			
+			//now parse stuff into the row...
+			$repArr = array(
+				'disabled'		=> $attributes['disabled'],
+				'index'			=> $indexName,
+				'title'			=> $attributes['TITLE'],
+				'description'	=> $attributes['DESCRIPTION'],
+				'value'			=> $value
+			);
+			if(!is_null($optionList)) {
+				$repArr['setting_select__normal'] = $optionList;
+			}
+			$parsedRows .= $page->mini_parser($page->templateRows[$rowName], $repArr);
+		}
+		#debug_print($parsedRows);
+		$page->add_template_var($defaultRowName, $parsedRows);
+	}//end build_update_interface()
+	//-------------------------------------------------------------------------
 }//end config{}
 ?>

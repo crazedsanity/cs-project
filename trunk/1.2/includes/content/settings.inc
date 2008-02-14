@@ -131,60 +131,10 @@ else {
 	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
 		if($user->is_admin() == 1) {
 			
-			//read the sample config.
-			require_once(dirname(__FILE__) .'/../../lib/config.class.php');
-			$config = new config(dirname(__FILE__) .'/../../lib/config.xml', FALSE);
-			$myData = $config->get_config_contents(FALSE);
+			#debug_print(get_class($page));
 			
-			$mainAttributes = $myData['attributes'];
-			unset($myData['type'], $myData['attributes']);
-			
-			$parsedRows = "";
-			$defaultRowName = 'setting_text';
-			foreach($myData as $indexName=>$data) {
-				$attributes = $data['attributes'];
-				$value = $data['value'];
-				unset($data['type'], $data['attributes'], $data['value']);
-				$indexName = strtolower($indexName);
-				
-				//pull the appropriate template row.
-				$rowName = $defaultRowName;
-				if(strlen($attributes['TYPE'])) {
-					$rowName = 'setting_'. $attributes['TYPE'];
-					
-					$optionList = NULL;
-					if($attributes['TYPE'] == 'select' && isset($attributes['OPTIONS'])) {
-						#debug_print(explode('|', $attributes['OPTIONS']));
-						$tmpOptionList = explode('|', $attributes['OPTIONS']);
-						$optionList = array();
-						foreach($tmpOptionList as $optionInfo) {
-							$x = explode('=', $optionInfo);
-							$optionList[$x[0]] = $x[1];
-						}
-						$optionList = $page->gfObj->array_as_option_list($optionList, $attributes['DEFAULT']);
-					}
-				}
-				
-				if(!isset($page->templateRows[$rowName])) {
-					throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
-				}
-				
-				//now parse stuff into the row...
-				$repArr = array(
-					'disabled'		=> $attributes['disabled'],
-					'index'			=> $indexName,
-					'title'			=> $attributes['TITLE'],
-					'description'	=> $attributes['DESCRIPTION'],
-					'value'			=> $value
-				);
-				if(!is_null($optionList)) {
-					$repArr['setting_select__normal'] = $optionList;
-				}
-				$parsedRows .= $page->mini_parser($page->templateRows[$rowName], $repArr);
-			}
-			#debug_print($parsedRows);
-			$page->add_template_var($defaultRowName, $parsedRows);
-			
+			$config = new config();
+			$config->build_update_interface($page);
 			
 			//create an object with administrative capabilities.
 			$adminUserClass = new adminUserClass($page->db);
