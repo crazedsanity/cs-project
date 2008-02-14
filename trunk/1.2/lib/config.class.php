@@ -113,9 +113,11 @@ class config {
 		$parsedRows = "";
 		$defaultRowName = 'setting_text';
 		foreach($systemData as $indexName=>$defaultValue) {
-			$value = NULL;
 			if(is_array($myData) && isset($myData[$indexName])) {
 				$value = $myData[$indexName];
+			}
+			else {
+				$value = $systemData[$indexName]['value'];
 			}
 			$attributes = $systemData[$indexName]['attributes'];
 			$indexName = strtolower($indexName);
@@ -139,7 +141,10 @@ class config {
 			}
 			
 			if(!isset($page->templateRows[$rowName])) {
-				throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
+				$page->set_block_row('content', $rowName);
+				if(!isset($page->templateRows[$rowName])) {
+					throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
+				}
 			}
 			
 			//now parse stuff into the row...

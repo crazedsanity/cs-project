@@ -63,14 +63,14 @@ function exception_handler($exception) {
 //##########################################################################
 
 
-$config = new config(dirname(__FILE__) .'/'. CONFIG_FILENAME, FALSE);
-$config->read_config_file(TRUE, TRUE);
+$configObj = new config(dirname(__FILE__) .'/'. CONFIG_FILENAME, FALSE);
+$configObj->read_config_file(TRUE, TRUE);
 
 check_external_lib_versions();
 
 	
 if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
-	$config = read_config_file(FALSE);
+	$config = $configObj->read_config_file(FALSE);
 	
 	if(($config['WORKINGONIT'] != "0" && strlen($config['WORKINGONIT'])) || strlen($config['WORKINGONIT']) > 1) {
 		//TODO: consider making this look prettier...
@@ -93,7 +93,7 @@ if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
 		else {
 			$upgrade->check_versions();
 		}
-		read_config_file(TRUE);
+		$configObj->read_config_file(TRUE);
 	}
 }
 

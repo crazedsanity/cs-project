@@ -141,7 +141,8 @@ class upgrade {
 	
 	//=========================================================================
 	private function read_config_version() {
-		$config = read_config_file(FALSE);
+		$configObj = new config();
+		$config = $configObj->read_config_file(FALSE);
 		$this->mainConfig = $config;
 		$retval = NULL;
 		
