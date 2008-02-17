@@ -21,7 +21,6 @@ class config {
     		$this->fileName = $fileName;
     	}
     	
-    	//Redirect them to the setup page. 
 		if(!file_exists($this->fileName)) {
 			$this->fileExists = FALSE;
 		}
@@ -163,6 +162,20 @@ class config {
 		#debug_print($parsedRows);
 		$page->add_template_var($defaultRowName, $parsedRows);
 	}//end build_update_interface()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	public function do_setup_redirect() {
+		if(!preg_match('/^setup/', $_SERVER['REQUEST_URI'])) {
+			$goHere = '/setup';
+			if(strlen($_SERVER['REQUEST_URI']) > 1) {
+				$goHere .= '?from='. urlencode($_SERVER['REQUEST_URI']);
+			}
+			$this->gf->conditional_header($goHere);
+		}
+	}//end do_setup_redirect()
 	//-------------------------------------------------------------------------
 }//end config{}
 ?>

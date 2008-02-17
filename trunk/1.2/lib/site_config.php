@@ -70,6 +70,7 @@ check_external_lib_versions();
 
 	
 if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
+	$configObj->do_setup_redirect();
 	$config = $configObj->read_config_file(FALSE);
 	
 	if(($config['WORKINGONIT'] != "0" && strlen($config['WORKINGONIT'])) || strlen($config['WORKINGONIT']) > 1) {
