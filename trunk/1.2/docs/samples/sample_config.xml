@@ -47,12 +47,6 @@
 			unless you really know what you're doing."
 		type="locked"
 		disabled="1">1.0.0-ALPHA1</version_string>
-	<stop_logins_on_global_alert
-		title="Stop Logins on Global Alert"
-		description="(&lt;font color=red&gt;&lt;b&gt;Currently unimplemented&lt;/b&gt;&lt;/font&gt;) Stop users from logging in if a global alert has been created."
-		type="select"
-		options="0=No (0)|1=Yes (1)"
-		default="0">0</stop_logins_on_global_alert>
 	<debugprintopt 
 		title="Debug Printing?"
 		description="Generally, this should only be turned on if you're running a development site for cs-project..."
