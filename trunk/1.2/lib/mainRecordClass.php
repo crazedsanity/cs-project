@@ -22,7 +22,7 @@ class mainRecord {
 	protected $cleanStringArr = array();
 	protected $insertFieldsArr = array();
 	
-	private $lastRecordId;
+	protected $lastRecordId;
 	private $internalRecordId;
 	private $cache = array();
 	
