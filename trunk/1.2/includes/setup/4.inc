@@ -9,15 +9,14 @@
 $defaultValues = array(
 	'isdevsite'						=> array(1,		'numeric',	0),
 	'proj_name'						=> array(10,	'sql', 		"CS-Project"),
-	'project_url'					=> array(5,		'sql',		$_SERVER['HTTP_HOST']),
+	'project_url'						=> array(5,		'sql',		$_SERVER['HTTP_HOST']),
 	'helpdesk_issue_announce_email'	=> array(7,		'email',	"new_issues@yourdomain.com"),
-	'max_time'						=> array(5,		'sql',		"18 hours"),
-	'max_idle'						=> array(5,		'sql',		"2 hours"),
-	'config_session_name'			=> array(9,		'alpha',	"CS_PROJECT_SESSID"),
-	'stop_logins_on_global_alert'	=> array(1,		'numeric',	1),
+	'max_time'							=> array(5,		'sql',		"18 hours"),
+	'max_idle'							=> array(5,		'sql',		"2 hours"),
+	'config_session_name'				=> array(9,		'alpha',	"CS_PROJECT_SESSID"),
 	'debugprintopt'					=> array(1,		'numeric',	0),
 	'debugremovehr'					=> array(1,		'numeric',	0),
-	'workingonit'					=> array(1,		'numeric',	0)
+	'workingonit'						=> array(1,		'numeric',	0)
 );
 
 
