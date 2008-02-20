@@ -1754,7 +1754,6 @@ function send_single_email($toAddr, $subject, $body) {
 	$mail->ContentType = "text/html";
 	$mail->Subject = $subject;
 	$mail->Body = $bbCodeParser->parseString($body);
-	$mail->WordWrap = 75;
 	
 	$logsObj = new logsClass($db, 'Email');
 	
