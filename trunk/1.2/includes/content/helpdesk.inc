@@ -180,7 +180,7 @@ if($_POST) {
 	$url = $baseUrl;
 	
 	//don't bother redirecting to the "view" page if the ID isn't valid.
-	if(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID'])) {
+	if(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID']) && $byPassUrlExtras === FALSE) {
 		unset($urlSection);
 	}
 	else {
