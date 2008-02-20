@@ -25,8 +25,7 @@ require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
 require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
-//Set of functions that should be usefull to everyone
-
+define(SESSION_SETUP_KEY, '___setup_key___');
 
 set_exception_handler('exception_handler');
 
@@ -68,35 +67,10 @@ $configObj->read_config_file(TRUE, TRUE);
 
 check_external_lib_versions();
 
-	
-if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
-	$configObj->do_setup_redirect();
-	$config = $configObj->read_config_file(FALSE);
-	
-	if(($config['WORKINGONIT'] != "0" && strlen($config['WORKINGONIT'])) || strlen($config['WORKINGONIT']) > 1) {
-		//TODO: consider making this look prettier...
-		$details = "The website/database is under construction... try back in a bit.";
-		if(preg_match('/upgrade/i', $config['WORKINGONIT'])) {
-			$details = "<b>Upgrade in progress</b>: ". $config['WORKINGONIT'];
-		}
-		elseif(strlen($config['WORKINGONIT']) > 1) {
-			$details .= "MORE INFORMATION::: ". $config['WORKINGONIT'];
-		}
-		throw new exception($details);
-	}
-	else {
-		//don't panic: we're going to check for upgrades, but this doesn't
-		//	necessarily mean anything will ACTUALLY be upgraded.
-		$upgrade = new upgrade;
-		if($upgrade->upgrade_in_progress()) {
-			throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
-		}
-		else {
-			$upgrade->check_versions();
-		}
-		$configObj->read_config_file(TRUE);
-	}
-}
+
+//call a method to see if setup should run.
+$configObj->check_site_status();
+
 
 if($_SERVER['DOCUMENT_ROOT']) {
 	//it was called from the web...

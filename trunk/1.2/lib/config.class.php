@@ -92,84 +92,20 @@ class config {
 	
 	
 	//-------------------------------------------------------------------------
-	/**
-	 * Create a page (portion of a page, actually) to set/update config settings.
-	 */
-	public function build_update_interface(cs_genericPage &$page) {
-		
-		//read the sample config.
-		$config = new config(dirname(__FILE__) .'/config.xml', FALSE);
-		$myData = $config->get_config_contents();
-		
-		//parse the sample config for it's attributes, so we can display the page properly.
-		$sampleConfig = new config(dirname(__FILE__) .'/../docs/samples/sample_config.xml', FALSE);
-		$systemData = $sampleConfig->get_config_contents(FALSE);
-		
-		$mainAttributes = $myData['attributes'];
-		
-		unset($myData['type'], $myData['attributes']);
-		
-		$parsedRows = "";
-		$defaultRowName = 'setting_text';
-		foreach($systemData as $indexName=>$defaultValue) {
-			if(is_array($myData) && isset($myData[$indexName])) {
-				$value = $myData[$indexName];
+	public function do_setup_redirect() {
+		if(!preg_match('/^setup/', $_SERVER['REQUEST_URI']) && !$_SESSION[SESSION_SETUP_KEY]) {
+			
+			//set something in the session so we know.
+			if(!isset($_SESSION[SESSION_SETUP_KEY])) {
+				$_SESSION[SESSION_SETUP_KEY]++;
 			}
 			else {
-				$value = $systemData[$indexName]['value'];
-			}
-			$attributes = $systemData[$indexName]['attributes'];
-			$indexName = strtolower($indexName);
-			
-			//pull the appropriate template row.
-			$rowName = $defaultRowName;
-			if(strlen($attributes['TYPE'])) {
-				$rowName = 'setting_'. $attributes['TYPE'];
-				
-				$optionList = NULL;
-				if($attributes['TYPE'] == 'select' && isset($attributes['OPTIONS'])) {
-					#debug_print(explode('|', $attributes['OPTIONS']));
-					$tmpOptionList = explode('|', $attributes['OPTIONS']);
-					$optionList = array();
-					foreach($tmpOptionList as $optionInfo) {
-						$x = explode('=', $optionInfo);
-						$optionList[$x[0]] = $x[1];
-					}
-					$optionList = $page->gfObj->array_as_option_list($optionList, $attributes['DEFAULT']);
-				}
+				throw new exception(__METHOD__ .": setup key (". SESSION_SETUP_KEY .") found in session already");
 			}
 			
-			if(!isset($page->templateRows[$rowName])) {
-				$page->set_block_row('content', $rowName);
-				if(!isset($page->templateRows[$rowName])) {
-					throw new exception(__METHOD__ .": failed to retrieve block row named (". $rowName .")");
-				}
-			}
 			
-			//now parse stuff into the row...
-			$repArr = array(
-				'disabled'		=> $attributes['disabled'],
-				'index'			=> $indexName,
-				'title'			=> $attributes['TITLE'],
-				'description'	=> $attributes['DESCRIPTION'],
-				'value'			=> $value
-			);
-			if(!is_null($optionList)) {
-				$repArr['setting_select__normal'] = $optionList;
-			}
-			$parsedRows .= $page->mini_parser($page->templateRows[$rowName], $repArr);
-		}
-		#debug_print($parsedRows);
-		$page->add_template_var($defaultRowName, $parsedRows);
-	}//end build_update_interface()
-	//-------------------------------------------------------------------------
-	
-	
-	
-	//-------------------------------------------------------------------------
-	public function do_setup_redirect() {
-		if(!preg_match('/^setup/', $_SERVER['REQUEST_URI'])) {
 			$goHere = '/setup';
+			
 			if(strlen($_SERVER['REQUEST_URI']) > 1) {
 				$goHere .= '?from='. urlencode($_SERVER['REQUEST_URI']);
 			}
@@ -177,5 +113,41 @@ class config {
 		}
 	}//end do_setup_redirect()
 	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	public function check_site_status() {
+		if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
+			$this->do_setup_redirect();
+			$config = $this->read_config_file(FALSE);
+			
+			if(($config['WORKINGONIT'] != "0" && strlen($config['WORKINGONIT'])) || strlen($config['WORKINGONIT']) > 1) {
+				//TODO: consider making this look prettier...
+				$details = "The website/database is under construction... try back in a bit.";
+				if(preg_match('/upgrade/i', $config['WORKINGONIT'])) {
+					$details = "<b>Upgrade in progress</b>: ". $config['WORKINGONIT'];
+				}
+				elseif(strlen($config['WORKINGONIT']) > 1) {
+					$details .= "MORE INFORMATION::: ". $config['WORKINGONIT'];
+				}
+				throw new exception($details);
+			}
+			else {
+				//don't panic: we're going to check for upgrades, but this doesn't
+				//	necessarily mean anything will ACTUALLY be upgraded.
+				$upgrade = new upgrade;
+				if($upgrade->upgrade_in_progress()) {
+					throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
+				}
+				else {
+					$upgrade->check_versions();
+				}
+				$this->read_config_file(TRUE);
+			}
+		}
+	}//end check_site_status()
+	//-------------------------------------------------------------------------
+	
 }//end config{}
 ?>
