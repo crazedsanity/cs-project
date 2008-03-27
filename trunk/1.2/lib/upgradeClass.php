@@ -68,7 +68,7 @@ class upgrade {
 		if($this->upgrade_in_progress()) {
 			throw new exception(__METHOD__ .": upgrade in progress");
 		}
-		elseif(!file_exists(dirname(__FILE__) .'/'. CONFIG_FILENAME)) {
+		elseif(!file_exists(CONFIG_FILE_LOCATION)) {
 			throw new exception(__METHOD__ .": config.xml file missing");
 		}
 		elseif(!file_exists(dirname(__FILE__) .'/../VERSION')) {
@@ -147,7 +147,7 @@ class upgrade {
 		$retval = NULL;
 		
 		if(!is_array($config) || !count($config)) {
-			throw new exception(__METHOD__ .": constant CONFIG_FILENAME not present, can't locate config xml file");
+			throw new exception(__METHOD__ .": no configuration data available (missing config file?)");
 		}
 		else {
 			//now, let's see if there's a "version_string" index.
@@ -203,7 +203,7 @@ class upgrade {
 				$this->gfObj->debug_print(__METHOD__ .": result of setting 'upgrade in progress': (". $lockConfig .")");
 				
 				//check to see if our config file is writable.
-				if(!$this->fsObj->is_writable("lib/config.xml")) {
+				if(!$this->fsObj->is_writable(CONFIG_FILE_LOCATION)) {
 					throw new exception(__METHOD__ .": config file isn't writable!");
 				}
 				
@@ -625,7 +625,7 @@ class upgrade {
 	//=========================================================================
 	private function update_config_file($index, $value) {
 		$gf = new cs_globalFunctions;
-		$myConfigFile = 'lib/'. CONFIG_FILENAME;
+		$myConfigFile = CONFIG_FILE_LOCATION;
 		$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
 		$xmlParser = new XMLParser($fs->read($myConfigFile));
 		$xmlCreator = new XMLCreator;
