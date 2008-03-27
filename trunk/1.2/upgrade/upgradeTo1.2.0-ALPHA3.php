@@ -39,14 +39,14 @@ class upgrade_to_1_2_0_ALPHA3 extends dbAbstract {
 	public function update_config_file() {
 		$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
 		$sampleXmlObj = new XMLParser($fs->read('docs/samples/sample_config.xml'));
-		$siteXmlObj = new XMLParser($fs->read('lib/config.xml'));
+		$siteXmlObj = new XMLParser($fs->read(CONFIG_FILE_LOCATION));
 		
 		$updateXml = new xmlCreator();
 		$updateXml->load_xmlparser_data($siteXmlObj);
 		
 		
 		//BACKUP ORIGINAL XML CONFIG...
-		$backupFile = 'lib/__BACKUP__'. time() .'__config.xml';
+		$backupFile = 'lib/__BACKUP__'. time() .'__'. CONFIG_FILENAME;
 		$fs->create_file($backupFile);
 		$fs->openFile($backupFile);
 		$fs->write($updateXml->create_xml_string());
@@ -77,7 +77,7 @@ class upgrade_to_1_2_0_ALPHA3 extends dbAbstract {
 		}
 		
 		$this->gfObj->debug_print($this->gfObj->cleanString($updateXml->create_xml_string(), 'htmlentity_plus_brackets'));
-		$fs->openFile('lib/config.xml');
+		$fs->openFile(CONFIG_FILE_LOCATION);
 		$fs->write($updateXml->create_xml_string());
 	}//end update_config_file()
 	//=========================================================================

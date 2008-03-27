@@ -9,7 +9,7 @@
  * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/includes/setup.inc $ 
  * Last Updated:::::::: $Date:2007-11-20 11:04:59 -0600 (Tue, 20 Nov 2007) $
  * 
- * TODO: check for the existence of the /lib/config.xml file
+ * TODO: check for the existence of the config file (CONFIG_FILE_LOCATION)
  * TODO: if the config.xml exists, check if the database connection works, and if we can get ANY version data: if so, give fatal message saying it won't work.
  * TODO: if step 2 is re-run, do something to reset the status/accessibility of the other steps.
  */
