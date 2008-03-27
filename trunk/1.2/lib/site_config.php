@@ -25,10 +25,15 @@ require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
 require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
+define(CONFIG_DIRECTORY, 'rw');
+define(CONFIG_FILE_LOCATION, CONFIG_DIRECTORY .'/'. CONFIG_FILENAME);
 define(SESSION_SETUP_KEY, '___setup_key___');
 
 set_exception_handler('exception_handler');
 
+//TODO: turn off if it's not a dev site, but NOT if setup is running (so they can see problems).
+ini_set('error_reporting', 'On');
+ini_set('display_errors', 'On');
 //##########################################################################
 function exception_handler($exception) {
 	$exceptionMessage = $exception->getMessage();
@@ -93,7 +98,8 @@ $GLOBALS['STATUS_NOTENDED'] = array(0,1,2,6);
 $GLOBALS['templateVars'] = array(
 	"PHP_SELF"		=> $_SERVER['PHP_SELF'],
 	"cs-content_version"	=> VERSION_STRING,
-	"PROJ_NAME"				=> PROJ_NAME
+	"PROJ_NAME"				=> PROJ_NAME,
+	"CONFIG_FILE_LOCATION"	=> CONFIG_FILE_LOCATION
 );
 
 
