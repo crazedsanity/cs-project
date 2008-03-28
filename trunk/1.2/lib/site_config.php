@@ -29,6 +29,11 @@ define(CONFIG_DIRECTORY, 'rw');
 define(CONFIG_FILE_LOCATION, CONFIG_DIRECTORY .'/'. CONFIG_FILENAME);
 define(SESSION_SETUP_KEY, '___setup_key___');
 
+//location where the config file USED to be, for the purpose of upgrading from previous versions.
+define(OLD_CONFIG_DIRECTORY, 'lib');
+define(OLD_CONFIG_FILENAME, CONFIG_FILENAME);
+define(OLD_CONFIG_FILE_LOCATION, OLD_CONFIG_DIRECTORY .'/'. OLD_CONFIG_FILENAME);
+
 set_exception_handler('exception_handler');
 
 //TODO: turn off if it's not a dev site, but NOT if setup is running (so they can see problems).

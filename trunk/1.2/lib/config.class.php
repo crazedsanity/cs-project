@@ -117,35 +117,96 @@ class config {
 	
 	
 	//-------------------------------------------------------------------------
+	/**
+	 * Determines if the site is a fresh install, undergoing setup, being 
+	 * upgraded (by someone else), or good to go.
+	 * 
+	 * @param (void)	No parameters accepted
+	 * 
+	 * TODO: make this actually WORK.
+	 * TODO: match actual returns with those specified below
+	 * TODO: implement a "reload timer" so the page with do a meta-refresh after X minutes/seconds (make sure any POST vars are retained!!!)
+	 * TODO: instead of a ton of returns, just set true/false for return, and have internal message explaining what's up.
+	 * 
+	 * @return TRUE		OK: display normal page (no upgrade/setup needed/running)
+	 * @return 1		OK: setup required (perform redirect)
+	 * @return 2		OK: setup initiated by current user (display setup page)
+	 * @return 3		ERROR: setup initiated by OTHER user (show "setup running" error)
+	 * @return 4		OK: upgrade required (starts upgrade process, then displays normal page)
+	 * @return 5		ERROR: upgrade started by other user (show temporary "upgrade in progress" message, set reload timer)
+	 */
 	public function check_site_status() {
-		if(!defined("PROJECT__INITIALSETUP") || PROJECT__INITIALSETUP !== TRUE) {
-			$this->do_setup_redirect();
-			$config = $this->read_config_file(FALSE);
+		
+		//=============================================================
+		//BEGIN pseudo code:
+		//--------------------------------------------------
+		
+		
+		if($this->configFileExists()) {
+			//got an existing config file.
 			
-			if(($config['WORKINGONIT'] != "0" && strlen($config['WORKINGONIT'])) || strlen($config['WORKINGONIT']) > 1) {
-				//TODO: consider making this look prettier...
-				$details = "The website/database is under construction... try back in a bit.";
-				if(preg_match('/upgrade/i', $config['WORKINGONIT'])) {
-					$details = "<b>Upgrade in progress</b>: ". $config['WORKINGONIT'];
-				}
-				elseif(strlen($config['WORKINGONIT']) > 1) {
-					$details .= "MORE INFORMATION::: ". $config['WORKINGONIT'];
-				}
-				throw new exception($details);
+			if($this->isWorkingOnItSet()) {
+				//site access is locked (probably an upgrade); get the message and show 'em.
+				$retval = $this->isWorkingOnItSet(TRUE);
+				$this->showFatalError($retval);
 			}
-			else {
-				//don't panic: we're going to check for upgrades, but this doesn't
-				//	necessarily mean anything will ACTUALLY be upgraded.
-				$upgrade = new upgrade;
-				if($upgrade->upgrade_in_progress()) {
-					throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
+			elseif($this->setupConfigExists()) {
+				if($this->setupConfigExists() === 'current_user') {
+					//the currently logged-in user is actually running the setup, no worries.
+					$retval = 'undergoing setup by current user';
 				}
 				else {
-					$upgrade->check_versions();
+					//tell 'em somebody is working on setup and to WAIT.
+					$retval = $this->showSetupMessage();
 				}
-				$this->read_config_file(TRUE);
+			}
+			else {
+				//config exists, site not locked... GOOD TO GO!
+				$retval = $this->setOkay();
 			}
 		}
+		else {
+			//check for the OLD config file.
+			if($this->oldConfigFileExists()) {
+				//copy old file to new location...
+				$this->copyOldConfigFile();
+				
+				//now check if the site is locked.
+				if($this->isWorkingOnItSet()) {
+					//upgrade running.  Show 'em the message.
+					$retval = $this->isWorkingOnItSet(TRUE);
+					$this->showFatalError($retval);
+				}
+				elseif($this->setupConfigExists()) {
+					//SETUP IN PROGRESS...
+					
+					if($this->setupConfigExists() === 'current_user') {
+						//the currently logged-in user is actually running the setup, no worries.
+						$retval = 'undergoing setup by current user';
+					}
+					else {
+						//tell 'em somebody is working on setup and to WAIT.
+						$retval = $this->showSetupMessage();
+					}
+				}
+				else {
+					//good to go!
+					$retval=$this->setOkay();
+				}
+			}
+			else {
+				//okay, no config file (new or old), no setup running, so current user has option
+				//	to run setup (viewing the page not enough; must click something to create the
+				//	setup config file which locks setup to their session)
+				$this->do_setup_redirect();
+			}
+		}
+		
+		return($retval);
+		//--------------------------------------------------
+		//END pseudo code;
+		//=============================================================
+		
 	}//end check_site_status()
 	//-------------------------------------------------------------------------
 	
