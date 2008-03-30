@@ -597,6 +597,9 @@ class mainRecord {
 				}
 			}
 		}
+		elseif(!preg_match('/:/', $ancestryString) && is_numeric($ancestryString)) {
+			$retval = $ancestryString;
+		}
 		
 		return($retval);
 	}//end get_parent_from_ancestry()
