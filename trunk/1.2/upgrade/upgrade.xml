@@ -19,17 +19,11 @@
 	in an unstable state.  Unstable is bad, m'kay?</system_note>
 	
 	<matching>
-		<v1.2.0-ALPHA1>
-			<target_version>1.2.0-ALPHA2</target_version>
-			<script_name>upgradeTo1.2.0-ALPHA2.php</script_name>
-			<class_name>upgrade_to_1_2_0_ALPHA2</class_name>
+		<v1.2.0-ALPHA3>
+			<target_version>1.2.0-ALPHA4</target_version>
+			<script_name>upgradeTo1.2.0-ALPHA4.php</script_name>
+			<class_name>upgrade_to_1_2_0_ALPHA4</class_name>
 			<call_method>run_upgrade</call_method>
-		</v1.2.0-ALPHA1>
-		<v1.2.0-ALPHA2>
-			<target_version>1.2.0-ALPHA3</target_version>
-			<script_name>upgradeTo1.2.0-ALPHA3.php</script_name>
-			<class_name>upgrade_to_1_2_0_ALPHA3</class_name>
-			<call_method>run_upgrade</call_method>
-		</v1.2.0-ALPHA2>
+		</v1.2.0-ALPHA3>
 	</matching>
 </upgrade>
