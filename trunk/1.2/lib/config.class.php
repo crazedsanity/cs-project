@@ -8,8 +8,10 @@ class config {
 	private $gf;
 	
 	private $fileExists;
-	
+	private $siteStatus;
+	private $setupRequired = FALSE;
 	private $fileName;
+	private $config;
 	
 	//-------------------------------------------------------------------------
     public function __construct($fileName=NULL) {
@@ -27,6 +29,11 @@ class config {
 		else {
 			$this->fileExists = TRUE;
 		}
+		
+		if(!$this->fs->is_writable(CONFIG_DIRECTORY)) {
+			throw new exception(__METHOD__ .": the config directory (". CONFIG_DIRECTORY .") isn't writable!");
+		}
+		$this->config = $this->get_config_contents(TRUE);
     }//end __construct()
 	//-------------------------------------------------------------------------
     
@@ -93,23 +100,17 @@ class config {
 	
 	//-------------------------------------------------------------------------
 	public function do_setup_redirect() {
-		if(!preg_match('/^setup/', $_SERVER['REQUEST_URI']) && !$_SESSION[SESSION_SETUP_KEY]) {
-			
-			//set something in the session so we know.
-			if(!isset($_SESSION[SESSION_SETUP_KEY])) {
-				$_SESSION[SESSION_SETUP_KEY]++;
+		if($this->check_site_status() && $this->setupRequired) {
+			if(!($_SERVER['SCRIPT_NAME'] == '/setup')) {
+				$this->gf->debug_print("script_name check=(". ($_SERVER['script_name'] != '/setup') .")", 1);
+				$goHere = '/setup';
+				if(strlen($_SERVER['REQUEST_URI']) > 1 && !isset($_SESSION['setup__viewed'])) {
+					$goHere .= '?from='. urlencode($_SERVER['REQUEST_URI']);
+				}
+				$_SESSION['setup_redirect'] = time();
+				$this->create_setup_config();
+				$this->gf->conditional_header($goHere);
 			}
-			else {
-				throw new exception(__METHOD__ .": setup key (". SESSION_SETUP_KEY .") found in session already");
-			}
-			
-			
-			$goHere = '/setup';
-			
-			if(strlen($_SERVER['REQUEST_URI']) > 1) {
-				$goHere .= '?from='. urlencode($_SERVER['REQUEST_URI']);
-			}
-			$this->gf->conditional_header($goHere);
 		}
 	}//end do_setup_redirect()
 	//-------------------------------------------------------------------------
@@ -129,86 +130,145 @@ class config {
 	 * TODO: instead of a ton of returns, just set true/false for return, and have internal message explaining what's up.
 	 * 
 	 * @return TRUE		OK: display normal page (no upgrade/setup needed/running)
-	 * @return 1		OK: setup required (perform redirect)
-	 * @return 2		OK: setup initiated by current user (display setup page)
-	 * @return 3		ERROR: setup initiated by OTHER user (show "setup running" error)
-	 * @return 4		OK: upgrade required (starts upgrade process, then displays normal page)
-	 * @return 5		ERROR: upgrade started by other user (show temporary "upgrade in progress" message, set reload timer)
+	 * @return FALSE	FAIL: somebody else is running setup, or the site is otherwise locked.
 	 */
 	public function check_site_status() {
 		
-		//=============================================================
-		//BEGIN pseudo code:
-		//--------------------------------------------------
+		//check for the OLD config file.
+		/**
+		 * WHY THE CHECK IS HERE:::
+		 * 
+		 * The setup system expects that the config file exists in the location 
+		 * specified by CONFIG_FILE_LOCATION; if it's not there, the site_config 
+		 * will assume setup must be run... so we have to circumvent that 
+		 * behaviour right here.
+		 */
+		if(file_exists(OLD_CONFIG_FILE_LOCATION)) {
+			//copy old file to new location...
+			if(!$this->fs->copy_file(OLD_CONFIG_FILE_LOCATION, CONFIG_FILE_LOCATION)) {
+				throw new exception(__METHOD__ .": failed to copy existing config into new location");
+			}
+			$this->fs->rm(OLD_CONFIG_FILE_LOCATION);
+		}
 		
 		
-		if($this->configFileExists()) {
+		if($this->setup_config_exists()) {
+			if($this->setup_config_exists(TRUE)) {
+				//the currently logged-in user is actually running the setup, no worries.
+				$this->siteStatus = 'You are running setup... please continue.';
+				$this->setupRequired = TRUE;
+				$retval = TRUE;
+			}
+			else {
+				//tell 'em somebody is working on setup and to WAIT.
+				$this->siteStatus = 'Setup is in progress by another user.  Please wait.';
+				$retval = FALSE;
+			}
+		}
+		elseif($this->fileExists) {
 			//got an existing config file.
 			
-			if($this->isWorkingOnItSet()) {
-				//site access is locked (probably an upgrade); get the message and show 'em.
-				$retval = $this->isWorkingOnItSet(TRUE);
-				$this->showFatalError($retval);
-			}
-			elseif($this->setupConfigExists()) {
-				if($this->setupConfigExists() === 'current_user') {
-					//the currently logged-in user is actually running the setup, no worries.
-					$retval = 'undergoing setup by current user';
-				}
-				else {
-					//tell 'em somebody is working on setup and to WAIT.
-					$retval = $this->showSetupMessage();
-				}
+			if($this->is_workingonit_set()) {
+				//site access is locked; get the message and show 'em.
+				$this->siteStatus = $this->is_workingonit_set(TRUE);
+				$retval = $this->siteStatus;
 			}
 			else {
 				//config exists, site not locked... GOOD TO GO!
-				$retval = $this->setOkay();
+				$this->siteStatus = 'Normal (site is setup).';
+				$retval = TRUE;
 			}
 		}
 		else {
-			//check for the OLD config file.
-			if($this->oldConfigFileExists()) {
-				//copy old file to new location...
-				$this->copyOldConfigFile();
-				
-				//now check if the site is locked.
-				if($this->isWorkingOnItSet()) {
-					//upgrade running.  Show 'em the message.
-					$retval = $this->isWorkingOnItSet(TRUE);
-					$this->showFatalError($retval);
-				}
-				elseif($this->setupConfigExists()) {
-					//SETUP IN PROGRESS...
-					
-					if($this->setupConfigExists() === 'current_user') {
-						//the currently logged-in user is actually running the setup, no worries.
-						$retval = 'undergoing setup by current user';
-					}
-					else {
-						//tell 'em somebody is working on setup and to WAIT.
-						$retval = $this->showSetupMessage();
-					}
-				}
-				else {
-					//good to go!
-					$retval=$this->setOkay();
-				}
-			}
-			else {
-				//okay, no config file (new or old), no setup running, so current user has option
-				//	to run setup (viewing the page not enough; must click something to create the
-				//	setup config file which locks setup to their session)
-				$this->do_setup_redirect();
-			}
+			//good to go!
+			$this->siteStatus = 'No existing config or setup file: you may initiate the setup process now.';
+			$this->setupRequired = TRUE;
+			$retval = TRUE;
 		}
 		
 		return($retval);
-		//--------------------------------------------------
-		//END pseudo code;
-		//=============================================================
 		
 	}//end check_site_status()
 	//-------------------------------------------------------------------------
 	
+	
+	
+	//-------------------------------------------------------------------------
+	private function is_workingonit_set($giveValue=FALSE) {
+		if((is_numeric($this->config['WORKINGONIT']) && $this->config['WORKINGONIT'] == 0) || ($this->config['WORKINGONIT'] === FALSE)) {
+			$retval = FALSE;
+		}
+		else {
+			$retval = TRUE;
+		}
+		
+		if($giveValue === TRUE) {
+			$retval = $this->config['WORKINGONIT'];
+		}
+		
+		return($retval);
+	}//end is_workingonit_set()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	public function setup_config_exists($checkOwnership=FALSE) {
+		$retval = FALSE;
+		
+		$dirContents = $this->fs->ls(CONFIG_DIRECTORY);
+		if($dirContents[SETUP_FILENAME]) {
+			$retval = TRUE;
+			
+			if($checkOwnership === TRUE) {
+				//read the object.
+				$xmlParser = new xmlParser($this->fs->read(SETUP_FILE_LOCATION));
+				$configData = $xmlParser->get_tree(TRUE);
+				$configData = $configData['CONFIG'];
+				
+				//now that we've got the data, determine if the current user is the owner.
+				if($configData['OWNER_SESSION'] === session_id()) {
+					$retval = TRUE;
+				}
+				else {
+					$retval = FALSE;
+				}
+			}
+		}
+		
+		return($retval);
+	}//end setup_config_exists()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	public function is_setup_required() {
+		return($this->setupRequired);
+	}//end is_setup_required()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	private function create_setup_config() {
+		$xmlCreator = new xmlCreator('config');
+		$attributes = array(
+			'creation'	=> time()
+		);
+		$xmlCreator->add_tag('/config/owner_session', session_id(), $attributes);
+		
+		$this->fs->create_file(SETUP_FILE_LOCATION);
+		$this->fs->write($xmlCreator->create_xml_string());
+	}//end create_setup_config()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	public function get_site_status() {
+		return($this->siteStatus);
+	}//end get_site_status()
+	//-------------------------------------------------------------------------
 }//end config{}
 ?>

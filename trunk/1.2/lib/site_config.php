@@ -25,9 +25,10 @@ require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
 require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
+define(SETUP_FILENAME, 'setup.xml');
 define(CONFIG_DIRECTORY, 'rw');
 define(CONFIG_FILE_LOCATION, CONFIG_DIRECTORY .'/'. CONFIG_FILENAME);
-define(SESSION_SETUP_KEY, '___setup_key___');
+define(SETUP_FILE_LOCATION, CONFIG_DIRECTORY .'/'. SETUP_FILENAME);
 
 //location where the config file USED to be, for the purpose of upgrading from previous versions.
 define(OLD_CONFIG_DIRECTORY, 'lib');
@@ -39,6 +40,7 @@ set_exception_handler('exception_handler');
 //TODO: turn off if it's not a dev site, but NOT if setup is running (so they can see problems).
 ini_set('error_reporting', 'On');
 ini_set('display_errors', 'On');
+error_reporting(E_ALL && ~E_NOTICE);
 //##########################################################################
 function exception_handler($exception) {
 	$exceptionMessage = $exception->getMessage();
@@ -72,14 +74,24 @@ function exception_handler($exception) {
 //##########################################################################
 
 
-$configObj = new config(dirname(__FILE__) .'/'. CONFIG_FILENAME, FALSE);
-$configObj->read_config_file(TRUE, TRUE);
+$configObj = new config(CONFIG_FILE_LOCATION, FALSE);
 
 check_external_lib_versions();
 
 
 //call a method to see if setup should run.
-$configObj->check_site_status();
+unset($_SESSION['setup_redirect']);
+if($configObj->check_site_status()) {
+	if($configObj->is_setup_required()) {
+		$configObj->do_setup_redirect();
+	}
+}
+else {
+	//tell 'em what the site's status is.
+	//TODO: make this look nicer.
+	echo($configObj->get_site_status());
+	exit;
+}
 
 
 if($_SERVER['DOCUMENT_ROOT']) {
@@ -89,7 +101,7 @@ if($_SERVER['DOCUMENT_ROOT']) {
 }
 else {
 	//called from the command line.
-	$GLOBALS['SITE_ROOT'] = $_SERVER['HOME'] ."/partslogistics2002";
+	$GLOBALS['SITE_ROOT'] = $_SERVER['HOME'];
 }
 
 $GLOBALS['LIBDIR']=$GLOBALS['SITE_ROOT'] . "/lib";
