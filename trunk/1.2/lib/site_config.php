@@ -85,6 +85,9 @@ if($configObj->check_site_status()) {
 	if($configObj->is_setup_required()) {
 		$configObj->do_setup_redirect();
 	}
+	else {
+		$configObj->get_config_contents(NULL,TRUE,TRUE);
+	}
 }
 else {
 	//tell 'em what the site's status is.

@@ -43,7 +43,7 @@ class config {
 	/**
 	 * Get the contents of the config file.
 	 */
-	public function get_config_contents($simple=TRUE) {
+	public function get_config_contents($simple=TRUE, $setConstants=FALSE, $setEverything=FALSE) {
 		if($this->fileExists) {
 			$xmlString = $this->fs->read($this->fileName);
 			
@@ -57,6 +57,26 @@ class config {
 			else {
 				$config = $xmlParser->get_path('/CONFIG');
 				unset($config['type'], $config['attributes']);
+			}
+			
+			if($setConstants) {
+				$myConfig = $config;
+				if(!$simple) {
+					$myConfig = $xmlParser->get_tree(TRUE);
+					$myConfig = $myConfig['CONFIG'];
+				}
+				$conditionallySet = array('VERSION_STRING', 'WORKINGONIT');
+				foreach($myConfig as $index=>$value) {
+					if(in_array($index, $conditionallySet)) {
+						//only set this part if we're told to.
+						if($setEverything) {
+							define($index, $value);
+						}
+					}
+					else {
+						define($index, $value);
+					}
+				}
 			}
 		}
 		else {
@@ -269,6 +289,14 @@ class config {
 	public function get_site_status() {
 		return($this->siteStatus);
 	}//end get_site_status()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	public function remove_setup_config() {
+		return($this->fs->rm(SETUP_FILE_LOCATION));
+	}//end remove_setup_config()
 	//-------------------------------------------------------------------------
 }//end config{}
 ?>

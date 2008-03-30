@@ -11,8 +11,9 @@ if($_POST) {
 	
 	$page->set_message_wrapper(array(
 		'title'		=> "Reloaded... ",
-		'message'	=> "Result of writing the config file:<BR>\n". $writeConfigResult,
-		'type'		=> "status"
+		'message'	=> $writeConfigResult,
+		'type'		=> "status",
+		'linkURL'	=> '/login'
 	));
 	$page->conditional_header("/setup/5", TRUE);
 }
@@ -50,7 +51,7 @@ class __finalStep {
 		unset($this->stepData[5]);
 		
 		$this->gfObj = new cs_globalFunctions;
-		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) ."/../../lib");
+		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) ."/../../". CONFIG_DIRECTORY);
 	}//end __construct()
 	//=========================================================================
 	
@@ -60,7 +61,7 @@ class __finalStep {
 	function write_config() {
 		if($this->fsObj->is_writable(NULL)) {
 			$lsData = $this->fsObj->ls();
-			if(!is_array($lsData['config.xml'])) {
+			if(!is_array($lsData[CONFIG_FILENAME])) {
 				$myData = array();
 				foreach($this->stepData as $stepNum=>$garbage) {
 					$tempStepData = get_setup_data($stepNum, 'data');
@@ -86,8 +87,8 @@ class __finalStep {
 				//now, create an XML string...
 				$xmlString = $xmlCreator->create_xml_string();
 				
-				$this->fsObj->create_file('config.xml', TRUE);
-				$writeRes = $this->fsObj->write($xmlString, 'config.xml');
+				$this->fsObj->create_file(CONFIG_FILENAME, TRUE);
+				$writeRes = $this->fsObj->write($xmlString, CONFIG_FILENAME);
 				
 				if($writeRes > 0) {
 					$retval = "Successfully created the XML config file";
@@ -99,12 +100,15 @@ class __finalStep {
 				}
 			}
 			else {
-				throw new exception(__METHOD__ .": config.xml already exists!");
+				throw new exception(__METHOD__ .": ". CONFIG_FILE_LOCATION ." already exists!");
 			}
 		}
 		else {
-			throw new exception(__METHOD__ .": the lib directory is not writable!");
+			throw new exception(__METHOD__ .": the config directory is not writable!");
 		}
+		
+		$configObj = new config(CONFIG_FILE_LOCATION);
+		$configObj->remove_setup_config();
 		
 		return($retval);
 	}//end write_config()
