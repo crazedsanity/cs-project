@@ -69,8 +69,18 @@ class bbCodeParser extends cs_bbCodeParser {
 		$retval = '&#91;helpdesk_id='. $helpdeskId .'&#93;';
 		if(is_numeric($helpdeskId)) {
 			try {
-			$data = $this->helpdeskObj->get_record($helpdeskId);
-			$retval = '&#91;<a href="http://'. PROJECT_URL .'/content/helpdesk/view?ID='. $helpdeskId .'">'. $data['name'] .'</a>&#93;';
+				$data = $this->helpdeskObj->get_record($helpdeskId);
+				$displayName = $data['name'];
+				
+				//add project linkage if there is any...
+				if($data['ancestry_level'] > 1) {
+					//pull the ancestry string.
+					$parentRecord = $this->projectObj->get_parent_record($data['ancestry']);
+					$x = $this->projectObj->get_ancestry_link_list($parentRecord['public_id'], TRUE, TRUE, TRUE);
+					$displayName = $x .' / <b>'. $displayName ."</b>";
+				}
+				
+				$retval = '&#91;<a href="http://'. PROJECT_URL .'/content/helpdesk/view?ID='. $helpdeskId .'">'. $displayName .'</a>&#93;';
 			}
 			catch(exception $e) {
 				debug_print($e->getMessage);
