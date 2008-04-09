@@ -4,45 +4,45 @@
  * ------------------
  * Last Author:         $Author:crazedsanity $ 
  * Current Revision:    $Revision:637 $ 
- * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/includes/content/todo.inc $ 
+ * Repository Location: $HeadURL:https://cs-project.svn.sourceforge.net/svnroot/cs-project/trunk/includes/content/task.inc $ 
  * Last Updated:        $Date:2007-11-20 11:04:33 -0600 (Tue, 20 Nov 2007) $
  */
 
 if($_POST) {
 	//okay, now do the requested action.
 	$action = strtolower($_POST['action']);
-	$todoId = $_POST['todo_id'];
+	$taskId = $_POST['task_id'];
 	if($action == 're-open') {
 		//re-open the item.
 		$updateArr = array(
 			"status_id"	=> 6,
 			"progress"	=> 0
 		);
-		$retval = $proj->todoObj->update_todo($todoId, $updateArr);
+		$retval = $proj->taskObj->update_task($taskId, $updateArr);
 		
 		$commentData = 'Re-opened.';
 		if(strlen($_POST['comment'])) {
 			$commentData = $_POST['comment'];
 		}
-		$proj->todoObj->add_comment($todoId, 'Re-opened.', 'Re-open [auto-generated]');
+		$proj->taskObj->add_comment($taskId, 'Re-opened.', 'Re-open [auto-generated]');
 	}
 	elseif($action == "undertake") {
 		$updateArr = array(
 			"status_id"	=> 2,
 			"assigned_contact_id"	=> $_SESSION['contact_id']
 		);
-		$retval = $proj->todoObj->update_todo($todoId, $updateArr);
+		$retval = $proj->taskObj->update_task($taskId, $updateArr);
 	}
 	elseif($action == "create") {
 		unset($_POST['updates']['add_elapsed']);
-		$retval = $proj->todoObj->create_todo($_POST['updates']);
-		$todoId = $retval;
+		$retval = $proj->taskObj->create_task($_POST['updates']);
+		$taskId = $retval;
 	}
 	elseif($action == "comment") {
-		$retval = $proj->todoObj->add_comment($todoId, $_POST['comment']);
+		$retval = $proj->taskObj->add_comment($taskId, $_POST['comment']);
 	}
 	elseif($action == "modify") {
-		$currentData = $proj->todoObj->get_todo($todoId);
+		$currentData = $proj->taskObj->get_task($taskId);
 		
 		//reset status if needs-be.
 		if($_POST['updates']['progress'] >= 100 || $_POST['done']) {
@@ -56,17 +56,17 @@ if($_POST) {
 				//don't 
 				$commentData = $_POST['comment'];
 			}
-			$proj->todoObj->add_comment($todoId, 'Completed.', 'Completed [auto-generated]');
+			$proj->taskObj->add_comment($taskId, 'Completed.', 'Completed [auto-generated]');
 		}
 		elseif(strlen($_POST['comment'])) {
 			//they passed a comment.
-			$proj->todoObj->add_comment($todoId, $_POST['comment']);
+			$proj->taskObj->add_comment($taskId, $_POST['comment']);
 		}
 		
-		$retval = $proj->todoObj->update_todo($todoId, $_POST['updates']);
+		$retval = $proj->taskObj->update_task($taskId, $_POST['updates']);
 	}
 	else {
-		#$retval = $proj->todoObj->update_todo($todoId, $_POST['updates']);
+		#$retval = $proj->taskObj->update_task($taskId, $_POST['updates']);
 		$retval = 0;
 	}
 	
@@ -88,25 +88,25 @@ if($_POST) {
 		set_message_wrapper(array(
 			"title"		=> "Update FAILED!",
 			"message"	=> "Something happened, and the sh*t hit the fan.  Sorry.<BR>\n" .
-							"LAST ERROR: ". $proj->todoObj->lastError ."<BR>\n" .
+							"LAST ERROR: ". $proj->taskObj->lastError ."<BR>\n" .
 							"RESULT RETURNED: [$retval]",
 			"type"		=> "error"
 		));
 	}
 	
 	//now redirect.
-	$url = "/content/todo/view?ID=$todoId&updateResult=$retval";
+	$url = "/content/task/view?ID=$taskId&updateResult=$retval";
 	conditional_header($url);
 	exit;
 }
 else {
 	$action = $page->ftsSections[2];
-	$todoId = $_GET['ID'];
+	$taskId = $_GET['ID'];
 	if($action == "create") {
 		
 		//sanity check: need to link it to an actual record.
 		if(!isset($_GET['parentPublicId']) || !is_numeric($_GET['parentPublicId'])) {
-			throw new exception("Unable to create todo without specifying a parent!!!");
+			throw new exception("Unable to create task without specifying a parent!!!");
 		}
 		else {
 			//get the details.
@@ -136,37 +136,37 @@ else {
 		$page->set_all_block_rows("content", $doNotRipRows);
 		
 	}
-	elseif(is_numeric($todoId)) { 
+	elseif(is_numeric($taskId)) { 
 	
 		if($action == "view") {
 			
-			$todoDetails = $proj->todoObj->get_todo($todoId);
+			$taskDetails = $proj->taskObj->get_task($taskId);
 			
 			//set the page's title.
-			create_page_title($page, array('title' => "Todo #". $todoId .": \"". $todoDetails['name'] ."\""));
+			create_page_title($page, array('title' => "Todo #". $taskId .": \"". $taskDetails['name'] ."\""));
 			
 			
 			//format the body, so long sentences fit properly.
-			$todoDetails['body'] = wordwrap($todoDetails['body'], FORMAT_WORDWRAP);
-			$todoDetails['body'] = cleanString($todoDetails['body'], 'htmlentity_plus_brackets');
+			$taskDetails['body'] = wordwrap($taskDetails['body'], FORMAT_WORDWRAP);
+			$taskDetails['body'] = cleanString($taskDetails['body'], 'htmlentity_plus_brackets');
 			
-			$commentsArray = $todoDetails['comments'];
-			unset($todoDetails['comments']);
+			$commentsArray = $taskDetails['comments'];
+			unset($taskDetails['comments']);
 	
-			foreach($todoDetails as $field=>$value) {
+			foreach($taskDetails as $field=>$value) {
 				$page->add_template_var($field, $value);
 			}
 			
 			//TODO: only give ability to update if they're the creator or if it's been assigned to them.
 			
 			//create the list of users.
-			$page->add_template_var("user_assign_list", $proj->create_user_option_list($todoDetails['assigned_contact_id']));
+			$page->add_template_var("user_assign_list", $proj->create_user_option_list($taskDetails['assigned_contact_id']));
 			
 			//should really check based off uid...
 			$page->add_template_var("note_readonly", "readonly");
-			if(in_array($todoDetails['status_id'], $GLOBALS['STATUS_NOTENDED'])) {
-				if($todoDetails['assigned_contact_id'] == "" || $todoDetails['assigned_contact_id'] == $_SESSION['contact_id']) {
-					if($todoDetails['status_id'] == 0 || $todoDetails['status_id'] == 1) {
+			if(in_array($taskDetails['status_id'], $GLOBALS['STATUS_NOTENDED'])) {
+				if($taskDetails['assigned_contact_id'] == "" || $taskDetails['assigned_contact_id'] == $_SESSION['contact_id']) {
+					if($taskDetails['status_id'] == 0 || $taskDetails['status_id'] == 1) {
 						//they're assigned, but haven't taken it yet.
 						$doNotRipRows[] = "undertake_button";
 						$doNotRipRows[] = "readonly_started";
@@ -211,10 +211,10 @@ else {
 			
 			$doNotRipRows[] = "progress_text";
 			//add the project list.
-			#$page->add_template_var("select_project_list", $proj->create_project_option_list($todoDetails['record_id'], TRUE));
+			#$page->add_template_var("select_project_list", $proj->create_project_option_list($taskDetails['record_id'], TRUE));
 			
 			//create the priority list.
-			$page->add_template_var("select_priority_list", create_priority_option_list($todoDetails['priority'],9,0));
+			$page->add_template_var("select_priority_list", create_priority_option_list($taskDetails['priority'],9,0));
 			
 			$doNotRipRows[] = "from_data";
 			$doNotRipRows[] = "remarks_and_comments_data";
@@ -238,11 +238,11 @@ else {
 				$page->add_template_var('previousComments', $myRow);
 			}
 			
-			if(in_array($todoDetails['status_id'], $GLOBALS['STATUS_NOTENDED'])) {
+			if(in_array($taskDetails['status_id'], $GLOBALS['STATUS_NOTENDED'])) {
 				//show hours logged.
 				$hoursLoggedLimit = 5;
 				$page->add_template_var('hoursLoggedLimit', $hoursLoggedLimit);
-				$hoursLogged = $proj->todoObj->get_hours_logged($todoId, NULL, $hoursLoggedLimit);
+				$hoursLogged = $proj->taskObj->get_hours_logged($taskId, NULL, $hoursLoggedLimit);
 				$baseRow = $page->templateRows["logEstimateRecord_row"];
 				if(is_array($hoursLogged)) {
 					$myRow = "";
@@ -259,12 +259,12 @@ else {
 	}
 	else {
 		//list everything...
-		$todoArr = $proj->todoObj->get_todos(array("gruppe"=>$_SESSION['user_group']), $currentSortArr);
+		$taskArr = $proj->taskObj->get_tasks(array("gruppe"=>$_SESSION['user_group']), $currentSortArr);
 		$page->set_all_block_rows("content");
 		
-		$baseRow = $page->templateRows['todo_row'];
-		if(is_array($todoArr)) {
-			foreach($todoArr as $todoId => $subArr) {
+		$baseRow = $page->templateRows['task_row'];
+		if(is_array($taskArr)) {
+			foreach($taskArr as $taskId => $subArr) {
 				$repArr = $subArr;
 				swapValue($bgColor, "rgb(213, 213, 213)", "rgb(194, 194, 194)");
 				swapValue($bgColor2, "#d5d5d5", "#c2c2c2");
@@ -273,7 +273,7 @@ else {
 				$repArr['bgColor2']= $bgColor2;
 				$finalRow .= mini_parser($baseRow, $repArr, "%%", "%%");
 			}
-			$page->add_template_var("todo_row", $finalRow);
+			$page->add_template_var("task_row", $finalRow);
 		}
 	}
 }
