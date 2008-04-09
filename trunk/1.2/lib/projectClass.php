@@ -42,7 +42,7 @@ class projectClass extends mainRecord {
 		
 		//now create all those internal objects.
 		$this->noteObj		= new noteClass($this->db);
-		$this->todoObj		= new todoClass($this->db);
+		$this->taskObj		= new taskClass($this->db);
 		$this->helpdeskObj	= new helpdeskClass($this->db);
 		$this->tagObj		= new tagClass($this->db);
 		$this->logsObj		= new logsClass($this->db, "Project");
@@ -123,7 +123,7 @@ class projectClass extends mainRecord {
 	 * Returns all details about a given project ID.
 	 * 
 	 * @param $projectId	(int) ID to lookup information for.
-	 * @param $getRelated 	(bool) whether the related notes/todos/issues 
+	 * @param $getRelated 	(bool) whether the related notes/tasks/issues 
 	 * 							should be retrieved or not.
 	 * 
 	 * @return <array>		PASS: contains all data relevant to given id.
@@ -161,7 +161,7 @@ class projectClass extends mainRecord {
 			$this->internalRecordId = $retval['record_id'];
 			if($getRelated) {
 				$retval['related'] = array(
-					"todo"	=> $this->get_todos(),
+					"task"	=> $this->get_tasks(),
 					"note"	=> $this->get_notes(),
 					"issue"	=> $this->get_issues()
 				);
@@ -264,34 +264,34 @@ class projectClass extends mainRecord {
 	
 	
 	//=========================================================================
-	function get_todos() {
+	function get_tasks() {
 		$retval = 0;
 		
-		//attempt to get a list of the todos...
-		$this->todoObj->projectId = $this->projectId;
+		//attempt to get a list of the tasks...
+		$this->taskObj->projectId = $this->projectId;
 		
-		$todoDisplayPref = $this->prefObj->get_pref_value_by_name('projectDetails_todoDisplayOnlyMine');
+		$taskDisplayPref = $this->prefObj->get_pref_value_by_name('projectDetails_taskDisplayOnlyMine');
 		
 		$critArr = array("record_id"=>$this->internalRecordId);
 		$contactCrit = NULL;
-		if($todoDisplayPref != 'all') {
-			if($todoDisplayPref == 'mine') {
+		if($taskDisplayPref != 'all') {
+			if($taskDisplayPref == 'mine') {
 				$contactCrit = array(
 					't.creator_contact_id'	=> $_SESSION['contact_id'],
 					't.assigned_contact_id'	=> $_SESSION['contact_id']
 				);
 			}
-			elseif($todoDisplayPref == 'assigned') {
+			elseif($taskDisplayPref == 'assigned') {
 				$contactCrit = array(
 					't.assigned_contact_id'	=> $_SESSION['contact_id']
 				);
 			}
 		}
-		$retval = $this->todoObj->get_todos($critArr, NULL, $contactCrit);
+		$retval = $this->taskObj->get_tasks($critArr, NULL, $contactCrit);
 			
 		return($retval);
 		
-	}//end get_todos()
+	}//end get_tasks()
 	//=========================================================================
 	
 	

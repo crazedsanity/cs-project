@@ -787,7 +787,7 @@ function string_from_array($array,$style=NULL,$separator=NULL, $cleanString=NULL
 			
 			//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			case "url":{
-				//an array like "array('module'='todo','action'='view','ID'=164)" to "module=todo&action=view&ID=164"
+				//an array like "array('module'='task','action'='view','ID'=164)" to "module=task&action=view&ID=164"
 				if(!$separator) {
 					$separator = "&";
 				}
