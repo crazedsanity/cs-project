@@ -48,6 +48,16 @@ class upgrade_to_1_2_0_ALPHA4 extends dbAbstract {
 		$details = "Executed SQL file, '". $this->lastSQLFile ."'.  Encoded contents::: ". 
 			base64_encode($this->fsObj->read($this->lastSQLFile));
 		$this->logsObj->log_by_class($details, 'system');
+		
+		
+		
+		$this->gfObj->debug_print(__METHOD__ .": running SQL file...");
+		$this->run_sql_file(dirname(__FILE__) .'/../docs/sql/upgrades/upgradeTo1.2.0-ALPHA4.sql');
+		
+		$details = "Executed SQL file, '". $this->lastSQLFile ."'.  Encoded contents::: ". 
+			base64_encode($this->fsObj->read($this->lastSQLFile));
+		$this->logsObj->log_by_class($details, 'system');
+		
 	}//end run_schema_changes()
 	//=========================================================================
 	

@@ -22,6 +22,9 @@ class config {
     	if(!is_null($fileName) && strlen($fileName)) {
     		$this->fileName = $fileName;
     	}
+    	else {
+    		$this->fileName = CONFIG_FILE_LOCATION;
+    	}
     	
 		if(!file_exists($this->fileName)) {
 			$this->fileExists = FALSE;

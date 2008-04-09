@@ -86,6 +86,17 @@ if($configObj->check_site_status()) {
 		$configObj->do_setup_redirect();
 	}
 	else {
+		//don't panic: we're going to check for upgrades, but this doesn't
+		//	necessarily mean anything will ACTUALLY be upgraded.
+		$configObj->get_config_contents(NULL,TRUE,FALSE);
+		$upgrade = new upgrade;
+		if($upgrade->upgrade_in_progress()) {
+			throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
+		}
+		else {
+			$upgrade->check_versions();
+		}
+		#read_config_file(TRUE);
 		$configObj->get_config_contents(NULL,TRUE,TRUE);
 	}
 }

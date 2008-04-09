@@ -791,7 +791,7 @@ class upgrade {
 			}
 		}
 		
-		$this->gfObj->debug_print(__METHOD__ .": ('". $version ."',  '". $checkIfHigher ."') retval=(". $retval .")");
+		$this->gfObj->debug_print(__METHOD__ .": ('". $version ."',  '". $checkIfHigher ."') retval=(". $retval .")", 1);
 		
 		return($retval);
 		
