@@ -55,12 +55,12 @@ function addAjax() {
 	$page->add_template_var('XAJAX_HEADERS', $xajaxHeaders);
 }//end addAjax()
 
-function parse_related_todo(array $parseData) {
+function parse_related_task(array $parseData) {
 	$page = $GLOBALS['objects']['page'];
 	$bgColor = NULL;
 	$bgColor2 = NULL;
 	
-	$rowName = 'related_todo_row';
+	$rowName = 'related_task_row';
 	$baseRow = $page->templateRows[$rowName];
 	
 	foreach($parseData as $id=>$arr) {
@@ -136,7 +136,7 @@ function parse_related_todo(array $parseData) {
 		$myRow .= mini_parser($baseRow, $repArr, "%%", "%%");
 	}
 	$page->add_template_var($rowName, $myRow);
-}//end parse_related_todo()
+}//end parse_related_task()
 
 
 

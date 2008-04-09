@@ -232,7 +232,7 @@ else {
 		create_page_title($page, array('title' => "Project #". $_GET['ID'] .": \"". $detailsArr['name'] ."\""));
 		$page->add_template_var("note_readonly", "readonly");
 		$page->set_all_block_rows("content", array("related", "new_subproject_link", "status_section", "note_show"));
-		$page->set_all_block_rows("related_todo");
+		$page->set_all_block_rows("related_task");
 		$page->set_all_block_rows("related_note");
 		$page->set_all_block_rows("related_issue");
 		
@@ -305,11 +305,11 @@ else {
 		unset($userList,$tSelected,$userListArr, $selLeader, $leaderSelect);
 		
 		//pull a couple of preferences, so we can say if they're getting the whole picture or not.
-		$todoPref = $proj->prefObj->get_pref_value_by_name('projectDetails_todoDisplayOnlyMine');
+		$taskPref = $proj->prefObj->get_pref_value_by_name('projectDetails_taskDisplayOnlyMine');
 		$helpdeskPref = $proj->prefObj->get_pref_value_by_name('projectDetails_showCompletedIssues');
 		
-		if($todoPref !== 'all') {
-			$page->add_template_var("todoPrefWarning", $page->templateRows['todoPrefWarning']);
+		if($taskPref !== 'all') {
+			$page->add_template_var("taskPrefWarning", $page->templateRows['taskPrefWarning']);
 		}
 		
 		if($helpdeskPref == 0) {
@@ -317,10 +317,10 @@ else {
 		}
 		
 		//SPECIAL PROCESSING FOR TODO's...
-		if(is_array($detailsArr['related']['todo'])) {
-			parse_related_todo($detailsArr['related']['todo']);
+		if(is_array($detailsArr['related']['task'])) {
+			parse_related_task($detailsArr['related']['task']);
 		}
-		unset($detailsArr['related']['todo']);
+		unset($detailsArr['related']['task']);
 		
 		//parse-in everything under "related"...
 		foreach($detailsArr['related'] as $type => $subArr) {
@@ -352,7 +352,7 @@ else {
 						}
 						$repArr['font_weight'] = 'normal';
 					}
-					elseif($type == "todo") {
+					elseif($type == "task") {
 						$changeFontColor=TRUE;
 						//Making TODO stuff look purdy.  Boy.
 						if(!preg_match('/accepted/', strtolower($arr['status_text']))) {
