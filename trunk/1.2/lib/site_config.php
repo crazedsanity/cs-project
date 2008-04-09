@@ -127,7 +127,7 @@ $GLOBALS['templateVars'] = array(
 define('SEQ_HELPDESK',		'special__helpdesk_public_id_seq');
 define('SEQ_PROJECT',		'special__project_public_id_seq');
 define('SEQ_MAIN',			'record_table_record_id_seq');
-define('TABLE_TODOCOMMENT',	'todo_comment_table');
+define('TABLE_TODOCOMMENT',	'task_comment_table');
 define('FORMAT_WORDWRAP',	90);
 
 //=========================================================================

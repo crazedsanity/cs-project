@@ -457,38 +457,38 @@ class helpdeskClass extends mainRecord {
 	
 	
 	//=========================================================================
-	function get_todos($helpdeskId) {
+	function get_tasks($helpdeskId) {
 		$retval = 0;
 		$prefObj = new pref($this->db, $_SESSION['uid']);
-		$todoDisplayPref = $prefObj->get_pref_value_by_name('projectDetails_todoDisplayOnlyMine');
+		$taskDisplayPref = $prefObj->get_pref_value_by_name('projectDetails_taskDisplayOnlyMine');
 		
-		$todoObj = new todoClass($this->db);
+		$taskObj = new taskClass($this->db);
 		
-		//attempt to get a list of the todos...
+		//attempt to get a list of the tasks...
 		//TODO: change this reference to "publicId" instead of "projectId"
-		$todoObj->projectId = $helpdeskId;
+		$taskObj->projectId = $helpdeskId;
 		
 		
 		$critArr = array("record_id"=>$this->get_parent_from_ancestry($this->get_ancestry($helpdeskId,TRUE),0));
 		$contactCrit = NULL;
-		if($todoDisplayPref != 'all') {
-			if($todoDisplayPref == 'mine') {
+		if($taskDisplayPref != 'all') {
+			if($taskDisplayPref == 'mine') {
 				$contactCrit = array(
 					't.creator_contact_id'	=> $_SESSION['contact_id'],
 					't.assigned_contact_id'	=> $_SESSION['contact_id']
 				);
 			}
-			elseif($todoDisplayPref == 'assigned') {
+			elseif($taskDisplayPref == 'assigned') {
 				$contactCrit = array(
 					't.assigned_contact_id'	=> $_SESSION['contact_id']
 				);
 			}
 		}
-		$retval = $todoObj->get_todos($critArr, NULL, $contactCrit);
+		$retval = $taskObj->get_tasks($critArr, NULL, $contactCrit);
 			
 		return($retval);
 		
-	}//end get_todos()
+	}//end get_tasks()
 	//=========================================================================
 	
 	
