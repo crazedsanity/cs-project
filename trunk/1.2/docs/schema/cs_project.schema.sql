@@ -899,7 +899,7 @@ CREATE TABLE log_estimate_table (
     log_estimate_id integer NOT NULL,
     creation timestamp with time zone DEFAULT now() NOT NULL,
     uid integer NOT NULL,
-    todo_id integer NOT NULL,
+    task_id integer NOT NULL,
     add_elapsed numeric(10,2) NOT NULL,
     system_note text
 );
@@ -1361,12 +1361,12 @@ ALTER SEQUENCE tag_table_tag_id_seq OWNED BY tag_table.tag_id;
 
 
 --
--- Name: todo_comment_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: task_comment_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE todo_comment_table (
-    todo_comment_id integer NOT NULL,
-    todo_id integer NOT NULL,
+CREATE TABLE task_comment_table (
+    task_comment_id integer NOT NULL,
+    task_id integer NOT NULL,
     creator_contact_id integer NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
     updated timestamp with time zone,
@@ -1375,13 +1375,13 @@ CREATE TABLE todo_comment_table (
 );
 
 
-ALTER TABLE public.todo_comment_table OWNER TO postgres;
+ALTER TABLE public.task_comment_table OWNER TO postgres;
 
 --
--- Name: todo_comment_table_todo_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: task_comment_table_task_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE todo_comment_table_todo_comment_id_seq
+CREATE SEQUENCE task_comment_table_task_comment_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -1389,21 +1389,21 @@ CREATE SEQUENCE todo_comment_table_todo_comment_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.todo_comment_table_todo_comment_id_seq OWNER TO postgres;
+ALTER TABLE public.task_comment_table_task_comment_id_seq OWNER TO postgres;
 
 --
--- Name: todo_comment_table_todo_comment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: task_comment_table_task_comment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE todo_comment_table_todo_comment_id_seq OWNED BY todo_comment_table.todo_comment_id;
+ALTER SEQUENCE task_comment_table_task_comment_id_seq OWNED BY task_comment_table.task_comment_id;
 
 
 --
--- Name: todo_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: task_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE todo_table (
-    todo_id integer NOT NULL,
+CREATE TABLE task_table (
+    task_id integer NOT NULL,
     creator_contact_id integer NOT NULL,
     name text NOT NULL,
     body text NOT NULL,
@@ -1422,13 +1422,13 @@ CREATE TABLE todo_table (
 );
 
 
-ALTER TABLE public.todo_table OWNER TO postgres;
+ALTER TABLE public.task_table OWNER TO postgres;
 
 --
--- Name: todo_table_todo_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: task_table_task_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE todo_table_todo_id_seq
+CREATE SEQUENCE task_table_task_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -1436,13 +1436,13 @@ CREATE SEQUENCE todo_table_todo_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.todo_table_todo_id_seq OWNER TO postgres;
+ALTER TABLE public.task_table_task_id_seq OWNER TO postgres;
 
 --
--- Name: todo_table_todo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: task_table_task_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE todo_table_todo_id_seq OWNED BY todo_table.todo_id;
+ALTER SEQUENCE task_table_task_id_seq OWNED BY task_table.task_id;
 
 
 --
@@ -1691,17 +1691,17 @@ ALTER TABLE tag_table ALTER COLUMN tag_id SET DEFAULT nextval('tag_table_tag_id_
 
 
 --
--- Name: todo_comment_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: task_comment_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE todo_comment_table ALTER COLUMN todo_comment_id SET DEFAULT nextval('todo_comment_table_todo_comment_id_seq'::regclass);
+ALTER TABLE task_comment_table ALTER COLUMN task_comment_id SET DEFAULT nextval('task_comment_table_task_comment_id_seq'::regclass);
 
 
 --
--- Name: todo_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: task_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE todo_table ALTER COLUMN todo_id SET DEFAULT nextval('todo_table_todo_id_seq'::regclass);
+ALTER TABLE task_table ALTER COLUMN task_id SET DEFAULT nextval('task_table_task_id_seq'::regclass);
 
 
 --
@@ -1902,19 +1902,19 @@ ALTER TABLE ONLY tag_table
 
 
 --
--- Name: todo_comment_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: task_comment_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY todo_comment_table
-    ADD CONSTRAINT todo_comment_table_pkey PRIMARY KEY (todo_comment_id);
+ALTER TABLE ONLY task_comment_table
+    ADD CONSTRAINT task_comment_table_pkey PRIMARY KEY (task_comment_id);
 
 
 --
--- Name: todo_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: task_table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY todo_table
-    ADD CONSTRAINT todo_table_pkey PRIMARY KEY (todo_id);
+ALTER TABLE ONLY task_table
+    ADD CONSTRAINT task_table_pkey PRIMARY KEY (task_id);
 
 
 --
@@ -2024,11 +2024,11 @@ ALTER TABLE ONLY group_table
 
 
 --
--- Name: log_estiate_table_todo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: log_estiate_table_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY log_estimate_table
-    ADD CONSTRAINT log_estiate_table_todo_id_fkey FOREIGN KEY (todo_id) REFERENCES todo_table(todo_id);
+    ADD CONSTRAINT log_estiate_table_task_id_fkey FOREIGN KEY (task_id) REFERENCES task_table(task_id);
 
 
 --
@@ -2176,51 +2176,51 @@ ALTER TABLE ONLY tag_table
 
 
 --
--- Name: todo_comment_table_creator_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: task_comment_table_creator_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY todo_comment_table
-    ADD CONSTRAINT todo_comment_table_creator_contact_id_fkey FOREIGN KEY (creator_contact_id) REFERENCES contact_table(contact_id);
-
-
---
--- Name: todo_comment_table_todo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY todo_comment_table
-    ADD CONSTRAINT todo_comment_table_todo_id_fkey FOREIGN KEY (todo_id) REFERENCES todo_table(todo_id);
+ALTER TABLE ONLY task_comment_table
+    ADD CONSTRAINT task_comment_table_creator_contact_id_fkey FOREIGN KEY (creator_contact_id) REFERENCES contact_table(contact_id);
 
 
 --
--- Name: todo_table_assigned_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: task_comment_table_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY todo_table
-    ADD CONSTRAINT todo_table_assigned_contact_id_fkey FOREIGN KEY (assigned_contact_id) REFERENCES contact_table(contact_id);
-
-
---
--- Name: todo_table_creator_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY todo_table
-    ADD CONSTRAINT todo_table_creator_contact_id_fkey FOREIGN KEY (creator_contact_id) REFERENCES contact_table(contact_id);
+ALTER TABLE ONLY task_comment_table
+    ADD CONSTRAINT task_comment_table_task_id_fkey FOREIGN KEY (task_id) REFERENCES task_table(task_id);
 
 
 --
--- Name: todo_table_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: task_table_assigned_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY todo_table
-    ADD CONSTRAINT todo_table_record_id_fkey FOREIGN KEY (record_id) REFERENCES record_table(record_id);
+ALTER TABLE ONLY task_table
+    ADD CONSTRAINT task_table_assigned_contact_id_fkey FOREIGN KEY (assigned_contact_id) REFERENCES contact_table(contact_id);
 
 
 --
--- Name: todo_table_status_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: task_table_creator_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY todo_table
-    ADD CONSTRAINT todo_table_status_id_fkey FOREIGN KEY (status_id) REFERENCES status_table(status_id);
+ALTER TABLE ONLY task_table
+    ADD CONSTRAINT task_table_creator_contact_id_fkey FOREIGN KEY (creator_contact_id) REFERENCES contact_table(contact_id);
+
+
+--
+-- Name: task_table_record_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY task_table
+    ADD CONSTRAINT task_table_record_id_fkey FOREIGN KEY (record_id) REFERENCES record_table(record_id);
+
+
+--
+-- Name: task_table_status_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY task_table
+    ADD CONSTRAINT task_table_status_id_fkey FOREIGN KEY (status_id) REFERENCES status_table(status_id);
 
 
 --

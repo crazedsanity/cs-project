@@ -289,7 +289,7 @@ CREATE TABLE log_estimate_table (
     log_estimate_id integer NOT NULL,
     creation timestamp with time zone DEFAULT now() NOT NULL,
     uid integer NOT NULL,
-    todo_id integer NOT NULL,
+    task_id integer NOT NULL,
     add_elapsed numeric(10,2) NOT NULL,
     system_note text
 );
@@ -753,12 +753,12 @@ ALTER SEQUENCE tag_table_tag_id_seq OWNED BY tag_table.tag_id;
 
 
 --
--- Name: todo_comment_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: task_comment_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE todo_comment_table (
-    todo_comment_id integer NOT NULL,
-    todo_id integer NOT NULL,
+CREATE TABLE task_comment_table (
+    task_comment_id integer NOT NULL,
+    task_id integer NOT NULL,
     creator_contact_id integer NOT NULL,
     created timestamp with time zone DEFAULT now() NOT NULL,
     updated timestamp with time zone,
@@ -767,13 +767,13 @@ CREATE TABLE todo_comment_table (
 );
 
 
-ALTER TABLE public.todo_comment_table OWNER TO postgres;
+ALTER TABLE public.task_comment_table OWNER TO postgres;
 
 --
--- Name: todo_comment_table_todo_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: task_comment_table_task_comment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE todo_comment_table_todo_comment_id_seq
+CREATE SEQUENCE task_comment_table_task_comment_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -781,21 +781,21 @@ CREATE SEQUENCE todo_comment_table_todo_comment_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.todo_comment_table_todo_comment_id_seq OWNER TO postgres;
+ALTER TABLE public.task_comment_table_task_comment_id_seq OWNER TO postgres;
 
 --
--- Name: todo_comment_table_todo_comment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: task_comment_table_task_comment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE todo_comment_table_todo_comment_id_seq OWNED BY todo_comment_table.todo_comment_id;
+ALTER SEQUENCE task_comment_table_task_comment_id_seq OWNED BY task_comment_table.task_comment_id;
 
 
 --
--- Name: todo_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: task_table; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE todo_table (
-    todo_id integer NOT NULL,
+CREATE TABLE task_table (
+    task_id integer NOT NULL,
     creator_contact_id integer NOT NULL,
     name text NOT NULL,
     body text NOT NULL,
@@ -814,13 +814,13 @@ CREATE TABLE todo_table (
 );
 
 
-ALTER TABLE public.todo_table OWNER TO postgres;
+ALTER TABLE public.task_table OWNER TO postgres;
 
 --
--- Name: todo_table_todo_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: task_table_task_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE todo_table_todo_id_seq
+CREATE SEQUENCE task_table_task_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -828,13 +828,13 @@ CREATE SEQUENCE todo_table_todo_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.todo_table_todo_id_seq OWNER TO postgres;
+ALTER TABLE public.task_table_task_id_seq OWNER TO postgres;
 
 --
--- Name: todo_table_todo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: task_table_task_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE todo_table_todo_id_seq OWNED BY todo_table.todo_id;
+ALTER SEQUENCE task_table_task_id_seq OWNED BY task_table.task_id;
 
 
 --

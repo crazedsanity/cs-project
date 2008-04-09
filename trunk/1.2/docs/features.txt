@@ -6,7 +6,7 @@ CS-Project Feature Overview
 === Simplicity ===
 	This system is built on a very simple premise: Project managers manage projects.  There are various types of issues associated with those projects (bugs, feature requests, etc).  Each project and issue have tasks associated with them.  Everyone is interested in how long things take.
 
-	CS-Project incorporates all of these principles.  Projects are a broad indicator of the various pieces of a system.  Large projects can be broken into smaller parts (sometimes referred to as “milestones”) to help focus efforts.  New issues, including bugs and feature requests, can be added to a project to help maintain a list of all the things that are requested or have been found to be problematic.  Tasks (todos) create a breakdown of things that need to be accomplished.
+	CS-Project incorporates all of these principles.  Projects are a broad indicator of the various pieces of a system.  Large projects can be broken into smaller parts (sometimes referred to as “milestones”) to help focus efforts.  New issues, including bugs and feature requests, can be added to a project to help maintain a list of all the things that are requested or have been found to be problematic.  Tasks create a breakdown of things that need to be accomplished.
 
 	To further simplify things, CS-Project doesn't tie its users down to a specific way to use it: it can be easily used strictly as a Trouble Ticket (Help Desk) system, or just projects, or both.  
 
