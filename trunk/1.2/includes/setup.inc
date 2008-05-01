@@ -26,10 +26,7 @@ if(strlen($configData['DATABASE__DBNAME'])) {
 	//setup already complete.  Stop 'em.
 	$page->set_message_wrapper(array(
 		'title'		=> "Setup Unavailable",
-		'message'	=> "It appears that CS-Project has already been installed.  Please use " .
-					"the administrative section of the <a href=\"/content/settings\">Settings " .
-					"Tab</a> to make changes to your configuration (<i><b>NOTE:</b> you must be " .
-					"an admin to be able to see administrative options</i>).",
+		'message'	=> "It appears that CS-Project has already been installed.",
 		'type'		=> "error"
 	));
 	$page->conditional_header('/login.php');

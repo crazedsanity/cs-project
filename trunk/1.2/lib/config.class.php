@@ -125,7 +125,8 @@ class config {
 	public function do_setup_redirect() {
 		if($this->check_site_status() && $this->setupRequired) {
 			if(!($_SERVER['SCRIPT_NAME'] == '/setup')) {
-				$this->gf->debug_print("script_name check=(". ($_SERVER['script_name'] != '/setup') .")", 1);
+				$this->gf->debug_print(__METHOD__ .": script_name check=(". ($_SERVER['script_name'] != '/setup') .")," .
+					" check_site_status=(". $this->check_site_status() ."), setupRequired=(". $this->setupRequired .")", 1);
 				$goHere = '/setup';
 				if(strlen($_SERVER['REQUEST_URI']) > 1 && !isset($_SESSION['setup__viewed'])) {
 					$goHere .= '?from='. urlencode($_SERVER['REQUEST_URI']);
@@ -168,14 +169,22 @@ class config {
 		 */
 		if(file_exists(OLD_CONFIG_FILE_LOCATION)) {
 			//copy old file to new location...
-			if(!$this->fs->copy_file(OLD_CONFIG_FILE_LOCATION, CONFIG_FILE_LOCATION)) {
-				throw new exception(__METHOD__ .": failed to copy existing config into new location");
+			$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
+			$moveRes = $fs->move_file(OLD_CONFIG_FILE_LOCATION, CONFIG_FILE_LOCATION);
+			if(!$moveRes) {
+				throw new exception(__METHOD__ .": failed to move existing config into new location (". $moveRes .")");
 			}
-			$this->fs->rm(OLD_CONFIG_FILE_LOCATION);
+			
+			//set some parameters.
+			$this->siteStatus = 'Old config file moved... ';
+			$this->setupRequired = FALSE;
+			$retval = TRUE;
+			
+			//set a parameter so get_config_contents() works, then read config parameters (like in __construct()).
+			$this->fileExists=TRUE;
+			$this->config = $this->get_config_contents(TRUE);
 		}
-		
-		
-		if($this->setup_config_exists()) {
+		elseif($this->setup_config_exists()) {
 			if($this->setup_config_exists(TRUE)) {
 				//the currently logged-in user is actually running the setup, no worries.
 				$this->siteStatus = 'You are running setup... please continue.';
