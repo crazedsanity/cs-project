@@ -73,14 +73,14 @@ if($_POST) {
 	if($action == "create" && $retval > 0) {
 		set_message_wrapper(array(
 			"title"		=> "Creation Successful",
-			"message"	=> "Todo #$retval was created successfully.",
+			"message"	=> "Task #$retval was created successfully.",
 			"type"		=> "notice"
 		));
 	}
 	elseif($retval == 1) {
 		set_message_wrapper(array(
 			"title"		=> "Update Successful",
-			"message"	=> "Todo was updated successfully.",
+			"message"	=> "Task was updated successfully.",
 			"type"		=> "notice"
 		));
 	}
@@ -120,7 +120,7 @@ else {
 		}
 		
 		//update the title.
-		create_page_title($page, array('title' => "Create New Todo"));
+		create_page_title($page, array('title' => "Create New Task"));
 		
 		//show the proper drop-downs.
 		$page->add_template_var("user_assign_list", $proj->create_user_option_list());
@@ -143,7 +143,7 @@ else {
 			$taskDetails = $proj->taskObj->get_task($taskId);
 			
 			//set the page's title.
-			create_page_title($page, array('title' => "Todo #". $taskId .": \"". $taskDetails['name'] ."\""));
+			create_page_title($page, array('title' => "Task #". $taskId .": \"". $taskDetails['name'] ."\""));
 			
 			
 			//format the body, so long sentences fit properly.

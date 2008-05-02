@@ -7,7 +7,7 @@
 
 if($_POST) {
 	$validSubmission = test_submitted_data($page, $_POST['users']);
-	if($validSubmission === TRUE) {
+		if($validSubmission === TRUE) {
 		$obj = new __setupDefaultValues();
 		store_setup_data(3, $obj->go(), 'text');
 		$obj->finish($page);
@@ -347,7 +347,7 @@ class __setupDefaultValues extends upgrade {
 				4	=> 'General',
 				5	=> 'Project',
 				6	=> 'Helpdesk',
-				7	=> 'Todo',
+				7	=> 'Task',
 				8	=> 'Tags',
 				9	=> 'Estimates',
 				10	=> 'Navigation',
@@ -395,12 +395,12 @@ class __setupDefaultValues extends upgrade {
 					7	=> array(2,	6,	'Helpdesk: Information'),
 					8	=> array(1,	6,	'Helpdesk: ERROR'),
 					9	=> array(6,	6,	'Helpdesk: Report'),
-					10	=> array(3,	7,	'Todo: created record'),
-					11	=> array(5,	7,	'Todo: deleted record'),
-					12	=> array(4,	7,	'Todo: updated record'),
+					10	=> array(3,	7,	'Task: created record'),
+					11	=> array(5,	7,	'Task: deleted record'),
+					12	=> array(4,	7,	'Task: updated record'),
 					13	=> array(1,	1,	'Database Error'),
 					14	=> array(6,	5,	'Project: Activity Report'),
-					15	=> array(6,	7,	'Todo: Activity Report'),
+					15	=> array(6,	7,	'Task: Activity Report'),
 					16	=> array(3,	2,	'User logged-in'),
 					17	=> array(5,	2,	'User logged-out'),
 					18	=> array(6,	2,	'Login/Logout Report'),
@@ -414,7 +414,7 @@ class __setupDefaultValues extends upgrade {
 					26	=> array(1,	9,	'Error: Estimates'),
 					27	=> array(2,	5,	'Information: Project'),
 					28	=> array(4,	3,	'Update: Users'),
-					29	=> array(1,	7,	'Error: Todo'),
+					29	=> array(1,	7,	'Error: Task'),
 					30	=> array(3,	3,	'Create: Users')
 				);
 				
@@ -476,7 +476,7 @@ class __setupDefaultValues extends upgrade {
 		//	{record_type_id} => array({name}, {module})
 		$recordTypes = array(
 			1	=> array('Project',		'project'),
-			2	=> array('Todo',		'task'),
+			2	=> array('Task',		'task'),
 			3	=> array('Helpdesk',	'helpdesk')
 		);
 		
@@ -822,7 +822,7 @@ class __setupDefaultValues extends upgrade {
 			1	=> array('startModule', 'helpdesk',	'Starting on Module',	'Defines which section will be loaded upon login if nothing was selected.'),
 			5	=> array('sorting_helpdesk', 'public_id|DESC', 'Helpdesk Sorting', 'Define the type of sorting for the helpdesk page.'),
 			6	=> array('sorting_project', 'priority|ASC', 'Project Sorting', 'Define the type of sorting for the helpdesk page.'),
-			7	=> array('projectDetails_taskDisplayOnlyMine', 'all', 'Project Details: Todo display', 'Define what tasks are displayed on a project\'s details page.'),
+			7	=> array('projectDetails_taskDisplayOnlyMine', 'all', 'Project Details: Task display', 'Define what tasks are displayed on a project\'s details page.'),
 			8	=> array('projectDetails_showCompletedIssues', '1', 'Project Details: Display completed issues', 'Should completed issues display in the details of a project?')
 		);
 		

@@ -38,7 +38,7 @@ class taskClass {
 		}
 		
 		//create the logging object.
-		$this->logsObj = new logsClass($this->db, 'Todo');
+		$this->logsObj = new logsClass($this->db, 'Task');
 	 }//end taskClass()
 	//================================================================================================
 	
