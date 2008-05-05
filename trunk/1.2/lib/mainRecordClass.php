@@ -634,7 +634,7 @@ class mainRecord {
 			}
 			else {
 				$details = __METHOD__ .": no data for ancestry (". $ancestryString .") with recordId=(". $recordId ."), or couldn't find lastRecordId (". $this->lastRecordId .")::: ". debug_print($data);
-				$this->log_by_class($details, 'error');
+				$this->logsObj->log_by_class($details, 'error');
 				throw new exception($details);
 			}
 			$this->isHelpdeskIssue = $oldIsHelpdesk;

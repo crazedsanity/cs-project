@@ -131,11 +131,6 @@ else {
 	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
 		if($user->is_admin() == 1) {
 			
-			#debug_print(get_class($page));
-			
-			$config = new config();
-			$config->build_update_interface($page);
-			
 			//create an object with administrative capabilities.
 			$adminUserClass = new adminUserClass($page->db);
 			

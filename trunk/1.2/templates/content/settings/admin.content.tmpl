@@ -2,62 +2,6 @@
 <h2><font color="red">Administrative Settings</font></h2>
 
 
-<a name="config" />
-<table border="1" cellpadding="3" cellspacing="0" width="80%">
-<tr>
-	<th colspan="2">Config Settings</th>
-</tr>
-<tr>
-	<td colspan="2" align="center">
-		<div class="note" style="width:60em"><b>NOTE:</b> You should be <font color="red"><b>absolutely certain</b></font> of the 
-			effects of the changes you make here.  Changing an item to an incorrect value make render the 
-			installation useless.  To rectify a broken configuration, you would need to modify the 
-			<b>{CONFIG_FILE_LOCATION}</b> file manually.</div>
-	</td>
-</tr>
-<tr>
-	<th width="80%">Name/Description</th>
-	<th width="20%">Value/Select Option</th>
-</tr>
-<!-- BEGIN setting_text -->
-	<tr>
-		<td>
-			<b>%%title%%</b> (%%index%%)<BR>
-			%%description%%
-		</td>
-		
-		<td><input name="%%index%%" type="text" value="%%value%%" %%disabled%%></td>
-	</tr>
-<!-- END setting_text -->
-<!-- BEGIN setting_select -->
-	<tr>
-		<td>
-			<b>%%title%%</b> (%%index%%)<BR>
-			%%description%%
-		</td>
-		
-		<td>
-			<select name="%%index%%" %%disabled%%>
-				%%setting_select__normal%%
-			</select>
-		</td>
-	</tr>
-<!-- END setting_select -->
-<!-- BEGIN setting_locked -->
-	<tr>
-		<td>
-			<b>%%title%%</b> (%%index%%)<BR>
-			%%description%%
-		</td>
-		
-		<td>
-			<!-- NOTE: should we even have hidden elements in the form? -->
-			<input type="text" name="%%index%%" value="%%value%%" disabled>
-		</td>
-	</tr>
-<!-- END setting_locked -->
-</table>
-
 
 <a name="group" />
 <table border=1 cellpadding=3 cellspacing=0>
