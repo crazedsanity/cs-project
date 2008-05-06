@@ -16,9 +16,11 @@ if($_POST) {
 	$helpdeskId = $_POST['id'];
 	$baseUrl = "/content/helpdesk";
 	$urlSection = "view";
-	$urlExtrasArr = array(
-		"ID"	=> $helpdeskId
-	);
+	if(is_numeric($helpdeskId)) {
+		$urlExtrasArr = array(
+			"ID"	=> $helpdeskId
+		);
+	}
 	$byPassUrlExtras = FALSE;
 	if($action) {
 		
@@ -180,8 +182,10 @@ if($_POST) {
 	$url = $baseUrl;
 	
 	//don't bother redirecting to the "view" page if the ID isn't valid.
-	if(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID']) && $byPassUrlExtras === FALSE) {
+	if(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID'])) {
 		unset($urlSection);
+		conditional_header('/content/helpdesk');
+		exit;
 	}
 	else {
 		if(isset($urlSection) && !preg_match('/\?/', $url)) {
@@ -199,6 +203,7 @@ if($_POST) {
 		conditional_header($url);
 		exit;
 	}
+	exit;
 }
 else {
 	$helpdeskId = $_GET['ID'];
