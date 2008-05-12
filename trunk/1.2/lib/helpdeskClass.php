@@ -173,7 +173,7 @@ class helpdeskClass extends mainRecord {
 		if($retval > 0) {
 			//send the submitter an email		
 			$newRemarks = $remark;
-			$emailTemplate = html_file_to_string("email/helpdesk-remark.tmpl");
+			$emailTemplate = html_file_to_string("email/helpdesk.tmpl");
 			$linkAction = "view";
 			
 			if($useRespondLink) {
@@ -198,7 +198,7 @@ class helpdeskClass extends mainRecord {
 			
 			//okay, now send the email.  The function "send_email()" should be ensuring that all values in
 			//	the recipients array are valid, and there's no dups.
-			$subject = "Update to Helpdesk Issue #". $helpdeskId ." -- ". $tmp['name'];
+			$subject = "Helpdesk Issue #". $helpdeskId ." -- ". $tmp['name'];
 			$sendEmailRes = send_email($recipientsArr, $subject, $emailTemplate, $parseArr);
 			
 			//log who we sent the emails to.
@@ -341,19 +341,19 @@ class helpdeskClass extends mainRecord {
 			//got good data... get the note_id.
 			
 			//now send 'em an email about it.
-			$emailTemplate = html_file_to_string("email/helpdesk-new.tmpl");
+			$emailTemplate = html_file_to_string("email/helpdesk.tmpl");
 			$parseArr = $this->get_record($retval);
 			
 			$normalEmailExtra = NULL;
 			$emailAddressList = $linkObj->get_record_email_list($newRecord);
 			
 			if((strlen($_SESSION['login_email'])) && ($_SESSION['login_email'] != $parseArr['email'])) {
-				$subject = "Created Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
+				$subject = "Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
 				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
 				$normalEmailExtra = " [registered by ". $_SESSION['login_loginname'] .": uid=". $_SESSION['login_id'] ."]";
 			}
 			else {
-				$subject = "Created Helpdesk Issue #$retval Created". $normalEmailExtra ." -- ". $parseArr['name'];
+				$subject = "Helpdesk Issue #$retval Created -- ". $parseArr['name'];
 				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
 			}
 			
