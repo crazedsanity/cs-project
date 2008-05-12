@@ -182,7 +182,10 @@ if($_POST) {
 	$url = $baseUrl;
 	
 	//don't bother redirecting to the "view" page if the ID isn't valid.
-	if(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID'])) {
+	if(isset($_POST['xajax'])) {
+		//don't exit or anything here: let the AJAX stuff work itself out, I guess.
+	}
+	elseif(preg_match('/view/', $urlSection) && !is_numeric($urlExtrasArr['ID'])) {
 		unset($urlSection);
 		conditional_header('/content/helpdesk');
 		exit;
@@ -203,7 +206,6 @@ if($_POST) {
 		conditional_header($url);
 		exit;
 	}
-	exit;
 }
 else {
 	$helpdeskId = $_GET['ID'];

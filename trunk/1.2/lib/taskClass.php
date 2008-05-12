@@ -389,6 +389,7 @@ class taskClass {
 			
 			$insertArr[$field] = $value;
 		}
+		$cleanStringArr['estimate_current'] = 'decimal';
 		
 		//merge it with the fields we manually set..
 		$insertArr = array_merge($insertArr, $addFieldsArr);
