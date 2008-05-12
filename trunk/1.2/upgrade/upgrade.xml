@@ -26,4 +26,12 @@
 			<call_method>run_upgrade</call_method>
 		</v1.2.0-ALPHA3>
 	</matching>
+	<matching>
+		<v1.2.0-ALPHA6>
+			<target_version>1.2.0-ALPHA7</target_version>
+			<script_name>upgradeTo1.2.0-ALPHA7.php</script_name>
+			<class_name>upgrade_to_1_2_0_ALPHA7</class_name>
+			<call_method>run_upgrade</call_method>
+		</v1.2.0-ALPHA6>
+	</matching>
 </upgrade>
