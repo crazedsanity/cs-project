@@ -178,6 +178,20 @@ class upgrade {
 		
 		$config = $xmlParser->get_tree(TRUE);
 		$this->config = $config['UPGRADE'];
+		
+		//now fix the "MATCHING" section as needed.
+		$matchingKeys = $this->config['MATCHING'];
+		
+		$myMatching = $this->config['MATCHING'];
+		unset($this->config['MATCHING']);
+		if(!preg_match('/^V/', $matchingKeys[0])) {
+			foreach($myMatching as $index=>$data) {
+				$keys = array_keys($data);
+				$this->config['MATCHING'][$keys[0]] = $myMatching[$index][$keys[0]];
+			}
+		}
+		debug_print($this->config);
+		
 	}//end read_upgrade_config_file()
 	//=========================================================================
 	
@@ -272,7 +286,8 @@ class upgrade {
 	
 	//=========================================================================
 	public function parse_version_string($versionString) {
-		if(is_null($versionString) || !strlen($versionString)) {
+		if(is_null($versionString) || !(strlen($versionString) > 4)) {
+			cs_debug_backtrace(1);
 			throw new exception(__METHOD__ .": invalid version string ($versionString)");
 		}
 		$tmp = explode('.', $versionString);
@@ -320,6 +335,16 @@ class upgrade {
 		}
 		else {
 			$retval['version_suffix'] = "";
+		}
+		
+		//double-check our data matches the initial version string.
+		$checkThis = $retval['version_major'] .".". $retval['version_minor'] .".". $retval['version_maintenance'];
+		if(strlen($retval['version_suffix'])) {
+			$checkThis .= "-". $retval['version_suffix'];
+		}
+		
+		if($checkThis != $versionString) {
+			throw new exception(__METHOD__ .": initial version string (". $versionString .") doesn't match final (". $checkThis .")");
 		}
 		
 		return($retval);
@@ -718,7 +743,7 @@ class upgrade {
 					}
 					else {
 						//TODO: should there maybe be an option to throw an exception (freak out) here?
-						debug_print(__METHOD__ .": while checking ". $index .", realized the new version (". $checkIfHigher .") is LOWER than current (". $version .")",1);
+						debug_print(__METHOD__ .": while checking ". $index .", realized the new version (". $checkIfHigher .") is LOWER than current (". $versionNumber .")",1);
 					}
 				}
 				else {
@@ -813,6 +838,10 @@ class upgrade {
 		$this->get_database_version();
 		$dbVersion = $this->databaseVersion;
 		$newVersion = $this->versionFileVersion;
+		
+		if((strlen($dbVersion) <= 4) || (strlen($newVersion) <= 4)) {
+			throw new exception(__METHOD__ .": invalid data in dbVersion (". $dbVersion .") or newVersion (". $newVersion .")");
+		}
 		
 		$retval = array();
 		if(!$this->is_higher_version($dbVersion, $newVersion)) {
