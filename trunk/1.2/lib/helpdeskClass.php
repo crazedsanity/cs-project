@@ -348,12 +348,12 @@ class helpdeskClass extends mainRecord {
 			$emailAddressList = $linkObj->get_record_email_list($newRecord);
 			
 			if((strlen($_SESSION['login_email'])) && ($_SESSION['login_email'] != $parseArr['email'])) {
-				$subject = "Helpdesk Issue #$retval Created [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
+				$subject = "Helpdesk Issue #$retval [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
 				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
 				$normalEmailExtra = " [registered by ". $_SESSION['login_loginname'] .": uid=". $_SESSION['login_id'] ."]";
 			}
 			else {
-				$subject = "Helpdesk Issue #$retval Created -- ". $parseArr['name'];
+				$subject = "Helpdesk Issue #$retval -- ". $parseArr['name'];
 				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
 			}
 			
