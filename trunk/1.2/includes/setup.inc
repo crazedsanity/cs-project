@@ -18,9 +18,12 @@
 //create the setup object.
 require_once(dirname(__FILE__) .'/../lib/simpletest/unit_tester.php');
 require_once(dirname(__FILE__) .'/../lib/simpletest/reporter.php');
+require_once(dirname(__FILE__) .'/../lib/setup.class.php');
 
 $configObj = new config(NULL, FALSE);
 $configData = $configObj->read_config_file(FALSE);
+
+$setupObj = new setup($page);
 
 if(strlen($configData['DATABASE__DBNAME'])) {
 	//setup already complete.  Stop 'em.
@@ -58,7 +61,7 @@ else {
 		$page->conditional_header("/setup/". $_SESSION['setup']['lastStep'], TRUE);
 	}
 	elseif(count($sectionArr) == 2 && is_numeric($sectionArr[1]) && $sectionArr[1] != 1) {
-		if(!is_numeric(get_setup_data($sectionArr[1], 'accessible'))) {
+		if(!is_numeric($setupObj->get_setup_data($sectionArr[1], 'accessible'))) {
 			$page->set_message_wrapper(
 				array(
 					'title'		=> "Incomplete Step",
@@ -71,7 +74,7 @@ else {
 	}
 	
 	
-	$page->add_template_var("VERSION_STRING", read_version_file());
+	$page->add_template_var("VERSION_STRING", $setupObj->read_version_file());
 	$page->rip_all_block_rows('stepData');
 	$page->clear_content('infobar');
 	
@@ -82,12 +85,12 @@ else {
 	
 	$tmplStepTitle = "Main Setup Screen";
 	foreach($stepNames as $num=>$name) {
-		$stepResult = get_setup_data($num, 'result');
+		$stepResult = $setupObj->get_setup_data($num, 'result');
 		if(!is_numeric($stepResult)) {
 			$passFail = "Incomplete";
 			$bgColor  = "yellow";
-			if(strlen(get_setup_data($num, 'text'))) {
-				$stepText = get_setup_data($num, 'text');
+			if(strlen($setupObj->get_setup_data($num, 'text'))) {
+				$stepText = $setupObj->get_setup_data($num, 'text');
 			}
 			else {
 				$stepText = "Step incomplete...";
@@ -97,14 +100,14 @@ else {
 			$passFail = interpret_bool($stepResult, array('FAIL', 'Pass'));
 			$bgColor = interpret_bool($stepResult, array('red', 'green'));
 			
-			if(strlen(get_setup_data($num, 'text'))) {
-				$stepText = get_setup_data($num, 'text');
+			if(strlen($setupObj->get_setup_data($num, 'text'))) {
+				$stepText = $setupObj->get_setup_data($num, 'text');
 			}
 			else {
 				$stepText = "&nbsp;";
 			}
 			
-			store_setup_data($num, 1, 'accessible');
+			$setupObj->store_setup_data($num, 1, 'accessible');
 			if($passFail == 'Pass') {
 				$_SESSION['setup']['lastStep'] = $num;
 			}
@@ -130,145 +133,5 @@ else {
 	$page->add_template_var('stepTitle', $tmplStepTitle);
 	$page->add_template_var('step_data_row', $myRows);
 }
-
-//=============================================================================
-function store_setup_data($step, $data, $type='data') {
-	$_SESSION['setup'][$type][$step] = $data;
-}//end store_setup_data()
-//=============================================================================
-
-
-
-//=============================================================================
-function get_setup_data($step, $type='data') {
-	return($_SESSION['setup'][$type][$step]);
-}//end get_setup_data()
-//=============================================================================
-
-
-
-//=============================================================================
-function read_version_file() {
-	$retval = NULL;
-	$fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/..');
-	
-	//okay, all files present: check the version in the VERSION file.
-	$lines = $fsObj->read('VERSION', TRUE);
-	$versionLine = $lines[2];
-	if(preg_match('/^VERSION: /', $versionLine)) {
-		
-		$retval = trim(preg_replace('/VERSION: /', '', $versionLine));
-	}
-	else {
-		throw new exception(__METHOD__ .": could not find VERSION data");
-	}
-	
-	return($retval);
-}//end read_version_file()
-//=============================================================================
-
-
-
-//=============================================================================
-function get_db_params() {
-	
-	$stepOneData = get_setup_data(1, 'data');
-	if(is_array($stepOneData)) {
-		$params = array();
-		foreach($stepOneData as $name=>$value) {
-			$index = preg_replace('/^database__/', '', $name);
-			$params[$index] = $value;
-		}
-	}
-	else {
-		throw new exception(__FUNCTION__ .": unable to retrieve step one data...");
-	}
-	
-	return($params);
-}//end get_db_params()
-//=============================================================================
-
-
-
-//=============================================================================
-function reset_all_steps($leaveText=TRUE, $afterStep=NULL) {
-	$retval=0;
-	if(is_array($_SESSION['setup'])) {
-		if(is_numeric($afterStep)) {
-			$_SESSION['setup']['lastStep'] = $afterStep;
-		}
-		else {
-			$_SESSION['setup']['lastStep'] = 1;
-		}
-		$unsetThis = array('data', 'result', 'accessible');
-		
-		if($leaveText !== TRUE) {
-			$unsetThis[] = 'text';
-		}
-		foreach($unsetThis as $indexName) {
-			if(isset($_SESSION['setup'][$indexName])) {
-				if(is_numeric($afterStep)) {
-					foreach($_SESSION['setup'][$indexName] as $stepNum=>$stepData) {
-						if(is_numeric($stepNum) && $stepNum > $afterStep) {
-							unset($_SESSION['setup'][$indexName][$stepNum]);
-							$retval++;
-						}
-					}
-				}
-				else {
-					unset($_SESSION['setup'][$indexName]);
-					$retval++;
-				}
-			}
-		}
-	}
-	else {
-		throw new exception(__FUNCTION__ .": no step data found in session");
-	}
-	
-	return($retval);
-}//end reset_all_steps()
-//=============================================================================
-
-
-
-//=============================================================================
-function test_db_stuff(cs_phpDB &$db=NULL) {
-	if(is_null($db) || !is_object($db)) {
-		$db = new cs_phpDB;
-	}
-	$stepOneData = get_setup_data(1);
-	$params = get_db_params();
-	$originalParams = $params;
-	
-	
-	
-	$params['dbname'] = 'template1';
-	$retval = "Failed to connect to ". $params['host'] .":". $params['dbname'] ." (host connection failed)";
-	
-	$gf = new cs_globalFunctions;
-	
-	try {
-		$db->connect($params);
-		$result = "Connected successfully to ". $params['host'] .":". $params['dbname'] ." (host connection good)";
-		try {
-			$newParams = $originalParams;
-			$db2 = new cs_phpDB;
-			$db2->connect($originalParams );
-			$retval = "Connected successfully to ". $newParams['host'] .":". $newParams['dbname'] ." (host connection good, DATABASE EXISTS)";
-		}
-		catch(exception $e) {
-			//no database!
-			//TODO: do a preg_match() on $e->getMessage() to see if it says something about the database not existing
-			$retval = TRUE;
-		}
-	}
-	catch(exception $e) {
-		$retval = $e->getMessage();
-	}
-	
-	return($retval);
-}//end test_db_stuff()
-//=============================================================================
 
 ?>

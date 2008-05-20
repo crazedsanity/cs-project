@@ -8,8 +8,7 @@
 if($_POST) {
 	$validSubmission = test_submitted_data($page, $_POST['users']);
 	if($validSubmission === TRUE) {
-		$obj = new setup($page);
-		store_setup_data(3, $obj->handle_step(3), 'text');
+		$setupObj->store_setup_data(3, $setupObj->handle_step(3), 'text');
 	}
 	else {
 		store_setup_data(3, $_POST['users'], 'post_info');
@@ -26,7 +25,7 @@ if($_POST) {
 	$page->conditional_header("/setup/3", TRUE);
 }
 else {
-	$myData = get_setup_data(3, 'post_info');
+	$myData = $setupObj->get_setup_data(3, 'post_info');
 	if(is_array($myData)) {
 		foreach($myData as $num=>$userArr) {
 			foreach($userArr as $userField => $userValue) {

@@ -7,15 +7,15 @@
 
 if($_POST) {
 	//check that step 1 was successful.
-	reset_all_steps(FALSE, 2);
-	$stepOneData = get_setup_data(1, 'data');
-	if(get_setup_data(1, 'result')) {
+	$setupObj->reset_all_steps(FALSE, 2);
+	$stepOneData = $setupObj->get_setup_data(1, 'data');
+	if($setupObj->get_setup_data(1, 'result')) {
 		
 		//first, check to see if we can connect to the host's "template1" database.
 		$db = new cs_phpDB;
 		
-		store_setup_data(2, 0, 'result');
-		$result = test_db_stuff($db);
+		$setupObj->store_setup_data(2, 0, 'result');
+		$result = $setupObj->test_db_stuff($db);
 		
 		if($result === TRUE) {
 			//Good to go: load the schema!
@@ -34,7 +34,7 @@ if($_POST) {
 		}
 		else {
 			//not so good.  Go back to step 1, so they can make changes.
-			$params = get_setup_data(1, 'data');
+			$params = $setupObj->get_setup_data(1, 'data');
 			$page->set_message_wrapper(
 				array(
 					'title'		=> "Test Failed",

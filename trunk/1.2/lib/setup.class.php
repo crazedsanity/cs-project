@@ -22,7 +22,17 @@ class setup {
 	//=============================================================================
     function __construct(cs_genericPage $page, cs_phpDB $db=NULL) {
     	$this->pageObj = $page;
-    	$this->dbObj = $db;
+		
+		//TODO: determine what step we're on (if > 1, can connect db)
+		try {
+			$connectionParams = $this->get_db_params();
+			
+			//TODO: make this a setup parameter (so we can integrate with mysql).
+			$this->dbObj = new cs_phpDB('pgsql');
+			$this->dbObj->connect($connectionParams);
+		}
+		catch(exception $e) {
+		}
     }//end __construct()
 	//=============================================================================
     
@@ -134,8 +144,8 @@ class setup {
 		if(is_null($db) || !is_object($db)) {
 			$db = new cs_phpDB;
 		}
-		$stepOneData = get_setup_data(1);
-		$params = get_db_params();
+		$stepOneData = $this->get_setup_data(1);
+		$params = $this->get_db_params();
 		$originalParams = $params;
 		
 		
