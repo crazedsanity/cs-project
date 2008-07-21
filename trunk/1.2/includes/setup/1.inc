@@ -10,14 +10,14 @@ $requiredFields = array('dbname', 'host', 'port', 'user', 'password');
 
 if($_POST) {
 	reset_all_steps(FALSE);
-	$setupObj->store_setup_data(1, $_POST['fields']);
-	$dbTestRes = $setupObj->test_db_stuff();
+	store_setup_data(1, $_POST['fields']);
+	$dbTestRes = test_db_stuff();
 	if($dbTestRes === TRUE) {
-		$setupObj->store_setup_data(1, 1, 'result');
-		$setupObj->store_setup_data(1, 'Values stored successfully', 'text');
+		store_setup_data(1, 1, 'result');
+		store_setup_data(1, 'Values stored successfully', 'text');
 		
 		//set the next step as accessible.
-		$setupObj->store_setup_data(2, 1, 'accessible');
+		store_setup_data(2, 1, 'accessible');
 		
 		//TODO: consider moving the database connectivity tests into this step (and alter the status message below accordingly).
 		$page->set_message_wrapper(array(
@@ -29,8 +29,8 @@ if($_POST) {
 	}
 	else {
 		//oops...
-		$setupObj->store_setup_data(1, 0, 'result');
-		$setupObj->store_setup_data(1, $dbTestRes, 'text');
+		store_setup_data(1, 0, 'result');
+		store_setup_data(1, $dbTestRes, 'text');
 		
 		$page->set_message_wrapper(array(
 			'title'		=> "Failure",
@@ -52,7 +52,7 @@ else {
 		));
 	}
 	
-	$setupData = $setupObj->get_setup_data(1,'data');
+	$setupData = get_setup_data(1,'data');
 	if(!is_array($setupData) || !count($setupData)) {
 		//provide some defaults.
 		$setupData = array(
