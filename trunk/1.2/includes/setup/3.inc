@@ -155,7 +155,6 @@ class __setupDefaultValues extends upgrade {
 			//now that we've connected, start doing stuff.
 			$retval = $this->set_version();
 			$retval .= "<BR>\n". $this->create_log_categories_and_classes();
-			$retval .= "<BR>\n". $this->create_record_type_data();
 			$retval .= "<BR>\n". $this->create_attributes();
 			$retval .= "<BR>\n". $this->create_anonymous_contact_data();
 			$retval .= "<BR>\n". $this->create_status_records();
@@ -369,7 +368,6 @@ class __setupDefaultValues extends upgrade {
 					//good.
 					$counter++;
 					$this->totalRecords++;
-					$this->data['logcat__'. strtolower($name)] = $num;
 				}
 				else {
 					throw new exception(__METHOD__ .": failed to create category record for (". $name .")::: ". $dberror ."<BR>\nSQL::: ". $sql);
@@ -466,66 +464,6 @@ class __setupDefaultValues extends upgrade {
 		return($retval);
 		
 	}//end create_log_categories_and_classes()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	private function create_record_type_data() {
-		//format:
-		//	{record_type_id} => array({name}, {module})
-		$recordTypes = array(
-			1	=> array('Project',		'project'),
-			2	=> array('Task',		'task'),
-			3	=> array('Helpdesk',	'helpdesk')
-		);
-		
-		$retval = 0;
-		foreach($recordTypes as $recTypeId => $subData) {
-			$insertArr = array(
-				'record_type_id'	=> $recTypeId,
-				'name'				=> $subData[0],
-				'module'			=> $subData[1]
-			);
-			$sql = "INSERT INTO record_type_table ". $this->gfObj->string_from_array($insertArr, 'insert', NULL, 'sql');
-			$numrows = $this->db->exec($sql);
-			$dberror = $this->db->errorMsg();
-			
-			if(!strlen($dberror) && $numrows == 1) {
-				$this->totalRecords++;
-				$retval++;
-				$this->data['rectype__'. $insertArr['module']] = $recTypeId;
-			}
-			else {
-				throw new exception(__METHOD__ .": failed to create record for ". $insertArr['name'] 
-					.", dberror::: ". $dberror ."<BR>\nSQL::: ". $sql);
-			}
-		}
-		
-		if(count($recordTypes) == $retval) {
-			
-			$sql = "SELECT setval('record_type_table_record_type_id_seq'::text, (SELECT max(record_type_id) FROM record_type_table))";
-			$numrows = $this->db->exec($sql);
-			$dberror = $this->db->errorMsg();
-			
-			if(!strlen($dberror) && $numrows == 1) {
-				if($retval == count($recordTypes)) {
-					$retval = "Created all record types (". $retval .")";
-				}
-				else {
-					throw new exception(__METHOD__ .": internal error (sanity check failed)");
-				}
-			}
-			else {
-				throw new exception(__METHOD__ .": failed to reset sequence::: ". $dberror ."<BR>\nSQL::: ". $sql);
-			}
-		}
-		else {
-			throw new exception(__METHOD__ .": internal error");
-		}
-		
-		return($retval);
-	}//end create_record_type_data()
 	//=========================================================================
 	
 	
