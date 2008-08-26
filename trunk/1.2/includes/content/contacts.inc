@@ -141,9 +141,18 @@ else {
 	
 	if(is_numeric($contactId)) {
 		try{
+			$page->rip_all_block_rows();
+			
+			
 			$contactObj->set_contact_id($contactId);
 			$contactDetails = $contactObj->get_contact();
-			$page->rip_all_block_rows();
+			
+			$userDetails = $user->get_user_info(array('contact_id'=>$contactId));
+			if(is_array($userDetails)) {
+				$contactDetails['username'] = $userDetails['username'];
+				$page->add_template_var('display_username', $page->templateRows['display_username']);
+			}
+			
 			
 			//set the main details.
 			foreach($contactDetails as $name=>$value) {

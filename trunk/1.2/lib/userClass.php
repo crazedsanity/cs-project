@@ -155,17 +155,20 @@ class userClass extends dbAbstract {
 	function get_user_info($findThis) {
 		
 		$retval = 0;
-		if(isset($findThis) && strlen($findThis)) {
-			$findThis = strtolower($findThis);
+		if(isset($findThis) && (strlen($findThis) || is_array($findThis))) {
 			
 			if(is_numeric($findThis)) {
 				$criteria = "uid = $findThis";
 			}
+			elseif(is_array($findThis)) {
+				$criteria = $this->gfObj->string_from_array($findThis, 'select', NULL, 'sql');
+			}
 			else {
+				$findThis = strtolower($findThis);
 				$criteria = "lower(username) = '$findThis'";
 			}
 			
-			$query = "SELECT * from user_table WHERE $criteria";
+			$query = "SELECT * from user_table WHERE ". $criteria;
 			
 			$numrows = $this->db->exec($query);
 			$dberror = $this->db->errorMsg();

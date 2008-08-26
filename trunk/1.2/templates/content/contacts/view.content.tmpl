@@ -1,4 +1,3 @@
-
 <form method="POST" onSubmit="new Effect.DropOut(submitButton);" name="updateContactForm">
 <input type="HIDDEN" name="contact_id" value="{contact_id}">
 <div id="mainContact_static" style="display:inline;">
@@ -7,6 +6,9 @@
 			<td style="border:solid #000 1px;																																																																">
 			<h1 style="display:inline">{company}</h1><BR>
 			<center><div style="display:inline;text-align:center;">{fname} {lname} (<i>{email}</i>)</div></center>
+			<!-- BEGIN display_username -->
+			<center><div style="display:inline;text-align:center;">Username: {username}</div></center>
+			<!-- END display_username -->
 			</td>
 		</tr>
 		
