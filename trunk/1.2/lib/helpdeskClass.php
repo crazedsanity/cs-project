@@ -347,6 +347,19 @@ class helpdeskClass extends mainRecord {
 			$normalEmailExtra = NULL;
 			$emailAddressList = $linkObj->get_record_email_list($newRecord);
 			
+			## If there's an associated project, get the records for that, too...
+			if(is_numeric($dataArr['parentRecordId'])) {
+				$list = $this->get_record_contact_associations($dataArr['parentRecordId']);
+				
+				if(is_array($list)) {
+					foreach($list as $myContactId=>$data) {
+						if(!isset($emailAddressList[$myContactId])) {
+							$emailAddressList[$myContactId] = $data['email'];
+						}
+					}
+				}
+			}
+			
 			if((strlen($_SESSION['login_email'])) && ($_SESSION['login_email'] != $parseArr['email'])) {
 				$subject = "Helpdesk Issue #$retval [for ".$parseArr['email']  ."] -- ". $parseArr['name'];
 				send_email($emailAddressList, $subject, $emailTemplate, $parseArr);
