@@ -1,0 +1,91 @@
+<config generated="2007-09-12 11:09:47" version="1.0.0-ALPHA1" svnLastAuthor="$Author:crazedsanity $" svnSignature="$Id:sample_config.xml 376 2007-10-12 13:54:50Z crazedsanity $">
+	<isdevsite 
+		title="Is Development Site?" 
+		description="Whether it's a development site for cs-project or not... (TODO: add more info here)"
+		type="select"
+		options="0=No (0)|1=Yes (1)" 
+		default="0">0</isdevsite>
+	<proj_name 
+		title="Project Name" 
+		description="Displayed name of the project (like 'CS-Project')"
+		default="CS-Project">CS-Project</proj_name>
+	<project_url
+		title="Project URL"
+		description="Generally its this website: (http://{currentUrl}"
+		default="http://{currentUrl}">project.danf.internal</project_url>
+	<helpdesk_issue_announce_email 
+		title="Helpdesk Issue Announce Email"
+		description="This would be something like 'new_issues@yourdomain.com'"
+		default="new_issues@yourdomain.com">new_issues@yourdomain.com</helpdesk_issue_announce_email>
+	<phpmailer_method
+		title="Method to Send Emails"
+		description="How email is delivered; 'SMTP' means it will connect to a specified server; all others 
+		are handled by the webserver." 
+		type="select" 
+		options="IsSMTP=SMTP|IsSendmail=Sendmail|IsQmail=Qmail|IsMail=Mail" 
+		default="IsSMTP">IsSMTP</phpmailer_method>
+	<phpmailer_host 
+		title="SMTP Server"
+		description="This should be the IP of your mailserver, like 127.0.0.1 (only needed if &quot;SMTP&quot; is selected above)"
+		default="127.0.0.1">127.0.0.1</phpmailer_host>
+	<max_time
+		title="Maximum Session Length"
+		description="This is how long any single session can be open before it's automatically removed from the server."
+		default="18 hours">18 hours</max_time>
+	<max_idle
+		title="Maximum Idleness"
+		description="How long a session can be idle (no page views/activities) before it is removed."
+		default="2 hours">2 hours</max_idle>
+	<config_session_name
+		title="Session Name"
+		description="Name of the session: really, this only matters if you have other websites running under the same 
+		domain using PHP sessions, in which case this should be unique to avoid random annoying issues."
+		default="CS_PROJECT_SESSID">CS_PROJECT_SESSID</config_session_name>
+	<version_string
+		title="Version String"
+		description="This is an important &lt;b&gt;INTERNAL&lt;/b&gt; setting that should NEVER be changed manually 
+			unless you really know what you're doing."
+		type="locked"
+		disabled="1">1.0.0-ALPHA1</version_string>
+	<debugprintopt 
+		title="Debug Printing?"
+		description="Generally, this should only be turned on if you're running a development site for cs-project..."
+		type="select"
+		options="0=Do not print|1=Print"
+		default="0">0</debugprintopt>
+	<debugremovehr
+		title="Debug Print: Add 'HR' Tag?"
+		description="This setting affects whether or not there are separators between debug_print()'s (useful to discover if there's a print occurring that is otherwise not visible)"
+		type="select"
+		options="0=Do not show (0)|1=Show (1)"
+		default="0">0</debugremovehr>
+	<workingonit
+		title="Working On It?"
+		description="&lt;font color=&quot;red&quot;&gt;&lt;b&gt;&lt;blink&gt;WARNING!&lt;/blink&gt;&lt;/b&gt;&lt;/font&gt;
+		 Setting this to a non-zero value will DISABLE all connections to the database, and make your site unuseable.  
+		It is provided as a simple, fast way to stop connections to your database, usually for maintenance purposes.  
+		It is displayed here for reference only."
+		type="locked"
+		default="0">0</workingonit>
+	<database__host
+		title="Database Host Name (cs_project)"
+		description="Hostname"
+		default="localhost">localhost</database__host>
+	<database__dbname 
+		title="Database Name (cs_project)"
+		description="Name of the database within PostgreSQL (i.e. 'cs_project')"
+		default="cs_project">__dev_cs_project</database__dbname>
+	<database__port 
+		title="Server Port"
+		description="Port to connect to PostgreSQL on (default is 5432)"
+		default="5432">5432</database__port>
+	<database__user 
+		title="Database Username"
+		description="Username for connecting to PostgreSQL (if you don't know it's probably 'postgres',
+		though connecting as a SUPERUSER is generally accepted as a BAD THING)."
+		default="postgres">postgres</database__user>
+	<database__password 
+		title="Database Password"
+		description="Password for connecting to PostgreSQL (for a trusted connection, this can be blank)"
+		default="" />
+</config>

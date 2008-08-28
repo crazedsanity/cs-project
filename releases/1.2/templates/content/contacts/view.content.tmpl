@@ -1,0 +1,168 @@
+<form method="POST" onSubmit="new Effect.DropOut(submitButton);" name="updateContactForm">
+<input type="HIDDEN" name="contact_id" value="{contact_id}">
+<div id="mainContact_static" style="display:inline;">
+	<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
+		<tr>
+			<td style="border:solid #000 1px;																																																																">
+			<h1 style="display:inline">{company}</h1><BR>
+			<center><div style="display:inline;text-align:center;">{fname} {lname} (<i>{email}</i>)</div></center>
+			<!-- BEGIN display_username -->
+			<center><div style="display:inline;text-align:center;">Username: {username}</div></center>
+			<!-- END display_username -->
+			</td>
+		</tr>
+		
+		<tr>
+			<td align="center"><a href="#NULL" onClick="cs_contactEdit();">Edit Details</a></td>
+		</tr>
+	</table>
+</div>
+
+<div id="mainContact_form" style="display:none;">
+	<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
+		<tr>
+			<th align="center">Company Name:</th>
+			
+			<td colspan="3">
+				<input size="60" id="contactData_company" type="text" name="contactData[company]" 
+				value="{company}" disabled>
+			</td>
+		</tr>
+		
+		<tr>
+			<th align="right">First Name:</th>
+			
+			<td>
+				<input id="contactData_fname" type="text" size="22" name="contactData[fname]" 
+				value="{fname}" disabled>
+			</td>
+			
+			<th align="right">Last Name:</th>
+			
+			<td>
+				<input id="contactData_lname" type="text" size="22" name="contactData[lname]" 
+				value="{lname}" disabled>
+			</td>
+		</tr>
+		
+		<tr>
+			<th align="right">Email Addresses:</th>
+			
+			<td colspan="3" align="left">
+				<input id="contactData_email" type="HIDDEN" name="contactData[contact_email_id]" 
+				value="{contact_email_id}" disabled>
+				
+				<input id="contactData_newContactEmail" type="HIDDEN" name="new_contact_email" value="" disabled>
+				
+				<table border="1" cellpadding="3" cellspacing="0">
+<!-- BEGIN contactEmailAddress -->
+					<tr>
+						<td>
+							<input type="radio" value="%%contact_email_id%%" %%isPrimary%% name="garbage_contactEmailId" 
+								onClick="cs_setContactEmailId('%%contact_email_id%%');">
+						</td>
+								
+						<td><div id="display_ceid_%%contact_email_id%%" style="display:inline;font-weight:normal;">%%email%%</div></td>
+					</tr>
+<!-- END contactEmailAddress -->
+					<tr>
+						<td>
+							<div id="contactAddEmail_link" style="display:inline">
+								<a href="{PHP_SELF}#NULL" onClick="cs_contactAddEmail();">Add Email</a>
+							</div>
+							
+							<div id="contactAddEmail_radioDiv" style="display:none;">
+								<input type="radio" id="contactAddEmail_radio" value="new" %%isPrimary%% 
+									name="garbage_contactEmailId" onClick="cs_setContactEmailId('new');">
+							</div>
+						</td>
+								
+						<td>&nbsp;
+							<div id="contactAddEmail_text" style="display:none">
+								<input id="contactAddEmail_input" type="text" size="22" name="garbage_contactEmailId" 
+									disabled 
+									onKeyUp="cs_contactAddEmail(this);" 
+									onBlur="cs_contactAddEmail(this);" 
+									onFocus="cs_contactAddEmail(this);" 
+									onSelect="cs_contactAddEmail(this);" 
+									onChange="cs_contactAddEmail(this);">
+							</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</div>
+<BR>
+
+
+
+
+<table border="0" cellspacing="0" cellpadding="3" style="padding-left:20px;">
+	
+	<tr>
+		<td style="border:solid #000 1px;" colspan="3" align="center" >
+			<h2 style="display:inline;">Contact Attributes</h2><BR>
+			<font color="red" size="-4">Click on the form field to enable and edit it.</font>
+		</td>
+	</tr>
+	
+	<tr>
+		<th style="border-left:solid #000 1px;border-bottom:dashed #999 1px;">Name</th>
+		
+		<th style="border-bottom:dashed #999 1px;border-left:dotted #999 1px; border-right:dotted #999 1px;">Value</th>
+		
+		<th style="border-right:solid #000 1px;border-bottom:dashed #999 1px;">DEL</th>
+	</tr>
+	
+<!-- BEGIN attributeRow -->
+	<tr>
+		<th style="border-left:solid #000 1px;">{name}</th>
+		
+		<td>
+			<div id="link_editAttribute_{name}" style="display:inline">
+				<a href="#NULL" onClick="cs_attributeEdit('{name}');">{displayValue}</a>
+			</div>
+			<div id="input_editAttribute_{name}" style="display:none;">
+				<input id="editAttribute_{name}" size="40" name="attributes[{name}]" 
+				value="{value}" disabled>
+			</div>
+		</td>
+		
+		<td style="border-right:solid #000 1px;">
+			&nbsp;
+			<input name="delAttrib[]" value="{name}" type="checkbox" onChange="cs_contactDelAttrib(this);">
+		</td>
+	</tr>
+<!-- END attributeRow -->
+	
+	<tr>
+		<td style="border-left:solid #000 1px;">Add an attribute:</td>
+		
+		<td colspan="2" style="border-right:solid #000 1px;" valign="top">
+			<div id="addAttribute_select" style="display:inline">
+				<SELECT id="addAttribute_list" onChange="cs_addAttribute(this);">
+					<option value="">--- SELECT ONE ---</option>
+					<option value="**new**">* NEW *</option>
+					{attributeOptionList}
+				</SELECT>
+			</div>
+			
+			<div id="addAttribute_new" style="display:none;">
+				<b>Name: </b><input id="addAttribute_new_input" name="addAttribute[name]" type="text" disabled><BR>
+				<b>Value:</b>
+			</div>
+			
+			<input id="addAttribute_value" name="addAttribute[value] type="text" disabled>
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan="3" align="center" style="border-top:solid #000 1px;">
+			<input type="HIDDEN" name="action" value="update">
+			&nbsp;<input id="submitButton" type="submit" value="Update Contact" disabled>&nbsp;
+		</td>
+	</tr>
+</table>
+</form>

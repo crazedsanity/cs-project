@@ -1,0 +1,82 @@
+		
+<form method="POST">
+<table border="0" cellpadding="2" cellspacing="0">
+<tr>
+	<td colspan="2" class="note_block">If you want or need more options, use the 
+	<a href="/content/helpdesk/create">helpdesk</a> to request them.</td>
+</tr>
+<tr>
+	<th colspan="2">Change Your Password</th>
+</tr>
+<tr>
+	<td>Current Password:</td>
+	<td><input name="change_password[old_password]" type="password"></td>
+</tr>
+<tr>
+	<td>New:</td>
+	<td><input name="change_password[new_password]" type="password"></td>
+</tr>
+<tr>
+	<td>Confirm:</td>
+	<td><input name="change_password[confirm_new]" type="password"></td>
+</tr>
+<tr>
+	<td colspan="2" align="center"><input type="submit" value="Change Password"></td>
+</tr>
+</table>
+<input type="HIDDEN" name="action" value="change_password">
+</form>
+<hr>
+
+
+
+
+
+<div id="prefTable">
+<form method="POST" name="prefTable">
+<table>
+	<tr>
+		<th colspan="3">Personal Preferences</th>
+	</tr>
+	<tr>
+		<td align="center" nowrap><b>Name</b></td>
+		
+		<td align="center" nowrap><b>Description</b></td>
+		
+		<td align="center" nowrap><b>Change Option </b></td>
+		
+		<td align="center" nowrap><b>Current Setting</b></td>
+		
+	</tr>
+	
+<!-- BEGIN pref_row -->
+	<tr>
+		<td style="background-color:%%rowColor%%">
+			<h4>%%display_name%%</h4>
+			<font class="note">(%%name%%)</font>
+		</td>
+		
+		<td style="background-color:%%rowColor%%">
+			%%description%%</td>
+		
+		<td style="background-color:%%rowColor%%">
+			<select name="prefType[%%pref_type_id%%]">
+				%%row_optionList%%
+<!-- BEGIN pref_optionList -->
+				<option %%selectedString%% value="%%value%%" 
+					onClick="xajax_ajax__update_preference(%%pref_type_id%%, %%value%%);">%%display%% (%%effective_value%%)</option>
+<!-- END pref_optionList -->
+			</select>
+		</td>
+		
+		<td style="background-color:%%rowColor%%">
+			<div id="pref_currentSetting_%%pref_type_id%%">%%currentSetting%%</div>
+			<div class="note">(Default value: %%default_value%%)</div>
+		</td>
+	</tr>
+<!-- END pref_row -->
+</table>
+<input type="hidden" name="prefTypeId" value="">
+<input type="hidden" name="action" value="set_preference">
+</form>
+

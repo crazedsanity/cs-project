@@ -1,0 +1,108 @@
+
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<td>
+			<b>Available Tags:</b><BR>
+			<div id="tagList">
+			<!-- BEGIN tagList -->
+			<table border=1 cellpadding=3 cellspacing=0>
+				<tr>
+					<td>
+					<!-- BEGIN availableTagsList -->
+							<div id="listedTag_%%tagNameId%%" style="padding-left:5px;">
+									<img src="/images/bullet-round.png" border="0">
+									<a href="javascript:void(xajax_ajax__showtagrecords(%%tagNameId%%));"> %%tagName%%</a>
+									<!-- BEGIN availableTagsList__tagIcon -->
+									<img src="/images/tags/%%icon_name%%.gif" border="0">
+									<!-- END availableTagsList__tagIcon -->
+							</div>
+					<!-- END availableTagsList -->
+					<!-- BEGIN availableTagsList_noLink -->
+							<div id="noListedTags" style="padding-left:5px;">
+									<img src="/images/bullet-round.png" border="0">
+									<font size="+1"><b>%%tagName%%</b></font>
+									{availableTagsList__tagIcon}
+							</div>
+					<!-- END availableTagsList_noLink -->
+					</td>
+				</tr>
+			</table>
+			<!-- END tagList -->
+			</div>
+			<table>
+				<tr>
+					<td>
+						<b>Add a New Tag:</b><br>
+						<form method="POST">
+							<input type="text" name="new_tag"><BR>
+							<input type="submit" value="Create Tag">
+						</form>
+					</td>
+			</table>
+		</td>
+		
+		<td>
+			<div id="currentTagData">
+			<!-- BEGIN currentTagData -->
+			<form method="POST" action="{PHP_SELF}?editTagId={showTagNameId}">
+				<input type="HIDDEN" name="tag_name_id" value="{showTagNameId}">
+				<input type="HIDDEN" name="action" value="update">
+				<table border=1 cellpadding=3 cellspacing=0 width="100%">
+					<tr>
+						<td align="center" colspan="2">
+							<div id="currentTagData_header">
+							<!-- BEGIN currentTagData_header -->
+							<h1 style="display:inline;">{tagName}</h1><br>
+							<table border="0" cellpadding="3" cellspacing="0">
+								<tr>
+									<td><b>Associated Records:</b></td>
+									<td>{tagRecordCount}</td>
+								</tr>
+								<tr>
+									<td><b>Modifier:</b>
+										<a href="/help/tag/modifier" target="_blank"><img src="/images/icon-help.png" border="0"></a></td>
+									<td>
+										<select name="modifier" onChange="this.form.submit();">
+											{modifier_option_list}
+										</select>
+									</td>
+								</tr>
+							</table>
+							<!-- END currentTagData_header -->
+							</div>
+						</td>
+					</tr>
+				</table>
+				
+				<div id="associatedRecords">
+				<!-- BEGIN associatedRecords -->
+				<table border=1 cellpadding=3 cellspacing=0 width="100%">
+					<tr>
+						<th>Record Type</th>
+						<th>Name</th>
+					</tr>
+					<!-- BEGIN tag_row -->
+						<tr style="background-color: %%rowColor%%;" onmouseover="this.style.backgroundColor = '#ffffff'" 
+						onmouseout="this.style.backgroundColor ='%%rowColor2%%'" 
+						onclick="location.href = '/content/%%module%%/view?ID=%%public_id%%'">
+							
+							<td>%%module%%</td>
+						
+							<td nowrap><a href="/content/%%module%%/view?ID=%%public_id%%">%%name%%</a>&nbsp;</td>
+						</tr>
+					<!-- END tag_row -->
+					<!-- BEGIN tag_row__noRecords -->
+						<tr>
+							<td colspan="5"><font color="red"><b>NO RECORDS</b></font></td>
+						</tr>
+					<!-- END tag_row__noRecords -->
+				</table>
+				<!-- END associatedRecords -->
+				</div>
+			</form>
+			<!-- END currentTagData -->
+			</div>
+		</td>
+		
+	</tr>
+</table>

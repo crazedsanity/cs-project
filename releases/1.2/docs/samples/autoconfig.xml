@@ -1,0 +1,41 @@
+<autoconfig>
+	<step number="1">
+		<database_dbname>cs-project</database_dbname>
+		<database_host>localhost</database_host>
+		<database_port>5432</database_port>
+		<database_user>postgres</database_user>
+		<database_password />
+	</step>
+	<step number="2" />
+	<step number="3">
+		<users>
+			<username></username>
+			<password></password>
+			<name></name>
+			<email></email>
+			<is_admin></is_admin>
+		</users>
+		<users>
+			<username></username>
+			<password></password>
+			<name></name>
+			<email></email>
+			<is_admin></is_admin>
+		</users>
+	</step>
+	<step number="4">
+		<isdevsite></isdevsite>
+		<proj_name></proj_name>
+		<project_url></project_url>
+		<helpdesk_issue_announce_email></helpdesk_issue_announce_email>
+		<phpmailer_host></phpmailer_host>
+		<phpmailer_method>IsSMTP</phpmailer_method>
+		<max_time></max_time>
+		<max_idle></max_idle>
+		<config_session_name></config_session_name>
+		<debugprintopt>1</debugprintopt>
+		<debugremovehr>0</debugremovehr>
+		<workingonit>0</workingonit>:w
+	</step>
+	<step number="5" />
+</autoconfig>

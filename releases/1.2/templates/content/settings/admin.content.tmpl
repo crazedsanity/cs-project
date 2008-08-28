@@ -1,0 +1,118 @@
+
+<h2><font color="red">Administrative Settings</font></h2>
+
+
+
+<a name="group" />
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<th colspan="3"><a href="#groupManagement"></a>Group Management</th>
+	</tr>
+	<tr>
+		<th>Select a group</th>
+		
+		<th>Current Members</th>
+		
+		<th>Non-Members</th>
+	</tr>
+	<tr>
+		<td>
+			<b>Change current group:</b><BR>
+			<SELECT>
+<!-- BEGIN show_group_list -->
+				<option onClick="javascript:void(xajax_ajax__change_current_group(%%group_id%%))" %%selectedString%%>%%display%% (%%short_name%%)</option>
+<!-- END show_group_list -->
+			</SELECT><BR><BR><hr>
+			<div id="currentGroupLeader">
+<!-- BEGIN currentGroupLeaderBox -->
+			<b>Change Leader </b>({currentGroupLeader})<b> to:</b> 
+			<input name="changeLeader[groupId]" type="HIDDEN" value="{groupId}">
+			<SELECT name="changeLeader[newLeader]">
+				{changeGroupLeader_list}
+			</SELECT><BR>
+<!-- END currentGroupLeaderBox -->
+			</div>
+			<input type="submit" value="Change Leader" onClick="this.form.action.value='changeLeader'">
+		</td>
+		
+		<td>
+			<div id="group_nonMembers">
+			<!-- BEGIN group_nonMembers -->
+			<table>
+<!-- BEGIN show_group_list__removeUser -->
+				<tr>
+					<td>(<b><a href="javascript:void(xajax_ajax__group_user(%%group_id%%, %%uid%%, 'remove'));">Remove</a></b>) %%username%%</td>
+				</tr>
+<!-- END show_group_list__removeUser -->
+<!-- BEGIN show_group_list__noRemoveUser -->
+				<tr>
+					<td><b><font color="red">No users to remove</font></b></td>
+				</tr>
+<!-- END show_group_list__noRemoveUser -->
+			</table>
+			<!-- END group_nonMembers -->
+			</div>
+		</td>
+		
+		<td>
+			<div id="group_currentMembers">
+			<!-- BEGIN group_currentMembers -->
+			<table>
+<!-- BEGIN show_group_list__selectUser -->
+				<tr>
+					<td>(<b><a href="javascript:void(xajax_ajax__group_user(%%group_id%%, %%uid%%, 'add'));">Add</a></b>) %%username%%</td>
+				</tr>
+<!-- END show_group_list__selectUser -->
+<!-- BEGIN show_group_list__noUser -->
+				<tr>
+					<td><b><font color="red">No users to add</font></b></td>
+				</tr>
+<!-- END show_group_list__noUser -->
+			</table>
+			<!-- END group_currentMembers -->
+			</div>
+		</td>
+	</tr>
+</table>
+
+
+<form method="POST">
+
+<table border=1 cellpadding=3 cellspacing=0>
+	<tr>
+		<th colspan="2"><a href="#createUser"></a>Create User:</th>
+	</tr>
+	<tr>
+		<td>Username: </td>
+		<td><input name="addUser[username]" type="text"></td>
+	</tr>
+	<tr>
+		<td>Password: </td>
+		<td><input name="addUser[password]" type="text"></td>
+	</tr>
+	<tr>
+		<td>First Name: </td>
+		<td><input name="addUser[fname]" type="text"></td>
+	</tr>
+	<tr>
+		<td>Last Name: </td>
+		<td><input name="addUser[lname]" type="text"></td>
+	</tr>
+	<tr>
+		<td>Company: </td>
+		<td><input name="addUser[company]" type="text"></td>
+	</tr>
+	<tr>
+		<td>Email: </td>
+		<td><input name="addUser[email]" type="text"></td>
+	</tr>
+	<tr>
+		<td>Default Group: </td>
+		<td><SELECT name="addUser[group_id]">{addUser_gruppe}</SELECT></td>
+	</tr>
+	<tr>
+		<td colspan="2"><input type="submit" value="Add User" OnClick="javascript:this.form.action.value='addUser';"></td>
+	</tr>
+</table>
+<input type="HIDDEN" name="action" value="Fix_JAVASCRIPT">
+</form>
