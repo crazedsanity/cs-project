@@ -8,7 +8,7 @@
  * Last Updated:::::::: $Date$
  */
 
-require_once(dirname(__FILE__) ."/../lib/cs-content/cs_tabsClass.php");
+require_once(dirname(__FILE__) ."/../lib/cs-content/cs_tabs.class.php");
 
 
 $db = new cs_phpDB;
