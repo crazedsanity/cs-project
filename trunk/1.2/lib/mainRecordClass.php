@@ -94,7 +94,7 @@ class mainRecord {
 		if(is_numeric($parent)) {
 			if($parent == 0) {
 				//
-				$critArr['ancestry'] = "=record_id";
+				$critArr['ancestry'] = "=record_id::text";
 			}
 			else {
 				//tricksie things to facilitate a 'like' search.
