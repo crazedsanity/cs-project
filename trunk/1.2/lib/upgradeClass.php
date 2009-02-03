@@ -36,7 +36,7 @@ class upgrade {
 	
 	//=========================================================================
 	public function __construct() {
-		$this->fsObj =  new cs_fileSystemClass(dirname(__FILE__) .'/../');
+		$this->fsObj =  new cs_fileSystem(dirname(__FILE__) .'/../');
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
 		clearstatcache();

@@ -16,12 +16,12 @@ require(dirname(__FILE__) .'/phpmailer/class.phpmailer.php');
 require(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
 require(dirname(__FILE__) .'/session_class.php');
 require(dirname(__FILE__) .'/upgradeClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.php');
-require_once(dirname(__FILE__) .'/cs-content/contentSystemClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
-require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
-require_once(dirname(__FILE__) .'/cs-phpxml/xmlParserClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.class.php');
+require_once(dirname(__FILE__) .'/cs-content/contentSystem.class.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_fileSystem.class.php');
+require_once(dirname(__FILE__) .'/cs-phpxml/cs_phpxmlCreator.class.php');
+require_once(dirname(__FILE__) .'/cs-phpxml/cs_phpxmlParser.class.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.class.php');
 require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
