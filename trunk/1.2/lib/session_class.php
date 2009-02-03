@@ -13,7 +13,7 @@
  */
 ##
 
-require_once(dirname(__FILE__) .'/cs-content/cs_sessionClass.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_session.class.php');
 
 
 class Session extends cs_session {
