@@ -127,16 +127,11 @@ $tabNames = array(
 	'summary'		=> "Summary",
 	'project'		=> "Projects",
 	'helpdesk'		=> "Helpdesk",
-	'tags'			=> "Tags",
 	'contacts'		=> "Contacts",
 	'settings'		=> "Settings",
+	'tags'			=> "Tags",
 );
 
-if($user->is_admin()) {
-	$tabNames['settings']	= "Settings</a><BR>\n<a href=\"/content/settings/admin\"><b>[Admin]</b>";
-}
-
-#$page->add_template_var('tabs', $page->file_to_string('tabs.shared.tmpl'));
 $tabObj = new cs_tabs($page);
 foreach($tabNames as $moduleName=>$name) {
 	$tabUrl = "/content/". $moduleName;
@@ -145,6 +140,14 @@ foreach($tabNames as $moduleName=>$name) {
 		$tabObj->select_tab($name);
 	}
 	$tabObj->add_tab($name, $tabUrl);
+}
+
+if($user->is_admin()) {
+	$name = "Admin";
+	$tabObj->add_tab($name, "/content/settings/admin");
+	if(count($page->ftsSections) == 3 && $page->ftsSections[2] == 'admin') {
+		$tabObj->select_tab($name);
+	}
 }
 $tabObj->display_tabs();
 
