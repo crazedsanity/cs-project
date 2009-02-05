@@ -213,13 +213,6 @@
 	</td>
 </tr>
 <!-- END remark_row -->
-<!-- BEGIN solution_row -->
-<tr>
-	<td colspan="3">Solution: <br>
-		<textarea name="solution" rows="10" cols="80" {solution_readonly}></textarea>
-	</td>
-</tr>
-<!-- END solution_row -->
 <!-- BEGIN reopen_button -->
 	<tr>
 		<td>&nbsp;</td>
@@ -228,21 +221,16 @@
 <!-- END reopen_button -->
 <!-- BEGIN buttons_row -->
 <tr>
-	<td colspan="3"><i>(Changes only take effect when clicking "modify", while "solve" only cares about the solution field, and "remark" only cares about the remarks field.)</i></td>
-</tr>
-<tr>
-	<td colspan="3">&nbsp;&nbsp;
-	<input name="action" value="Remark" type="submit">&nbsp;
-<!-- BEGIN update_button -->
-		<input name="action" value="Modify" type="submit">&nbsp;
-<!-- END update_button -->
-<!-- BEGIN owner_options -->
-		<input name="action" value="solve" type="submit">&nbsp;
-<!-- END owner_options -->
+	<td colspan="3" align="center">&nbsp;&nbsp;
+		<input name="action" value="Submit" type="submit">&nbsp;
 	
 									
 		<a href="/help/helpdesk/submit_buttons" target="_blank">
 		<img src="/images/icon-help.png" border="0"></a>
+		
+		<BR>
+		Is this a <b>Solution</b>?
+		<input name="isSolution" type="checkbox">
 	</td>
 </tr>
 <!-- END buttons_row -->
