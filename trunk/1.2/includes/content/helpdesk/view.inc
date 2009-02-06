@@ -22,7 +22,7 @@ if($_POST) {
 	$byPassUrlExtras = FALSE;
 	if(strlen($action)) {
 		
-		if($action == "submit") {
+		if($action == "submit" || $action == "modify") {
 			$proj->helpdeskObj->db->beginTrans();
 			
 			//SETUP THE MESSAGE THEY'LL SEE...
