@@ -9,7 +9,181 @@
  */
 
 
-
+if($_POST) {
+	$action = strtolower($_POST['action']);
+	$helpdeskId = $_POST['id'];
+	$baseUrl = "/content/helpdesk";
+	$urlSection = "view";
+	if(is_numeric($helpdeskId)) {
+		$urlExtrasArr = array(
+			"ID"	=> $helpdeskId
+		);
+	}
+	$byPassUrlExtras = FALSE;
+	if(strlen($action)) {
+		
+		if($action == "submit") {
+			$proj->helpdeskObj->db->beginTrans();
+			
+			//SETUP THE MESSAGE THEY'LL SEE...
+			$setMessage = array(
+				"title"		=> "",
+				"message"	=> "... SET ME!!! ...",
+				"type"		=> "error"
+			);
+			$success = false;
+			$remarks = array();
+			
+			
+			$oldData = $proj->helpdeskObj->get_record($helpdeskId);
+			
+			
+			#################################
+			# ---------> BEGIN "update"
+			#################################
+			
+			
+			//if they've changed the name, we gotta log it.
+			//TODO: probably log this within helpdeskClass::update().
+			if(isset($_POST['updates']['name']) && $oldData['name'] !== $_POST['updates']['name']) {
+				$remarks[] = array(
+					"remark"	=> 'Updated [b]name[/b] from ([b][i]'. $oldData['name'] .'[/i][/b])',
+					false
+				);
+			}
+			
+			$doNotAcceptFields = array("solution", "remark");
+			foreach($doNotAcceptFields as $unsetThis) {
+				unset($_POST['updates'][$unsetThis]);
+			}
+			$result = $proj->helpdeskObj->update_record($helpdeskId, $_POST['updates']);
+			
+			
+			//SET/UPDATE THE TYPE OF MESSAGE THAT WILL DISPLAY...
+			if($result == 1) {
+				$success = true;
+				$messageTitle[] = "Updated";
+				$messageText[] = "Your issue was updated successfully.";
+			}
+			else {
+				#$setMessage['type'] = "error";
+				$success = false;
+			}
+			
+			#################################
+			# ---------> BEGIN "remark/solve"
+			#################################
+			if($success === true && strlen($_POST['remark'])) {
+				//now check remark stuff.
+				$useRespondLink = FALSE;
+				if($_POST['isSolution']) {
+					//IT'S A SOLUTION
+					//solve it & make sure they know if it was good or not.
+					#$result = $proj->helpdeskObj->solve($helpdeskId, $_POST['solution']);
+					$remarks[] = array(
+						'remark'		=> $_POST['remark'],
+						'isSolution'	=> true
+					);
+					$extra = NULL;
+					
+					if($result == 1 && $success === true) {
+						$messageTitle[] = "Solved";
+						$messageText[] = "Your solution was logged, and the issue was updated accordingly.  Confirmation emails have been sent.";
+					}
+				}
+				else {
+					//JUST A REMARK...
+					if($oldData['email'] != $_SESSION['email']) {
+						$useRespondLink = $proj->helpdeskObj->create_md5($helpdeskId);
+					}
+					$remarks[] = array(
+						'remark'		=> $_POST['remark'],
+						'isSolution'	=> false,
+						'link'			=> $useRespondLink
+					);
+					
+					if($result > 0) {
+						$success = true;
+						$messageTitle[] = "Remarked Upon";
+						$messageText[] = "Your thoughts have been dually noted in the database... or at least singly.  :D";
+					}
+				}//end REMARK
+			}
+					
+			if($success) {
+				//TODO: this is where a queued email system would be good; if the first remark succeeds but the second fails, this will generate an erroneous email.
+				if(count($remarks)) {
+					foreach($remarks as $num=>$remarkData) {
+						$result = $proj->helpdeskObj->remark($helpdeskId, $remarkData['remark'], $remarkData['isSolution'], $remarkData['link']);
+						if($result <= 0) {
+							$success = false;
+							break;
+						}
+					}
+				}
+				
+				if($success === true) {
+					$proj->helpdeskObj->db->commitTrans();
+					//format the message so it looks nice...
+					$setMessage['message'] = "";
+					if(count($messageTitle) > 2) {
+						$lastMessage = array_pop($setMessage);
+						$setMessage['title'] = $page->gfObj->string_from_array($messageTitle, null, ", ");
+						$setMessage['title'] .= " and ". $lastMessage;
+					}
+					else {
+						$setMessage['title'] = $page->gfObj->string_from_array($messageTitle, null, " and ");
+					}
+					$setMessage['message'] = $page->gfObj->string_from_array($messageText, null, "<BR>\n");
+					$setMessage['type'] = "status";
+				}
+				else {
+					$proj->helpdeskObj->db->rollbackTrans();
+					$setMessage = array(
+						'title'		=> "Update FAILED",
+						'message'	=> "The update would have worked, but you didn't put enough information into your remark.",
+						'type'		=> "error"
+					);
+				}
+			}
+			else {
+				$proj->helpdeskObj->db->rollbackTrans();
+				$setMessage = array(
+					'title'		=> "Update FAILED",
+					'message'	=> "Update returned [". $result ."].  Last error was [". $proj->helpdeskObj->lastError ."]",
+					'type'		=> "error"
+				);
+			}
+			
+			#$page->gfObj->debug_print($_POST,1);
+			#$page->gfObj->debug_print($setMessage,1);
+			#exit;
+			$page->set_message_wrapper($setMessage);
+		}
+		elseif($action == "re-open") {
+			//we'll update some fields, then remark the old solution.
+			$oldData = $proj->helpdeskObj->get_record($helpdeskId);
+			$oldSolution = $oldData['solution'];
+			$updatesArr = array(
+				"status_id"	=> 6
+			);
+			
+			$updateRes = $proj->helpdeskObj->update_record($helpdeskId, $updatesArr);
+			
+			//make the old solution... better.
+			$oldSolution = "Re-opened.";
+			$remarkRes = $proj->helpdeskObj->remark($helpdeskId, $oldSolution);
+			
+		}
+		else {
+		}
+	}
+	
+	if(!isset($_POST['xajax'])) {
+		$page->gfObj->conditional_header("/content/helpdesk/view?ID=". $helpdeskId);
+	}
+}
+else {
 	$helpdeskId = $_GET['ID'];
 	$action = $page->ftsSections[2];
 	
@@ -211,7 +385,7 @@
 		$page->add_template_var('associatedUser_data', $parsedRow);
 		
 	}
-
+}
 //call the function to add AJAX stuff...
 addAjax();
 
