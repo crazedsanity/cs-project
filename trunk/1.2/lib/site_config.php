@@ -37,10 +37,6 @@ define(OLD_CONFIG_FILE_LOCATION, OLD_CONFIG_DIRECTORY .'/'. OLD_CONFIG_FILENAME)
 
 set_exception_handler('exception_handler');
 
-//TODO: turn off if it's not a dev site, but NOT if setup is running (so they can see problems).
-ini_set('error_reporting', 'On');
-ini_set('display_errors', 'On');
-error_reporting(E_ALL && ~E_NOTICE);
 //##########################################################################
 function exception_handler($exception) {
 	$exceptionMessage = $exception->getMessage();
