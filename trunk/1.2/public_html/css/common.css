@@ -57,3 +57,17 @@ table.notice p { margin-top: 0px; margin-bottom: 5px  }
 	background-color: white;
 	border: dashed #000 1px;
 }
+
+/* Helpdesk Styles */
+.helpdesk_comment_header {
+	border-top:dashed #000 1px;
+	padding-bottom:1em;
+	border-left:solid #000 1px;
+}
+.helpdesk_comment_body {
+	width:750;
+	overflow:auto;
+	padding-bottom:1em;
+	border-left:solid #000 1px;
+	padding-left:1em;
+}
