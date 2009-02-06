@@ -1,17 +1,16 @@
 <?php
 /*
  * FILE INFORMATION:
- * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_session.class.php $
- * $Id: cs_session.class.php 345 2009-02-03 19:08:45Z crazedsanity $
- * $LastChangedDate: 2009-02-03 13:08:45 -0600 (Tue, 03 Feb 2009) $
+ * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/cs_sessionClass.php $
+ * $Id: cs_sessionClass.php 267 2008-04-29 15:27:28Z crazedsanity $
+ * $LastChangedDate: 2008-04-29 10:27:28 -0500 (Tue, 29 Apr 2008) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 345 $
+ * $LastChangedRevision: 267 $
  */
 
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
-require_once(dirname(__FILE__) ."/../cs-versionparse/cs_version.abstract.class.php");
+require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 
-class cs_session extends cs_contentAbstract {
+class cs_session extends cs_versionAbstract {
 
 	protected $db;
 	public $uid;
@@ -22,17 +21,10 @@ class cs_session extends cs_contentAbstract {
 	/**
 	 * The constructor.
 	 * 
-	 * @param $createSession	(mixed,optional) determines if a session will be started or not; if
-	 * 								this parameter is non-null and non-numeric, the value will be 
-	 * 								used as the session name.
+	 * @param $createSession	(boolean,optional) determines if a session will be started or not.
 	 */
 	function __construct($createSession=1) {
-		parent::__construct(false);
 		if($createSession) {
-			if(!is_null($createSession) && strlen($createSession) && !is_numeric($createSession)) {
-				session_name($createSession);
-			}
-			
 			//now actually create the session.
 			session_start();
 		}

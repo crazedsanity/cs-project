@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) ."/../cs-versionparse/cs_version.abstract.class.php");
+require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 
 class cs_globalFunctions extends cs_versionAbstract {
 	
@@ -10,65 +10,17 @@ class cs_globalFunctions extends cs_versionAbstract {
 	public $debugRemoveHr = 0;
 	public $debugPrintOpt = 0;
 	
-	private $forceSqlQuotes=0;
-	private $oldForceSqlQuotes=0;
-	
 	//=========================================================================
 	public function __construct() {
 		//These checks have been implemented for pseudo backwards-compatibility 
 		//	(internal vars won't change if GLOBAL vars changed).
-		if(defined('DEBUGREMOVEHR')) {
-			$this->debugRemoveHr = constant('DEBUGREMOVEHR');
-		}
-		elseif(isset($GLOBALS['DEBUGREMOVEHR'])) {
+		if(isset($GLOBALS['DEBUGREMOVEHR'])) {
 			$this->debugRemoveHr = $GLOBALS['DEBUGREMOVEHR'];
 		}
-		
-		if(defined('DEBUGPRINTOPT')) {
-			$this->debugPrintOpt = constant('DEBUGPRINTOPT');
-		}
-		elseif(isset($GLOBALS['DEBUGPRINTOPT'])) {
+		if(isset($GLOBALS['DEBUGPRINTOPT'])) {
 			$this->debugPrintOpt = $GLOBALS['DEBUGPRINTOPT'];
 		}
-		$this->set_version_file_location(dirname(__FILE__) . '/VERSION');
 	}//end __construct()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	public function switch_force_sql_quotes($newSetting) {
-		if(is_bool($newSetting)) {
-			if($newSetting === true) {
-				$newSetting = 1;
-			}
-			else {
-				$newSetting = 1;
-			}
-		}
-		elseif(is_numeric($newSetting)) {
-			if($newSetting > 0) {
-				$newSetting = 1;
-			}
-			else {
-				$newSetting = 0;
-			}
-		}
-		else {
-			throw new exception(__METHOD__ .": invalid new setting (". $newSetting .")");
-		}
-		
-		if($newSetting !== $this->forceSqlQuotes) {
-			$this->oldForceSqlQuotes = $this->forceSqlQuotes;
-			$this->forceSqlQuotes = $newSetting;
-			$retval = true;
-		}
-		else {
-			$retval = false;
-		}
-		
-		return($retval);
-	}//end switch_force_sql_quotes()
 	//=========================================================================
 	
 	
@@ -193,18 +145,17 @@ class cs_globalFunctions extends cs_versionAbstract {
 					//clean the string, if required.
 					if($cleanString) {
 						//make sure it's not full of poo...
-						$value = $this->cleanString($value, "sql");
-						#$value = "'". $value ."'";
+						#$value = $this->cleanString($value, "sql");
+						$value = "'". $value ."'";
 					}
 					if((is_null($value)) OR ($value == "")) {
 						$value = "NULL";
 					}
-					@$tmp[1] = $this->create_list($tmp[1], $value, ",", 1);
+					@$tmp[1] = $this->create_list($tmp[1], $value);
 				}
 				
 				//make the final product.
 				$retval = "(". $tmp[0] .")" . $separator . "(". $tmp[1] .")";
-				
 				break;
 				//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 				
@@ -216,7 +167,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 				//build final product.
 				foreach($array as $field=>$value) {
 					$sqlQuotes = 1;
-					if(($value === "NULL" || $value === NULL) && !$this->forceSqlQuotes) {
+					if($value === "NULL" || $value === NULL) {
 						$sqlQuotes = 0;
 					}
 					if($cleanString && !preg_match('/^\'/',$value)) {
@@ -237,7 +188,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 				foreach($array as $field=>$value) {
 					if($cleanString) {
 						//make sure it doesn't have crap in it...
-						$value = $this->cleanString($value, "sql", $this->forceSqlQuotes);
+						$value = $this->cleanString($value, "sql");
 						$value = "'". $value ."'";
 					}
 					$retval = $this->create_list($retval, $value, ", ");
@@ -264,8 +215,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 					$delimiter = "AND";
 					if(is_array($value)) {
 						//doing tricksie things!!!
-						$retval = $this->create_list($retval, $field ." IN (". $this->string_from_array($value) .")",
-								" $delimiter ", $this->forceSqlQuotes);
+						$retval = $this->create_list($retval, $field ." IN (". $this->string_from_array($value) .")", " $delimiter ");
 					}
 					else {
 						//if there's already an operator ($separator), don't specify one.
@@ -279,7 +229,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 						if(!is_numeric($value) && isset($separator)) {
 							$value = "'". $value ."'";	
 						}
-						$retval = $this->create_list($retval, $field . $separator . $value, " $delimiter ", $this->forceSqlQuotes);
+						$retval = $this->create_list($retval, $field . $separator . $value, " $delimiter ");
 					}
 				}
 				break;
@@ -338,7 +288,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 					if($cleanString) {
 						$value = $this->cleanString($value, $cleanString);
 					}
-					$retval = $this->create_list($retval, $value, $separator, $this->forceSqlQuotes);
+					$retval = $this->create_list($retval, $value, $separator);
 				}
 				//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			}
@@ -380,7 +330,6 @@ class cs_globalFunctions extends cs_versionAbstract {
 				*/
 				$evilChars = array("\$", "%", "~", "*",">", "<", "-", "{", "}", "[", "]", ")", "(", "&", "#", "?", ".", "\,","\/","\\","\"","\|","!","^","+","`","\n","\r");
 				$cleanThis = preg_replace("/\|/","",$cleanThis);
-				$cleanThis = preg_replace("/\'/", "", $cleanThis);
 				$cleanThis = str_replace($evilChars,"", $cleanThis);
 				$cleanThis = stripslashes(addslashes($cleanThis));
 			break;
@@ -398,8 +347,6 @@ class cs_globalFunctions extends cs_versionAbstract {
 				 */
 				$cleanThis = addslashes(stripslashes($cleanThis));
 				$cleanThis = preg_replace('/\\\\"/', '"', $cleanThis);
-				$cleanThis = preg_replace("/'/", "\\\'", $cleanThis);
-				
 			break;
 			
 			
@@ -519,7 +466,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 			
 			case "name":
 			case "names":
-				//allows only things in the "alpha" case and single quotes.
+				//removes everything in the "alpha" case, but allows "'".
 				$cleanThis = preg_replace("/[^a-zA-Z']/", "", $cleanThis);
 			break;
 	
@@ -531,7 +478,7 @@ class cs_globalFunctions extends cs_versionAbstract {
 			case "bool":
 			case "boolean":
 				//makes it either T or F (gotta lower the string & only check the first char to ensure accurate results).
-				$cleanThis = $this->interpret_bool($cleanThis, array('f', 't'));
+				$cleanThis = interpret_bool($cleanThis, array('f', 't'));
 			break;
 			
 			case "varchar":
@@ -572,18 +519,12 @@ class cs_globalFunctions extends cs_versionAbstract {
 	 * Returns a list delimited by the given delimiter.  Does the work of checking if the given variable has data
 	 * in it already, that needs to be added to, vs. setting the variable with the new content.
 	 */
-	public function create_list($string=NULL, $addThis=NULL, $delimiter=", ", $useSqlQuotes=0) {
-		if(strlen($string)) {
-			if($useSqlQuotes && !(preg_match("/^'/", $addThis) && preg_match("/'\$/", $addThis))) {
-				$addThis = "'". $addThis ."'";
-			}
+	public function create_list($string=NULL, $addThis=NULL, $delimiter=", ") {
+		if($string) {
 			$retVal = $string . $delimiter . $addThis;
 		}
 		else {
 			$retVal = $addThis;
-			if($useSqlQuotes && !(preg_match("/^'/", $retVal) && preg_match("/'\$/", $retVal))) {
-				$retVal = "'". $retVal ."'";
-			}
 		}
 	
 		return($retVal);
@@ -776,67 +717,6 @@ class cs_globalFunctions extends cs_versionAbstract {
 		
 		return($retval);
 	}//end array_as_option_list()
-	//##########################################################################
-	
-	
-	
-	//##########################################################################
-	public function interpret_bool($interpretThis, array $trueFalseMapper=null) {
-		$interpretThis = preg_replace('/ /', '', $interpretThis);
-		if(is_array($trueFalseMapper)) {
-			if(count($trueFalseMapper) == 2 && isset($trueFalseMapper[0]) && isset($trueFalseMapper[1])) {
-				$realVals = $trueFalseMapper;
-			}
-			else {
-				throw new exception(__METHOD__ .": invalid true/false map");
-			}
-		}
-		else {
-			//set an array that defines what "0" and "1" return.
-			$realVals = array(
-				0 => false,
-				1 => true
-			);
-		}
-		
-		//now figure out the value to return.
-		if(is_numeric($interpretThis)) {
-			settype($interpretThis, 'integer');
-			if($interpretThis == '0') {
-				$index=0;
-			}
-			else {
-				$index=1;
-			}
-		}
-		elseif(is_bool($interpretThis)) {
-			if($interpretThis == true) {
-				$index=1;
-			}
-			else {
-				$index=0;
-			}
-		}
-		elseif(preg_match('/^true$/i', $interpretThis) || preg_match('/^false$/', $interpretThis) || preg_match("/^[tf]$/", $interpretThis)) {
-			if(preg_match('/^true$/i', $interpretThis) || preg_match('/^t$/', $interpretThis)) {
-				$index=1;
-			}
-			else {
-				$index=0;
-			}
-		}
-		else {
-			//straight-up PHP if/else evaluation.
-			if($interpretThis) {
-				$index=1;
-			}
-			else {
-				$index=0;
-			}
-		}
-		
-		return($realVals[$index]);
-	}//end interpret_bool()
 	//##########################################################################
 
 }//end cs_globalFunctions{}

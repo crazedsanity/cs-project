@@ -5,9 +5,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 52 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxmlParser.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-25 18:33:44 -0600 (Sun, 25 Jan 2009) $
+ * Current Revision:::: $Revision: 38 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/xmlParserClass.php $ 
+ * Last Updated:::::::: $Date: 2007-10-10 12:25:07 -0500 (Wed, 10 Oct 2007) $
  * 
  * 
  * Built for PHP to programatically parse & understand data within an XML document.
@@ -53,10 +53,11 @@
  * 
  */
 
-require_once(dirname(__FILE__) ."/cs_phpxml.abstract.class.php");
+require_once(dirname(__FILE__) .'/../cs-arrayToPath/arrayToPathClass.php');
+require_once(dirname(__FILE__) ."/xmlAbstract.class.php");
 
 
-class cs_phpxmlParser extends cs_phpxmlAbstract {
+class XMLParser extends cs_xmlAbstract {
 
 /*
  * Based on code found online at:
@@ -79,6 +80,7 @@ class cs_phpxmlParser extends cs_phpxmlAbstract {
 						//   shall we store as scalar or array?
 	var $index_numeric;	// Index tags by numeric position, not name.
 						//   useful for ordered XML like CallXML.
+	private $a2p;
 	private $xmlTags;
 	private $xmlIndex;
 	private $levelArr;
@@ -90,7 +92,6 @@ class cs_phpxmlParser extends cs_phpxmlAbstract {
 	 * CONSTRUCTOR: Read in XML on object creation, via raw data (string), stream, filename, or URL.
 	 */
 	function __construct($data_source, $data_source_type='raw', $collapse_dups=1, $index_numeric=0) {
-		parent::__construct(array());
 		if($data_source === 'unit_test') {
 			//this is only a test... don't do anything.
 			$this->isTest = TRUE;
@@ -257,8 +258,8 @@ class cs_phpxmlParser extends cs_phpxmlAbstract {
 	 * @param $path			(string) path in XML document to traverse...
 	 */
 	public function get_path($path=NULL) {
-		$this->a2p->reload_data($this->get_tree());
-		return($this->a2p->get_data($path));
+		$a2p = new arrayToPath($this->get_tree());
+		return($a2p->get_data($path));
 	}//end get_path()
 	//=================================================================================
 	

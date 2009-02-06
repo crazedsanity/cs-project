@@ -4,9 +4,9 @@
  * A class for generic PostgreSQL database access.
  * 
  * SVN INFORMATION:::
- * SVN Signature:::::::: $Id: cs_phpDB.class.php 336 2009-01-29 21:45:51Z crazedsanity $
- * Last Committted Date: $Date: 2009-01-29 15:45:51 -0600 (Thu, 29 Jan 2009) $
- * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_phpDB.class.php $
+ * SVN Signature:::::::: $Id: cs_phpDB.php 267 2008-04-29 15:27:28Z crazedsanity $
+ * Last Committted Date: $Date: 2008-04-29 10:27:28 -0500 (Tue, 29 Apr 2008) $
+ * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/cs_phpDB.php $
  * 
  */
 
@@ -24,10 +24,9 @@
 //
 ///////////////////////
 
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
-require_once(dirname(__FILE__) ."/abstract/cs_phpDB.abstract.class.php");
+require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 
-class cs_phpDB extends cs_contentAbstract {
+class cs_phpDB extends cs_versionAbstract {
 	
 	private $dbLayerObj;
 	private $dbType;
@@ -42,7 +41,11 @@ class cs_phpDB extends cs_contentAbstract {
 			$this->dbLayerObj = new $className;
 			$this->dbType = $type;
 			
-			parent::__construct();
+			$this->gfObj = new cs_globalFunctions;
+			
+			if(defined('DEBUGPRINTOPT')) {
+				$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
+			}
 			
 			$this->isInitialized = TRUE;
 		}

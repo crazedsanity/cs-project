@@ -2,16 +2,17 @@
 
 /*
  * FILE INFORMATION:
- * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_fileSystem.class.php $
- * $Id: cs_fileSystem.class.php 333 2009-01-29 21:04:18Z crazedsanity $
- * $LastChangedDate: 2009-01-29 15:04:18 -0600 (Thu, 29 Jan 2009) $
+ * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/cs_fileSystemClass.php $
+ * $Id: cs_fileSystemClass.php 296 2008-07-09 19:52:22Z crazedsanity $
+ * $LastChangedDate: 2008-07-09 14:52:22 -0500 (Wed, 09 Jul 2008) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 333 $
+ * $LastChangedRevision: 296 $
  */
 
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
+require_once(dirname(__FILE__) ."/cs_globalFunctions.php");
+require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 
-class cs_fileSystem extends cs_contentAbstract {
+class cs_fileSystemClass extends cs_versionAbstract {
 
 	public $root;		//actual root directory.
 	public $cwd;		//current directory; relative to $this->root
@@ -19,6 +20,7 @@ class cs_fileSystem extends cs_contentAbstract {
 	public $dh;		//directory handle.
 	public $fh;		//file handle.
 	public $filename;	//filename currently being used.
+	public $gf;		//cs_globalFunctions{} object.
 	public $lineNum = NULL;
 
 	
@@ -40,8 +42,7 @@ class cs_fileSystem extends cs_contentAbstract {
 			exit("UNUSEABLE ROOT: $rootDir");
 		}
 		
-		parent::__construct();
-		
+		$this->gf = new cs_globalFunctions();
 		$this->root = $this->resolve_path_with_dots($this->root);
 		
 		//set the CURRENT working directory... this should be a RELATIVE path to $this->root.
@@ -82,8 +83,8 @@ class cs_fileSystem extends cs_contentAbstract {
 			}
 			$myParts = explode('/', $myCwd);
 			array_pop($myParts);
-			$myCwd = $this->gfObj->string_from_array($myParts, NULL, '/');
-			$realCwd = $this->gfObj->create_list($this->root, $myCwd, '/');
+			$myCwd = $this->gf->string_from_array($myParts, NULL, '/');
+			$realCwd = $this->gf->create_list($this->root, $myCwd, '/');
 			if(file_exists($realCwd)) {
 				$retval = TRUE;
 				$this->realcwd = $realCwd;
@@ -117,7 +118,7 @@ class cs_fileSystem extends cs_contentAbstract {
 			$retval = 1;
 		} elseif(is_dir($this->realcwd .'/'. $newDir)) {
 			//relative path...
-			$this->cwd = $this->gfObj->create_list($this->cwd, $newDir, '/');
+			$this->cwd = $this->gf->create_list($this->cwd, $newDir, '/');
 			$this->realcwd .= '/'. $newDir;
 			$retval = 1;
 		} else {
@@ -424,7 +425,7 @@ class cs_fileSystem extends cs_contentAbstract {
 		}
 		
 		if(!$this->check_chroot($retval, FALSE)) {
-			$this->gfObj->debug_print(func_get_args());
+			$this->gf->debug_print(func_get_args());
 			throw new exception(__METHOD__ .": file is outside of allowed directory (". $retval .")");
 		}
 		
@@ -469,15 +470,6 @@ class cs_fileSystem extends cs_contentAbstract {
 	public function rm($filename) {
 		$filename = $this->filename2absolute($filename);
 		return(unlink($filename));
-	}//end rm()
-	//========================================================================================
-	
-	
-	
-	//========================================================================================
-	public function rmdir($dirname) {
-		$dirname = $this->filename2absolute($dirname);
-		return(rmdir($dirname));
 	}//end rm()
 	//========================================================================================
 	
@@ -600,7 +592,7 @@ class cs_fileSystem extends cs_contentAbstract {
 	 */
 	public function rename($currentFilename, $newFilename) {
 		if($newFilename == $currentFilename) {
-			$this->gfObj->debug_print(func_get_args());
+			$this->gf->debug_print(func_get_args());
 			throw new exception(__METHOD__ .": renaming file to same name");
 		}
 		
@@ -610,7 +602,7 @@ class cs_fileSystem extends cs_contentAbstract {
 		
 		if($this->compare_open_filename($newFilename)) {
 			//renaming a different file to our currently open file... 
-			$this->gfObj->debug_print(func_get_args());
+			$this->gf->debug_print(func_get_args());
 			throw new exception(__METHOD__ .": renaming another file (". $currentFilename .") to the currently open filename (". $newFilename .")");
 		}
 		else {
@@ -803,7 +795,7 @@ class cs_fileSystem extends cs_contentAbstract {
 				}
 			}
 			
-			$retval = $this->gfObj->string_from_array($finalPieces, NULL, '/');
+			$retval = $this->gf->string_from_array($finalPieces, NULL, '/');
 			if($isAbsolute) {
 				$retval = '/'. $retval;
 			}
@@ -842,10 +834,10 @@ class cs_fileSystem extends cs_contentAbstract {
 			$pathDir = $pathPieces[$index];
 			if($pathDir != $dirName) {
 				$retval = FALSE;
-				$this->gfObj->debug_print(__METHOD__ .": failed... tmp=(". $tmp ."), dirName=(". $dirName .")");
+				$this->gf->debug_print(__METHOD__ .": failed... tmp=(". $tmp ."), dirName=(". $dirName .")");
 				break;
 			}
-			$tmp = $this->gfObj->create_list($tmp, $dirName, '/');
+			$tmp = $this->gf->create_list($tmp, $dirName, '/');
 		}
 		
 		return($retval);
@@ -882,7 +874,7 @@ class cs_fileSystem extends cs_contentAbstract {
 				$retval = rename($filename, $destination);
 			}
 			else {
-				$this->gfObj->debug_print(__METHOD__ .":: ". $this->check_chroot($destination),1);
+				$this->gf->debug_print(__METHOD__ .":: ". $this->check_chroot($destination),1);
 				throw new exception(__METHOD__ .':: destination is not in the directory path (from=['. $filename .'], to=['. $destination .']');
 			}
 		}
@@ -910,7 +902,6 @@ class cs_fileSystem extends cs_contentAbstract {
 			}
 		}
 		else {
-			cs_debug_backtrace(1);
 			throw new exception(__METHOD__ .': invalid data: ('. $name .')');
 		}
 		

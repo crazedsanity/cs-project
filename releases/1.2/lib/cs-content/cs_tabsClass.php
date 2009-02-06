@@ -4,10 +4,7 @@
  * 
  */
 
-require_once(dirname(__FILE__) .'/abstract/cs_content.abstract.class.php');
-
-
-class cs_tabs extends cs_contentAbstract {
+class cs_tabs extends cs_versionAbstract {
 	private $tabsArr;
 	private $selectedTab;
 	
@@ -28,7 +25,6 @@ class cs_tabs extends cs_contentAbstract {
 	 * @param $templateVar	(str,optional) What template var to find the tab blockrows in.
 	 */
 	public function __construct(cs_genericPage $csPageObj, $templateVar="tabs") {
-		parent::__construct(false);
 		if(is_null($csPageObj) || !is_object($csPageObj) || get_class($csPageObj) !== 'cs_genericPage') {
 			//can't continue without that!
 			throw new exception("cs_tabs::__construct(): cannot load without cs_genericPage{} object (". get_class($csPageObj) .")");

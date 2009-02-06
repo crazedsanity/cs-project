@@ -4,32 +4,32 @@
  * A class for generic PostgreSQL database access.
  * 
  * SVN INFORMATION:::
- * SVN Signature:::::::: $Id: cs_phpDB__pgsql.class.php 330 2009-01-29 19:44:01Z crazedsanity $
- * Last Committted Date: $Date: 2009-01-29 13:44:01 -0600 (Thu, 29 Jan 2009) $
- * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/db_types/cs_phpDB__pgsql.class.php $
+ * SVN Signature:::::::: $Id: cs_phpDB__pgsql.class.php 259 2008-03-12 23:53:22Z crazedsanity $
+ * Last Committted Date: $Date: 2008-03-12 18:53:22 -0500 (Wed, 12 Mar 2008) $
+ * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/db_types/cs_phpDB__pgsql.class.php $
  * 
- * //////////////////////
- * ORIGINATION INFO:
- * 		Author: Trevin Chow (with contributions from Lee Pang, wleepang@hotmail.com)
- * 		Email: t1@mail.com
- * 		Date: February 21, 2000
- * 		Last Updated: August 14, 2001
- * 
- * 		Description:
- *  		Abstracts both the php function calls and the server information to POSTGRES
- *  		databases.  Utilizes class variables to maintain connection information such
- *  		as number of rows, result id of last operation, etc.
- * 
- * /////////////////////
- * 
- * TODO: option to not use layered transactions
- * TODO: rollbackTrans() in layered transaction causes abort when final layer is committed/aborted
- * TODO: stop sending queries to backend when transction is bad/aborted.
- * TODO: commit/abort specific layer requests (i.e. if there's 8 layers & the first is named "x", calling commitTrans("x") will cause the whole transaction to commit & all layers to be destroyed.
  */
 
+///////////////////////
+// ORIGINATION INFO:
+// 		Author: Trevin Chow (with contributions from Lee Pang, wleepang@hotmail.com)
+// 		Email: t1@mail.com
+// 		Date: February 21, 2000
+// 		Last Updated: August 14, 2001
+//
+// 		Description:
+//  		Abstracts both the php function calls and the server information to POSTGRES
+//  		databases.  Utilizes class variables to maintain connection information such
+//  		as number of rows, result id of last operation, etc.
+//
+///////////////////////
 
-class cs_phpDB__pgsql extends cs_phpDBAbstract {
+//TODO: option to not use layered transactions
+//TODO: rollbackTrans() in layered transaction causes abort when final layer is committed/aborted
+//TODO: stop sending queries to backend when transction is bad/aborted.
+//TODO: commit/abort specific layer requests (i.e. if there's 8 layers & the first is named "x", calling commitTrans("x") will cause the whole transaction to commit & all layers to be destroyed.
+
+class cs_phpDB__pgsql {
 
 	/** Internal result set pointer. */
 	protected $result = NULL;
@@ -101,8 +101,27 @@ class cs_phpDB__pgsql extends cs_phpDBAbstract {
 	
 	//=========================================================================
 	public function __construct() {
-		parent::__construct();
+		$this->gfObj = new cs_globalFunctions;
+		
+		if(defined('DEBUGPRINTOPT')) {
+			$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
+		}
+		
+		$this->isInitialized = TRUE;
 	}//end __construct()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Make sure the object is sane.
+	 */
+	final protected function sanity_check() {
+		if($this->isInitialized !== TRUE) {
+			throw new exception(__METHOD__ .": not properly initialized");
+		}
+	}//end sanity_check()
 	//=========================================================================
 	
 	
@@ -116,14 +135,14 @@ class cs_phpDB__pgsql extends cs_phpDBAbstract {
 		$required = array('host', 'port', 'dbname', 'user', 'password');
 		
 		$requiredCount = 0;
-		foreach($required as $index) {
-			if(isset($params[$index]) || $index == 'password') {
-				$this->$index = $params[$index];
+		foreach($params as $index=>$value) {
+			if(property_exists($this, $index) && in_array($index, $required)) {
+				$this->$index = $value;
 				$requiredCount++;
 			}
 			else {
-				$this->gfObj->debug_print($params,1);
-				throw new exception(__METHOD__. ": property (". $index .") missing");
+				throw new exception(__METHOD__. ": property (". $index .") does " .
+					"not exist or isn't allowed");
 			}
 		}
 		
@@ -135,6 +154,18 @@ class cs_phpDB__pgsql extends cs_phpDBAbstract {
 				.") does not match required number of fields (". count($required) .")");
 		}
 	}//end set_db_info()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Wrapper for close()
+	 */
+	function disconnect() {
+		//Disconnect from $database
+		return($this->close());
+	}//end disconnect()
 	//=========================================================================
 	
 	
@@ -671,6 +702,17 @@ class cs_phpDB__pgsql extends cs_phpDBAbstract {
 	
 	//=========================================================================
 	/**
+	 * Returns the current row number.
+	 */
+	function currRow(){
+		return($this->row);
+	}//end currRow()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
 	 * Get the number of fields in a result.
 	 */
 	// get the number of fields in a result
@@ -835,6 +877,28 @@ class cs_phpDB__pgsql extends cs_phpDBAbstract {
 	////////////////////////
 	// SQL String Related
 	////////////////////////
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Gets rid of evil characters that might lead ot SQL injection attacks.
+	 */
+	function querySafe($string) {
+		return($this->gfObj->cleanString($string,"query"));
+	}//end querySafe()
+	//=========================================================================
+	
+	
+	
+	//=========================================================================
+	/**
+	 * Make it SQL safe.
+	 */
+	function sqlSafe($string) {
+		return($this->gfObj->cleanString($string,"sql"));
+	}//end sqlSafe()
+	//=========================================================================
 	
 	
 	
@@ -1087,30 +1151,6 @@ class cs_phpDB__pgsql extends cs_phpDBAbstract {
 		}
 		return($retval);
 	}//end is_in_transaction()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	public function get_currval($sequence) {
-		if(is_string($sequence) && strlen($sequence) >= 5) {
-			$numrows = $this->exec("SELECT currval('". $sequence ."')");
-			$dberror = $this->errorMsg();
-			
-			if($numrows == 1 && !strlen($dberror)) {
-				$data = $this->farray();
-				$retval = $data[0];
-			}
-			else {
-				throw new exception(__METHOD__ .": invalid rows (". $numrows .") or database error (". $dberror .")");
-			}
-		}
-		else {
-			throw new exception(__METHOD__ .": invalid sequence name (". $sequence .")");
-		}
-		
-		return($retval);
-	}//end get_currval()
 	//=========================================================================
 	
 	

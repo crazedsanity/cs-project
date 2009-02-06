@@ -1,10 +1,10 @@
 <?php
 /*
  * FILE INFORMATION: 
- * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/contentSystem.class.php $
- * $Id: contentSystem.class.php 360 2009-02-06 20:38:40Z crazedsanity $
- * $LastChangedDate: 2009-02-06 14:38:40 -0600 (Fri, 06 Feb 2009) $
- * $LastChangedRevision: 360 $
+ * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/contentSystemClass.php $
+ * $Id: contentSystemClass.php 288 2008-06-04 18:20:26Z crazedsanity $
+ * $LastChangedDate: 2008-06-04 13:20:26 -0500 (Wed, 04 Jun 2008) $
+ * $LastChangedRevision: 288 $
  * $LastChangedBy: crazedsanity $
  * 
  * HOW THE SYSTEM WORKS:::
@@ -70,13 +70,14 @@ if(!isset($GLOBALS['SITE_ROOT'])) {
 	$GLOBALS['SITE_ROOT'] = str_replace("/public_html", "", $GLOBALS['SITE_ROOT']);
 }
 
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
-require_once(dirname(__FILE__) ."/cs_fileSystem.class.php");
-require_once(dirname(__FILE__) ."/cs_session.class.php");
-require_once(dirname(__FILE__) ."/cs_genericPage.class.php");
-require_once(dirname(__FILE__) ."/cs_tabs.class.php");
+require_once(dirname(__FILE__) ."/cs_globalFunctions.php");
+require_once(dirname(__FILE__) ."/cs_fileSystemClass.php");
+require_once(dirname(__FILE__) ."/cs_sessionClass.php");
+require_once(dirname(__FILE__) ."/cs_genericPageClass.php");
+require_once(dirname(__FILE__) ."/cs_tabsClass.php");
+require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 
-class contentSystem extends cs_contentAbstract {
+class contentSystem extends cs_versionAbstract {
 	
 	protected $baseDir			= NULL;			//base directory for templates & includes.			
 	protected $section			= NULL;			//section string, derived from the URL.		
@@ -103,12 +104,15 @@ class contentSystem extends cs_contentAbstract {
 	 * The CONSTRUCTOR.  Duh.
 	 */
 	public function __construct($testOnly=FALSE) {
-		parent::__construct();
 		if($testOnly === 'unit_test') {
 			//It's just a test, don't do anything we might regret later.
 			$this->isTest = TRUE;
 		}
 		else {
+			$this->get_version();
+			$this->get_project();
+			//make a cs_globalFunctions{} object.
+			$this->gfObj = new cs_globalFunctions();
 			
 			//setup the section stuff...
 			$repArr = array($_SERVER['SCRIPT_NAME'], "/");
@@ -145,7 +149,7 @@ class contentSystem extends cs_contentAbstract {
 		$this->templateObj->add_template_var('CURRENT_URL', $myUrl);
 		
 		//create a fileSystem object.
-		$this->fileSystemObj = new cs_fileSystem();
+		$this->fileSystemObj = new cs_fileSystemClass();
 		
 		//create a tabs object, in case they want to load tabs on the page.
 		$this->tabs = new cs_tabs($this->templateObj);
@@ -262,8 +266,6 @@ class contentSystem extends cs_contentAbstract {
 	 * Rips apart the "section" string, setting $this->section and $this->sectionArr.
 	 */
 	private function parse_section() {
-		
-		//TODO::: this should be an OPTIONAL THING as to how to handle "/" (i.e. CSCONTENT_HANDLE_ROOTURL='content/index')
 		if($this->section === 0 || is_null($this->section) || !strlen($this->section)) {
 			$this->section = "content/index";
 		}
@@ -652,43 +654,20 @@ class contentSystem extends cs_contentAbstract {
 		$this->load_dir_includes($this->baseDir);
 		
 		//okay, now loop through $this->sectionArr & see if we can include anything else.
-		$addIndex=false;
 		if(($this->fileSystemObj->cd($this->baseDir)) && is_array($this->sectionArr) && count($this->sectionArr) > 0) {
 			
-			
-			//if the last item in the array is "index", disregard it...
-			$loopThis = $this->sectionArr;
-			$lastSection = $this->sectionArr[(count($this->sectionArr) -1)];
-			if($lastSection == 'index') {
-				array_pop($loopThis);
-			}
-			
-			
-			foreach($loopThis as $mySection) {
+			foreach($this->sectionArr as $mySection) {
 				//Run includes.
 				$this->load_dir_includes($mySection);
 				
 				//attempt to cd() into the next directory, or die if we can't.
 				if(!$this->fileSystemObj->cd($mySection)) {
 					//no dice.  Break the loop.
-					$addIndex = false;
 					break;
-				}
-				else {
-					//okay, we made it to the final directory; add the magic "index.inc" file if it exists.
-					$addIndex = true;
 				}
 			}
 		}
 		
-		//include the final shared & index files.
-		$lsData = $this->fileSystemObj->ls();
-		if(isset($lsData['shared.inc']) && is_array($lsData['shared.inc'])) {
-			$this->add_include('shared.inc');
-		}
-		if(isset($lsData['index.inc']) && is_array($lsData['index.inc']) && $addIndex==true) {
-			$this->add_include('index.inc');
-		}
 	}//end load_includes()
 	//------------------------------------------------------------------------
 	
@@ -704,13 +683,13 @@ class contentSystem extends cs_contentAbstract {
 		
 		//attempt to load the shared includes file.
 		if(isset($lsData['shared.inc']) && $lsData['shared.inc']['type'] == 'file') {
-			$this->add_include('shared.inc');
+			$this->includesList[] = $this->fileSystemObj->realcwd .'/shared.inc';
 		}
 		
 		//attempt to load the section's includes file.
 		$myFile = $section .'.inc';
 		if(isset($lsData[$myFile]) && $lsData[$myFile]['type'] == 'file') {
-			$this->add_include($myFile);
+			$this->includesList[] = $this->fileSystemObj->realcwd .'/'. $myFile;
 		}
 		
 		if(isset($lsData[$section]) && !count($this->sectionArr)) {
@@ -872,20 +851,6 @@ class contentSystem extends cs_contentAbstract {
 	 */
 	public function __destruct() {
 	}//end __destruct()
-	//------------------------------------------------------------------------
-	
-	
-	
-	//------------------------------------------------------------------------
-	/**
-	 * Method that appends filenames to the list of include scripts.
-	 */
-	private final function add_include($file) {
-		$myFile = $this->fileSystemObj->realcwd .'/'. $file;
-		if(!array_search($myFile, $this->includesList)) {
-			$this->includesList[] = $myFile;
-		}
-	}//end add_include()
 	//------------------------------------------------------------------------
 	
 	

@@ -1,20 +1,19 @@
 <?php
 /*
  * FILE INFORMATION:
- * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_genericPage.class.php $
- * $Id: cs_genericPage.class.php 357 2009-02-05 22:04:03Z crazedsanity $
- * $LastChangedDate: 2009-02-05 16:04:03 -0600 (Thu, 05 Feb 2009) $
+ * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/cs_genericPageClass.php $
+ * $Id: cs_genericPageClass.php 284 2008-06-02 18:56:54Z crazedsanity $
+ * $LastChangedDate: 2008-06-02 13:56:54 -0500 (Mon, 02 Jun 2008) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 357 $
+ * $LastChangedRevision: 284 $
  */
-require_once(dirname(__FILE__) ."/required/template.inc");
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
+require_once(dirname(__FILE__) ."/template.inc");
+require_once(dirname(__FILE__) ."/cs_versionAbstract.class.php");
 
-class cs_genericPage extends cs_contentAbstract {
-	public $templateObj;					//template object to parse the pages
-	public $templateVars	= array();	//our copy of the global templateVars
-	public $mainTemplate;				//the default layout of the site
-	public $unhandledVars=array();
+class cs_genericPage extends cs_versionAbstract {
+	var $templateObj;					//template object to parse the pages
+	var $templateVars	= array();	//our copy of the global templateVars
+	var $mainTemplate;				//the default layout of the site
 	
 	private $tmplDir;
 	private $libDir;
@@ -33,14 +32,12 @@ class cs_genericPage extends cs_contentAbstract {
 		//handle some configuration.
 		$this->allowRedirect = $allowRedirect;
 		
-		//initialize stuff from our parent...
-		parent::__construct();
-		
 		//initialize some internal stuff.
 		$this->initialize_locals($mainTemplateFile);
 		
 		//if they need to be logged-in... 
 		$this->check_login($restrictedAccess);
+		$this->gfObj = new cs_globalFunctions;
 		
 		if(!defined('CS-CONTENT_SESSION_NAME')) {
 			define("CS-CONTENT_SESSION_NAME", ini_get('session.name'));
@@ -61,22 +58,9 @@ class cs_genericPage extends cs_contentAbstract {
 	 */
 	protected function initialize_locals($mainTemplateFile) {
 		
-		//replace multiple slashes with a single one to avoid confusing other logic...
-		$mainTemplateFile = preg_replace('/(\/){2,}/', '/', $mainTemplateFile);
-		if(preg_match('/\//', $mainTemplateFile) == 1 && preg_match('/^/', $mainTemplateFile)) {
-			$mainTemplateFile = preg_replace('/^\//', '', $mainTemplateFile);
-		}
-		
-		
-		if(strlen(dirname($mainTemplateFile)) && dirname($mainTemplateFile) !== '/' && !preg_match('/^\./', dirname($mainTemplateFile))) {
-			$this->tmplDir = dirname($mainTemplateFile);
-			$this->siteRoot = preg_replace('/\/templates$/', '', $this->tmplDir);
-		}
-		else {
-			//NOTE: this **requires** that the global variable "SITE_ROOT" is already set.
-			$this->siteRoot = preg_replace('/\/public_html/', '', $_SERVER['DOCUMENT_ROOT']);
-			$this->tmplDir = $this->siteRoot .'/templates';
-		}
+		//NOTE: this **requires** that the global variable "SITE_ROOT" is already set.
+		$this->siteRoot = preg_replace('/\/public_html/', '', $_SERVER['DOCUMENT_ROOT']);
+		$this->tmplDir = $this->siteRoot .'/templates';
 		$this->libDir = $this->siteRoot .'/lib';
 		
 		//if there have been some global template vars (or files) set, read 'em in here.
@@ -95,7 +79,7 @@ class cs_genericPage extends cs_contentAbstract {
 		//build a new instance of the template library (from PHPLib)
 		$this->templateObj=new Template($this->tmplDir,"keep"); //initialize a new template parser
 
-		if(!preg_match('/^\//', $mainTemplateFile)) {
+		if(preg_match('/^\//', $mainTemplateFile)) {
 			$mainTemplateFile = $this->tmplDir ."/". $mainTemplateFile;
 		}
 		$this->mainTemplate=$mainTemplateFile; //load the default layout
@@ -213,7 +197,7 @@ class cs_genericPage extends cs_contentAbstract {
 		$name = $handle;
 		$str = $this->templateVars[$parent];
 
-		$reg = "/<!-- BEGIN $handle -->(.+){0,}<!-- END $handle -->/sU";
+		$reg = "/<!-- BEGIN $handle -->.+<!-- END $handle -->/sU";
 		preg_match_all($reg, $str, $m);
 		if(!is_string($m[0][0])) {
 			#exit("set_block_row(): couldn't find '$handle' in var '$parent'");
@@ -287,7 +271,6 @@ class cs_genericPage extends cs_contentAbstract {
 					if(!$this->templateVars[$str2] && $stripUndefVars) {
 						//TODO: set an internal pointer or something to use here, so they can see what was missed.
 						$this->templateObj->varvals[out] = str_replace($str, '', $this->templateObj->varvals[out]);
-						$this->unhandledVars[$str2]++;
 					}
 				}
 				$this->templateObj->parse("out", "out");
@@ -539,20 +522,20 @@ class cs_genericPage extends cs_contentAbstract {
 		//cast $retArr as an array, so it's clean.
 		$retArr = array();
 		
-		//NOTE: the value 30 isn't just a randomly chosen length; it's the minimum
-		// number of characters to have a block row.  EG: "<!-- BEGIN x --><!-- END x -->"
+		//NOTE: the value 31 isn't just a randomly chosen length; it's the minimum
+		// number of characters to have a block row.  EG: "<!-- BEGIN x -->o<!-- END x -->"
 		$templateContents = $this->templateVars[$templateVar];
-		if(strlen($templateContents) >= 30) {
+		if(strlen($templateContents) >= 31) {
 			//looks good to me.  Run the regex...
 			$flags = PREG_PATTERN_ORDER;
-			$reg = "/<!-- BEGIN (\S{1,}) -->/";
+			$reg = "/<!-- BEGIN (.+) -->/";
 			preg_match_all($reg, $templateContents, $beginArr, $flags);
 			$beginArr = $beginArr[1];
 			
-			$endReg = "/<!-- END (\S{1,}) -->/";
+			$endReg = "/<!-- END (.+) -->/";
 			preg_match_all($endReg, $templateContents, $endArr, $flags);
 			$endArr = $endArr[1];
-			
+	
 			//create a part of the array that shows any orphaned "BEGIN" statements (no matching "END"
 			// statement), and orphaned "END" statements (no matching "BEGIN" statements)
 			// NOTE::: by doing this, should easily be able to tell if the block rows were defined
@@ -592,7 +575,6 @@ class cs_genericPage extends cs_contentAbstract {
 		$rowDefs = $this->get_block_row_defs($templateVar);
 		
 		$useTheseBlockRows = $rowDefs['ordered'];
-		
 		$retval = array();
 		if(is_array($useTheseBlockRows)) {
 			foreach($useTheseBlockRows as $blockRowName)
@@ -630,56 +612,6 @@ class cs_genericPage extends cs_contentAbstract {
 		return($this->allowInvalidUrls);
 	}//end allow_invalid_urls()
 	//---------------------------------------------------------------------------------------------
-	
-	
-	
-	//-------------------------------------------------------------------------
-	public function return_printed_page($stripUndefVars=1) {
-		ob_start();
-		$this->print_page($stripUndefVars);
-		$retval = ob_get_contents();
-		ob_end_clean();
-		return($retval);
-	}//end return_printed_page()
-	//-------------------------------------------------------------------------
-	
-	
-	
-	//-------------------------------------------------------------------------
-	public function strip_undef_template_vars($templateContents) {
-		$numLoops = 0;
-		while(preg_match_all('/\{.\S+?\}/', $templateContents, $tags) && $numLoops < 50) {
-			$tags = $tags[0];
-			
-			//TODO: figure out why this works when running it twice.
-			foreach($tags as $key=>$str) {
-				$str2 = str_replace("{", "", $str);
-				$str2 = str_replace("}", "", $str2);
-				if(!$this->templateVars[$str2]) {
-					//TODO: set an internal pointer or something to use here, so they can see what was missed.
-					$templateContents = str_replace($str, '', $templateContents);
-				}
-			}
-			$numLoops++;
-		}
-		return($templateContents);
-	}//end strip_undef_template_vars()
-	//-------------------------------------------------------------------------
-	
-	
-	
-	//-------------------------------------------------------------------------
-	public function strip_undef_template_vars_from_section($section='content') {
-		if(isset($this->templateVars[$section])) {
-			$this->templateVars[$section] = $this->strip_undef_template_vars($this->templateVars[$section]);
-		}
-		else {
-			throw new exception(__METHOD__ .": section (". $section .") does not exist");
-		}
-		
-		return($this->templateVars[$section]);
-	}//strip_undef_template_vars_from_section()
-	//-------------------------------------------------------------------------
 
 }//end cs_genericPage{}
 ?>

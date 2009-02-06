@@ -5,9 +5,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 25 $ 
- * Repository Location: $HeadURL: https://cs-arraytopath.svn.sourceforge.net/svnroot/cs-arraytopath/trunk/cs_arrayToPath.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-25 17:17:49 -0600 (Sun, 25 Jan 2009) $
+ * Current Revision:::: $Revision: 17 $ 
+ * Repository Location: $HeadURL: https://cs-arraytopath.svn.sourceforge.net/svnroot/cs-arraytopath/trunk/arrayToPathClass.php $ 
+ * Last Updated:::::::: $Date: 2007-09-12 14:24:46 -0500 (Wed, 12 Sep 2007) $
  * 
  * 
  * Basically traverses an array as though it were a filesystem. In the given example, it looks 
@@ -33,9 +33,9 @@
  */ 	
 
 
-require_once(dirname(__FILE__) .'/../cs-versionparse/cs_version.abstract.class.php');
+require_once(dirname(__FILE__) .'/cs_versionAbstract.class.php');
 
-class cs_arrayToPath extends cs_versionAbstract {
+class arrayToPath extends cs_a2p_versionAbstract {
 	
 	private $prefix		= NULL;	//the first directory to use.
 	private $data;
@@ -49,20 +49,26 @@ class cs_arrayToPath extends cs_versionAbstract {
 	 * 
 	 * TODO::: there is a strange recursion issue when $prefix is non-null: prefix is presently hardwired as NULL for now... 
 	 */
-	public function __construct($array) {
-		$this->set_version_file_location(dirname(__FILE__) . '/VERSION');
+	public function __construct($array, $prefix=NULL) {
 		if($array === 'unit_test') {
 			//it's a unit test.
 			$this->isTest = TRUE;
 		}
 		else {
 			$this->get_version();
+			$prefix=NULL;
 			if(!is_array($array)) {
 				//I don't deal with non-arrays.  Idiot.
 				exit('arrayToPath{}->__construct(): got an invalid datatype.');
 			}
 			//create a reference to the data, so if it changes, the class doesn't have to be re-initialized.
 			$this->data = $array;
+			
+			//now set the prefix ONLY if the prefix is valid.
+			if(!is_null($prefix) && strlen($prefix)) {
+				//got a good prefix, so use it.
+				$this->prefix = $prefix;
+			}
 		}
 	}//end __construct()
 	//======================================================================================
@@ -132,49 +138,37 @@ class cs_arrayToPath extends cs_versionAbstract {
 	
 	//======================================================================================
 	/**
-	 * Fixes issues with extra slashes and such.
+	 * Pre-pends the internal $this->prefix onto the given path.
 	 * 
-	 * @param $path		<str> path to fix
+	 * @param $path		<str> path to append $this->prefix onto.
 	 * 
-	 * @return <str>	PASS: this is the fixed path
+	 * @return <str>	PASS: this is the path with our prefix added.
 	 */
 	private function fix_path($path) {
-		$retval = $path;
-		if(!is_null($path) && strlen($path)) {
-			
-			$retval = preg_replace('/[\/]{2,}/', '/', $retval);
-			if(strlen($retval) && preg_match('/\./', $retval)) {
-				
-				$pieces = explode('/', $retval);
-				
-				$finalPieces = array();
-				for($i=0; $i < count($pieces); $i++) {
-					$dirName = $pieces[$i];
-					if($dirName == '.') {
-						//do nothing; don't bother appending.
-					}
-					elseif($dirName == '..') {
-						$rippedIndex = array_pop($finalPieces);
-					}
-					else {
-						$finalPieces[] = $dirName;
-					}
-				}
-				
-				#$retval = $this->gf->string_from_array($finalPieces, NULL, '/');
-				$retval = "";
-				foreach($finalPieces as $bit) {
-					if(strlen($retval)) {
-						$retval .= '/'. $bit;
-					}
-					else {
-						$retval = '/'. $bit;
-					}
-				}
-			}
-			
+		if(is_null($path) && is_null($this->prefix)) {
+			//all data is null. don't bother changing it.
+			$retval = NULL;
+		}
+		else {
 			//remove slashes at the beginning or end of the path.
-			$retval = preg_replace('/\/$/', '', $retval);
+			$path = preg_replace('/\/$/', '', $path);
+			
+			if(preg_match('/\/$/', $this->prefix)) {
+				//remove the trailing slash.
+				$this->prefix = preg_replace('/$\//', '', $this->prefix);
+			}
+			if(preg_match('/^\//', $this->prefix)) {
+				$this->prefix = preg_replace('/^\//', '', $this->prefix);
+			}
+			$path = preg_replace('/\/$/', '', $path);
+			
+			//should we add our prefix?
+			if(preg_match('/^\//', $path)) {
+				$retval = $path;
+			}
+			else {
+				$retval = $this->prefix ."/". $path;
+			}
 			
 			//remove a trailing slash, if present, before returning.
 			$retval = preg_replace('/\/$/', '', $retval);
@@ -359,7 +353,7 @@ class cs_arrayToPath extends cs_versionAbstract {
 	//======================================================================================
 	public function reload_data($array) {
 		//call the constructor on it, and pass along the CURRENT prefix, so it doesn't get reset.
-		$this->__construct($array);
+		$this->__construct($array, $this->prefix);
 	}//end reload_data()
 	//======================================================================================
 	

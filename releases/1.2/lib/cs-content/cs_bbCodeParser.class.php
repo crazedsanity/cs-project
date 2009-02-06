@@ -5,11 +5,11 @@
  *  
  * SVN INFORMATION:::
  * ------------------
- * SVN Signature::::::: $Id: cs_bbCodeParser.class.php 331 2009-01-29 20:18:41Z crazedsanity $
+ * SVN Signature::::::: $Id: cs_bbCodeParser.class.php 267 2008-04-29 15:27:28Z crazedsanity $
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 331 $ 
- * Repository Location: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_bbCodeParser.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-29 14:18:41 -0600 (Thu, 29 Jan 2009) $
+ * Current Revision:::: $Revision: 267 $ 
+ * Repository Location: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/cs_bbCodeParser.class.php $ 
+ * Last Updated:::::::: $Date: 2008-04-29 10:27:28 -0500 (Tue, 29 Apr 2008) $
  * 
  * 
  * Originally from a snippet (just the function) on PHPFreaks.com: http://www.phpfreaks.com/quickcode/BBCode/712.php
@@ -18,9 +18,9 @@
  * been converted.
  */
 
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
+require_once(dirname(__FILE__) .'/cs_versionAbstract.class.php');
 
-class cs_bbCodeParser extends cs_contentAbstract {
+class cs_bbCodeParser extends cs_versionAbstract {
 	
 	/** Array containing all the codes & how to parse them. */
 	private $bbCodeData = NULL;
@@ -30,7 +30,6 @@ class cs_bbCodeParser extends cs_contentAbstract {
 	 * Setup internal structures.
 	 */
 	function __construct() {
-		parent::__construct(false);
 		# Which BBCode is accepted here
 		$this->bbCodeData = array(
 			'bold' => array(

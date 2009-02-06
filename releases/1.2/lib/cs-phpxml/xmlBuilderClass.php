@@ -5,19 +5,20 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 55 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxmlBuilder.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-25 23:47:46 -0600 (Sun, 25 Jan 2009) $
+ * Current Revision:::: $Revision: 47 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/xmlBuilderClass.php $ 
+ * Last Updated:::::::: $Date: 2008-02-09 15:23:24 -0600 (Sat, 09 Feb 2008) $
  * 
  */
-require_once(dirname(__FILE__) ."/cs_phpxml.abstract.class.php");
+require_once(dirname(__FILE__) ."/xmlAbstract.class.php");
 
 	
-class cs_phpxmlBuilder extends cs_phpxmlAbstract {
+class xmlBuilder extends cs_xmlAbstract {
 	private $goAhead = FALSE;
 	private $xmlArray = NULL;
 	private $xmlString = "";
 	private $rootElement = NULL;
+	private $a2pObj = NULL;
 	private $depth = 0;
 	private $maxDepth = 50; //if the code gets past this depth of nested tags, assume something went wrong & die.
 	private $crossedPaths = array (); //list of paths that have been traversed in the array.
@@ -30,13 +31,14 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 	 * The construct.  Pass the array in here, then call get_xml_string() to see the results.
 	 */
 	public function __construct($xmlArray) {
+		$this->get_version();
 		if(is_array($xmlArray) && count($xmlArray)) {
 			//all looks good.  Give 'em the go ahead.
 			$this->goAhead = TRUE;
 			$this->xmlArray = $xmlArray;
 			
 			//create an arrayToPath{} object.
-			parent::__construct($xmlArray);
+			$this->a2pObj = new arrayToPath($xmlArray);
 			
 			//process the data.
 			$this->process_xml_array();
@@ -66,13 +68,13 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 				$this->rootElement = $keys[0];
 				
 				//pull the rootElement out of the equation.
-				$rootAttributes = $this->a2p->get_data("/". $this->rootElement ."/attributes");
+				$rootAttributes = $this->a2pObj->get_data("/". $this->rootElement ."/attributes");
 				if(is_array($rootAttributes)) {
 					//remove it from our internal array.
-					$this->a2p->unset_data("/". $this->rootElement ."/attributes");
+					$this->a2pObj->unset_data("/". $this->rootElement ."/attributes");
 				}
 				//now remove the "type" index.
-				$this->a2p->unset_data("/". $this->rootElement ."/type");
+				$this->a2pObj->unset_data("/". $this->rootElement ."/type");
 			}
 			
 			//open a tag for the root element.
@@ -217,7 +219,7 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 		}
 		
 		//pull the data we're going to be working with.
-		$subArray = $this->a2p->get_data($path);
+		$subArray = $this->a2pObj->get_data($path);
 		$origSubArray = $subArray;
 		
 		if(is_array($subArray)) {
@@ -276,7 +278,7 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 								$myPath = $this->create_list($path, $tagName .'/'. $subTagName, '/');
 								
 								//run a pre-check on that piece of the data...
-								$checkData = $this->a2p->get_data($myPath);
+								$checkData = $this->a2pObj->get_data($myPath);
 								if(isset($checkData['type']) && $checkData['type'] === 'open') {
 									//
 									$this->process_sub_arrays($myPath, $subTagName);
@@ -333,11 +335,11 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 						elseif(is_array($subArray['0'])) {
 							//special.  Don't know how, yet, but it's fscking special.
 							$myBasePath = $this->create_list($path, $tagName, '/');
-							$pathArr = $this->a2p->explode_path($myBasePath);
+							$pathArr = $this->a2pObj->explode_path($myBasePath);
 							array_pop($pathArr);
 							
 							$useThisTagName = array_pop($pathArr);
-							$checkData = $this->a2p->get_data($myBasePath);
+							$checkData = $this->a2pObj->get_data($myBasePath);
 							if($checkData['type'] === 'complete') {
 								//process it specially.
 								if(is_null($checkData['value']) || !isset($checkData['value'])) {

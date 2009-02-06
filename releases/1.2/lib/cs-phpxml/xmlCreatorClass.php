@@ -6,13 +6,13 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 60 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxmlCreator.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-29 16:14:27 -0600 (Thu, 29 Jan 2009) $
+ * Current Revision:::: $Revision: 44 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/xmlCreatorClass.php $ 
+ * Last Updated:::::::: $Date: 2007-10-30 14:44:56 -0500 (Tue, 30 Oct 2007) $
  * 
  * 
- * Methods to create XML that's parseable by cs_phpxmlBuilder{}.  Eliminates the need for manually creating
- * a massive array, just to feed it into cs_phpxmlBuilder: it's assumed that the XML is being built in-line,
+ * Methods to create XML that's parseable by xmlBuilder{}.  Eliminates the need for manually creating
+ * a massive array, just to feed it into xmlBuilder: it's assumed that the XML is being built in-line,
  * though there are methods for "going back" and modifying specific items within a specific tag (tags 
  * that have the same name are represented numerically).
  * 
@@ -31,7 +31,7 @@
  * </cart>
  * 
  * NOTE ON PATHS:
- * 	cs_arrayToPath{} facilitates referencing items within an array using a path: in the example XML (above),
+ * 	arrayToPath{} facilitates referencing items within an array using a path: in the example XML (above),
  * 	the element with the value of "foo" would be in the path "/cart/item/0/name" (the number after "item"
  * 	indicates it is programatically the first element within "cart" with the element name of "item").
  * 
@@ -53,12 +53,15 @@
  * (forthcoming)
  */
 
-require_once(dirname(__FILE__) ."/cs_phpxml.abstract.class.php");
+require_once(dirname(__FILE__) ."/xmlBuilderClass.php");
+require_once(dirname(__FILE__) ."/xmlAbstract.class.php");
+require_once(dirname(__FILE__) ."/../cs-arrayToPath/arrayToPathClass.php");
 
-class cs_phpxmlCreator extends cs_phpxmlAbstract {
+class xmlCreator extends cs_xmlAbstract {
 	private $xmlArray;
 	private $lastTag;
 	private $rootElement;
+	private $a2pObj;
 	private $reservedWords = array('attributes', 'type', 'value');
 	private $tagTypes = array('open', 'complete');
 	private $numericPaths = array();
@@ -68,6 +71,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	 * The constructor.
 	 */
 	public function __construct($rootElement="main", array $xmlns=NULL) {
+		$this->get_version();
 		//check to ensure there's a real element.
 		if(!strlen($rootElement)) {
 			//Give it a default root element.
@@ -81,7 +85,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		$xmlArray = $this->create_tag($this->rootElement, array(), $xmlns, 'open');
 		
 		//create our internal data structure using arrayToPath{}.
-		parent::__construct($xmlArray);
+		$this->a2pObj = new arrayToPath($xmlArray);
 		
 	}//end __construct()
 	//=================================================================================
@@ -110,14 +114,14 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		$myTag = $this->create_tag($tagName, $value, $attributes);
 		
 		//check to see if there's already data on this path.
-		$myData = $this->a2p->get_data($path);
+		$myData = $this->a2pObj->get_data($path);
 		if(is_array($myData)) {
 			//set the type as "open".
 			$myData['type'] = 'open';
 			
 			//add the new path.
 			$myData = array_merge($myData, $myTag);
-			$this->a2p->set_data($path, $myData);
+			$this->a2pObj->set_data($path, $myData);
 		}
 		else {
 			//not an array... how can this be?
@@ -144,7 +148,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		$path = $this->create_list($path, 'attributes', '/');
 		
 		//add the attribute.
-		$this->a2p->set_data($path, $attributes);
+		$this->a2pObj->set_data($path, $attributes);
 		
 	}//end add_attribute()
 	//=================================================================================
@@ -167,7 +171,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		$pathArr = $this->explode_path($path);
 		
 		//check to see if the path exists at all.
-		$checkData = $this->a2p->get_data($path);
+		$checkData = $this->a2pObj->get_data($path);
 		if($justCheckIt) {
 			if(!is_array($checkData)) {
 				//it's NOT an array: return NULL to let 'em know.
@@ -186,7 +190,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 				//okay, set the current path.
 				$currentPath = $this->create_list($currentPath, $tagName, '/');
 				
-				$myData = $this->a2p->get_data($currentPath);
+				$myData = $this->a2pObj->get_data($currentPath);
 				
 				$myType = $myData['type'];
 				if($myType !== 'open' && !isset($this->numericPaths[$currentPath])) {
@@ -197,7 +201,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 			
 			//now, let's check to see if there's already a tag in the final path ($currentPath) with
 			//	the same name as $lastTag.
-			$finalData = $this->a2p->get_data($currentPath);
+			$finalData = $this->a2pObj->get_data($currentPath);
 		}
 		
 		return($path);
@@ -211,7 +215,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	 * Creates an XML string based upon the current internal array structure.
 	 */
 	public function create_xml_string($addXmlVersion=FALSE) {
-		$xmlBuilder = new cs_phpxmlBuilder($this->a2p->get_data());
+		$xmlBuilder = new xmlBuilder($this->a2pObj->get_data());
 		$retval = $xmlBuilder->get_xml_string($addXmlVersion);
 		return($retval);
 		
@@ -361,7 +365,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		$path = $this->fix_path($path);
 		
 		//remove the "type" from that part of the array.
-		$this->a2p->unset_data($path ."/type");
+		$this->a2pObj->unset_data($path ."/type");
 		
 		//add this path to our internal array of numeric paths.
 		$this->numericPaths[$path]++;
@@ -382,7 +386,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		if(!is_null($path) && strlen($path) > 1 && !$this->verify_path($path,TRUE)) {
 			//create an array to loop through.
 			$path = $this->fix_path($path);
-			$pathArr = $this->a2p->explode_path(strtoupper($path));
+			$pathArr = $this->a2pObj->explode_path(strtoupper($path));
 			
 			//rip the final tag out.
 			$finalTag = array_pop($pathArr);
@@ -392,7 +396,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 				$currentPath = "/";
 				foreach($pathArr as $key=>$tagName) {
 					//check data in the current path...
-					$pathOk = $this->a2p->get_data($currentPath);
+					$pathOk = $this->a2pObj->get_data($currentPath);
 					
 					$tagPath = $this->create_list($currentPath, $tagName, '/');
 					if(!strlen($pathOk[$tagName]['type']) && !isset($this->numericPaths[$tagPath])) {
@@ -451,7 +455,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		//check to see if it's already a numeric path.
 		if(isset($this->numericPaths[$path])) {
 			//good to go: pull the data that already exists.
-			$myData = $this->a2p->get_data($path);
+			$myData = $this->a2pObj->get_data($path);
 			
 			//set the tagData array...
 			$tagData = array();
@@ -485,7 +489,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 			$myData[] = $tagData;
 			
 			//now set the data into our array.
-			$this->a2p->set_data($path, $myData);
+			$this->a2pObj->set_data($path, $myData);
 		}
 		else {
 			//it's not already a numeric path.  DIE.
@@ -511,12 +515,12 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		$this->rootElement = $newName;
 		
 		//now change our array information.
-		$myData = $this->a2p->get_data("/$oldRoot");
-		$this->a2p->unset_data("/");
+		$myData = $this->a2pObj->get_data("/$oldRoot");
+		$this->a2pObj->unset_data("/");
 		$newData = array (
 			$this->rootElement => $myData
 		);
-		$this->a2p->reload_data($newData);
+		$this->a2pObj->reload_data($newData);
 		
 		//update the "numericPaths" array, if there's anything in it.
 		if(is_array($this->numericPaths) && count($this->numericPaths)) {
@@ -535,10 +539,10 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	
 	//=================================================================================
 	/**
-	 * Calls $this->a2p->get_data($path).  Just a wrapper for private data.
+	 * Calls $this->a2pObj->get_data($path).  Just a wrapper for private data.
 	 */
 	public function get_data($path=NULL) {
-		$retval = $this->a2p->get_data($path);
+		$retval = $this->a2pObj->get_data($path);
 		return($retval);
 	}//end get_data()
 	//=================================================================================
@@ -549,12 +553,12 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	 * Takes an XMLParser object & loads data from it as the internal XML array. This 
 	 * facilitates the ability to add data to existing XML.
 	 */
-	public function load_xmlparser_data(cs_phpxmlParser $obj) {
+	public function load_xmlparser_data(XMLParser $obj) {
 		$data = $obj->get_tree();
 		$this->xmlArray = $data;
-		$this->a2p = new cs_arrayToPath($data);
+		$this->a2pObj = new arrayToPath($data);
 		
-		$x = array_keys($this->a2p->get_data(NULL));
+		$x = array_keys($this->a2pObj->get_data(NULL));
 		
 		if(count($x) > 1) {
 			throw new exception(__METHOD__ .": too many root elements");
@@ -570,7 +574,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	//=================================================================================
 	public function remove_path($path) {
 		if(!is_null($path)) {
-			$this->a2p->unset_data($path);
+			$this->a2pObj->unset_data($path);
 		}
 		else {
 			throw new exception(__METHOD__ .": invalid path given (". $path .")");
