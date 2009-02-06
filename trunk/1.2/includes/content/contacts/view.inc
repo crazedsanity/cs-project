@@ -10,7 +10,7 @@
  * Last Updated:        $Date$
  */
 
-require_once(dirname(__FILE__) .'/../../lib/contactClass.php');
+require_once(dirname(__FILE__) .'/../../../lib/contactClass.php');
 
 $contactObj = new contactClass($page->db);
 
