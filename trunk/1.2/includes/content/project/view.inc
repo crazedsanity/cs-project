@@ -82,7 +82,6 @@
 	}
 	elseif($action == "view" && is_numeric($_GET['ID'])) {
 		
-		$showAllProjects = FALSE;
 		$projectId = $page->ui->magic_cache("ID", NULL, "project","_GET,_SESSION");
 		$detailsArr = $proj->get_details($projectId);
 		
@@ -106,16 +105,21 @@
 					$helpdeskObj->remark($linkIssue, $remarkDetails);
 					
 					if($linkRes) {
-						$oldIsHelpdesk = $proj->helpdeskObj->isHelpdeskIssue;
-						$proj->helpdeskObj->isHelpdeskIssue=FALSE;
-						$oldProjData = $proj->helpdeskObj->get_parent_record($issueData['ancestry']);
-						$proj->helpdeskObj->isHelpdeskIssue=$oldIsHelpdesk;
-						$oldProjLinkList = $proj->get_ancestry_link_list($oldProjData['public_id'], TRUE, TRUE, TRUE);
+						$linkData = "";
+						if($issueData['record_id'] != $issueData['ancestry']) {
+							$oldIsHelpdesk = $proj->helpdeskObj->isHelpdeskIssue;
+							$proj->helpdeskObj->isHelpdeskIssue=FALSE;
+							$oldProjData = $proj->helpdeskObj->get_parent_record($issueData['ancestry']);
+							$proj->helpdeskObj->isHelpdeskIssue=$oldIsHelpdesk;
+							
+							//build the "go back to old project" link.
+							$oldProjLinkList = $proj->get_ancestry_link_list($oldProjData['public_id'], TRUE, TRUE, TRUE);
+							$linkData = "<BR><BR>\nBack to old project:</b> [". $oldProjLinkList ."]";
+						}
 						
 						$page->set_message_wrapper(array(
 							'title'		=> "Issue Linked Successfully",
-							'message'	=> "Issue #". $linkIssue ." was successfully linked to this project.<BR><BR>" .
-											"<b>Back to old project:</b> [". $oldProjLinkList ."]",
+							'message'	=> "Issue #". $linkIssue ." was successfully linked to this project." . $linkData,
 							'type'		=> "status"
 						));
 					}
