@@ -16,7 +16,7 @@ class config {
 	//-------------------------------------------------------------------------
     public function __construct($fileName=NULL) {
     	$this->gf = new cs_globalFunctions();
-    	$this->fs = new cs_fileSystemClass(dirname(__FILE__) .'/..');
+    	$this->fs = new cs_fileSystem(dirname(__FILE__) .'/..');
     	
     	$this->fileName = dirname(__FILE__) .'/'. CONFIG_FILENAME;
     	if(!is_null($fileName) && strlen($fileName)) {
@@ -51,7 +51,7 @@ class config {
 			$xmlString = $this->fs->read($this->fileName);
 			
 			//parse the file.
-			$xmlParser = new xmlParser($xmlString);
+			$xmlParser = new cs_phpxmlParser($xmlString);
 			
 			if($simple) {
 				$config = $xmlParser->get_tree(TRUE);

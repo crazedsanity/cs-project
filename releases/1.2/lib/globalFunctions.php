@@ -17,9 +17,9 @@
 function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'0.10.12'),
-		'XMLParser'			=> array('cs-phpxml',		'0.5.6'),
-		'arrayToPath'			=> array('cs-arrayToPath',	'0.2.2')
+		'contentSystem'		=> array('cs-content',		'1.0.0-ALPHA7'),
+		'cs_phpxmlParser'	=> array('cs-phpxml',		'1.0.0-ALPHA4'),
+		'cs_arrayToPath'	=> array('cs-arrayToPath',	'1.0.0')
 	);
 	
 	if(!is_null($projectName)) {
@@ -61,8 +61,13 @@ function check_external_lib_versions() {
 			if($obj->isTest === TRUE) {
 				//okay, get version & project names.
 				if(method_exists($obj, 'get_version') && method_exists($obj, 'get_project')) {
-					$realVersion = $obj->get_version();
-					$realProject = $obj->get_project();
+					try {
+						$realVersion = $obj->get_version();
+						$realProject = $obj->get_project();
+					}
+					catch(exception $e) {
+						throw new exception(__METHOD__ .": unable to get project name or version for (". $className ."), DETAILS::: ". $e->getMessage());
+					}
 					
 					if($realVersion === $matchVersion && $realProject === $matchProject) {
 						//all looks good.

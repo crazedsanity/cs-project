@@ -300,6 +300,8 @@ function updateTagList($showTagNameId) {
 	$retval = mini_parser($myRow, array('tag_row'=>$recordList), '{', '}');
 	$retval = mini_parser($outerTemplate, array('availableTagsList' => $retval), '{', '}');
 	
+	$retval = $page->strip_undef_template_vars($retval);
+	
 	return($retval);
 }//end updateTagList()
 

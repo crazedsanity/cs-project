@@ -13,8 +13,8 @@
 
 class helpdeskClass extends mainRecord {
 	
-	var $db;				//database handle.
-	var $helpdeskId	= NULL;		//bug/helpdesk
+	public $db;						//database handle.
+	public $helpdeskId=null;
 	private $allowedFields;
 	
 	protected $logsObj;
@@ -149,8 +149,12 @@ class helpdeskClass extends mainRecord {
 		//PRE-CHECK!!!
 		if(strlen($remark) < 10) {
 			$this->logsObj->log_by_class(__METHOD__ .": not enough content to remark on [helpdesk_id=". $helpdeskId."] ::: $remark", 'error');
-			return(-1);
+			#return(-1);
+			$retval = -1;
 		}
+		else {
+		//start a transaction so if one part fails, they all fail.
+		$this->db->beginTrans();
 		
 		$tmp = $this->get_record($helpdeskId);
 		$noteObj = new noteClass($this->db);
@@ -214,12 +218,19 @@ class helpdeskClass extends mainRecord {
 				$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
 				$details = 'Sent notifications of SOLUTION for [helpdesk_id='. $helpdeskId .'] to: '. $sendEmailRes;
 				$this->logsObj->log_by_class($details, 'information');
+				
+				$this->solve();
 			}
+			$this->db->commitTrans();
 		}
 		else {
+			$this->rollbackTrans();
 			//something went wrong.
 			$this->logsObj->log_by_class(__METHOD__ .": failed to remark on [helpdesk_id=". $helpdeskId ."] (". $retval .")", 'error');
 		}
+		}
+		
+		$this->gfObj->debug_print(__METHOD__ .": result=(". $retval .")",1);
 		
 		return($retval);
 		
@@ -229,7 +240,7 @@ class helpdeskClass extends mainRecord {
 	
 	//================================================================================================
 	/**
-	 * Updates the given record with the "solved" status, and updates the "solution" field.
+	 * Marks the issue as solved (does NOT handle marking any notes as solutions).
 	 * 
 	 * @param <$helpdeskId>		<int> helpdesk issue to update.
 	 * @param <$solution>	<str> solution for the problem.
@@ -237,46 +248,32 @@ class helpdeskClass extends mainRecord {
 	 * @return 0			FAIL: unable to solve... not sure why.
 	 * @return 1			PASS: solved successfully.
 	 */
-	function solve($helpdeskId, $solution) {
+	protected function solve() {
 		//PRE-CHECK!!!
-		if(!is_numeric($helpdeskId) || !is_string($solution) || strlen($solution) < 10) {
-			$retval = 0;
-			if(strlen($solution) < 10) {
-				$this->logsObj->log_by_class(__METHOD__ .": not enough information to solve [helpdesk_id=" .
-					$helpdeskId ."]::: $solution", 'error');
-				$retval = -1;
-			}
+		if(!is_numeric($this->helpdeskId)) {
+			$details = __METHOD__ .": not enough information to solve [helpdesk_id=" .
+					$this->helpdeskId ."]::: $solution";
+			$this->logsObj->log_by_class($details, 'error');
+			throw new exception($details);
 		}
 		else {
 			//okay, everything checked out.  Do your thing.
-			//NOTE::: projects using the original helpdesk code had the "minute" part of the time as "daylight savings time"...
 			$updatesArr = array(
-				"solution"		=> $solution,
-				"solve_time"	=> date("Y-m-d H:m:s"),
-				"solved"		=> $_SESSION['uid'],
+				"progress"		=> 100,
 				"status_id"		=> 4
 			);
 			
-			//now, let's run the update method & tell 'em what happened.
-			$createSolution = $this->remark($helpdeskId, $solution, TRUE);
-			if($createSolution > 0) {
-				$retval = $this->update_record($helpdeskId, $updatesArr);
-				
-				//only send an email if the update succeeded.
-				if($retval == 1) {
-					//send the submitter a notification.
-					$this->logsObj->log_by_class("Solved issue #". $helpdeskId .": [helpdesk_id=". $helpdeskId ."]", 'report');
-				}
-				else {
-					//log the problem.
-					$this->logsObj->log_by_class(__METHOD__ .": failed to update [helpdesk_id=". 
-						$helpdeskId ."]: (". $retval .")", 'error');
-				}
+			$retval = $this->update_record($this->helpdeskId, $updatesArr);
+			
+			//log the action.
+			if($retval == 1) {
+				//send the submitter a notification.
+				$this->logsObj->log_by_class("Solved issue #". $this->helpdeskId .": [helpdesk_id=". $this->helpdeskId ."]", 'report');
 			}
 			else {
-				//failed to create the solution remark.
-				$this->logsObj->log_dberror("Unable to create solution note for issue [helpdesk_id=" .
-					$helpdeskId ."] : (". $createSolution .")");
+				//log the problem.
+				$this->logsObj->log_by_class(__METHOD__ .": failed to update [helpdesk_id=". 
+					$this->helpdeskId ."]: (". $retval .")", 'error');
 			}
 		}
 		return($retval);

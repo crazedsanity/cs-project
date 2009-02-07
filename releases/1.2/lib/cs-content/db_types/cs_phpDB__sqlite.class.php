@@ -4,14 +4,14 @@
  * A class for generic SQLite database access.
  * 
  * SVN INFORMATION:::
- * SVN Signature:::::::: $Id: cs_phpDB__sqlite.class.php 290 2008-06-10 18:33:06Z crazedsanity $
- * Last Committted Date: $Date: 2008-06-10 13:33:06 -0500 (Tue, 10 Jun 2008) $
- * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/0.10/db_types/cs_phpDB__sqlite.class.php $
+ * SVN Signature:::::::: $Id: cs_phpDB__sqlite.class.php 330 2009-01-29 19:44:01Z crazedsanity $
+ * Last Committted Date: $Date: 2009-01-29 13:44:01 -0600 (Thu, 29 Jan 2009) $
+ * Last Committed Path:: $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/db_types/cs_phpDB__sqlite.class.php $
  * 
  */
 
 
-class cs_phpDB__sqlite {
+class cs_phpDB__sqlite extends cs_phpDBAbstract {
 
 	/** Internal result set pointer. */
 	protected $result = NULL;
@@ -71,27 +71,8 @@ class cs_phpDB__sqlite {
 	
 	//=========================================================================
 	public function __construct() {
-		$this->gfObj = new cs_globalFunctions;
-		
-		if(defined('DEBUGPRINTOPT')) {
-			$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
-		}
-		
-		$this->isInitialized = TRUE;
+		parent::__construct();
 	}//end __construct()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	/**
-	 * Make sure the object is sane.
-	 */
-	final protected function sanity_check() {
-		if($this->isInitialized !== TRUE) {
-			throw new exception(__METHOD__ .": not properly initialized");
-		}
-	}//end sanity_check()
 	//=========================================================================
 	
 	
@@ -124,18 +105,6 @@ class cs_phpDB__sqlite {
 				.") does not match required number of fields (". count($required) .")");
 		}
 	}//end set_db_info()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	/**
-	 * Wrapper for close()
-	 */
-	function disconnect() {
-		//Disconnect from $database
-		return($this->close());
-	}//end disconnect()
 	//=========================================================================
 	
 	
@@ -595,28 +564,6 @@ class cs_phpDB__sqlite {
 	////////////////////////
 	// SQL String Related
 	////////////////////////
-	
-	
-	
-	//=========================================================================
-	/**
-	 * Gets rid of evil characters that might lead ot SQL injection attacks.
-	 */
-	function querySafe($string) {
-		return($this->gfObj->cleanString($string,"query"));
-	}//end querySafe()
-	//=========================================================================
-	
-	
-	
-	//=========================================================================
-	/**
-	 * Make it SQL safe.
-	 */
-	function sqlSafe($string) {
-		return($this->gfObj->cleanString($string,"sql"));
-	}//end sqlSafe()
-	//=========================================================================
 	
 	
 	

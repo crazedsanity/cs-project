@@ -184,7 +184,7 @@
 
 	<th style="border-bottom:solid #000 1px;" align="right">Issue Text:</th>
 	
-	<td style="border-bottom:solid #000 1px;" width="650" colspan="2" nowrap><code>{subject}</code></td>
+	<td style="border-bottom:solid #000 1px;" width="750" colspan="2" nowrap><font size="+1">{subject}</font></td>
 </tr>
 <tr>
 	<th>Tasks:</th>
@@ -194,13 +194,13 @@
 	</td>
 </tr>
 <tr>
-	<th style="border-bottom:solid #000 1px;" align="right">Notes:<BR><font size="-3"><i>(Includes previous/current<BR>solution(s), if available)</i></font></th>
+	<th style="border-bottom:solid #000 1px;" align="right">Comments:<BR><font size="-3"><i>(Includes previous/current<BR>solution(s), if available)</i></font></th>
 	<td style="border-bottom:solid #000 1px;" colspan="2">&nbsp;
 <!-- BEGIN issueNotes -->
-		<div style="border-top:dashed #000 1px;">
+		<div class="helpdesk_comment_header">
 			%%solutionIndicator%% <u> [#%%note_id%%] <b>%%subject%%</b> (%%fname%%@%%created%%)</u>
-		</div><br>
-		<div style="width:100%; overflow:auto"><code style="font-size:10px;">%%body%%</code></div>
+		</div>
+		<div class="helpdesk_comment_body">%%body%%</div>
 <!-- END issueNotes -->
 	</td>
 </tr>
@@ -208,18 +208,11 @@
 <!-- BEGIN remark_row -->
 <tr>
 
-	<td colspan="3">Remark:  <br>
+	<td colspan="3" align="center">Add a Comment (or solution by checking the box):  <br>
 		<textarea name="remark" rows="8" cols="80"></textarea>
 	</td>
 </tr>
 <!-- END remark_row -->
-<!-- BEGIN solution_row -->
-<tr>
-	<td colspan="3">Solution: <br>
-		<textarea name="solution" rows="10" cols="80" {solution_readonly}></textarea>
-	</td>
-</tr>
-<!-- END solution_row -->
 <!-- BEGIN reopen_button -->
 	<tr>
 		<td>&nbsp;</td>
@@ -228,21 +221,16 @@
 <!-- END reopen_button -->
 <!-- BEGIN buttons_row -->
 <tr>
-	<td colspan="3"><i>(Changes only take effect when clicking "modify", while "solve" only cares about the solution field, and "remark" only cares about the remarks field.)</i></td>
-</tr>
-<tr>
-	<td colspan="3">&nbsp;&nbsp;
-	<input name="action" value="Remark" type="submit">&nbsp;
-<!-- BEGIN update_button -->
-		<input name="action" value="Modify" type="submit">&nbsp;
-<!-- END update_button -->
-<!-- BEGIN owner_options -->
-		<input name="action" value="solve" type="submit">&nbsp;
-<!-- END owner_options -->
+	<td colspan="3" align="center">&nbsp;&nbsp;
+		<input name="action" value="Submit" type="submit">&nbsp;
 	
 									
 		<a href="/help/helpdesk/submit_buttons" target="_blank">
 		<img src="/images/icon-help.png" border="0"></a>
+		
+		<BR>
+		Is this a <b>Solution</b>?
+		<input name="isSolution" type="checkbox">
 	</td>
 </tr>
 <!-- END buttons_row -->

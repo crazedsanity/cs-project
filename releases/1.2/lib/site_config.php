@@ -16,12 +16,12 @@ require(dirname(__FILE__) .'/phpmailer/class.phpmailer.php');
 require(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
 require(dirname(__FILE__) .'/session_class.php');
 require(dirname(__FILE__) .'/upgradeClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.php');
-require_once(dirname(__FILE__) .'/cs-content/contentSystemClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_fileSystemClass.php');
-require_once(dirname(__FILE__) .'/cs-phpxml/xmlCreatorClass.php');
-require_once(dirname(__FILE__) .'/cs-phpxml/xmlParserClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.class.php');
+require_once(dirname(__FILE__) .'/cs-content/contentSystem.class.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_fileSystem.class.php');
+require_once(dirname(__FILE__) .'/cs-phpxml/cs_phpxmlCreator.class.php');
+require_once(dirname(__FILE__) .'/cs-phpxml/cs_phpxmlParser.class.php');
+require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.class.php');
 require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
@@ -37,10 +37,6 @@ define(OLD_CONFIG_FILE_LOCATION, OLD_CONFIG_DIRECTORY .'/'. OLD_CONFIG_FILENAME)
 
 set_exception_handler('exception_handler');
 
-//TODO: turn off if it's not a dev site, but NOT if setup is running (so they can see problems).
-ini_set('error_reporting', 'On');
-ini_set('display_errors', 'On');
-error_reporting(E_ALL && ~E_NOTICE);
 //##########################################################################
 function exception_handler($exception) {
 	$exceptionMessage = $exception->getMessage();

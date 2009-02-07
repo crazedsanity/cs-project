@@ -36,7 +36,7 @@ class upgrade {
 	
 	//=========================================================================
 	public function __construct() {
-		$this->fsObj =  new cs_fileSystemClass(dirname(__FILE__) .'/../');
+		$this->fsObj =  new cs_fileSystem(dirname(__FILE__) .'/../');
 		$this->gfObj = new cs_globalFunctions;
 		$this->gfObj->debugPrintOpt = DEBUGPRINTOPT;
 		clearstatcache();
@@ -174,7 +174,7 @@ class upgrade {
 		$xmlString = $this->fsObj->read("upgrade/upgrade.xml");
 		
 		//parse the file.
-		$xmlParser = new xmlParser($xmlString);
+		$xmlParser = new cs_phpxmlParser($xmlString);
 		
 		$config = $xmlParser->get_tree(TRUE);
 		$this->config = $config['UPGRADE'];
@@ -626,9 +626,9 @@ class upgrade {
 	private function update_config_file($index, $value) {
 		$gf = new cs_globalFunctions;
 		$myConfigFile = CONFIG_FILE_LOCATION;
-		$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
-		$xmlParser = new XMLParser($fs->read($myConfigFile));
-		$xmlCreator = new XMLCreator;
+		$fs = new cs_fileSystem(dirname(__FILE__) .'/../');
+		$xmlParser = new cs_phpxmlParser($fs->read($myConfigFile));
+		$xmlCreator = new cs_phpxmlCreator;
 		$xmlCreator->load_xmlparser_data($xmlParser);
 		
 		//update the given index.
