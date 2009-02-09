@@ -211,7 +211,6 @@ else {
 		//================================================================================================================
 		$titleSub = "Show All";
 		//change the content of the page properly.
-		#$page->change_content(html_file_to_string("modules/helpdesk/helpdesk_main.tmpl"));
 		$page->set_all_block_rows("content", array("helpdesk_search"));
 		
 		$filterData = $page->ui->get_cache("filter");

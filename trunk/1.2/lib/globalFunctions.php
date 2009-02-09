@@ -17,7 +17,7 @@
 function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'1.0.0-ALPHA7'),
+		'contentSystem'		=> array('cs-content',		'1.0.0-ALPHA8'),
 		'cs_phpxmlParser'	=> array('cs-phpxml',		'1.0.0-ALPHA4'),
 		'cs_arrayToPath'	=> array('cs-arrayToPath',	'1.0.0')
 	);
@@ -110,12 +110,8 @@ function html_file_to_string($file){
 		cs_debug_backtrace(1);
 		//Could not find the file requested to stringify.
 		//Sending warning to user and logging it.
-
-		set_message(
-			"Warning!",
-			"Could not find all files necessary to create this page.<br>Please call technical support.<BR>\nfile=[". $file ."]",
-			"","status"
-		);
+		
+		throw new exception(__FUNCTION__ .": template file does not exist (". $file ."), output from template_file_exists=(". $filename .")");
 		return(NULL);
 	}
 
@@ -1356,7 +1352,13 @@ function template_file_exists($file) {
 	
 	if(file_exists($filename)) {
 		$retval = $filename;
-	} 
+	}
+	else {
+		
+		$gf = new cs_globalFunctions;
+		$gf->debug_print(__FUNCTION__ .": TMPLDIR=(". $GLOBALS['TMPLDIR'] ."), filename=(". $filename .")");
+		exit;
+	}
 	return($retval);
 }//end template_file_exists()
 //================================================================================================================

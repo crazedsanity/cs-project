@@ -346,11 +346,11 @@ class config extends cs_siteConfig {
 		$dataArray['SITE_ROOT']['value'] = '{_DIRNAMEOFFILE_}/..';
 		$dataArray['SITE_ROOT']['attributes']['cleanpath'] = 1;
 		
-		//Set some other special values...
-		{
-			$dataArray['DOCUMENT_ROOT']['value'] = '{/MAIN/SITE_ROOT}';
-			$dataArray['LIBDIR']['value'] = '{/MAIN/SITE_ROOT}/lib';
-			$dataArray['TMPLDIR']['value'] = '{/MAIN/SITE_ROOT}/templates';
+		
+		{//Set some other special values...
+			$dataArray['DOCUMENT_ROOT']['value'] = '{MAIN/SITE_ROOT}';
+			$dataArray['LIBDIR']['value'] = '{MAIN/SITE_ROOT}/lib';
+			$dataArray['TMPLDIR']['value'] = '{MAIN/SITE_ROOT}/templates';
 			$dataArray['SEQ_HELPDESK']['value'] = 'special__helpdesk_public_id_seq';
 			$dataArray['SEQ_PROJECT']['value'] = 'special__project_public_id_seq';
 			$dataArray['SEQ_MAIN']['value'] = 'record_table_record_id_seq';
