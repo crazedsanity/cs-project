@@ -156,6 +156,7 @@ class helpdeskClass extends mainRecord {
 		//start a transaction so if one part fails, they all fail.
 		$this->db->beginTrans();
 		
+		$this->helpdeskId = $helpdeskId;
 		$tmp = $this->get_record($helpdeskId);
 		$noteObj = new noteClass($this->db);
 		$noteData = array(
@@ -209,6 +210,9 @@ class helpdeskClass extends mainRecord {
 			$details = 'Sent notification(s) of for [helpdesk_id='. $helpdeskId .'] remark to: '. $sendEmailRes;
 			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
 			
+			if($isSolution) {
+				$this->solve();
+			}
 			if($isSolution && strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
 				$subject = '[ALERT] Helpdesk Issue #'. $helpdeskId .' was SOLVED';
 				if(strlen($_SESSION['login_username'])) {
@@ -218,8 +222,6 @@ class helpdeskClass extends mainRecord {
 				$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
 				$details = 'Sent notifications of SOLUTION for [helpdesk_id='. $helpdeskId .'] to: '. $sendEmailRes;
 				$this->logsObj->log_by_class($details, 'information');
-				
-				$this->solve();
 			}
 			$this->db->commitTrans();
 		}
@@ -229,8 +231,6 @@ class helpdeskClass extends mainRecord {
 			$this->logsObj->log_by_class(__METHOD__ .": failed to remark on [helpdesk_id=". $helpdeskId ."] (". $retval .")", 'error');
 		}
 		}
-		
-		$this->gfObj->debug_print(__METHOD__ .": result=(". $retval .")",1);
 		
 		return($retval);
 		
