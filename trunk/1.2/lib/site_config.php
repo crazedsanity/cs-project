@@ -44,7 +44,7 @@ function exception_handler($exception) {
 	
 	//attempt to log the problem; if it happens too early, we can't do much about it.
 	try {
-			print "<pre><h3>FATAL EXCEPTION ENCOUNTERED: </h3>". $exception->getMessage() ."</pre>";
+		print "<pre><h3>FATAL EXCEPTION ENCOUNTERED: </h3>". $exception->getMessage() ."</pre>";
 		include_once(dirname(__FILE__) ."/globalFunctions.php");
 		if(function_exists('get_config_db_params') && class_exists('cs_phpDB') && class_exists('logsClass')) {
 			$db = new cs_phpDB;
@@ -104,19 +104,6 @@ else {
 }
 
 
-if($_SERVER['DOCUMENT_ROOT']) {
-	//it was called from the web...
-	$GLOBALS['SITE_ROOT'] = $_SERVER['DOCUMENT_ROOT'];
-	$GLOBALS['SITE_ROOT'] = str_replace("/public_html", "", $GLOBALS['SITE_ROOT']);
-}
-else {
-	//called from the command line.
-	$GLOBALS['SITE_ROOT'] = $_SERVER['HOME'];
-}
-
-$GLOBALS['LIBDIR']=$GLOBALS['SITE_ROOT'] . "/lib";
-$GLOBALS['TMPLDIR']=$GLOBALS['SITE_ROOT'] . "/templates";
-
 //define an array of status_id's that are "NOT ENDED".
 $GLOBALS['STATUS_NOTENDED'] = array(0,1,2,6);
 
@@ -129,13 +116,6 @@ $GLOBALS['templateVars'] = array(
 	"CONFIG_FILE_LOCATION"	=> CONFIG_FILE_LOCATION
 );
 
-
-//define some constants...
-define('SEQ_HELPDESK',		'special__helpdesk_public_id_seq');
-define('SEQ_PROJECT',		'special__project_public_id_seq');
-define('SEQ_MAIN',			'record_table_record_id_seq');
-define('TABLE_TODOCOMMENT',	'task_comment_table');
-define('FORMAT_WORDWRAP',	90);
 
 //=========================================================================
 /**
