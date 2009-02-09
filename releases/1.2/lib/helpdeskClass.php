@@ -153,84 +153,84 @@ class helpdeskClass extends mainRecord {
 			$retval = -1;
 		}
 		else {
-		//start a transaction so if one part fails, they all fail.
-		$this->db->beginTrans();
-		
-		$tmp = $this->get_record($helpdeskId);
-		$noteObj = new noteClass($this->db);
-		$noteData = array(
-			'record_id'	=> $tmp['record_id'],
+			//start a transaction so if one part fails, they all fail.
+			$this->db->beginTrans();
 			
-			//TODO: allow user to specify subject!
-			'subject'		=> 'Comment',
-			'body'			=> $remark,
-			'is_solution'	=> cleanString($isSolution, 'boolean_strict')
-		);
-		$retval = $noteObj->create_note($noteData);
-		
-		if(is_numeric($noteObj->lastContactId) && $noteObj->lastContactId > 0) {
-			$this->lastContactId = $noteObj->lastContactId;
-			$recordContactLink = new recordContactLink($this->db);
-			$recordContactLink->add_link($tmp['record_id'], $noteObj->lastContactId);
-		}
-		
-		if($retval > 0) {
-			//send the submitter an email		
-			$newRemarks = $remark;
-			$emailTemplate = html_file_to_string("email/helpdesk.tmpl");
-			$linkAction = "view";
-			
-			if($useRespondLink) {
-				$linkAction = "respond";
-			}
-			$parseArr = array(
-				"newRemark"		=> $newRemarks,
-				"linkAction"	=> $linkAction,
-				"linkExtra"		=> "&check=". $this->create_md5($helpdeskId)
-			);
-			$parseArr = array_merge($tmp, $parseArr);
-			
-			//set the list of recipients.
-			$recipientsArr = array();
-			$myUserClass = new userClass($this->db,NULL);
-			$assignedUserData = $myUserClass->get_user_info($tmp['assigned']);
-			$recipientsArr[] = $assignedUserData['email'];
-			if(strlen($_SESSION['login_email']) && $_SESSION['login_email'] != $tmp['email']) {
-				$recipientsArr[] = $_SESSION['login_email'];
-			}
-			$recipientsArr[] = $tmp['email'];
-			
-			//okay, now send the email.  The function "send_email()" should be ensuring that all values in
-			//	the recipients array are valid, and there's no dups.
-			$subject = "Helpdesk Issue #". $helpdeskId ." -- ". $tmp['name'];
-			$sendEmailRes = send_email($recipientsArr, $subject, $emailTemplate, $parseArr);
-			
-			//log who we sent the emails to.
-			$details = 'Sent notification(s) of for [helpdesk_id='. $helpdeskId .'] remark to: '. $sendEmailRes;
-			$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
-			
-			if($isSolution && strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
-				$subject = '[ALERT] Helpdesk Issue #'. $helpdeskId .' was SOLVED';
-				if(strlen($_SESSION['login_username'])) {
-					$subject .= ' by '. $_SESSION['login_username'];
-				}
-				$subject .= " -- ". $tmp['name'];
-				$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
-				$details = 'Sent notifications of SOLUTION for [helpdesk_id='. $helpdeskId .'] to: '. $sendEmailRes;
-				$this->logsObj->log_by_class($details, 'information');
+			$this->helpdeskId = $helpdeskId;
+			$tmp = $this->get_record($helpdeskId);
+			$noteObj = new noteClass($this->db);
+			$noteData = array(
+				'record_id'	=> $tmp['record_id'],
 				
-				$this->solve();
+				//TODO: allow user to specify subject!
+				'subject'		=> 'Comment',
+				'body'			=> $remark,
+				'is_solution'	=> cleanString($isSolution, 'boolean_strict')
+			);
+			$retval = $noteObj->create_note($noteData);
+			
+			if(is_numeric($noteObj->lastContactId) && $noteObj->lastContactId > 0) {
+				$this->lastContactId = $noteObj->lastContactId;
+				$recordContactLink = new recordContactLink($this->db);
+				$recordContactLink->add_link($tmp['record_id'], $noteObj->lastContactId);
 			}
-			$this->db->commitTrans();
+			
+			if($retval > 0) {
+				//send the submitter an email		
+				$newRemarks = $remark;
+				$emailTemplate = html_file_to_string("email/helpdesk.tmpl");
+				$linkAction = "view";
+				
+				if($useRespondLink) {
+					$linkAction = "respond";
+				}
+				$parseArr = array(
+					"newRemark"		=> $newRemarks,
+					"linkAction"	=> $linkAction,
+					"linkExtra"		=> "&check=". $this->create_md5($helpdeskId)
+				);
+				$parseArr = array_merge($tmp, $parseArr);
+				
+				//set the list of recipients.
+				$recipientsArr = array();
+				$myUserClass = new userClass($this->db,NULL);
+				$assignedUserData = $myUserClass->get_user_info($tmp['assigned']);
+				$recipientsArr[] = $assignedUserData['email'];
+				if(strlen($_SESSION['login_email']) && $_SESSION['login_email'] != $tmp['email']) {
+					$recipientsArr[] = $_SESSION['login_email'];
+				}
+				$recipientsArr[] = $tmp['email'];
+				
+				//okay, now send the email.  The function "send_email()" should be ensuring that all values in
+				//	the recipients array are valid, and there's no dups.
+				$subject = "Helpdesk Issue #". $helpdeskId ." -- ". $tmp['name'];
+				$sendEmailRes = send_email($recipientsArr, $subject, $emailTemplate, $parseArr);
+				
+				//log who we sent the emails to.
+				$details = 'Sent notification(s) of for [helpdesk_id='. $helpdeskId .'] remark to: '. $sendEmailRes;
+				$this->logsObj->log_by_class($details, 'information', NULL, $this->recordTypeId, $helpdeskId);
+				
+				if($isSolution) {
+					$this->solve();
+				}
+				if($isSolution && strlen(constant('HELPDESK_ISSUE_ANNOUNCE_EMAIL'))) {
+					$subject = '[ALERT] Helpdesk Issue #'. $helpdeskId .' was SOLVED';
+					if(strlen($_SESSION['login_username'])) {
+						$subject .= ' by '. $_SESSION['login_username'];
+					}
+					$subject .= " -- ". $tmp['name'];
+					$sendEmailRes = send_email(HELPDESK_ISSUE_ANNOUNCE_EMAIL, $subject, $emailTemplate, $parseArr);
+					$details = 'Sent notifications of SOLUTION for [helpdesk_id='. $helpdeskId .'] to: '. $sendEmailRes;
+					$this->logsObj->log_by_class($details, 'information');
+				}
+				$this->db->commitTrans();
+			}
+			else {
+				$this->rollbackTrans();
+				//something went wrong.
+				$this->logsObj->log_by_class(__METHOD__ .": failed to remark on [helpdesk_id=". $helpdeskId ."] (". $retval .")", 'error');
+			}
 		}
-		else {
-			$this->rollbackTrans();
-			//something went wrong.
-			$this->logsObj->log_by_class(__METHOD__ .": failed to remark on [helpdesk_id=". $helpdeskId ."] (". $retval .")", 'error');
-		}
-		}
-		
-		$this->gfObj->debug_print(__METHOD__ .": result=(". $retval .")",1);
 		
 		return($retval);
 		

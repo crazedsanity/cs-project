@@ -78,8 +78,6 @@ if($_POST) {
 				$useRespondLink = FALSE;
 				if($_POST['isSolution']) {
 					//IT'S A SOLUTION
-					//solve it & make sure they know if it was good or not.
-					#$result = $proj->helpdeskObj->solve($helpdeskId, $_POST['solution']);
 					$remarks[] = array(
 						'remark'		=> $_POST['remark'],
 						'isSolution'	=> true
@@ -155,9 +153,6 @@ if($_POST) {
 				);
 			}
 			
-			#$page->gfObj->debug_print($_POST,1);
-			#$page->gfObj->debug_print($setMessage,1);
-			#exit;
 			$page->set_message_wrapper($setMessage);
 		}
 		elseif($action == "re-open") {
@@ -197,20 +192,7 @@ else {
 		unset($_SESSION['goBackLink']);
 	}
 	
-	if($action == "create") {
-		create_page_title($page, array('title' => "Create a Helpdesk Issue"));
-		$page->set_all_block_rows("content");
-		
-		//show the "category" selection.
-		$categoryList = $proj->helpdeskObj->get_category_list('bug', TRUE);
-		$page->add_template_var("select_tags", $categoryList);
-		
-		//
-		$page->add_template_var("email", $_SESSION['email']);
-		$page->add_template_var("linked_proj", cleanString($_GET['proj']),"numeric");
-		
-	}
-	elseif($action == "view" && !is_numeric($helpdeskId)) {
+	if($action == "view" && !is_numeric($helpdeskId)) {
 		//missing ID: throw a message & send 'em packin'.
 		set_message_wrapper(array(
 			"title"		=> "Invalid ID Specified",
@@ -269,20 +251,6 @@ else {
 			$doNotRipRows[] = "assigned_optionList";
 			$doNotRipRows[] = "priority_optionList";
 			$doNotRipRows[] = "editable_tags";
-			if(($assignedStr == $_SESSION['contact_id']) || ($assignedStr == "" || is_null($assignedStr))) {
-				//well, we can show 'em the update/modify button.
-				$doNotRipRows[] = "update_button";
-				if($_SESSION['contact_id'] == $assignedStr) {
-					//they're the owner... show 'em more options.
-					$doNotRipRows[] = "solution_row";
-					$doNotRipRows[] = "owner_options";
-				}
-			//if they're the owner, show 'em more options...
-			}
-			elseif($_SESSION['isGroupOwner']) {
-				//we got an OWNER!!!
-				$doNotRipRows[] = "owner_options";
-			}
 			$doNotRipRows[] = "remark_row";
 			$doNotRipRows[] = "buttons_row";
 			$doNotRipRows[] = 'accessBlock__modifyButton';
@@ -295,9 +263,6 @@ else {
 			
 			//keep the set of data allows it to be linked to a project.
 			$doNotRipRows[] = "edit_project_selection";
-			
-			//TODO: implement a link for updating project associations.
-			#$page->add_template_var("select_project_list", $proj->create_project_option_list($helpdeskData['ancestry'], NULL));
 		}
 		$doNotRipRows[] = 'update_button';
 		

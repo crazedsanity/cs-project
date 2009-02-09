@@ -1,6 +1,8 @@
 <?php
 
-class config {
+require_once(dirname(__FILE__) .'/cs-content/cs_siteConfig.class.php');
+
+class config extends cs_siteConfig {
 	
 	
 	private $data;
@@ -11,7 +13,7 @@ class config {
 	private $siteStatus;
 	private $setupRequired = FALSE;
 	private $fileName;
-	private $config;
+	protected $config;
 	
 	//-------------------------------------------------------------------------
     public function __construct($fileName=NULL) {
@@ -36,6 +38,20 @@ class config {
 		if(!$this->fs->is_writable(CONFIG_DIRECTORY)) {
 			throw new exception(__METHOD__ .": the config directory (". CONFIG_DIRECTORY .") isn't writable!");
 		}
+		
+		if($this->fileExists) {
+			//check to see if it all config items are directly under the root, or if they're already in sections.
+			$xml = new cs_phpxmlParser($this->fs->read($this->fileName));
+			$checkThis = $xml->get_attribute('/CONFIG', 'USECSSITECONFIG');
+			
+			if(!strlen($checkThis)) {
+				$this->gf->debug_print(__METHOD__ .": converting to use sections...");
+				$this->convert_to_sections();
+			}
+		}
+		
+		parent::__construct($this->fs->realcwd .'/'. $this->fileName);
+		
 		$this->config = $this->get_config_contents(TRUE);
     }//end __construct()
 	//-------------------------------------------------------------------------
@@ -55,10 +71,10 @@ class config {
 			
 			if($simple) {
 				$config = $xmlParser->get_tree(TRUE);
-				$config = $config['CONFIG'];
+				$config = $config['CONFIG']['MAIN'];
 			}
 			else {
-				$config = $xmlParser->get_path('/CONFIG');
+				$config = $xmlParser->get_path('/CONFIG/MAIN');
 				unset($config['type'], $config['attributes']);
 			}
 			
@@ -66,7 +82,7 @@ class config {
 				$myConfig = $config;
 				if(!$simple) {
 					$myConfig = $xmlParser->get_tree(TRUE);
-					$myConfig = $myConfig['CONFIG'];
+					$myConfig = $myConfig['CONFIG']['MAIN'];
 				}
 				$conditionallySet = array('VERSION_STRING', 'WORKINGONIT');
 				foreach($myConfig as $index=>$value) {
@@ -75,9 +91,6 @@ class config {
 						if($setEverything) {
 							define($index, $value);
 						}
-					}
-					else {
-						define($index, $value);
 					}
 				}
 			}
@@ -95,27 +108,11 @@ class config {
 	
 	//-------------------------------------------------------------------------
 	/**
-	 * Read the XML config file & return it's simplified contents
+	 * Read the XML config file & return it's simplified contents (just a 
+	 * wrapper for get_config_contents(); kept for backwards-compatibility)
 	 */
     public function read_config_file($defineConstants=TRUE, $setEverything=TRUE) {
-		$config = $this->get_config_contents(TRUE);
-		
-		if(!is_null($config) && $defineConstants) {
-			$conditionallySet = array('VERSION_STRING', 'WORKINGONIT');
-			foreach($config as $index=>$value) {
-				if(in_array($index, $conditionallySet)) {
-					//only set this part if we're told to.
-					if($setEverything) {
-						define($index, $value);
-					}
-				}
-				else {
-					define($index, $value);
-				}
-			}
-		}
-		
-		return($config);
+		return($this->get_config_contents(TRUE));
     }//end read_config_file()
 	//-------------------------------------------------------------------------
 	
@@ -309,6 +306,90 @@ class config {
 	public function remove_setup_config() {
 		return($this->fs->rm(SETUP_FILE_LOCATION));
 	}//end remove_setup_config()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	/**
+	 * Convert sections to be in a format that cs_siteConfig{} expects them to 
+	 * be in.
+	 */
+	private function convert_to_sections() {
+		
+		//make a copy of the old data.
+		$backupFilename = $this->fileName .".backup_convertToSections__". date("YmdHis");
+		$this->fs->create_file($backupFilename);
+		$this->fs->write($this->fs->read($this->fileName));
+		
+		$xml = new cs_phpxmlParser($this->fs->read($this->fileName));
+		$rootElement = $xml->get_root_element();
+		
+		$creator=new cs_phpxmlCreator($rootElement);
+		
+		$dataArray = $xml->get_tree();
+		$dataArray = $dataArray[$rootElement];
+		
+		
+		$rootAttribs = $dataArray['attributes'];
+		
+		//remove unnecessary indexes.
+		unset($dataArray['type'], $dataArray['attributes']);
+		
+		if(!is_array($rootAttribs)) {
+			$rootAttribs = array();
+		}
+		$rootAttribs['USECSSITECONFIG'] = 1;
+		$creator->add_attribute('/'. $rootElement, $rootAttribs);
+		
+		//set special value for SITE_ROOT
+		$dataArray['SITE_ROOT']['value'] = '{_DIRNAMEOFFILE_}/..';
+		$dataArray['SITE_ROOT']['attributes']['cleanpath'] = 1;
+		
+		//Set some other special values...
+		{
+			$dataArray['DOCUMENT_ROOT']['value'] = '{/MAIN/SITE_ROOT}';
+			$dataArray['LIBDIR']['value'] = '{/MAIN/SITE_ROOT}/lib';
+			$dataArray['TMPLDIR']['value'] = '{/MAIN/SITE_ROOT}/templates';
+			$dataArray['SEQ_HELPDESK']['value'] = 'special__helpdesk_public_id_seq';
+			$dataArray['SEQ_PROJECT']['value'] = 'special__project_public_id_seq';
+			$dataArray['SEQ_MAIN']['value'] = 'record_table_record_id_seq';
+			$dataArray['TABLE_TODOCOMMENT']['value'] = 'task_comment_table';
+			$dataArray['FORMAT_WORDWRAP']['value'] = '90';
+		}
+		
+		//define what items should also be GLOBAL.
+		$defineAsGlobal = array('SITE_ROOT', 'LIBDIR', 'TMPLDIR');
+		
+		//skip some things that should NOT be automatically set as constants.
+		$skipSetConstant = array('VERSION_STRING', 'WORKINGONIT');
+		
+		//create the main section that our old settings will go under.
+		$mainPath = '/'. $rootElement .'/MAIN';
+		$creator->add_tag($mainPath);
+		$creator->set_tag_as_multiple($mainPath);
+		$creator->add_attribute($mainPath, array('FIX'=>'sanitizeDirs'));
+		
+		
+		//now add all the old settings.
+		foreach($dataArray as $index=>$data) {
+			if(!is_array($data['attributes'])) {
+				$data['attributes'] = array();
+			}
+			if(!in_array($index, $skipSetConstant)) {
+				$data['attributes']['setconstant']=1;
+			}
+			if(in_array($index, $defineAsGlobal)) {
+				$data['attributes']['setglobal']=1;
+			}
+			$creator->add_tag($mainPath .'/'. $index, $data['value'], $data['attributes']);
+		}
+		
+		
+		//now write changes to the file.
+		$this->fs->truncate_file($this->fileName);
+		$this->fs->write($creator->create_xml_string(), $this->fileName);
+	}//end convert_to_sections()
 	//-------------------------------------------------------------------------
 }//end config{}
 ?>
