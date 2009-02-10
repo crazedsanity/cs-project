@@ -42,7 +42,7 @@ if($_POST) {
 }
 else {
 	//check if the /lib dir is writeable, so they've been warned.
-	$fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../../lib');
+	$fsObj = new cs_fileSystem(dirname(__FILE__) .'/../../lib');
 	if(!$fsObj->is_writable(NULL)) {
 		$page->set_message_wrapper(array(
 			'title'		=> "Warning",

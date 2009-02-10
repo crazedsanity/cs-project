@@ -51,7 +51,7 @@ class __finalStep {
 		unset($this->stepData[5]);
 		
 		$this->gfObj = new cs_globalFunctions;
-		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) ."/../../". CONFIG_DIRECTORY);
+		$this->fsObj = new cs_fileSystem(dirname(__FILE__) ."/../../". CONFIG_DIRECTORY);
 	}//end __construct()
 	//=========================================================================
 	
@@ -74,7 +74,7 @@ class __finalStep {
 				}
 				
 				//now that we've built the array successfully, now let's turn it into XML.
-				$xmlCreator = new xmlCreator('config');
+				$xmlCreator = new cs_phpxmlCreator('config/main');
 				foreach($myData as $index=>$value) {
 					$xmlCreator->add_tag($index, $value);
 				}
@@ -82,7 +82,7 @@ class __finalStep {
 					'generated'		=> date('Y-m-d H:m:s'),
 					'version'		=> $myData['version_string']
 				);
-				$xmlCreator->add_attribute('/config', $extraAttributes);
+				$xmlCreator->add_attribute('/config/main', $extraAttributes);
 				
 				//now, create an XML string...
 				$xmlString = $xmlCreator->create_xml_string();

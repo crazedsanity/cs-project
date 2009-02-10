@@ -68,7 +68,7 @@ class __tmpSetupClass {
 	//=========================================================================
 	public function __construct(cs_phpDB &$db, cs_genericPage &$page) {
 		$this->db = $db;
-		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../../docs/sql/setup');
+		$this->fsObj = new cs_fileSystem(dirname(__FILE__) .'/../../docs/sql/setup');
 		$this->gfObj = new cs_globalFunctions;
 		$this->page = $page;
 		
