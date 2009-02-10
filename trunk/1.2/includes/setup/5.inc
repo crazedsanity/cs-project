@@ -28,6 +28,9 @@ else {
 		
 		$test = &new TestSuite("All Tests");
 		$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-content_tests.php');
+		$test->addTestFile(dirname(__FILE__) .'/../../lib/cs-arrayToPath/tests/testOfA2P.php');
+		$test->addTestFile(dirname(__FILE__) .'/../../lib/cs-content/tests/testOfCSContent.php');
+		$test->addTestFile(dirname(__FILE__) .'/../../lib/cs-phpxml/tests/testOfCSPHPXML.php');
 		$display = new HtmlReporter();
 		$test->run($display);
 		
