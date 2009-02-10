@@ -302,7 +302,12 @@ class config extends cs_siteConfig {
 	
 	//-------------------------------------------------------------------------
 	public function remove_setup_config() {
-		return($this->fs->rm(SETUP_FILE_LOCATION));
+		$retval = false;
+		if(file_exists(constant('SETUP_FILENAME'))) {
+			$retval = $this->fs->rm(constant('SETUP_FILENAME'));
+		}
+		
+		return($retval);
 	}//end remove_setup_config()
 	//-------------------------------------------------------------------------
 	
