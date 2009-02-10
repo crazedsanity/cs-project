@@ -150,7 +150,7 @@ function get_setup_data($step, $type='data') {
 //=============================================================================
 function read_version_file() {
 	$retval = NULL;
-	$fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/..');
+	$fsObj = new cs_fileSystem(dirname(__FILE__) .'/..');
 	
 	//okay, all files present: check the version in the VERSION file.
 	$lines = $fsObj->read('VERSION', TRUE);
