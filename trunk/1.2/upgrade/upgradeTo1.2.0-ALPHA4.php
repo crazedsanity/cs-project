@@ -105,10 +105,10 @@ class upgrade_to_1_2_0_ALPHA4 extends dbAbstract {
 	//=========================================================================
 	public function update_config_file() {
 		$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
-		$sampleXmlObj = new XMLParser($fs->read('docs/samples/sample_config.xml'));
-		$siteXmlObj = new XMLParser($fs->read(CONFIG_FILE_LOCATION));
+		$sampleXmlObj = new cs_phpxmlParser($fs->read('docs/samples/sample_config.xml'));
+		$siteXmlObj = new cs_phpxmlParser($fs->read(CONFIG_FILE_LOCATION));
 		
-		$updateXml = new xmlCreator();
+		$updateXml = new cs_phpxmlCreator();
 		$updateXml->load_xmlparser_data($siteXmlObj);
 		
 		
