@@ -95,7 +95,7 @@ class Test_cscontent extends UnitTestCase {
 				),
 				'styles'	=> array(
 					'select'	=> "field1='value1' AND field2='value2'",
-					'insert'	=> "(field1, field2) VALUES ('value1', 'value2')",
+					'insert'	=> "(field1, field2) VALUES ('value1','value2')",
 					'update'	=> "field1='value1', field2='value2'"
 				)
 			),
@@ -113,7 +113,7 @@ class Test_cscontent extends UnitTestCase {
 		foreach($testData as $name=>$data) {
 			foreach($data['styles'] as $styleName => $expectedOutput) {
 				$realOutput = $this->gfObj->string_from_array($data['input'], $styleName, NULL, 'sql');
-				$this->assertEqual($realOutput, $expectedOutput, "invalid output for style (".$styleName ."): ". $realOutput);
+				$this->assertEqual($realOutput, $expectedOutput);
 			}
 		}
 	}//end testSQLCreation()

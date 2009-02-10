@@ -10,29 +10,45 @@ if($_POST) {
 	$writeConfigResult = $obj->write_config($page);
 	
 	$page->set_message_wrapper(array(
-		'title'		=> "Reloaded... ",
+		'title'		=> "Setup Complete",
 		'message'	=> $writeConfigResult,
 		'type'		=> "status",
-		'linkURL'	=> '/login'
+		'linkText'	=> "Proceed To Login",
+		'linkURL'	=> '/setup/5?removeData=1'
 	));
 	$page->conditional_header("/setup/5", TRUE);
+}
+elseif($_GET['removeData'] == 1) {
+	unset($_SESSION['setup']);
+	$page->conditional_header('/login.php');
 }
 else {
 	if(get_setup_data(5, 'result')) {
 		$page->clear_content();
-		#$page->set_block_row('content', 'submitButton');
 		
 		$test = &new TestSuite("All Tests");
 		$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-content_tests.php');
-		#$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-arrayToPath_tests.php');
-		#$test->addTestFile(dirname(__FILE__) .'/../../lib/_unitTests_/cs-phpxml_tests.php');
 		$display = new HtmlReporter();
 		$test->run($display);
 		
 		$page->gfObj->debug_print("Passes: (". $display->getPassCount() .")");
-	}
-	else {
 		
+		//log our result into the database.
+		$db = new cs_phpDB;
+		$db->connect(get_config_db_params());
+		
+		$log = new logsClass($db, 'SETUP');
+		$log->log_by_class('UNIT TEST DATA::: passes='. $display->getPassCount() .', fails='. $display->getFailCount() .', exceptions='. $display->getExceptionCount(), 'Information');
+		
+		if(!is_array($_SESSION['message'])) {
+			$page->set_message_wrapper(array(
+				'title'		=> "Setup Complete",
+				'message'	=> "Setup has been completed successfully.  If you would like to remove setup data and proceed to login, click the link below.",
+				'type'		=> 'status',
+				'linkText'	=> "Proceed to Login",
+				'linkURL'	=> "/setup/5?removeData=1"
+			));
+		}
 	}
 }
 
@@ -74,15 +90,49 @@ class __finalStep {
 				}
 				
 				//now that we've built the array successfully, now let's turn it into XML.
-				$xmlCreator = new cs_phpxmlCreator('config/main');
+				$xmlCreator = new cs_phpxmlCreator('config');
+				$tagPath = "/config/main";
+				$xmlCreator->add_tag($tagPath);
+				$xmlCreator->add_attribute($tagPath, array('fix'=>"sanitizeDirs"));
+				$xmlCreator->set_tag_as_multiple($tagPath);
+				
+				//Special values (including vars that cs_siteConfig{} handles)
+				$specialValues = array(
+					'site_root'			=> '{_DIRNAMEOFFILE_}/..',
+					'document_root'		=> '{MAIN/SITE_ROOT}',
+					'libdir'			=> '{MAIN/SITE_ROOT}/lib',
+					'tmpldir'			=> '{MAIN/SITE_ROOT}/templates',
+					'seq_helpdesk'		=> 'special__helpdesk_public_id_seq',
+					'seq_project'		=> 'special__project_public_id_seq',
+					'seq_main'			=> 'record_table_record_id_seq',
+					'table_todocomment'	=> 'task_comment_table',
+					'format_wordwrap'	=> '90'
+				);
+				$defineAsGlobal=array('site_root', 'libdir', 'tmpldir');
+				foreach($specialValues as $index=>$value) {
+					$xmlCreator->add_tag($tagPath .'/'. $index, $value);
+					$attributes = array('setconstant'=>1);
+					if(array_search($index, $defineAsGlobal)) {
+						$attributes['setglobal']=1;
+					}
+					$xmlCreator->add_attribute($tagPath .'/'. $index, $attributes);
+				}
+				
+				$skipSetConstant = array('version_string', 'workingonit');
 				foreach($myData as $index=>$value) {
-					$xmlCreator->add_tag($index, $value);
+					$xmlCreator->add_tag($tagPath ."/". $index, $value);
+					$attributes=array();
+					if(!strlen(array_search($index, $skipSetConstant))) {
+						$attributes['setconstant']=1;
+					}
+					$xmlCreator->add_attribute($tagPath .'/'. $index, $attributes);
 				}
 				$extraAttributes = array(
-					'generated'		=> date('Y-m-d H:m:s'),
-					'version'		=> $myData['version_string']
+					'generated'			=> date('Y-m-d H:m:s'),
+					'version'			=> $myData['version_string'],
+					'usecssiteconfig'	=> 1
 				);
-				$xmlCreator->add_attribute('/config/main', $extraAttributes);
+				$xmlCreator->add_attribute('/config', $extraAttributes);
 				
 				//now, create an XML string...
 				$xmlString = $xmlCreator->create_xml_string();

@@ -48,11 +48,9 @@ class config extends cs_siteConfig {
 				$this->gf->debug_print(__METHOD__ .": converting to use sections...");
 				$this->convert_to_sections();
 			}
-			
 			parent::__construct($this->fs->realcwd .'/'. $this->fileName);
+			$this->config = $this->get_config_contents(TRUE);
 		}
-		
-		$this->config = $this->get_config_contents(TRUE);
     }//end __construct()
 	//-------------------------------------------------------------------------
     
