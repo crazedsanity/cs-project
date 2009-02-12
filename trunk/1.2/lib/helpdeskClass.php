@@ -263,6 +263,12 @@ class helpdeskClass extends mainRecord {
 				"status_id"		=> 4
 			);
 			
+			//If it's not assigned, assign it to the current user.
+			$oldData = $this->get_record($this->helpdeskId);
+			if(is_null($oldData['leader_contact_id']) && is_numeric($_SESSION['contact_id'])) {
+				$updatesArr['leader_contact_id'] = $_SESSION['contact_id'];
+			}
+			
 			$retval = $this->update_record($this->helpdeskId, $updatesArr);
 			
 			//log the action.
