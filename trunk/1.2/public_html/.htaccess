@@ -1,7 +1,7 @@
 php_value include_path ".:./lib:../lib/:../../lib"
 php_value session.auto_start 1
 
-DirectoryIndex content content.php index.php index.html
+DirectoryIndex index.php content content.php index.html
 
 <files content>
     ForceType application/x-httpd-php
