@@ -632,7 +632,7 @@ class upgrade {
 		$xmlCreator->load_xmlparser_data($xmlParser);
 		
 		//update the given index.
-		$xmlCreator->add_tag($index, $value, $xmlParser->get_attribute('/CONFIG/'. strtoupper($index)));
+		$xmlCreator->add_tag($index, $value, $xmlParser->get_attribute('/CONFIG/MAIN/'. strtoupper($index)));
 		$this->mainConfig[strtoupper($index)] = $value;
 		
 		$xmlString = $xmlCreator->create_xml_string();
