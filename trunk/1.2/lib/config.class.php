@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) .'/cs-content/cs_siteConfig.class.php');
+require_once(dirname(__FILE__) .'/cs-content/__autoload.php');
 
 class config extends cs_siteConfig {
 	
@@ -303,8 +303,9 @@ class config extends cs_siteConfig {
 	//-------------------------------------------------------------------------
 	public function remove_setup_config() {
 		$retval = false;
-		if(file_exists(constant('SETUP_FILENAME'))) {
-			$retval = $this->fs->rm(constant('SETUP_FILENAME'));
+		$theFile = dirname(__FILE__) .'/../'. constant('SETUP_FILE_LOCATION');
+		if(file_exists($theFile)) {
+			$retval = $this->fs->rm($theFile);
 		}
 		
 		return($retval);
