@@ -38,6 +38,7 @@ else {
 		$test->run($display);
 		
 		$page->gfObj->debug_print("Passes: (". $display->getPassCount() .")");
+		$page->gfObj->debug_print("Fails: (". $display->getFailCount() .")");
 		
 		//log our result into the database.
 		$db = new cs_phpDB;
@@ -46,15 +47,37 @@ else {
 		$log = new logsClass($db, 'SETUP');
 		$log->log_by_class('UNIT TEST DATA::: passes='. $display->getPassCount() .', fails='. $display->getFailCount() .', exceptions='. $display->getExceptionCount(), 'Information');
 		
-		if(!is_array($_SESSION['message'])) {
-			$page->set_message_wrapper(array(
-				'title'		=> "Setup Complete",
-				'message'	=> "Setup has been completed successfully.  If you would like to remove setup data and proceed to login, click the link below.",
-				'type'		=> 'status',
-				'linkText'	=> "Proceed to Login",
-				'linkURL'	=> "/setup/5?removeData=1"
-			));
+		$title = "Setup Complete";
+		$issueLink = '<a href="http://project.crazedsanity.com/extern/helpdesk/create?from='. $page->get_version() .
+				'&version='. $page->get_version() .'&isdevsite='. constant('ISDEVSITE') .'CS-Project Helpdesk</a>';
+		if($display->getPassCount() > 0) {
+			$type = 'status';
+			$message = "Setup has been completed successfully.  If you would like to remove setup data and proceed to login, click the link below.";
+			if($display->getFailCount() > 0 && $display->getPassCount() > 0) {
+				$type = 'warning';
+				$message = "Setup completed, but there seem to be errors (see above).  You may be able to ignore them, especially " .
+						"if you are running a test site.  Please report them at ". $issueLink;
+			}
+			elseif($display->getPassCount() == 0) {
+				$title = "TOTAL FAILURE :(";
+				$type = 'fatal';
+				$message = "Setup finished, but it appears all the tests failed.  Your installation will likely be " .
+						"highly unstable, if it is useable at all.  Please report the problem to ". $issueLink .", along with " .
+						"information regarding your server's environment, database, the exception information, and anything " .
+						"else that could help track the problem down.";
+			}
 		}
+		else {
+			
+		}
+		
+		$page->set_message_wrapper(array(
+			'title'		=> $title,
+			'message'	=> $message,
+			'type'		=> $type,
+			'linkText'	=> "Proceed to Login",
+			'linkURL'	=> "/setup/5?removeData=1"
+		));
 	}
 }
 
