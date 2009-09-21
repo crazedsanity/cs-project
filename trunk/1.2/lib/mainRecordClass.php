@@ -152,9 +152,8 @@ class mainRecord {
 					$critArr['u.username like'] = $keyword;
 					$critArr['r.subject like'] = $keyword;
 				
-					$query = "WHERE is_helpdesk_issue IS ". cleanString($isHelpdesk, 'bool_strict') ." AND (lower(r.name) like ". $keyword ." OR r.leader_contact_id LIKE ". $keyword 
+					$query = "WHERE is_helpdesk_issue IS ". cleanString($isHelpdesk, 'bool_strict') ." AND (lower(r.name) like ". $keyword  
 						." OR lower(u.username) LIKE ". $keyword ." OR lower(r.subject) LIKE ". $keyword .")";
-				
 				}
 				
 				if(isset($critArr['status_id'])) {
