@@ -8,8 +8,6 @@
  * Last Updated:::::::: $Date$
  */
 
-require_once(dirname(__FILE__) ."/../lib/cs-content/cs_tabs.class.php");
-
 
 $db = new cs_phpDB;
 $db->connect(get_config_db_params());
