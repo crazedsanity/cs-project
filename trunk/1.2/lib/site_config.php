@@ -11,17 +11,11 @@
  */
 
 
+require_once(dirname(__FILE__) .'/cs-content/__autoload.php');
 require(dirname(__FILE__) .'/globalFunctions.php');
 require(dirname(__FILE__) .'/phpmailer/class.phpmailer.php');
 require(dirname(__FILE__) .'/abstractClasses/dbAbstract.class.php');
 require(dirname(__FILE__) .'/session_class.php');
-require(dirname(__FILE__) .'/upgradeClass.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_phpDB.class.php');
-require_once(dirname(__FILE__) .'/cs-content/contentSystem.class.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_fileSystem.class.php');
-require_once(dirname(__FILE__) .'/cs-phpxml/cs_phpxmlCreator.class.php');
-require_once(dirname(__FILE__) .'/cs-phpxml/cs_phpxmlParser.class.php');
-require_once(dirname(__FILE__) .'/cs-content/cs_globalFunctions.class.php');
 require_once(dirname(__FILE__) .'/config.class.php');
 
 define(CONFIG_FILENAME, 'config.xml');
@@ -85,7 +79,14 @@ if($configObj->check_site_status()) {
 		//don't panic: we're going to check for upgrades, but this doesn't
 		//	necessarily mean anything will ACTUALLY be upgraded.
 		$configObj->get_config_contents(NULL,TRUE,FALSE);
-		$upgrade = new upgrade;
+		$dbParams = array(
+			'host'		=> constant('DATABASE__HOST'),
+			'port'		=> constant('DATABASE__PORT'),
+			'dbname'	=> constant('DATABASE__DBNAME'),
+			'user'		=> constant('DATABASE__USER'),
+			'password'	=> constant('DATABASE__PASSWORD'),
+		);
+		$upgrade = new cs_webdbupgrade(dirname(__FILE__) .'/../VERSION', dirname(__FILE__) .'/../upgrade/upgrade.xml', $dbParams);
 		if($upgrade->upgrade_in_progress()) {
 			throw new exception("Upgrade in progress... reload the page after a few minutes and it should be complete.  :) ");
 		}
@@ -117,35 +118,5 @@ $GLOBALS['templateVars'] = array(
 );
 
 
-//=========================================================================
-/**
- * Special PHP5 function: last-ditch effort to include all files necessary to 
- * make this class work.
- */
-function __autoload($className) {
-	$retval = FALSE;
-	$possible = array(
-		dirname(__FILE__) .'/'. $className .'.php',
-		dirname(__FILE__) .'/'. $className .'Class.php',
-		dirname(__FILE__) .'/'. $className .'.class.php',
-		dirname(__FILE__) .'/abstractClasses/'. $className .'.abstract.php'
-	);
-	
-	foreach($possible as $fileName) {
-		if(file_exists($fileName)) {
-			require_once($fileName);
-			$retval = TRUE;
-			break;
-		}
-	}
-	
-	if($retval !== TRUE) {
-		throw new exception(__FUNCTION__ .": unable to find class file for (". $className .")");
-	}
-	
-	return($retval);
-	
-}//end __autoload()
-//=========================================================================
 
 ?>
