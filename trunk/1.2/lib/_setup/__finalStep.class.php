@@ -94,6 +94,19 @@ class __finalStep {
 				);
 				$xmlCreator->add_attribute('/config', $extraAttributes);
 				
+				//add values for other libs...
+				$tagPath = '/config/cs-webapplibs';
+				$xmlCreator->add_tag($tagPath);
+				$attributes = array('setconstant'=>1, 'setconstantprefix'=>"cs_webapplibs");
+				
+				//TODO: set this dynamically if other databases are supported.
+				$xmlCreator->add_tag($tagPath .'/DBTYPE',		'pgsql', array('setconstant'=>1));
+				$xmlCreator->add_tag($tagPath .'/DB_CONNECT_HOST',		'{MAIN/DATABASE__HOST}', $attributes);
+				$xmlCreator->add_tag($tagPath .'/DB_CONNECT_DBNAME',	'{MAIN/DATABASE__DBNAME}', $attributes);
+				$xmlCreator->add_tag($tagPath .'/DB_CONNECT_USER',		'{MAIN/DATABASE__USER}', $attributes);
+				$xmlCreator->add_tag($tagPath .'/DB_CONNECT_PASSWORD',	'{MAIN/DATABASE__PASSWORD}', $attributes);
+				$xmlCreator->add_tag($tagPath .'/DB_CONNECT_PORT',		'{MAIN/DATABASE__PORT}', $attributes);
+				
 				//now, create an XML string...
 				$xmlString = $xmlCreator->create_xml_string();
 				
