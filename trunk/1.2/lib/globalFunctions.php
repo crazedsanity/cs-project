@@ -18,7 +18,7 @@ function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
 		'contentSystem'		=> array('cs-content',		'1.0.0-ALPHA10'),
-		'cs_phpxmlParser'	=> array('cs-phpxml',		'1.0.0-ALPHA4')
+		'cs_phpxmlParser'	=> array('cs-phpxml',		'1.0.0-RC1')
 	);
 	
 	if(!is_null($projectName)) {
@@ -57,32 +57,28 @@ function check_external_lib_versions() {
 		if(class_exists($className)) {
 			//hopefully, this initializes each of them as a TEST class.
 			$obj = new $className('unit_test');
-			if($obj->isTest === TRUE) {
-				//okay, get version & project names.
-				if(method_exists($obj, 'get_version') && method_exists($obj, 'get_project')) {
-					try {
-						$realVersion = $obj->get_version();
-						$realProject = $obj->get_project();
-					}
-					catch(exception $e) {
-						throw new exception(__METHOD__ .": unable to get project name or version for (". $className ."), DETAILS::: ". $e->getMessage());
-					}
-					
-					if($realVersion === $matchVersion && $realProject === $matchProject) {
-						//all looks good.
-						$retval++;
-					}
-					else {
-						throw new exception(__FUNCTION__ .": version mismatch (". $realVersion ." != ". $matchVersion .") or " .
-							"invalid project name (". $realProject ." != ". $matchProject .")");
-					}
+			
+			//okay, get version & project names.
+			if(method_exists($obj, 'get_version') && method_exists($obj, 'get_project')) {
+				try {
+					$realVersion = $obj->get_version();
+					$realProject = $obj->get_project();
+				}
+				catch(exception $e) {
+					throw new exception(__METHOD__ .": unable to get project name or version for (". $className ."), DETAILS::: ". $e->getMessage());
+				}
+				
+				if($realVersion === $matchVersion && $realProject === $matchProject) {
+					//all looks good.
+					$retval++;
 				}
 				else {
-					throw new exception(__FUNCTION__ .": required checking method(s) for (". $className .") missing");
+					throw new exception(__FUNCTION__ .": version mismatch (". $realVersion ." != ". $matchVersion .") or " .
+						"invalid project name (". $realProject ." != ". $matchProject .")");
 				}
 			}
 			else {
-				throw new exception(__FUNCTION__ .": ". $className ."::isTest isn't set, something is broken");
+				throw new exception(__FUNCTION__ .": required checking method(s) for (". $className .") missing");
 			}
 		}
 		else {
