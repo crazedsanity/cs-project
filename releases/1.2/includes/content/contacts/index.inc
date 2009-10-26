@@ -10,8 +10,6 @@
  * Last Updated:        $Date$
  */
 
-require_once(dirname(__FILE__) .'/../../../lib/contactClass.php');
-
 $contactObj = new contactClass($page->db);
 
 $page->allow_invalid_urls(TRUE);

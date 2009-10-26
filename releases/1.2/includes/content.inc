@@ -8,12 +8,10 @@
  * Last Updated:::::::: $Date$
  */
 
-require_once(dirname(__FILE__) ."/../lib/cs-content/cs_tabs.class.php");
-
 
 $db = new cs_phpDB;
 $db->connect(get_config_db_params());
-$page->db = &$db;
+$page->db = $db;
 
 $page->session = new Session($page->db);
 
@@ -93,7 +91,7 @@ if(!isset($page->ftsSections[1])) {
 		//check for old misspellings, and fix them.
 		$defaultModule = "project";
 	}
-	conditional_header("/content/$defaultModule");
+	conditional_header("/content/". $defaultModule);
 	exit;
 }
 
@@ -132,7 +130,7 @@ $tabNames = array(
 	'tags'			=> "Tags",
 );
 
-$tabObj = new cs_tabs($page);
+$tabObj = new cs_tabs();
 foreach($tabNames as $moduleName=>$name) {
 	$tabUrl = "/content/". $moduleName;
 	
@@ -142,6 +140,7 @@ foreach($tabNames as $moduleName=>$name) {
 	$tabObj->add_tab($name, $tabUrl);
 }
 
+
 if($user->is_admin()) {
 	$name = "Admin";
 	$tabObj->add_tab($name, "/content/settings/admin");
@@ -149,7 +148,8 @@ if($user->is_admin()) {
 		$tabObj->select_tab($name);
 	}
 }
-$tabObj->display_tabs();
+$page->rip_all_block_rows('tabs');
+$page->add_template_var('tabs', $tabObj->display_tabs($page->templateRows));
 
 
 

@@ -19,6 +19,9 @@ if($_POST) {
 	if($postAction == "remark") {
 		$helpdeskId = $_POST['ID'];
 		
+		$_SESSION['POST_remark'] = $_POST['remark'];
+		
+		if($captchaResult === true) {
 		if(is_numeric($helpdeskId)) {
 			//now check to make sure they can actually remark on it...
 			$helpdeskData = $proj->helpdeskObj->get_record($helpdeskId);
@@ -45,6 +48,7 @@ if($_POST) {
 						"message"	=> "Your remark has been added to the database.  Thank you for your feedback.",
 						"type"		=> "status"
 					));
+					unset($_SESSION['POST_remark']);
 				}
 				else {
 					set_message_wrapper(array(
@@ -76,32 +80,17 @@ if($_POST) {
 			conditional_header("/extern/helpdesk/");
 			exit;
 		}
-	}
-	elseif($_POST && strtolower($_POST['submit']) == "go" && !isset($_POST['action'])) {
-		//they're CREATING an issue.
-		$result = $proj->helpdeskObj->create_record($_POST['data']);
-		
-		//first, determine what happened from the result...
-		if($result > 0) {
-			//everything worked.
-			set_message_wrapper(array(
-				"title"		=> "Issue Successfully Created",
-				"message"	=> "Your issue has been added to the helpdesk.  You should receive an email shortly with confirmation.",
-				"type"		=> "notice"
-			));
 		}
 		else {
-			//something failed.
+			//didn't give me the proper captcha data...
 			set_message_wrapper(array(
-				"title"		=> "Unable to Create Issue",
-				"message"	=> "Something broke.  Sorry.",
-				"type"		=> "notice"
+				'title'		=> "Captcha Failed",
+				'message'	=> "You didn't answer the CAPTCHA correctly.  Are you really a person?",
+				'type'		=> "error"
 			));
+			conditional_header("/extern/helpdesk/view?ID=". $helpdeskId);
+			exit;
 		}
-		
-		//send 'em packing.
-		conditional_header("/extern/helpdesk/view?ID=$result");
-		exit;
 	}
 	elseif($_POST['action'] == "filter") {
 		if($_POST['reset_filter']) {
@@ -118,6 +107,7 @@ if($_POST) {
 	}
 }
 else {
+	$page->add_template_var('POST_remark', $_SESSION['POST_remark']);
 	$action = $page->ftsSections[2];
 	$helpdeskId = $_GET['ID'];
 	$page->add_template_var("id", $helpdeskId);
@@ -211,7 +201,6 @@ else {
 		//================================================================================================================
 		$titleSub = "Show All";
 		//change the content of the page properly.
-		#$page->change_content(html_file_to_string("modules/helpdesk/helpdesk_main.tmpl"));
 		$page->set_all_block_rows("content", array("helpdesk_search"));
 		
 		$filterData = $page->ui->get_cache("filter");

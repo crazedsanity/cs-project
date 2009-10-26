@@ -29,7 +29,6 @@
 		}
 		$page->ui->set_cache("expandArr", $expandArr);
 		
-		#$page->change_content(html_file_to_string("modules/project/project_main.tmpl"));
 		$page->set_all_block_rows("content");
 		
 		//set some template vars for the filtering.

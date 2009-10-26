@@ -15,7 +15,7 @@
 
 $db = new cs_phpDB;
 $db->connect(get_config_db_params());
-$page->db = &$db;
+$page->db = $db;
 
 //The "sectionArr" is provided from contentSystem::finish() as a local var, and ftsSections is a leftover from fast_templating.
 $page->ftsSections = $sectionArr;

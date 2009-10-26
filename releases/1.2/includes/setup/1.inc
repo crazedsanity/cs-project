@@ -6,8 +6,6 @@
 
 $requiredFields = array('dbname', 'host', 'port', 'user', 'password');
 
-//TODO: consider adding a check that the /lib directory is writable, to avoid errors later on.
-
 if($_POST) {
 	reset_all_steps(FALSE);
 	store_setup_data(1, $_POST['fields']);
@@ -42,11 +40,11 @@ if($_POST) {
 }
 else {
 	//check if the /lib dir is writeable, so they've been warned.
-	$fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/../../lib');
+	$fsObj = new cs_fileSystem(dirname(__FILE__) .'/../../rw');
 	if(!$fsObj->is_writable(NULL)) {
 		$page->set_message_wrapper(array(
 			'title'		=> "Warning",
-			'message'	=> "The lib directory of your install isn't writable.  Please correct this <BR>\n" .
+			'message'	=> "The 'rw' directory of your install isn't writable.  Please correct this <BR>\n" .
 					"before continuing, as setup will not be able create the config.xml file.",
 			'type'		=> 'notice'
 		));

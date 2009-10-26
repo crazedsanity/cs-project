@@ -22,7 +22,7 @@ require_once(dirname(__FILE__) .'/../lib/simpletest/reporter.php');
 $configObj = new config(NULL, FALSE);
 $configData = $configObj->read_config_file(FALSE);
 
-if(strlen($configData['DATABASE__DBNAME'])) {
+if(strlen($configData['DATABASE__DBNAME']) && !is_array($_SESSION['setup'])) {
 	//setup already complete.  Stop 'em.
 	$page->set_message_wrapper(array(
 		'title'		=> "Setup Unavailable",
@@ -150,7 +150,7 @@ function get_setup_data($step, $type='data') {
 //=============================================================================
 function read_version_file() {
 	$retval = NULL;
-	$fsObj = new cs_fileSystemClass(dirname(__FILE__) .'/..');
+	$fsObj = new cs_fileSystem(dirname(__FILE__) .'/..');
 	
 	//okay, all files present: check the version in the VERSION file.
 	$lines = $fsObj->read('VERSION', TRUE);

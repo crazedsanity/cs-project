@@ -9,7 +9,7 @@ $page->add_template_var('cs-project_version', VERSION_STRING);
 
 $db = new cs_phpDB;
 $db->connect(get_config_db_params());
-$page->db = &$db;
+$page->db = $db;
 
 
 #$titlePart = NULL;
