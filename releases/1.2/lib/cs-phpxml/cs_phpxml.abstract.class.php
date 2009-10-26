@@ -6,14 +6,12 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 63 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxml.abstract.class.php $ 
- * Last Updated:::::::: $Date: 2009-02-03 13:04:55 -0600 (Tue, 03 Feb 2009) $
+ * Current Revision:::: $Revision: 104 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/1.0/cs_phpxml.abstract.class.php $ 
+ * Last Updated:::::::: $Date: 2009-08-28 15:26:44 -0500 (Fri, 28 Aug 2009) $
  * 
  */
 
-require_once(dirname(__FILE__) .'/../cs-arrayToPath/cs_arrayToPath.class.php');
-require_once(dirname(__FILE__) .'/../cs-versionparse/cs_version.abstract.class.php');
 
 abstract class cs_phpxmlAbstract extends cs_versionAbstract {
 	

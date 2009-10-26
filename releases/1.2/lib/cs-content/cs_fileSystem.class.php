@@ -3,13 +3,11 @@
 /*
  * FILE INFORMATION:
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_fileSystem.class.php $
- * $Id: cs_fileSystem.class.php 333 2009-01-29 21:04:18Z crazedsanity $
- * $LastChangedDate: 2009-01-29 15:04:18 -0600 (Thu, 29 Jan 2009) $
+ * $Id: cs_fileSystem.class.php 455 2009-08-28 20:21:25Z crazedsanity $
+ * $LastChangedDate: 2009-08-28 15:21:25 -0500 (Fri, 28 Aug 2009) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 333 $
+ * $LastChangedRevision: 455 $
  */
-
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
 
 class cs_fileSystem extends cs_contentAbstract {
 
@@ -195,17 +193,18 @@ class cs_fileSystem extends cs_contentAbstract {
 	 */
 	public function get_fileinfo($tFile) {
 		
+		//TODO: shouldn't require putting the "@" in front of these calls!
 		$retval = array(
-			"size"		=> filesize($tFile),
+			"size"		=> @filesize($tFile),
 			"type"		=> @filetype($tFile),
-			"accessed"	=> fileatime($tFile),
-			"modified"	=> filemtime($tFile),
-			"owner"		=> $this->my_getuser_group(fileowner($tFile), 'uid'),
-			"uid"		=> fileowner($tFile),
-			"group"		=> $this->my_getuser_group(filegroup($tFile), 'gid'),
-			"gid"		=> filegroup($tFile),
-			"perms"		=> $this->translate_perms(fileperms($tFile)),
-			"perms_num"	=> substr(sprintf('%o', fileperms($tFile)), -4)
+			"accessed"	=> @fileatime($tFile),
+			"modified"	=> @filemtime($tFile),
+			"owner"		=> @$this->my_getuser_group(fileowner($tFile), 'uid'),
+			"uid"		=> @fileowner($tFile),
+			"group"		=> @$this->my_getuser_group(filegroup($tFile), 'gid'),
+			"gid"		=> @filegroup($tFile),
+			"perms"		=> @$this->translate_perms(fileperms($tFile)),
+			"perms_num"	=> @substr(sprintf('%o', fileperms($tFile)), -4)
 		);
 		
 		return($retval);
@@ -362,7 +361,7 @@ class cs_fileSystem extends cs_contentAbstract {
 				//something bad happened.
 				$retval = 0;
 			}
-		} 
+		}
 		else {
 			throw new exception(__METHOD__ .": file is unreadable (". $filename .")");
 		} 
@@ -413,14 +412,19 @@ class cs_fileSystem extends cs_contentAbstract {
 		
 		$filename = $this->resolve_path_with_dots($filename);
 		
-		//see if it starts with a "/"...
+		//If it's a single filename beginning with a slash, strip the slash.
+		$x = array();
+		$numSlashes  = preg_match_all('/\//', $filename, $x);
+		if(preg_match('/^\/[\w]/', $filename) && !preg_match('/^\/\./', $filename) && $numSlashes == 1) {
+			$filename = preg_replace('/^\//', '', $filename);
+		}
+		
+		
 		if(preg_match("/^\//", $filename)) {
 			$retval = $filename;
 		} else {
 			$retval=$this->realcwd .'/'. $filename;
 			$retval = $this->resolve_path_with_dots($retval);
-			#debug_print(__METHOD__ .": realcwd=(". $this->realcwd .")");
-			#$this->resolve_path_with_dots($retval);
 		}
 		
 		if(!$this->check_chroot($retval, FALSE)) {
@@ -879,6 +883,8 @@ class cs_fileSystem extends cs_contentAbstract {
 		if($this->is_readable($filename)) {
 			if($this->check_chroot($destination)) {
 				//do the move.
+				$filename = $this->filename2absolute($filename);
+				$destination = $this->filename2absolute($destination);
 				$retval = rename($filename, $destination);
 			}
 			else {

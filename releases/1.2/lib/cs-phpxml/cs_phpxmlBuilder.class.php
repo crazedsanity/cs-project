@@ -5,12 +5,11 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 55 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxmlBuilder.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-25 23:47:46 -0600 (Sun, 25 Jan 2009) $
+ * Current Revision:::: $Revision: 104 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/1.0/cs_phpxmlBuilder.class.php $ 
+ * Last Updated:::::::: $Date: 2009-08-28 15:26:44 -0500 (Fri, 28 Aug 2009) $
  * 
  */
-require_once(dirname(__FILE__) ."/cs_phpxml.abstract.class.php");
 
 	
 class cs_phpxmlBuilder extends cs_phpxmlAbstract {
@@ -230,7 +229,11 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 			{
 				if(isset($subArray['type']) || isset($subArray['attributes'])) {
 					$parentType = $subArray['type'];
-					$parentAttribs = $subArray['attributes'];
+					
+					$parentAttribs = null;
+					if(isset($subArray['attributes']) && is_array($subArray['attributes'])) {
+						$parentAttribs = $subArray['attributes'];
+					}
 					unset($subArray['type'], $subArray['attributes']);
 				}
 			}
@@ -285,7 +288,11 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 									//it's complete.  Just create the tag here.
 									if(isset($checkData['value'])) {
 										//got a value...
-										$this->open_tag($subTagName, $checkData['attributes']);
+										$myAttribs = null;
+										if(isset($checkData['attributes']) && is_array($checkData['attributes'])) {
+											$myAttribs = $checkData['attributes'];
+										}
+										$this->open_tag($subTagName, $myAttribs);
 										$this->add_value_plus_close_tag($checkData['value'], $subTagName);
 									}
 									else {
@@ -323,7 +330,7 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 					else {
 						
 						//null type....
-						if(is_array($data['0'])) {
+						if(isset($data['0']) && is_array($data['0'])) {
 							$myBasePath = $this->create_list($path, $tagName, '/');
 							foreach($data as $numericIndex=>$numericSubData) {
 								$mySubPath = $this->create_list($myBasePath, $numericIndex, '/');
@@ -346,7 +353,11 @@ class cs_phpxmlBuilder extends cs_phpxmlAbstract {
 								}
 								else {
 									//single tag with value.
-									$this->open_tag($useThisTagName, $checkData['attributes']);
+									$myAttribs = null;
+									if(isset($checkData['attributes']) && is_array($checkData['attributes'])) {
+										$myAttribs = $checkData['attributes'];
+									}
+									$this->open_tag($useThisTagName, $myAttribs);
 									$this->add_value_plus_close_tag($checkData['value'], $useThisTagName);
 								}
 							}

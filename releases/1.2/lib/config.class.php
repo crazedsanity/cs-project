@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) .'/cs-content/cs_siteConfig.class.php');
+require_once(dirname(__FILE__) .'/cs-content/__autoload.php');
 
 class config extends cs_siteConfig {
 	
@@ -48,11 +48,9 @@ class config extends cs_siteConfig {
 				$this->gf->debug_print(__METHOD__ .": converting to use sections...");
 				$this->convert_to_sections();
 			}
+			parent::__construct($this->fs->realcwd .'/'. $this->fileName);
+			$this->config = $this->get_config_contents(TRUE);
 		}
-		
-		parent::__construct($this->fs->realcwd .'/'. $this->fileName);
-		
-		$this->config = $this->get_config_contents(TRUE);
     }//end __construct()
 	//-------------------------------------------------------------------------
     
@@ -166,7 +164,7 @@ class config extends cs_siteConfig {
 		 */
 		if(file_exists(OLD_CONFIG_FILE_LOCATION)) {
 			//copy old file to new location...
-			$fs = new cs_fileSystemClass(dirname(__FILE__) .'/../');
+			$fs = new cs_fileSystem(dirname(__FILE__) .'/../');
 			$moveRes = $fs->move_file(OLD_CONFIG_FILE_LOCATION, CONFIG_FILE_LOCATION);
 			if(!$moveRes) {
 				throw new exception(__METHOD__ .": failed to move existing config into new location (". $moveRes .")");
@@ -251,7 +249,7 @@ class config extends cs_siteConfig {
 			
 			if($checkOwnership === TRUE) {
 				//read the object.
-				$xmlParser = new xmlParser($this->fs->read(SETUP_FILE_LOCATION));
+				$xmlParser = new cs_phpxmlParser($this->fs->read(SETUP_FILE_LOCATION));
 				$configData = $xmlParser->get_tree(TRUE);
 				$configData = $configData['CONFIG'];
 				
@@ -281,7 +279,7 @@ class config extends cs_siteConfig {
 	
 	//-------------------------------------------------------------------------
 	private function create_setup_config() {
-		$xmlCreator = new xmlCreator('config');
+		$xmlCreator = new cs_phpxmlCreator('config');
 		$attributes = array(
 			'creation'	=> time()
 		);
@@ -304,7 +302,13 @@ class config extends cs_siteConfig {
 	
 	//-------------------------------------------------------------------------
 	public function remove_setup_config() {
-		return($this->fs->rm(SETUP_FILE_LOCATION));
+		$retval = false;
+		$theFile = dirname(__FILE__) .'/../'. constant('SETUP_FILE_LOCATION');
+		if(file_exists($theFile)) {
+			$retval = $this->fs->rm($theFile);
+		}
+		
+		return($retval);
 	}//end remove_setup_config()
 	//-------------------------------------------------------------------------
 	
@@ -346,11 +350,11 @@ class config extends cs_siteConfig {
 		$dataArray['SITE_ROOT']['value'] = '{_DIRNAMEOFFILE_}/..';
 		$dataArray['SITE_ROOT']['attributes']['cleanpath'] = 1;
 		
-		//Set some other special values...
-		{
-			$dataArray['DOCUMENT_ROOT']['value'] = '{/MAIN/SITE_ROOT}';
-			$dataArray['LIBDIR']['value'] = '{/MAIN/SITE_ROOT}/lib';
-			$dataArray['TMPLDIR']['value'] = '{/MAIN/SITE_ROOT}/templates';
+		
+		{//Set some other special values...
+			$dataArray['DOCUMENT_ROOT']['value'] = '{MAIN/SITE_ROOT}';
+			$dataArray['LIBDIR']['value'] = '{MAIN/SITE_ROOT}/lib';
+			$dataArray['TMPLDIR']['value'] = '{MAIN/SITE_ROOT}/templates';
 			$dataArray['SEQ_HELPDESK']['value'] = 'special__helpdesk_public_id_seq';
 			$dataArray['SEQ_PROJECT']['value'] = 'special__project_public_id_seq';
 			$dataArray['SEQ_MAIN']['value'] = 'record_table_record_id_seq';

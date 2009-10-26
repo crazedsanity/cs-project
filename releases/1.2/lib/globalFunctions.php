@@ -17,9 +17,8 @@
 function get_required_external_lib_versions($projectName=NULL) {
 	//format: {className} => array({projectName} => {exactVersion})
 	$requirements = array(
-		'contentSystem'		=> array('cs-content',		'1.0.0-ALPHA7'),
-		'cs_phpxmlParser'	=> array('cs-phpxml',		'1.0.0-ALPHA4'),
-		'cs_arrayToPath'	=> array('cs-arrayToPath',	'1.0.0')
+		'contentSystem'		=> array('cs-content',		'1.0.0-BETA1'),
+		'cs_phpxmlParser'	=> array('cs-phpxml',		'1.0.0-RC1')
 	);
 	
 	if(!is_null($projectName)) {
@@ -58,32 +57,28 @@ function check_external_lib_versions() {
 		if(class_exists($className)) {
 			//hopefully, this initializes each of them as a TEST class.
 			$obj = new $className('unit_test');
-			if($obj->isTest === TRUE) {
-				//okay, get version & project names.
-				if(method_exists($obj, 'get_version') && method_exists($obj, 'get_project')) {
-					try {
-						$realVersion = $obj->get_version();
-						$realProject = $obj->get_project();
-					}
-					catch(exception $e) {
-						throw new exception(__METHOD__ .": unable to get project name or version for (". $className ."), DETAILS::: ". $e->getMessage());
-					}
-					
-					if($realVersion === $matchVersion && $realProject === $matchProject) {
-						//all looks good.
-						$retval++;
-					}
-					else {
-						throw new exception(__FUNCTION__ .": version mismatch (". $realVersion ." != ". $matchVersion .") or " .
-							"invalid project name (". $realProject ." != ". $matchProject .")");
-					}
+			
+			//okay, get version & project names.
+			if(method_exists($obj, 'get_version') && method_exists($obj, 'get_project')) {
+				try {
+					$realVersion = $obj->get_version();
+					$realProject = $obj->get_project();
+				}
+				catch(exception $e) {
+					throw new exception(__METHOD__ .": unable to get project name or version for (". $className ."), DETAILS::: ". $e->getMessage());
+				}
+				
+				if($realVersion === $matchVersion && $realProject === $matchProject) {
+					//all looks good.
+					$retval++;
 				}
 				else {
-					throw new exception(__FUNCTION__ .": required checking method(s) for (". $className .") missing");
+					throw new exception(__FUNCTION__ .": version mismatch (". $realVersion ." != ". $matchVersion .") or " .
+						"invalid project name (". $realProject ." != ". $matchProject .")");
 				}
 			}
 			else {
-				throw new exception(__FUNCTION__ .": ". $className ."::isTest isn't set, something is broken");
+				throw new exception(__FUNCTION__ .": required checking method(s) for (". $className .") missing");
 			}
 		}
 		else {
@@ -110,12 +105,8 @@ function html_file_to_string($file){
 		cs_debug_backtrace(1);
 		//Could not find the file requested to stringify.
 		//Sending warning to user and logging it.
-
-		set_message(
-			"Warning!",
-			"Could not find all files necessary to create this page.<br>Please call technical support.<BR>\nfile=[". $file ."]",
-			"","status"
-		);
+		
+		throw new exception(__FUNCTION__ .": template file does not exist (". $file ."), output from template_file_exists=(". $filename .")");
 		return(NULL);
 	}
 
@@ -1356,7 +1347,13 @@ function template_file_exists($file) {
 	
 	if(file_exists($filename)) {
 		$retval = $filename;
-	} 
+	}
+	else {
+		
+		$gf = new cs_globalFunctions;
+		$gf->debug_print(__FUNCTION__ .": TMPLDIR=(". $GLOBALS['TMPLDIR'] ."), filename=(". $filename .")");
+		exit;
+	}
 	return($retval);
 }//end template_file_exists()
 //================================================================================================================

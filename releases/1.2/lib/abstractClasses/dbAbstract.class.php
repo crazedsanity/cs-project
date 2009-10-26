@@ -65,7 +65,7 @@ abstract class dbAbstract {
 	//=========================================================================
 	final public function run_sql_file($filename) {
 		if(!is_object($this->fsObj)) {
-			$this->fsObj = new cs_fileSystemClass;
+			$this->fsObj = new cs_fileSystem;
 		}
 		
 		$this->lastSQLFile = $filename;

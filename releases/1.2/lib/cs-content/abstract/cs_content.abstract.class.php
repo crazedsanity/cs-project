@@ -5,13 +5,12 @@
  * FILE INFORMATION:
  * 
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/abstract/cs_content.abstract.class.php $
- * $Id: cs_content.abstract.class.php 335 2009-01-29 21:25:58Z crazedsanity $
- * $LastChangedDate: 2009-01-29 15:25:58 -0600 (Thu, 29 Jan 2009) $
+ * $Id: cs_content.abstract.class.php 455 2009-08-28 20:21:25Z crazedsanity $
+ * $LastChangedDate: 2009-08-28 15:21:25 -0500 (Fri, 28 Aug 2009) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 335 $
+ * $LastChangedRevision: 455 $
  */
 
-require_once(dirname(__FILE__) ."/../../cs-versionparse/cs_version.abstract.class.php");
 
 
 abstract class cs_contentAbstract extends cs_versionAbstract {
@@ -24,7 +23,6 @@ abstract class cs_contentAbstract extends cs_versionAbstract {
 		
 		if($makeGfObj === true) {
 			//make a cs_globalFunctions{} object.
-			require_once(dirname(__FILE__) ."/../cs_globalFunctions.class.php");
 			$this->gfObj = new cs_globalFunctions();
 		}
     }//end __construct()

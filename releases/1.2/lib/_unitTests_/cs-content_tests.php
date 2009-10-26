@@ -10,7 +10,7 @@ class Test_cscontent extends UnitTestCase {
 	
 	function setUp() {
 		$this->gfObj = new cs_globalFunctions;
-		$this->fsObj = new cs_fileSystemClass;
+		$this->fsObj = new cs_fileSystem;
 		$this->contentObj = new contentSystem;
 	}//end setUp()
 	
@@ -32,7 +32,7 @@ class Test_cscontent extends UnitTestCase {
 	
 	function testFileReading() {
 		unset($this->fsObj);
-		$this->fsObj = new cs_fileSystemClass(dirname(__FILE__));
+		$this->fsObj = new cs_fileSystem(dirname(__FILE__));
 		$dirData = $this->fsObj->ls();
 		
 		if($this->assertTrue(is_array($dirData)) && $this->assertTrue(isset($dirData['data'])) && $this->assertTrue($dirData['data']['type'] == 'dir')) {
@@ -95,7 +95,7 @@ class Test_cscontent extends UnitTestCase {
 				),
 				'styles'	=> array(
 					'select'	=> "field1='value1' AND field2='value2'",
-					'insert'	=> "(field1, field2) VALUES ('value1', 'value2')",
+					'insert'	=> "(field1, field2) VALUES ('value1','value2')",
 					'update'	=> "field1='value1', field2='value2'"
 				)
 			),
@@ -113,7 +113,7 @@ class Test_cscontent extends UnitTestCase {
 		foreach($testData as $name=>$data) {
 			foreach($data['styles'] as $styleName => $expectedOutput) {
 				$realOutput = $this->gfObj->string_from_array($data['input'], $styleName, NULL, 'sql');
-				$this->assertEqual($realOutput, $expectedOutput, "invalid output for style (".$styleName ."): ". $realOutput);
+				$this->assertEqual($realOutput, $expectedOutput);
 			}
 		}
 	}//end testSQLCreation()

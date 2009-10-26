@@ -577,11 +577,6 @@ class Session extends cs_session {
 			$dMsg	= "An unknown error occurred while attempting to log you out.";
 			$dType	= "fatal";
 			break;
-		case "restricted":
-			$dTitle = "Access  Forbidden";
-			$dMsg	= "<img src=\"/images/puis-clean.png\"><br>Outside access to this section is forbidden.<br> Your attempt has been logged.";
-			$dType	= "fatal";
-			break;
 		case "expired":
 			$dTitle	= "Session Expired";
 			$dMsg	= "For your protection, your session has been expired.<BR>\nPlease re-login.<BR>\n";

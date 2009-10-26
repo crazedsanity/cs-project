@@ -2,23 +2,19 @@
 /*
  * FILE INFORMATION:
  * $HeadURL: https://cs-content.svn.sourceforge.net/svnroot/cs-content/trunk/1.0/cs_session.class.php $
- * $Id: cs_session.class.php 345 2009-02-03 19:08:45Z crazedsanity $
- * $LastChangedDate: 2009-02-03 13:08:45 -0600 (Tue, 03 Feb 2009) $
+ * $Id: cs_session.class.php 455 2009-08-28 20:21:25Z crazedsanity $
+ * $LastChangedDate: 2009-08-28 15:21:25 -0500 (Fri, 28 Aug 2009) $
  * $LastChangedBy: crazedsanity $
- * $LastChangedRevision: 345 $
+ * $LastChangedRevision: 455 $
  */
-
-require_once(dirname(__FILE__) ."/abstract/cs_content.abstract.class.php");
-require_once(dirname(__FILE__) ."/../cs-versionparse/cs_version.abstract.class.php");
 
 class cs_session extends cs_contentAbstract {
 
-	protected $db;
-	public $uid;
-	public $sid;
-	public $sid_check = 1;
+	protected $uid;
+	protected $sid;
+	protected $sid_check = 1;
 	
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	/**
 	 * The constructor.
 	 * 
@@ -26,10 +22,10 @@ class cs_session extends cs_contentAbstract {
 	 * 								this parameter is non-null and non-numeric, the value will be 
 	 * 								used as the session name.
 	 */
-	function __construct($createSession=1) {
-		parent::__construct(false);
+	function __construct($createSession=true) {
+		parent::__construct(true);
 		if($createSession) {
-			if(!is_null($createSession) && strlen($createSession) && !is_numeric($createSession)) {
+			if(is_string($createSession) && strlen($createSession) >2) {
 				session_name($createSession);
 			}
 			
@@ -41,7 +37,7 @@ class cs_session extends cs_contentAbstract {
 		//TODO: need a setting somewhere that says what the name of this var should be,
 		//	instead of always forcing "uid".
 		$this->uid = 0;
-		if($_SESSION['uid']) {
+		if(isset($_SESSION['uid']) && $_SESSION['uid']) {
 			$this->uid = $_SESSION['uid'];
 		}
 		
@@ -49,11 +45,11 @@ class cs_session extends cs_contentAbstract {
 		$this->sid = session_id();
 		
 	}//end __construct()
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	
 	
 	
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	/**
 	 * Required method, so passing the object to contentSystem::handle_session() 
 	 * will work properly.
@@ -65,11 +61,11 @@ class cs_session extends cs_contentAbstract {
 	public function is_authenticated() {
 		return(FALSE);
 	}//end is_authenticated()
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	
 	
 	
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	/**
 	 * Retrieve data for an existing cookie.
 	 * 
@@ -85,11 +81,11 @@ class cs_session extends cs_contentAbstract {
 		}
 		return($retval);
 	}//end get_cookie()
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	
 	
 	
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	/**
 	 * Create a new cookie.
 	 * 
@@ -116,11 +112,11 @@ class cs_session extends cs_contentAbstract {
 		return($retval);
 		
 	}//end create_cookie()
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	
 	
 	
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 	/**
 	 * Destroy (expire) an existing cookie.
 	 * 
@@ -138,7 +134,20 @@ class cs_session extends cs_contentAbstract {
 		}
 		return($retval);
 	}//end drop_cookie()
-	//---------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	/**
+	 * PHP5 magic method for retrieving the value of internal vars; this allows 
+	 * code to find the value of these variables, but not modify them (modifying 
+	 * requires the "__set($var,$val)" method).
+	 */
+	public function __get($var) {
+		return($this->$var);
+	}//end __get()
+	//-------------------------------------------------------------------------
 
 
 }//end cs_session{}

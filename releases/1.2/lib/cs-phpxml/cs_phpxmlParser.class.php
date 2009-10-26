@@ -5,9 +5,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 52 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxmlParser.class.php $ 
- * Last Updated:::::::: $Date: 2009-01-25 18:33:44 -0600 (Sun, 25 Jan 2009) $
+ * Current Revision:::: $Revision: 104 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/1.0/cs_phpxmlParser.class.php $ 
+ * Last Updated:::::::: $Date: 2009-08-28 15:26:44 -0500 (Fri, 28 Aug 2009) $
  * 
  * 
  * Built for PHP to programatically parse & understand data within an XML document.
@@ -52,8 +52,6 @@
  *  
  * 
  */
-
-require_once(dirname(__FILE__) ."/cs_phpxml.abstract.class.php");
 
 
 class cs_phpxmlParser extends cs_phpxmlAbstract {

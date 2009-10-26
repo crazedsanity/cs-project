@@ -152,9 +152,8 @@ class mainRecord {
 					$critArr['u.username like'] = $keyword;
 					$critArr['r.subject like'] = $keyword;
 				
-					$query = "WHERE is_helpdesk_issue IS ". cleanString($isHelpdesk, 'bool_strict') ." AND (lower(r.name) like ". $keyword ." OR r.leader_contact_id LIKE ". $keyword 
+					$query = "WHERE is_helpdesk_issue IS ". cleanString($isHelpdesk, 'bool_strict') ." AND (lower(r.name) like ". $keyword  
 						." OR lower(u.username) LIKE ". $keyword ." OR lower(r.subject) LIKE ". $keyword .")";
-				
 				}
 				
 				if(isset($critArr['status_id'])) {
@@ -376,7 +375,7 @@ class mainRecord {
 				debug_print($sqlArr);
 				debug_print($definitionArr);
 				$details = __METHOD__ .": no data left for (". $type .")!";
-				$this->log_by_class($details, 'error');
+				$this->logsObj->log_by_class($details, 'error');
 				throw new exception($details);
 			}
 			

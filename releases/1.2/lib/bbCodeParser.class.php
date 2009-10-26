@@ -18,8 +18,6 @@
  * been converted.
  */
 
-require_once(dirname(__FILE__) .'/cs-content/cs_bbCodeParser.class.php');
-
 class bbCodeParser extends cs_bbCodeParser {
 	
 	/** Array containing all the codes & how to parse them. */

@@ -6,9 +6,9 @@
  * SVN INFORMATION:::
  * -------------------
  * Last Author::::::::: $Author: crazedsanity $ 
- * Current Revision:::: $Revision: 66 $ 
- * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/cs_phpxmlCreator.class.php $ 
- * Last Updated:::::::: $Date: 2009-02-06 15:12:55 -0600 (Fri, 06 Feb 2009) $
+ * Current Revision:::: $Revision: 104 $ 
+ * Repository Location: $HeadURL: https://cs-phpxml.svn.sourceforge.net/svnroot/cs-phpxml/trunk/1.0/cs_phpxmlCreator.class.php $ 
+ * Last Updated:::::::: $Date: 2009-08-28 15:26:44 -0500 (Fri, 28 Aug 2009) $
  * 
  * 
  * Methods to create XML that's parseable by cs_phpxmlBuilder{}.  Eliminates the need for manually creating
@@ -53,8 +53,6 @@
  * (forthcoming)
  */
 
-require_once(dirname(__FILE__) ."/cs_phpxml.abstract.class.php");
-require_once(dirname(__FILE__) ."/cs_phpxmlBuilder.class.php");
 
 class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	private $xmlArray;
@@ -263,7 +261,7 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 	//=================================================================================
 	/**
 	 * Break the path into bits, and fix the case of each tag to UPPER, except for any
-	 * reserved words.
+	 * reserved words (with exceptions)
 	 */
 	private function fix_path($path) {
 		
@@ -272,9 +270,39 @@ class cs_phpxmlCreator extends cs_phpxmlAbstract {
 		
 		//fix each tag's case.
 		$newPathArr = array();
+		$lastIndex = (count($pathArr) -1);
 		foreach($pathArr as $index=>$tagName) {
+			$newTagName = null;
 			//fix each tag in the path.
-			$newPathArr[] = $this->fix_tagname($tagName);
+			if(strtolower($tagName) == 'value' && $index != $lastIndex) {
+				$newTagName = strtoupper($tagName);
+			}
+			else {
+				if(strtolower($tagName) == 'value' && $index == $lastIndex) {
+					//FIX ISSUE #267: handle "value" in the path properly.
+					$checkUpperPath = $this->a2p->get_data($this->reconstruct_path($newPathArr) .'/VALUE');
+					$checkLowerPath = $this->a2p->get_data($this->reconstruct_path($newPathArr) .'/value');
+					if(is_array($checkUpperPath) && is_array($checkLowerPath)) {
+						//there's two paths... uh... just let them use the one they requested.
+						if(preg_match('/^V/', $tagName)) {
+							$newTagName = strtoupper($tagName);
+						}
+						else {
+							$newTagName = strtolower($tagName);
+						}
+					}
+					elseif(is_array($checkLowerPath)) {
+						$newTagName = strtolower($tagName);
+					}
+					else {
+						$newTagName = strtoupper($tagName);
+					}
+				}
+				else {
+					$newTagName = $this->fix_tagname($tagName);
+				}
+			}
+			$newPathArr[$index] = $newTagName;
 		}
 		
 		//check if the first element is our root element: if not, add it.
