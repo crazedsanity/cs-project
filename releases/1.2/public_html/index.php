@@ -15,6 +15,8 @@ EXAMPLE: public_html/content  ->  ./index.php
 */
 
 require_once(dirname(__FILE__) ."/../lib/site_config.php");
+$gf = new cs_globalFunctions;
+$gf->conditional_header('/content');
 $GLOBALS['DEBUGPRINTOPT'] = 1;
 define("DEBUGPRINTOPT", 1);
 $contentObj = new contentSystem();
