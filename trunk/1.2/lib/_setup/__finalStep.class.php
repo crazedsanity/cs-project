@@ -57,16 +57,18 @@ class __finalStep {
 				
 				//Special values (including vars that cs_siteConfig{} handles)
 				$specialValues = array(
-					'site_root'			=> '{_DIRNAMEOFFILE_}/..',
-					'document_root'		=> '{MAIN/SITE_ROOT}',
-					'libdir'			=> '{MAIN/SITE_ROOT}/lib',
-					'tmpldir'			=> '{MAIN/SITE_ROOT}/templates',
-					'seq_helpdesk'		=> 'special__helpdesk_public_id_seq',
-					'seq_project'		=> 'special__project_public_id_seq',
-					'seq_main'			=> 'record_table_record_id_seq',
-					'table_todocomment'	=> 'task_comment_table',
-					'rwdir'				=> '{MAIN/SITE_ROOT}/rw',
-					'format_wordwrap'	=> '90'
+					'site_root'				=> '{_DIRNAMEOFFILE_}/..',
+					'document_root'			=> '{MAIN/SITE_ROOT}',
+					'libdir'				=> '{MAIN/SITE_ROOT}/lib',
+					'tmpldir'				=> '{MAIN/SITE_ROOT}/templates',
+					'seq_helpdesk'			=> 'special__helpdesk_public_id_seq',
+					'seq_project'			=> 'special__project_public_id_seq',
+					'seq_main'				=> 'record_table_record_id_seq',
+					'table_todocomment'		=> 'task_comment_table',
+					'rwdir'					=> '{MAIN/SITE_ROOT}/rw',
+					'format_wordwrap'		=> '90',
+					'recaptcha_publickey'	=> '6Ld27ggAAAAAADHN-jYSdY0cJjfM10pjRgbWS02B',
+					'recaptcha_privatekey'	=> '6Ld27ggAAAAAAErK12LU6sCeYF8m-whCJn4azM2B'
 				);
 				$defineAsGlobal=array('site_root', 'libdir', 'tmpldir');
 				foreach($specialValues as $index=>$value) {
