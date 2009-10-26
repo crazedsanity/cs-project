@@ -11,11 +11,7 @@
 
 $page->clear_content("header");
 
-$db = new cs_phpDB;
-$db->connect(get_config_db_params());
-$page->db = $db;
 
-$page->add_template_var('cs-project_version', VERSION_STRING);
 $page->add_template_var('MAINTABLE_EXTRA', 'align="center"');
 
 if(isset($_GET['loginDestination']) && strlen($_GET['loginDestination'])) {

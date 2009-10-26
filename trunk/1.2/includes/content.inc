@@ -9,10 +9,6 @@
  */
 
 
-$db = new cs_phpDB;
-$db->connect(get_config_db_params());
-$page->db = $db;
-
 $page->session = new Session($page->db);
 
 //initialize everything we need to display the page & remember stuff in the session.
@@ -21,8 +17,6 @@ $page->ui = new sessionCache("/userInput/content");
 //The "sectionArr" is provided from contentSystem::finish() as a local var, and ftsSections is a leftover from fast_templating.
 $page->ftsSections = $sectionArr;
 
-
-$page->add_template_var('cs-project_version', VERSION_STRING);
 
 
 //done with redirection.  Here's where we define if they have to be logged-in, and then run the fast_templating engine.

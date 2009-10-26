@@ -12,7 +12,7 @@
  */
 
 
-class mainRecord {
+class mainRecord extends cs_versionAbstract {
 	
 	public $db;
 	public $isHelpdeskIssue = FALSE;
@@ -30,6 +30,8 @@ class mainRecord {
 	
 	//=========================================================================
 	function __construct() {
+		
+		$this->set_version_file_location(dirname(__FILE__) .'/../VERSION');
 		
 		//these are fairly generic, & can be updated easily.
 		$this->updateableFieldsArr = array(

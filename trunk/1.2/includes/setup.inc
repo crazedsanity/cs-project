@@ -71,7 +71,7 @@ else {
 	}
 	
 	
-	$page->add_template_var("VERSION_STRING", read_version_file());
+	$page->add_template_var("VERSION_STRING", $configObj->get_version());
 	$page->rip_all_block_rows('stepData');
 	$page->clear_content('infobar');
 	

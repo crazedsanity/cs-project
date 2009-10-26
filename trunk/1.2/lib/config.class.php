@@ -20,6 +20,8 @@ class config extends cs_siteConfig {
     	$this->gf = new cs_globalFunctions();
     	$this->fs = new cs_fileSystem(dirname(__FILE__) .'/..');
     	
+    	$this->set_version_file_location(dirname(__FILE__) .'/../VERSION');
+    	
     	$this->fileName = dirname(__FILE__) .'/'. CONFIG_FILENAME;
     	if(!is_null($fileName) && strlen($fileName)) {
     		$this->fileName = $fileName;
