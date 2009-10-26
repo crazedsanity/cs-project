@@ -375,7 +375,7 @@ class mainRecord {
 				debug_print($sqlArr);
 				debug_print($definitionArr);
 				$details = __METHOD__ .": no data left for (". $type .")!";
-				$this->log_by_class($details, 'error');
+				$this->logsObj->log_by_class($details, 'error');
 				throw new exception($details);
 			}
 			
