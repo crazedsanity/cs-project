@@ -1,0 +1,291 @@
+
+================================================================================
+Client systems need a "key" (PHP, MD5... something) in order to securely communicate with main cs-project server & verify their identity.
+================================================================================
+
+
+
+
+================================================================================
+Tasks should create notifications (users associated with project or helpdesk issue).
+================================================================================
+
+
+
+
+================================================================================
+Should be a panel to display info about users on given project:
+	* what users are working on
+	* last login for each user
+================================================================================
+
+
+
+================================================================================
+Display user associations as "{username} ({Proper Name})"
+================================================================================
+
+
+
+================================================================================
+Send notifications for existing issues/projects when:
+	* user associated/disassociated
+	* issue has been assigned
+	* projects are created/completed.
+================================================================================
+
+
+
+================================================================================
+User that performs action to spawn email notification should have option (beside button) to "edit" notification (probably more like add a personal message about it)... this should also be logged somewhere (?).
+================================================================================
+
+
+
+
+================================================================================
+Summary page:
+	* should show more reports (more systems should log "report" things)
+	* allow filtering (change log type, filter on user, date, etc)
+================================================================================
+
+
+
+
+================================================================================
+File uploads:
+	* only link to notes
+	* make notes generic
+		-- remove "record_id" column from note_table
+		-- create "linker" table for notes, wherein "type" indicates what the note is linked to (i.e. task, project, issue, etc)
+		-- convert task comments into notes
+
+EXAMPLE ("av_check" value indicates whether it was scanned; if it is set, the 
+file is free of viruses; if not, it should be automatically scanned if there is 
+a clamscan client available at time of download)::: 
+
+
+ *** file_table ***
+file_id | file_name               | av_check   | md5sum                           | encoded_contents
+--------+-------------------------+------------+----------------------------------+--------------
+ 10     | cs-project_redesign.epz | 2008-09-17 | ddf3bb6a56463b73047398091daec26a | (base64 code)
+ 20     | cs-project_redesign.png |            | ddf3bb6a56463b73047398091daec26a | (base64 code)
+ 30     | new_logo.png            |            | ddf3bb6a56463b73047398091daec26a | (base64 code)
+
+ *** note_table ***
+note_id | subject         | body                                      | created | updated | creator_contact_id | is_solution
+--------+-----------------+-------------------------------------------+---------+---------+--------------------+------------
+ 200    | Attached File   | Filename attached: new_logo.png           |         |         | 101                | f
+ 201    | Comment         | My new design, in Pencil and png formats. |         |         | 101                | f
+
+
+ ** note_file_table ***
+note_file_id | note_id | file_id
+-------------+---------+---------
+ 1           | 200     | 30
+ 2           | 201     | 10
+ 3           | 201     | 20
+
+================================================================================
+
+
+
+
+
+================================================================================
+Post-upgrade notifications:
+	* upgrades should be able to specify actions that need to be performed
+	* notify users of new features (or things that have changed; consider storing so each user can see upon login)
+================================================================================
+
+
+
+================================================================================
+#1:  This is a logo customized for the active project (the active project in the example is CS-Project)
+#2:  Admin/group admin goes to the admin tab, which shows extra options for having that title.
+#3:  Where "group switcher" was now has the "active project switcher"
+#4:  Preference contains ONLY the user's preferences (no admin stuff)
+#5:  Admin tab only shows for those with administrative titles associated with their account.
+#6:  Summary is similar to the v1.x tab, but has information about newly-assigned items, etc (the exclamation shows when there's something new to show--since their last viewing of it).
+#7:  Overview is where the old "projects" tab was.
+#8:  Contacts is just like in v1.x, but can show contacts only associated with the current project or ALL of them.
+#9:  The url no should no longer use project id's, but instead use a human-readable link to the active project (the active project can be switched this way as well).
+#10: Issues linked directly to the active project.  They should be linked to sub-projects (or "milestones").  Only show if there are applicable issues?
+#11: As with issues, tasks linked directly to the main project.  Only show if there are applicable tasks?
+#12: Documentation is basically notes and uploaded files that help development or are help docs for using the system... the count would probably only include the actual note records, not the files associated with them.  NOTE: this could incorporate requirements documentation from that one Tigris.org project...
+#13: the main projects beneath the active project are displayed like root projects used to be; progress is updated automatically based on sub-projects.
+
+
+
+
+Project Leader(s):
+Dan Falconer (slaughter)
+
+Lead Developer(s):
+Dan Falconer (slaughter)
+
+Developers:
+Bill Bray (bilfurd)
+Jesse Lesperance (jlesperance)
+Vikas Rajput (vikasrajput)
+================================================================================
+
+
+
+================================================================================
+More Changes for 1.2.x:
+	* CONFIG CHANGES
+		-- move config from /CONFIG to /CONFIG/CS-PROJECT
+		-- add section for cs-content
+	* Update CS-Content to use a configuration
+		-- USE CONSTANTS
+		-- in prepare() (or in some other pre-check), make sure required 
+		constants, such as "SITE_ROOT", are available
+		-- add considerations for using cs_siteConfig (i.e. check for a constant 
+		"CS-CONTENT_USE_SITECONFIG": a value of false or no constant makes it 
+		need the normal constants; non-false should have the path to the site's
+		config, and check for "CS-CONTENT_SITECONFIG_SECTION" for where to find 
+		the section [default='CS-CONTENT'])
+	* Incorporate CS-VersionParse (required for new version of cs-content)
+	* Incorporate CS-WebDBUpgrade
+================================================================================
+
+
+
+================================================================================
+Use API-Style Calls for Interface
+
+REASONING:
+	* makes future API integration easier
+		-- when using an external API, use XML libs to wrap into XML doc
+		-- encryption can be done via protocol or at the API level
+	* simplify interface by using standardized calls
+
+Information:
+	* GET for retrieving information
+	* POST for changing information
+	* Each call has a "type", "name", and "parameters" 
+
+EXAMPLES:
+----------
++ Updating a Project (i.e. projectClass::update_project()):
+POST = array(
+	'type'		=> "project",
+	'name'		=> "updateProject",
+	'params'	=> array(
+		0	=> 101,
+		1	=> array(
+			'project_name'	=> "New Project Name",
+			'ancestry'		=> "400:101"
+		)
+	)
+);
+
++ Updating a Pref:
+POST = array(
+	'type'		=> "pref",
+	'name'		=> "update_user_pref",
+	'params'	=> array(
+		0	=> 101,
+		1	=> 1
+	)
+);
+
++ Retrieving All Contacts:
+GET = array(
+	'type'		=> "contact",
+	'name'		=> "getAllContacts",
+	'params'	=> NULL
+);
+================================================================================
+
+
+
+================================================================================
+CS-CONTENT CONFIG PARAMETERS (all are GLOBAL unless otherwise specified):
+	* SITE_ROOT
+		-- contentSystemClass.php lines 67-70
+		-- cs_fileSystemClass.php lines 38-40
+		-- cs_genericPageClass.php lines 62-63
+	* TMPLDIR
+		-- contentSystemClass.php lines 352,437,533,559,588
+	* IGNORE_FOLDERS
+		-- contentSystemClass.php line 88
+	* IGNORE_FILES
+		-- contentSystemClass.php line 87
+	* VERSION_FILE_LOCATION (make a small abstract class that extends cs_versionAbstract and sets the version file location directly in the constructor to avoid code duplication)
+		-- contentSystemClass.php line 112
+		-- cs_bbCodeParser.class.php line 33
+		-- cs_fileSystemClass.php line 32
+		-- cs_genericPageClass.php line 36
+		-- cs_globalFunctions.php line 33
+		-- cs_phpDB.php line line 36
+		-- cs_sessionClass.php line 29
+		-- !!! cs_siteConfig.php !!!
+		-- cs_tabsClass.php line 28
+	* INCLUDESDIR
+		-- contentSystemClass.php lines 346
+	* LIBDIR
+		-- cs_genericPageClass.php line 65
+	* DO_NOT_REDIRECT_TO_SCRIPTS
+		-- cs_genericPageClass.php lines 101-102
+	* DROP_GET_VARS_FOR_LOGIN
+		-- cs_genericPageClass.php lines 107-108
+	* MINI-PARSER_DEFAULT_BEGIN (not required)
+		-- cs_genericPageClass.php lines 236-237
+	* MINI-PARSER_DEFAULT_END (not required)
+		-- cs-genericPageClass.php lines 236-237
+================================================================================
+
+
+
+================================================================================
+Promotion: "Why Simple Upgrades Are So Important"
+----
+
+So you've got a web application.  It is an integral part of your business, and finding bugs means your company's productivity drops sharply or grinds to a halt: you want a fix FAST.
+
+This is the very reason why upgradability is so important, especially in a web application.  As many developers have already experienced, rolling out an update to a database-driven web application which requires a change to the database requires a lot of coordination, usually at least a few minutes of downtime, and lots of careful planning.  
+
+Now let's say you have a web application built by a third party.  You've found this bug, and need a fix fast.  Let's also say the vendor is very quick to patch the bug and get a new release to you as quickly as possible.  Here is what seems to be the most common scenario:
+
+ * back-up database, just in case
+ * Download the new release
+ * Install the new release over the top of the old one, or wipe-out your installation & install "from scratch"
+ * copy old configuration file(s), attempt to update based on vendor's release notes or new example configs
+ * update license files with existing information
+ * manually run database schema changes or run a script that does it automatically
+ * try running the web application again, tweak files until it all works again
+ * verify the bug has been fixed (all too often, the requested bug has not been fixed, and you'll have to wait for another release)
+
+There is another, more comforting scenario.  One that puts customer's minds at ease and helps system administrators sleep at night.  This scenario is one that CS-Project has embraced from the beginning:
+
+ * run command (svn update) to retrieve latest release
+ * go to web app in browser (or refresh if it's already open)
+
+This is the point where most people ask, "okay, and then what?"  Loading the webpage again automatically spawns an upgrade process.  The first person to access the website will cause the upgrade to run, which temporarily blocks others from accessing it: the upgrade is blazing fast, so normally nobody even realizes an upgrade happened, unless they notice the version number changed.
+
+Seem too simple?  Well, CS-Project was built on the idea that upgrading should be part of the process.  Software development is a complex process that is often prone to error, so we made sure upgrades are simple, and upgrading is painless and can be done without fear.  Changing database schema or smoothing-out invalid data is quick and efficient.
+
+How do we do it?  The basis of the system involves storing two versions: one on the filesystem, indicating the version of the application; the other stored in the database, indicating the version of schema that is running.  When the application is updated, the application version becomes higher than the version stored in the database, so the application knows that it should perform an upgrade.
+
+Each release comes with upgrade scripts for each release, and those scripts are the ones that make the necessary changes to the database (including schema changes) and make necessary changes to the configuration file.
+
+Remember that problem with upgrading?  That scenario was based upon a rare usecase, wherein the customer keeps their app as up-to-date as possible, always installing the latest patch or fix when it becomes available.  But what about the more common cases, where the customer doesn't upgrade for months or years?
+
+CS-Project accounts for that as well.  Even if an installation is 50 upgrades behind, upgrading to the most recent release of a given version is simple and painless.  The upgrade system runs through all upgrade scripts (not every release has a script) until the database and application match versions.  This process generally only takes a few seconds, even on economy or old hardware.
+================================================================================
+
+
+
+================================================================================
+(only sort-of related)
+CS-PHPXML LOGIC CHANGES (proposal)
+
+Instead of creating a massive array which differentiates the internal vs. external nature of an item based upon whether the item is all upper or all lower case... well, create a list of all the paths.  In this array, one can list values, attributes, etc.
+
+The only catch is when dealing with tags that have values: if there's a value, I believe it cannot have tags (i.e. paths) beneath it.  There would have to be special checks to ensure this doesn't happen.
+================================================================================
+
+
+
