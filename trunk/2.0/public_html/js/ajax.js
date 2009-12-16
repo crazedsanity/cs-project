@@ -31,12 +31,7 @@ function ajax_getRequest(type, isAsync, url) {
 		cache		: false,
 		async		: isAsync,
 		dataType	: 'text/xml',
-		success: function (returnXml) {
-			var xml = parseXML(returnXml);
-			if($(xml).find('type').text() == 'auth') {
-				updateLoginBox(xml);
-			}
-		},
+		success: ajax_successCallback,
 		error: function (returnXml) {
 			alert("Call to " + type + " failed::: " + returnXml);
 		}

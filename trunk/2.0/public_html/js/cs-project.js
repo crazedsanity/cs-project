@@ -29,7 +29,7 @@ var ajaxLoadingImage = '<img src="/images/ajax-loader.gif" border="0"/>';
 	
 
 	//-------------------------------------------------------------------------
-	function ajax_getTestResponse() {
+	function ajax_postTestResponse() {
 		
 		
 		myPostData = {
@@ -39,6 +39,15 @@ var ajaxLoadingImage = '<img src="/images/ajax-loader.gif" border="0"/>';
 		show_ajaxLoading("Checking response...");
 		ajax_doPost("test", myPostData, "WAIT", "Doing a test POST via AJAX, be patient.");
 		
+	}//end ajax_postTestResponse()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	function ajax_getTestResponse() {
+		show_ajaxLoading("Sending GET request..");
+		ajax_getRequest("test");
 	}//end ajax_getTestResponse()
 	//-------------------------------------------------------------------------
 	
@@ -48,8 +57,18 @@ var ajaxLoadingImage = '<img src="/images/ajax-loader.gif" border="0"/>';
 	function callback_test(xmlObj) {
 		$xmlObj = $(xmlObj);
 		updatePageLoadData("Response complete... time was (" + $xmlObj.find("time").text() +")");
-		$("#response").html($xmlObj.find("post_data").text());
+		$("#response").html(Base64.decode($xmlObj.find("post_data").text()));
 	}//end callback_test()
+	//-------------------------------------------------------------------------
+	
+	
+	
+	//-------------------------------------------------------------------------
+	function callback_get(xmlObj) {
+		$xmlObj = $(xmlObj);
+		updatePageLoadData("GET response complete...");
+		$("#getData").html(Base64.decode($xmlObj.find("all_get_tags").text()));
+	}//end callback_get()
 	//-------------------------------------------------------------------------
 
 /* END AJAX TEST FUNCTIONS */
@@ -60,6 +79,9 @@ var ajaxLoadingImage = '<img src="/images/ajax-loader.gif" border="0"/>';
 $(document).ready(function() {
 	updatePageLoadData("page loaded!");
 	$("#button1").click(function() {
+		ajax_postTestResponse();
+	});
+	$("#button2").click(function() {
 		ajax_getTestResponse();
 	});
 });
