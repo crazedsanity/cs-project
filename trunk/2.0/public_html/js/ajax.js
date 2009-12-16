@@ -45,20 +45,6 @@ function ajax_getRequest(type, isAsync, url) {
 
 
 
-function handle_ajaxLoginResult(xml) {
-	if(typeof xml == "object") {
-		updateLoginBox(xml);
-		
-		//they're logged in.  Redirect.
-		if($(xml).find('status').text() == 1 && getURLVar('loginDestination')) {
-			var dest = Url.decode(getURLVar('loginDestination'));
-			document.location=dest;
-		}
-	}
-}
-
-
-
 function ajax_successCallback(xmlData) {
 	var xmlObj = parseXML(xmlData);
 	var $xmlObj = $(xmlObj);
