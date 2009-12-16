@@ -11,4 +11,9 @@
  */
 
 
+require_once(dirname(__FILE__) .'/../lib/cs-content/__autoload.php');
+
+$cs = new contentSystem();
+$cs->finish();
+
 ?>
