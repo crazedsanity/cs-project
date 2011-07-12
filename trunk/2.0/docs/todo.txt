@@ -1,0 +1,8 @@
+
+capabilities need to be documented better
+ * BBCode stuff
+ * upgrading
+
+Look into moving SVN projects from sf.net to CrazedSanity.com
+ * ohloh.net
+ * cia.vc 
