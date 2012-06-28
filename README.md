@@ -5,16 +5,16 @@ PostgreSQL + PHP driven project management website. All projects can have notes,
 
 
 CS-Project Feature Overview
----------------------------
+--------
 
-=== Simplicity ===
+*Simplicity*
 	This system is built on a very simple premise: Project managers manage projects.  There are various types of issues associated with those projects (bugs, feature requests, etc).  Each project and issue have tasks associated with them.  Everyone is interested in how long things take.
 
 	CS-Project incorporates all of these principles.  Projects are a broad indicator of the various pieces of a system.  Large projects can be broken into smaller parts (sometimes referred to as “milestones”) to help focus efforts.  New issues, including bugs and feature requests, can be added to a project to help maintain a list of all the things that are requested or have been found to be problematic.  Tasks create a breakdown of things that need to be accomplished.
 
 	To further simplify things, CS-Project doesn't tie its users down to a specific way to use it: it can be easily used strictly as a Trouble Ticket (Help Desk) system, or just projects, or both.  
 
-=== Easy Setup ===
+*Easy Setup*
 	CS-Project is very easy to setup.  Once the webserver accepts connections to the website name of your choosing (like "http://project.crazedsanity.com"), just go to it's address, and the setup program will start immediately. Each step explains exactly what will happen, provides defaults for nearly every item, and shows the output from every completed step.  No need to run any scripts on a command line, loading things manually, or anything else: it's all done for you.
 
 	Normal installations of specialized websites that are downloaded off the 'net require steps similar to the following:
@@ -29,7 +29,7 @@ CS-Project Feature Overview
 		2.) open website in browser
 		3.) follow step-by-step instructions until install is complete
 
-=== Upgradeability ===
+*Upgradeability*
 	CS-Project was built with the understanding that no piece of software is perfect.  New features are implemented.  Bugs are fixed.  Backend systems are tweaked.  Security issues are patched.
 
 	When these upgrades are available, especially for critical bugs, users want—and need—to get them as quickly and easily as possible.  And even in the case of a severe bug that causes data corruption, scripted upgrades can usually fix this automatically with little or no interuption (see "Scripted Upgrades").
@@ -65,20 +65,20 @@ CS-Project Feature Overview
 
 	In the event that Subversion isn't available, the traditional method of downloading & extracting is just fine, though prone to error.  Backup the old copy, extract the new one, and copy the config.xml file from the old directory into the new one.  Modified templates have to be dealt with manually, of course (which wouldn't be a problem if the Subversion option were used).
 
-=== Scripted Upgrades ===
+*Scripted Upgrades*
 	Besides getting the newest version and features, there is another unique system incorporated into CS-Project: upgrades happen on-the-fly.  After an update occurs, the next time the website is loaded, any bug fixes or database changes happened automatically.  From schema changes to data fixes and anything in between, automatic upgrades ensure that problems are fixed quickly.
 
 	“But why is this important?”  Imagine a situation where, for some reason, a glitch in some obscure piece of code somewhere causes an issue to be linked to a different project after you've already set it properly.  Somehow, issues just seem to move to random locations, or disappear, and you just don't know why... The next version fixes the problem.  You update your checkout and reload the page: suddenly, all your records are linked exactly the way they should have been.  *This is the power of scripted upgrades.*
 
-=== Database Conversions ===
+*Database Conversions*
 	One of the other features that was thought of from the start was the ability to automatically convert an existing project database to be used with CS-Project.  During the setup process, there is an option to connect to an existing database to convert from another database to CS-Project.
 
 
 
 UPGRADING CS-PROJECT
---------------------
+--------
 
-=== DEFINITIONS ===
+*DEFINITIONS*
 Because the definition of a given term is sometimes inconsistent across software projects, I feel it is important to make their meanings as clear as possible to avoid confusion.
 
 	* "version string": this is a string of numbers separated by dots, sometimes containing a suffix, to indicate a particular "variant" of CS-Project's codebase.  Example: "1.0.0-BETA1" is the first BETA version of release 1 (minor version 0, maintenance 0).
@@ -94,7 +94,7 @@ Because the definition of a given term is sometimes inconsistent across software
 
 	* "maintenance version": whenever one or more bugs are fixed, a maintenance release is created.  These sometimes incorporate minor feature requests deemed appropriate and fall within the scope of the current minor version.
 
-=== UPDATE FREQUENCY ===
+*UPDATE FREQUENCY*
 Constant work is being done on CS-Project to make it as powerful (and useful) as possible.  It is nice, however, to know roughly how often one should expect changes to occur:
 
 	* All file releases are based on Subversion releases.
@@ -106,20 +106,19 @@ Constant work is being done on CS-Project to make it as powerful (and useful) as
 		-- created whenever a critical bug is fixed
 		-- can sometimes happen up to several times per day
 
-=== AVAILABILITY ===
+*AVAILABILITY*
 	* Releases are available via Subversion immediately.
 	* File releases will be made 
 	* These releases are generally available as a file download once a month, depending on the number of changes that happened (if they contain critical bug fixes, updates are usually made available the same day they're fixed).
 
 
----------------------
 HOW TO OBTAIN UPDATES
 ---------------------
 
 Whenever an existing installation is updated/upgraded, the database is updated to reflect the new version.  This sometimes involves scripted changes, which should always run seemlessly in the background.
 
 
-=== Subversion (the easy way) ===
+*Subversion (the easy way)*
 	* maintenance updates:
 		-- update your install using "svn update" (via command line or a program)
 		-- open/reload website to ensure the new version is reflected
@@ -129,9 +128,10 @@ Whenever an existing installation is updated/upgraded, the database is updated t
 			"svn switch https://cs-project.svn.sourceforge.net/svnroot/cs-project/releases/1.2"
 		-- open/reload website to ensure the new version is reflected.
 
-=== Manual Download ===
+*Manual Download*
 	* download the latest copy from http://sf.net/projects/cs-project
 	* backup your existing install
 	* extract new version into a new directory
 	* copy old changed files and the config.xml file into the new directory.
 	* open/reload the website to ensure it reflects the new version.
+
