@@ -4,6 +4,11 @@ _CS-Project has been out-of-date for several years.  Currently, supporting libra
 
 _CS-Project is in need of development, documentation, testers, and anyone willing to help setup some of the automated tasks associated with software development.  If you can program, run a mouse and a browser, or can do some system administration type stuff, please contact me. It could definitely use some "Web 2.0" love._
 
+Supporting Libraries:
+ * [CS Content, MVC/Templating System](https://github.com/crazedsanity/cs-content)
+ * [CS PHP XML Framework](https://github.com/crazedsanity/cs-phpxml)
+ * [CS Web Application Libraries](https://github.com/crazedsanity/cs-webapplibs)
+ * [SimpleTest, a PHP Unit Testing Framework](http://www.simpletest.org)
 
 # CS-Project
 
