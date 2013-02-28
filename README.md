@@ -150,7 +150,7 @@ Whenever an existing installation is updated/upgraded, the database is updated t
 
 #### Git (the most up-to-date way)
 
-(_This is still a work in progress, stay tuned._)
+( _This is still a work in progress, stay tuned._ )
 
 #### Subversion (the easy way)
 
